@@ -55,34 +55,38 @@ module cpu_top(
   logic alu_final_cf;
   logic int_pending;
   logic any_interruption;
-  logic [CONTROL_WORD_WIDTH - 1 : 0] control_word;
   logic [7:0] u_flags;
-  logic alu_cf_out_invert;
+  logic ctrl_alu_cf_out_invert;
   logic alu_cf_in;
 
   logic int_request;
   
+  // control word fields
+  logic [1:0] ctrl_typ;
+  logic [6:0] ctrl_offset;
+  logic [1:0] ctrl_cf_in_src;
+  
   always_comb begin
     logic cf_muxed;
-    case(control_word[CF_IN_SRC])
+    case(ctrl_CF_IN_SRC)
       2'b00: cf_muxed = 1'b1;
       2'b01: cf_muxed = alu_flags[1];
       2'b10: cf_muxed = u_flags[1];
       2'b11: cf_muxed = 1'b0;
     endcase
-    alu_cf_in = cf_muxed ^ ALU_CF_IN_INVERT;
+    alu_cf_in = cf_muxed ^ ctrl_alu_cf_in_invert;
   end
   alu u_alu(
     .a(x_bus),
     .b(y_bus),
     .cf_in(alu_cf_in),
     .sel(alu_op),
-    .mode(ALU_MODE),
+    .mode(control_word[ALU_MODE]),
     .alu_out(alu_out),
     .cf_out(alu_cf)
   );
   assign alu_zf = ~|alu_out;
-  assign alu_final_cf = alu_cf_out_invert ^ alu_cf;
+  assign alu_final_cf = ctrl_alu_cf_out_invert ^ alu_cf;
   assign alu_sf = z_bus[7];
   assign alu_of = (z_bus[7] ^ x_bus[7]) & ~((x_bus[7] ^ y_bus[7]) ^ ~(alu_op[0] & alu_op[3] & ~(alu_op[2] | alu_op[1])));
   

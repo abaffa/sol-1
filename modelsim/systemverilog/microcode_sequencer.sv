@@ -1,3 +1,5 @@
+import pa_microcode::*;
+
 module microcode_sequencer(
   input logic arst,
   input logic clk,
@@ -15,12 +17,23 @@ module microcode_sequencer(
   input logic ext_input,
   
   output logic [7:0] u_flags,
-  output logic [pa_microcode::CONTROL_WORD_WIDTH - 1 : 0] control_word
+  
+  output logic [1:0] ctrl_typ,
+  output logic [6:0] ctrl_offset
 );
 
+  assign ctrl_typ = {control_word[bitpos_typ1], control_word[bitpos_typ0]};
+  assign ctrl_offset = {
+    control_word[bitpos_offset_6],
+    control_word[bitpos_offset_5],
+    control_word[bitpos_offset_4],
+    control_word[bitpos_offset_3],
+    control_word[bitpos_offset_2],
+    control_word[bitpos_offset_1],
+    control_word[bitpos_offset_0]
+  };
+
   logic [13:0] u_address;
-  logic next1, next0;
-  logic [13:0] u_offset;
   logic final_condition;
   logic fetch_u_address;
   logic trap_u_address;
@@ -31,9 +44,6 @@ module microcode_sequencer(
   logic [3:0] cond_sel;
   logic u_escape;
 
-  assign next0 = control_word[0];
-  assign next1 = control_word[1];
-  assign u_escape = control_word[pa_microcode::U_ROM1 + 7];
 
   always_comb begin
     logic zf_muxed, cf_muxed, sf_muxed, of_muxed;
@@ -45,50 +55,50 @@ module microcode_sequencer(
     of_muxed = cond_flag_src ? u_flags[3] : alu_flags[3];
 
     case(cond_sel)
-      3'b0000: begin
+      4'b0000: begin
         condition = zf_muxed;
       end
-      3'b0001: begin
+      4'b0001: begin
         condition = cf_muxed;
       end
-      3'b0010: begin
+      4'b0010: begin
         condition = sf_muxed;
       end
-      3'b0011: begin
+      4'b0011: begin
         condition = of_muxed;
       end
-      3'b0100: begin
+      4'b0100: begin
         condition = sf_muxed ^ of_muxed;
       end
-      3'b0101: begin
+      4'b0101: begin
         condition = (sf_muxed ^ of_muxed) | zf_muxed;
       end
-      3'b0110: begin
+      4'b0110: begin
         condition = cf_muxed | zf_muxed;
       end
-      3'b0111: begin
+      4'b0111: begin
         condition = dma_req;
       end
-      3'b1000: begin
+      4'b1000: begin
         condition = cpu_status[pa_microcode::CPU_STATUS_MODE_POS];
       end
-      3'b1001: begin
+      4'b1001: begin
         condition = WAIT;
       end
-      3'b1010: begin
+      4'b1010: begin
         condition = int_pending;
       end
-      3'b1011: begin
+      4'b1011: begin
         condition = ext_input;
       end
-      3'b1100: begin
+      4'b1100: begin
         condition = cpu_status[pa_microcode::CPU_STATUS_DIR_POS];
       end
-      3'b1101: begin
+      4'b1101: begin
         condition = cpu_status[pa_microcode::CPU_STATUS_DISPLAYREG_LOAD_POS];
       end
-      3'b1110: condition = 1'b0;
-      3'b1111: condition = 1'b0;
+      4'b1110: condition = 1'b0;
+      4'b1111: condition = 1'b0;
     endcase
 
     final_condition = condition ^ cond_invert;
@@ -123,11 +133,11 @@ module microcode_sequencer(
   end
 
   always_ff @(posedge clk, posedge arst) begin
-    case({next1, next0})
+    case(ctrl_typ)
       2'b00:
-        u_address <= u_address + u_offset;
+        u_address <= u_address + ctrl_offset;
       2'b01:
-        if(final_condition == 1'b1) u_address <= u_address + u_offset;
+        if(final_condition == 1'b1) u_address <= u_address + ctrl_offset;
         else u_address <= u_address + 14'b1;
       2'b10:
         if(any_interruption == 1'b1) u_address <= trap_u_address;
