@@ -5,7 +5,7 @@ entity alu is
         a               : in     vl_logic_vector(7 downto 0);
         b               : in     vl_logic_vector(7 downto 0);
         cf_in           : in     vl_logic;
-        sel             : in     vl_logic_vector(3 downto 0);
+        op              : in     vl_logic_vector(3 downto 0);
         mode            : in     vl_logic;
         alu_out         : out    vl_logic_vector(7 downto 0);
         cf_out          : out    vl_logic
