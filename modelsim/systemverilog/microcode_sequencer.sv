@@ -90,16 +90,73 @@ module microcode_sequencer(
 
   assign any_interruption = dma_req | int_pending;
 
-  assign ctrl_typ = {control_word[bitpos_typ1], control_word[bitpos_typ0]};
-  assign ctrl_offset = {
-    control_word[bitpos_offset_6],
-    control_word[bitpos_offset_5],
-    control_word[bitpos_offset_4],
-    control_word[bitpos_offset_3],
-    control_word[bitpos_offset_2],
-    control_word[bitpos_offset_1],
-    control_word[bitpos_offset_0]
-  };
+  assign ctrl_typ = control_word[bitpos_typ1 : bitpos_typ0];
+  assign ctrl_offset = control_word[bitpos_offset_6 : bitpos_offset_0];
+  assign ctrl_cond_invert = control_word[bitpos_cond_invert];
+  assign ctrl_cond_flag_src = control_word[bitpos_cond_flag_src];
+  assign ctrl_cond_sel = control_word[bitpos_cond_sel_3 : bitpos_cond_sel_0];
+  assign ctrl_escape = control_word[bitpos_escape];
+  assign ctrl_u_zf_in_src = control_word[bitpos_u_zf_in_src_1 : bitpos_u_zf_in_src_0];
+  assign ctrl_u_cf_in_src = control_word[bitpos_u_cf_in_src_1 : bitpos_u_cf_in_src_0];
+  assign ctrl_u_sf_in_src = control_word[bitpos_u_sf_in_src];
+  assign ctrl_u_of_in_src = control_word[bitpos_u_of_in_src];
+  assign ctrl_ir_wrt = control_word[bitpos_ir_wrt];
+  assign ctrl_status_flags_wrt = control_word[bitpos_status_flags_wrt];
+  assign ctrl_shift_msb_src = control_word[bitpos_shift_msb_src_2 : bitpos_shift_msb_src_0];
+  assign ctrl_zbus_in_src = control_word[bitpos_zbus_in_src_1 : bitpos_zbus_in_src_0];
+  assign ctrl_alu_a_src = control_word[bitpos_alu_a_src_5 : bitpos_alu_a_src_0];
+  assign ctrl_alu_op = control_word[bitpos_alu_op_3 : bitpos_alu_op_0];
+  assign ctrl_alu_mode = control_word[bitpos_alu_mode];
+  assign ctrl_alu_cf_in_src = control_word[bitpos_alu_cf_in_src_1 : bitpos_alu_cf_in_src_0];
+  assign ctrl_alu_cf_in_invert = control_word[bitpos_alu_cf_in_invert];
+  assign ctrl_alu_cf_out_invert = control_word[bitpos_alu_cf_out_invert];
+  assign ctrl_zf_in_src = control_word[bitpos_zf_in_src_1 : bitpos_zf_in_src_0];
+  assign ctrl_cf_in_src = control_word[bitpos_cf_in_src_2 : bitpos_cf_in_src_0];
+  assign ctrl_sf_in_src = control_word[bitpos_sf_in_src_1 : bitpos_sf_in_src_0];
+  assign ctrl_of_in_src = control_word[bitpos_of_in_src_2 : bitpos_of_in_src_0];
+  assign ctrl_rd = control_word[bitpos_rd];
+  assign ctrl_wr = control_word[bitpos_wr];
+  assign ctrl_alu_b_src = control_word[bitpos_alu_b_src_2 : bitpos_alu_b_src_0];
+  assign ctrl_display_reg_load = control_word[bitpos_display_reg_load]; // used during fetch to select and load register display
+  assign ctrl_dl_wrt = control_word[bitpos_dl_wrt];
+  assign ctrl_dh_wrt = control_word[bitpos_dh_wrt];
+  assign ctrl_cl_wrt = control_word[bitpos_cl_wrt];
+  assign ctrl_ch_wrt = control_word[bitpos_ch_wrt];
+  assign ctrl_bl_wrt = control_word[bitpos_bl_wrt];
+  assign ctrl_bh_wrt = control_word[bitpos_bh_wrt];
+  assign ctrl_al_wrt = control_word[bitpos_al_wrt];
+  assign ctrl_ah_wrt = control_word[bitpos_ah_wrt];
+  assign ctrl_mdr_in_src = control_word[bitpos_mdr_in_src];
+  assign ctrl_mdr_out_src = control_word[bitpos_mdr_out_src];
+  assign ctrl_mdr_out_en = control_word[bitpos_mdr_out_en];			// must invert before sending
+  assign ctrl_mdr_l_wrt = control_word[bitpos_mdr_l_wrt];			
+  assign ctrl_mdr_h_wrt = control_word[bitpos_mdr_h_wrt];
+  assign ctrl_tdr_l_wrt = control_word[bitpos_tdr_l_wrt];
+  assign ctrl_tdr_h_wrt = control_word[bitpos_tdr_h_wrt];
+  assign ctrl_di_l_wrt = control_word[bitpos_di_l_wrt];
+  assign ctrl_di_h_wrt = control_word[bitpos_di_h_wrt];
+  assign ctrl_si_l_wrt = control_word[bitpos_si_l_wrt];
+  assign ctrl_si_h_wrt = control_word[bitpos_si_h_wrt];
+  assign ctrl_mar_l_wrt = control_word[bitpos_mar_l_wrt];
+  assign ctrl_mar_h_wrt = control_word[bitpos_mar_h_wrt];
+  assign ctrl_bp_l_wrt = control_word[bitpos_bp_l_wrt];
+  assign ctrl_bp_h_wrt = control_word[bitpos_bp_h_wrt];
+  assign ctrl_pc_l_wrt = control_word[bitpos_pc_l_wrt];
+  assign ctrl_pc_h_wrt = control_word[bitpos_pc_h_wrt];
+  assign ctrl_sp_l_wrt = control_word[bitpos_sp_l_wrt];
+  assign ctrl_sp_h_wrt = control_word[bitpos_sp_h_wrt];
+  assign ctrl_gl_wrt = control_word[bitpos_gl_wrt];
+  assign ctrl_gh_wrt = control_word[bitpos_gh_wrt];
+  assign ctrl_int_vector_wrt = control_word[bitpos_int_vector_wrt];
+  assign ctrl_mask_flags_wrt = control_word[bitpos_mask_flags_wrt];		// wrt signals are also active low
+  assign ctrl_mar_in_src = control_word[bitpos_mar_in_src];
+  assign ctrl_int_ack = control_word[bitpos_int_ack];		      // active high
+  assign ctrl_clear_all_ints = control_word[bitpos_clear_all_ints];
+  assign ctrl_ptb_wrt = control_word[bitpos_ptb_wrt];
+  assign ctrl_page_table_we = control_word[bitpos_page_table_we]; 
+  assign ctrl_mdr_to_pagetable_data_buffer = control_word[bitpos_mdr_to_pagetable_data_buffer];
+  assign ctrl_force_user_ptb = control_word[bitpos_force_user_ptb];   // goes to board as page_table_addr_source via or gate
+  assign ctrl_immy = control_word[bitpos_immy_7 : bitpos_immy_0];
 
   logic [13:0] u_address;
   logic final_condition;

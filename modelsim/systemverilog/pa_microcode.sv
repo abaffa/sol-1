@@ -72,8 +72,8 @@ package pa_microcode;
   parameter byte unsigned bitpos_alu_op_3 = base_u_rom4 + 6;
   parameter byte unsigned bitpos_alu_mode = base_u_rom4 + 7;
 
-  parameter byte unsigned bitpos_alu_cf_in_src0 = base_u_rom5 + 0;
-  parameter byte unsigned bitpos_alu_cf_in_src1 = base_u_rom5 + 1;
+  parameter byte unsigned bitpos_alu_cf_in_src_0 = base_u_rom5 + 0;
+  parameter byte unsigned bitpos_alu_cf_in_src_1 = base_u_rom5 + 1;
   parameter byte unsigned bitpos_alu_cf_in_invert = base_u_rom5 + 2;
   parameter byte unsigned bitpos_zf_in_src_0 = base_u_rom5 + 3;
   parameter byte unsigned bitpos_zf_in_src_1 = base_u_rom5 + 4;
