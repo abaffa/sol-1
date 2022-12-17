@@ -6,7 +6,6 @@ module microcode_sequencer(
   input logic [7:0] ir,
   input logic [7:0] alu_flags,
   input logic [7:0] cpu_status,
-  input logic any_interruption,
   input logic [7:0] alu_out,
   input logic [7:0] z_bus,
   input logic alu_of,
@@ -19,8 +18,77 @@ module microcode_sequencer(
   output logic [7:0] u_flags,
   
   output logic [1:0] ctrl_typ,
-  output logic [6:0] ctrl_offset
+  output logic [6:0] ctrl_offset,
+  output logic ctrl_cond_invert,
+  output logic ctrl_cond_flag_src,
+  output logic [3:0] ctrl_cond_sel,
+  output logic ctrl_escape,
+  output logic [1:0] ctrl_u_zf_in_src,
+  output logic [1:0] ctrl_u_cf_in_src,
+  output logic ctrl_u_sf_in_src,
+  output logic ctrl_u_of_in_src,
+  output logic ctrl_ir_wrt,
+  output logic ctrl_status_flags_wrt,
+  output logic [2:0] ctrl_shift_msb_src,
+  output logic [1:0] ctrl_zbus_in_src_0,
+  output logic [5:0] ctrl_alu_a_src,
+  output logic [3:0] ctrl_alu_op,
+  output logic ctrl_alu_mode,
+  output logic [1:0] ctrl_alu_cf_in_src,
+  output logic ctrl_alu_cf_in_invert,
+  output logic ctrl_alu_cf_out_invert,
+  output logic [1:0] ctrl_zf_in_src,
+  output logic [2:0] ctrl_cf_in_src,
+  output logic [1:0] ctrl_sf_in_src,
+  output logic [2:0] ctrl_of_in_src,
+  output logic ctrl_rd,
+  output logic ctrl_wr,
+  output logic [2:0] ctrl_alu_b_src,
+  output logic ctrl_display_reg_load, // used during fetch to select and load register display
+  output logic ctrl_dl_wrt,
+  output logic ctrl_dh_wrt,
+  output logic ctrl_cl_wrt,
+  output logic ctrl_ch_wrt,
+  output logic ctrl_bl_wrt,
+  output logic ctrl_bh_wrt,
+  output logic ctrl_al_wrt,
+  output logic ctrl_ah_wrt,
+  output logic ctrl_mdr_in_src,
+  output logic ctrl_mdr_out_src,
+  output logic ctrl_mdr_out_en,			// must invert before sending
+  output logic ctrl_mdr_l_wrt,			
+  output logic ctrl_mdr_h_wrt,
+  output logic ctrl_tdr_l_wrt,
+  output logic ctrl_tdr_h_wrt,
+  output logic ctrl_di_l_wrt,
+  output logic ctrl_di_h_wrt,
+  output logic ctrl_si_l_wrt,
+  output logic ctrl_si_h_wrt,
+  output logic ctrl_mar_l_wrt,
+  output logic ctrl_mar_h_wrt,
+  output logic ctrl_bp_l_wrt,
+  output logic ctrl_bp_h_wrt,
+  output logic ctrl_pc_l_wrt,
+  output logic ctrl_pc_h_wrt,
+  output logic ctrl_sp_l_wrt,
+  output logic ctrl_sp_h_wrt,
+  output logic ctrl_gl_wrt,
+  output logic ctrl_gh_wrt,
+  output logic ctrl_int_vector_wrt,
+  output logic ctrl_mask_flags_wrt,		// wrt signals are also active low
+  output logic ctrl_mar_in_src,
+  output logic ctrl_int_ack,		      // active high
+  output logic ctrl_clear_all_ints,
+  output logic ctrl_ptb_wrt,
+  output logic ctrl_page_table_we, 
+  output logic ctrl_mdr_to_pagetable_data_buffer,
+  output logic ctrl_force_user_ptb,   // goes to board as page_table_addr_source via or gate
+  output logic [7:0] ctrl_immy
 );
+  logic [CONTROL_WORD_WIDTH - 1:0] control_word;
+  logic any_interruption;
+
+  assign any_interruption = dma_req | int_pending;
 
   assign ctrl_typ = {control_word[bitpos_typ1], control_word[bitpos_typ0]};
   assign ctrl_offset = {
@@ -80,7 +148,7 @@ module microcode_sequencer(
         condition = dma_req;
       end
       4'b1000: begin
-        condition = cpu_status[pa_microcode::CPU_STATUS_MODE_POS];
+        condition = cpu_status[pa_microcode::bitpos_cpu_status_mode];
       end
       4'b1001: begin
         condition = WAIT;
@@ -92,10 +160,10 @@ module microcode_sequencer(
         condition = ext_input;
       end
       4'b1100: begin
-        condition = cpu_status[pa_microcode::CPU_STATUS_DIR_POS];
+        condition = fu_getStatusField(bitpos_cpu_status_dir);
       end
       4'b1101: begin
-        condition = cpu_status[pa_microcode::CPU_STATUS_DISPLAYREG_LOAD_POS];
+        condition = cpu_status[bitpos_cpu_status_displayreg_load];
       end
       4'b1110: condition = 1'b0;
       4'b1111: condition = 1'b0;
@@ -104,6 +172,10 @@ module microcode_sequencer(
     final_condition = condition ^ cond_invert;
   end
 
+  function logic fu_getStatusField(logic [7:0] field);
+    return cpu_status[field];
+  endfunction
+  
   // DFF for u_flags register
   always_ff @(posedge clk) begin
     // u_zf

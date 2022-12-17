@@ -27,7 +27,10 @@ module testbench;
 		clk_sel = 3'b000;
 		data_in = 8'h00;
 		arst = 1'b1;
-		#500ns arst = 1'b0;		
+		#500ns arst = 1'b0;	
+
+
+    $display($typename(pa_microcode::bitpos_cpu_status_dma_ack));
 
 		#20us $stop;
   end
