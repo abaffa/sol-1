@@ -2,7 +2,7 @@ module alu(
   input logic [7:0] a,
   input logic [7:0] b,
   input logic cf_in,
-  input logic [3:0] sel,
+  input logic [3:0] op,
   input logic mode,
 
   output logic [7:0] alu_out,
@@ -15,7 +15,7 @@ module alu(
   assign cn = {{7{1'b0}}, ~cf_in};
 
   always_comb begin
-    case(sel)
+    case(op)
       4'b0000: {cf_out, alu_out} = mode ? ~a : a + cn;
       4'b0001: {cf_out, alu_out} = mode ? ~(a | b) : a | b + cn;
       4'b0010: {cf_out, alu_out} = mode ? ~a & b : (a | ~b) + cn;

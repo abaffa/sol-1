@@ -142,7 +142,7 @@ module cpu_top(
     .a(x_bus),
     .b(y_bus),
     .cf_in(alu_cf_in),
-    .sel(ctrl_alu_op),
+    .op(ctrl_alu_op),
     .mode(ctrl_alu_mode),
     .alu_out(alu_out),
     .cf_out(alu_cf)
