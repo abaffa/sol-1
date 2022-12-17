@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="dots" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -12394,6 +12394,16 @@ AND COULD DAMAGE THE WIRING AND DESTROY THE BOARD.</text>
 <wire x1="335.28" y1="899.16" x2="340.36" y2="899.16" width="0.1524" layer="91"/>
 <label x="340.36" y="899.16" size="1.778" layer="95" xref="yes"/>
 </segment>
+<segment>
+<pinref part="IC32" gate="A" pin="CLK"/>
+<wire x1="-307.34" y1="586.74" x2="-312.42" y2="586.74" width="0.1524" layer="91"/>
+<wire x1="-312.42" y1="586.74" x2="-312.42" y2="556.26" width="0.1524" layer="91"/>
+<pinref part="IC33" gate="A" pin="CLK"/>
+<wire x1="-312.42" y1="556.26" x2="-307.34" y2="556.26" width="0.1524" layer="91"/>
+<wire x1="-312.42" y1="586.74" x2="-317.5" y2="586.74" width="0.1524" layer="91"/>
+<junction x="-312.42" y="586.74"/>
+<label x="-317.5" y="586.74" size="1.778" layer="95" rot="R180" xref="yes"/>
+</segment>
 </net>
 <net name="YBUS4" class="0">
 <segment>
@@ -14323,18 +14333,6 @@ AND COULD DAMAGE THE WIRING AND DESTROY THE BOARD.</text>
 <wire x1="-492.76" y1="629.92" x2="-477.52" y2="629.92" width="0.1524" layer="91"/>
 <label x="-477.52" y="629.92" size="1.778" layer="95" xref="yes"/>
 <pinref part="IC28" gate="A" pin="2Q"/>
-</segment>
-</net>
-<net name="~CLK" class="0">
-<segment>
-<pinref part="IC32" gate="A" pin="CLK"/>
-<wire x1="-307.34" y1="586.74" x2="-312.42" y2="586.74" width="0.1524" layer="91"/>
-<wire x1="-312.42" y1="586.74" x2="-312.42" y2="556.26" width="0.1524" layer="91"/>
-<pinref part="IC33" gate="A" pin="CLK"/>
-<wire x1="-312.42" y1="556.26" x2="-307.34" y2="556.26" width="0.1524" layer="91"/>
-<wire x1="-312.42" y1="586.74" x2="-317.5" y2="586.74" width="0.1524" layer="91"/>
-<junction x="-312.42" y="586.74"/>
-<label x="-317.5" y="586.74" size="1.778" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="PC_L_0" class="0">
