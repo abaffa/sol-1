@@ -1,6 +1,4 @@
-import pa_microcode::*;
-
-module cpu_top(
+module cpu_top import pa_microcode::*; (
   input logic arst,
   input logic clk,
   input logic [7:0] data_bus_in,

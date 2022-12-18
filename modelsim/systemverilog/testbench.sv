@@ -1,3 +1,9 @@
+class base;
+  virtual function hello;
+    return 0;
+  endfunction
+endclass
+
 module testbench;
 	logic arst;
 	logic clk_in = 1'b0;

@@ -1,6 +1,4 @@
-import pa_microcode::*;
-
-module microcode_sequencer(
+module microcode_sequencer import pa_microcode::*; (
   input logic arst,
   input logic clk,
   input logic [7:0] ir,
