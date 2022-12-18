@@ -7,7 +7,7 @@ entity cpu_top is
         data_in         : in     vl_logic_vector(7 downto 0);
         ext_irq_req     : in     vl_logic_vector(7 downto 0);
         dma_req         : in     vl_logic;
-        \WAIT\          : in     vl_logic;
+        pad_wait        : in     vl_logic;
         ext_input       : in     vl_logic;
         addr            : out    vl_logic_vector(21 downto 0);
         data_out        : out    vl_logic_vector(7 downto 0);

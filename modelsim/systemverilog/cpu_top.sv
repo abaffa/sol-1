@@ -6,7 +6,7 @@ module cpu_top(
   input logic [7:0] data_in,
   input logic [7:0] ext_irq_req,
   input logic dma_req,
-  input logic WAIT,
+  input logic pad_wait,
   input logic ext_input,
   
   output logic [21:0] addr,
@@ -17,11 +17,13 @@ module cpu_top(
   output logic halt,
   output logic dma_ack
 );
+
 // General registers
   logic [7:0] ah, al;
   logic [7:0] bh, bl;
   logic [7:0] ch, cl;
   logic [7:0] dh, dl;
+  logic [7:0] gh, gl;
   logic [7:0] pch, pcl;
   logic [7:0] sph, spl;
   logic [7:0] bph, bpl;
@@ -42,10 +44,10 @@ module cpu_top(
   logic [7:0] irq_vector;
   
 // Buses
+  logic [7:0] x_bus; 
+  logic [7:0] y_bus; 
   logic [7:0] k_bus;
   logic [7:0] w_bus;
-  logic [7:0] y_bus; 
-  logic [7:0] x_bus; 
   logic [7:0] z_bus; 
 
 // ALU
@@ -193,6 +195,42 @@ module cpu_top(
 
 // Registers Block
   always_ff @(posedge clk) begin
+    if(ctrl_al_wrt == 1'b0) al <= z_bus;
+    if(ctrl_ah_wrt == 1'b0) ah <= z_bus;
+    if(ctrl_bl_wrt == 1'b0) bl <= z_bus;
+    if(ctrl_bh_wrt == 1'b0) bh <= z_bus;
+    if(ctrl_cl_wrt == 1'b0) cl <= z_bus;
+    if(ctrl_ch_wrt == 1'b0) ch <= z_bus;
+    if(ctrl_dl_wrt == 1'b0) dl <= z_bus;
+    if(ctrl_dh_wrt == 1'b0) dh <= z_bus;
+    if(ctrl_gl_wrt == 1'b0) gl <= z_bus;
+    if(ctrl_gh_wrt == 1'b0) gh <= z_bus;
+
+    if(ctrl_tdr_l_wrt == 1'b0) tdrl <= z_bus;
+    if(ctrl_tdr_h_wrt == 1'b0) tdrh <= z_bus;
+    if(ctrl_di_l_wrt == 1'b0) dil <= z_bus;
+    if(ctrl_di_h_wrt == 1'b0) dih <= z_bus;
+    if(ctrl_si_l_wrt == 1'b0) sil <= z_bus;
+    if(ctrl_si_h_wrt == 1'b0) sih <= z_bus;
+    if(ctrl_bp_l_wrt == 1'b0) bpl <= z_bus;
+    if(ctrl_bp_h_wrt == 1'b0) bph <= z_bus;
+    if(ctrl_sp_l_wrt == 1'b0) spl <= z_bus;
+    if(ctrl_sp_h_wrt == 1'b0) sph <= z_bus;
+    if(ctrl_pc_l_wrt == 1'b0) pcl <= z_bus;
+    if(ctrl_pc_h_wrt == 1'b0) pch <= z_bus;
+
+    if(ctrl_mar_l_wrt == 1'b0) begin
+      if(ctrl_mar_in_src == 1'b0) marl <= z_bus;
+      else marl <= pcl;
+    end
+    if(ctrl_mar_h_wrt == 1'b0) begin
+      if(ctrl_mar_in_src == 1'b0) marh <= z_bus;
+      else marh <= pch;
+    end
+
+    if(ctrl_sp_l_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) sspl <= z_bus;
+    if(ctrl_sp_h_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) ssph <= z_bus;
+
     if(ctrl_irq_masks_wrt == 1'b0) irq_masks <= z_bus;
   end
 

@@ -17,7 +17,7 @@ module testbench;
 	logic [2:0] clk_sel;
 	logic stop_clk;
   
-  logic WAIT;
+  logic pad_wait;
   logic ext_input;
 	
   initial begin
@@ -60,7 +60,7 @@ module testbench;
 		.mem_io(mem_io),
 		.halt(halt),
 		.dma_ack(dma_ack),
-    .WAIT(WAIT),
+    .pad_wait(pad_wait),
     .ext_input(ext_input)
 	);
 
