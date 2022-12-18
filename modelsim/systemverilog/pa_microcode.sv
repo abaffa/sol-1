@@ -9,6 +9,11 @@ package pa_microcode;
   parameter byte unsigned bitpos_cpu_status_displayreg_load = 5;
   // pos 6 undefined for now
   parameter byte unsigned bitpos_cpu_status_dir = 7;
+
+  parameter byte unsigned bitpos_alu_flags_zf = 0;
+  parameter byte unsigned bitpos_alu_flags_cf = 1;
+  parameter byte unsigned bitpos_alu_flags_sf = 2;
+  parameter byte unsigned bitpos_alu_flags_of = 3;
   
   
   parameter byte unsigned base_u_rom0 = 0 * 8;
@@ -54,11 +59,11 @@ package pa_microcode;
   parameter byte unsigned bitpos_ir_wrt = base_u_rom2 + 6;
   parameter byte unsigned bitpos_status_flags_wrt = base_u_rom2 + 7;
 
-  parameter byte unsigned bitpos_shift_msb_src_0 = base_u_rom3 + 0;
-  parameter byte unsigned bitpos_shift_msb_src_1 = base_u_rom3 + 1;
-  parameter byte unsigned bitpos_shift_msb_src_2 = base_u_rom3 + 2;
-  parameter byte unsigned bitpos_zbus_in_src_0 = base_u_rom3 + 3;
-  parameter byte unsigned bitpos_zbus_in_src_1 = base_u_rom3 + 4;
+  parameter byte unsigned bitpos_shift_src_0 = base_u_rom3 + 0;
+  parameter byte unsigned bitpos_shift_src_1 = base_u_rom3 + 1;
+  parameter byte unsigned bitpos_shift_src_2 = base_u_rom3 + 2;
+  parameter byte unsigned bitpos_zbus_src_0 = base_u_rom3 + 3;
+  parameter byte unsigned bitpos_zbus_src_1 = base_u_rom3 + 4;
   parameter byte unsigned bitpos_alu_a_src_0	= base_u_rom3 + 5;	
   parameter byte unsigned bitpos_alu_a_src_1	= base_u_rom3 + 6;	
   parameter byte unsigned bitpos_alu_a_src_2 = base_u_rom3 + 7; 

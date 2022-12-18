@@ -18,14 +18,18 @@ let &cpo=s:cpo_save
 unlet s:cpo_save
 set autoindent
 set backspace=indent,eol,start
+set backupdir=~/.vim//
+set directory=~/.vim//
 set expandtab
 set fileencodings=ucs-bom,utf-8,default,latin1
 set guifont=Cascadia_Mono:h10
+set guitablabel=%t
 set helplang=en
 set hlsearch
 set shiftwidth=2
 set noswapfile
 set tabstop=2
+set undodir=~/.vim//
 set window=50
 let s:so_save = &g:so | let s:siso_save = &g:siso | setg so=0 siso=0 | setl so=-1 siso=-1
 let v:this_session=expand("<sfile>:p")
@@ -49,6 +53,7 @@ badd +1 Desktop\SOL1_MiniComputer\modelsim\systemverilog\testbench.sv
 badd +7 C:\Program\ Files\ (x86)\Vim\_vimrc
 badd +1 Desktop\SOL1_MiniComputer\hardware\microcode\docs\control_bits.txt
 badd +24 C:\Program\ Files\ (x86)\Vim\vim90\syntax\colortest.vim
+badd +0 Desktop\SOL1_MiniComputer\hardware\control_bits.txt
 argglobal
 %argdel
 set stal=2
@@ -193,12 +198,12 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 27 - ((26 * winheight(0) + 25) / 50)
+let s:l = 18 - ((17 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 27
-normal! 021|
+keepjumps 18
+normal! 015|
 tabnext
 edit Desktop\SOL1_MiniComputer\modelsim\systemverilog\cpu_top.sv
 argglobal
@@ -292,7 +297,7 @@ setlocal norightleft
 setlocal rightleftcmd=search
 setlocal noscrollbind
 setlocal scrolloff=-1
-setlocal shiftwidth=8
+setlocal shiftwidth=2
 setlocal noshortname
 setlocal showbreak=
 setlocal sidescrolloff=-1
@@ -333,12 +338,12 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 107 - ((0 * winheight(0) + 25) / 50)
+let s:l = 172 - ((25 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 107
-normal! 0
+keepjumps 172
+normal! 010|
 tabnext
 edit Desktop\SOL1_MiniComputer\modelsim\systemverilog\microcode_sequencer.sv
 let s:save_splitbelow = &splitbelow
@@ -357,10 +362,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe '1resize ' . ((&lines * 23 + 25) / 51)
-exe 'vert 1resize ' . ((&columns * 46 + 118) / 237)
-exe '2resize ' . ((&lines * 23 + 25) / 51)
-exe 'vert 2resize ' . ((&columns * 33 + 118) / 237)
+exe 'vert 1resize ' . ((&columns * 126 + 118) / 237)
+exe 'vert 2resize ' . ((&columns * 108 + 118) / 237)
 argglobal
 balt Desktop\SOL1_MiniComputer\modelsim\systemverilog\alu.sv
 setlocal keymap=
@@ -495,17 +498,12 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 11) / 23)
+let s:l = 102 - ((23 * winheight(0) + 24) / 49)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 1
-let s:c = 51 - ((21 * winwidth(0) + 23) / 46)
-if s:c > 0
-  exe 'normal! ' . s:c . '|zs' . 51 . '|'
-else
-  normal! 051|
-endif
+keepjumps 102
+normal! 015|
 wincmd w
 argglobal
 if bufexists(fnamemodify("Desktop\SOL1_MiniComputer\modelsim\systemverilog\pa_microcode.sv", ":p")) | buffer Desktop\SOL1_MiniComputer\modelsim\systemverilog\pa_microcode.sv | else | edit Desktop\SOL1_MiniComputer\modelsim\systemverilog\pa_microcode.sv | endif
@@ -641,17 +639,15 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 131 - ((4 * winheight(0) + 11) / 23)
+let s:l = 61 - ((36 * winheight(0) + 24) / 49)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 131
-normal! 038|
+keepjumps 61
+normal! 027|
 wincmd w
-exe '1resize ' . ((&lines * 23 + 25) / 51)
-exe 'vert 1resize ' . ((&columns * 46 + 118) / 237)
-exe '2resize ' . ((&lines * 23 + 25) / 51)
-exe 'vert 2resize ' . ((&columns * 33 + 118) / 237)
+exe 'vert 1resize ' . ((&columns * 126 + 118) / 237)
+exe 'vert 2resize ' . ((&columns * 108 + 118) / 237)
 tabnext
 edit Desktop\SOL1_MiniComputer\modelsim\systemverilog\alu.sv
 argglobal
@@ -787,16 +783,16 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 28 - ((27 * winheight(0) + 25) / 50)
+let s:l = 28 - ((13 * winheight(0) + 12) / 24)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
 keepjumps 28
 normal! 07|
 tabnext
-edit Desktop\SOL1_MiniComputer\hardware\microcode\docs\control_bits.txt
+edit Desktop\SOL1_MiniComputer\hardware\control_bits.txt
 argglobal
-balt Desktop\SOL1_MiniComputer\modelsim\systemverilog\microcode_sequencer.sv
+balt Desktop\SOL1_MiniComputer\hardware\microcode\docs\control_bits.txt
 setlocal keymap=
 setlocal noarabic
 setlocal autoindent
@@ -826,7 +822,7 @@ setlocal cryptmethod=
 setlocal nocursorbind
 setlocal nocursorcolumn
 set cursorline
-setlocal nocursorline
+setlocal cursorline
 setlocal cursorlineopt=both
 setlocal define=
 setlocal dictionary=
@@ -887,7 +883,7 @@ setlocal norightleft
 setlocal rightleftcmd=search
 setlocal noscrollbind
 setlocal scrolloff=-1
-setlocal shiftwidth=8
+setlocal shiftwidth=2
 setlocal noshortname
 setlocal showbreak=
 setlocal sidescrolloff=-1
@@ -901,7 +897,7 @@ setlocal spelllang=en
 setlocal spelloptions=
 setlocal statusline=
 setlocal suffixesadd=
-setlocal swapfile
+setlocal noswapfile
 setlocal synmaxcol=3000
 if &syntax != 'text'
 setlocal syntax=text
@@ -928,7 +924,7 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 12) / 24)
+let s:l = 1 - ((0 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -1210,16 +1206,15 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 11 - ((5 * winheight(0) + 12) / 24)
+let s:l = 61 - ((38 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 11
-normal! 026|
+keepjumps 61
+normal! 039|
 tabnext
 edit C:\Program\ Files\ (x86)\Vim\_vimrc
 argglobal
-balt C:\Program\ Files\ (x86)\Vim\vim90\syntax\colortest.vim
 setlocal keymap=
 setlocal noarabic
 setlocal autoindent
@@ -1351,13 +1346,13 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 14 - ((13 * winheight(0) + 25) / 50)
+let s:l = 17 - ((16 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 14
+keepjumps 17
 normal! 0
-tabnext 2
+tabnext 5
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
@@ -1372,7 +1367,6 @@ if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

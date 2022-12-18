@@ -27,8 +27,8 @@ module microcode_sequencer import pa_microcode::*; (
   output logic ctrl_u_of_in_src,
   output logic ctrl_ir_wrt,
   output logic ctrl_status_flags_wrt,
-  output logic [2:0] ctrl_shift_msb_src,
-  output logic [1:0] ctrl_zbus_in_src_0,
+  output logic [2:0] ctrl_shift_src,
+  output logic [1:0] ctrl_zbus_src,
   output logic [5:0] ctrl_alu_a_src,
   output logic [3:0] ctrl_alu_op,
   output logic ctrl_alu_mode,
@@ -99,8 +99,8 @@ module microcode_sequencer import pa_microcode::*; (
   assign ctrl_u_of_in_src = control_word[bitpos_u_of_in_src];
   assign ctrl_ir_wrt = control_word[bitpos_ir_wrt];
   assign ctrl_status_flags_wrt = control_word[bitpos_status_flags_wrt];
-  assign ctrl_shift_msb_src = control_word[bitpos_shift_msb_src_2 : bitpos_shift_msb_src_0];
-  assign ctrl_zbus_in_src = control_word[bitpos_zbus_in_src_1 : bitpos_zbus_in_src_0];
+  assign ctrl_shift_src = control_word[bitpos_shift_src_2 : bitpos_shift_src_0];
+  assign ctrl_zbus_src = control_word[bitpos_zbus_src_1 : bitpos_zbus_src_0];
   assign ctrl_alu_a_src = control_word[bitpos_alu_a_src_5 : bitpos_alu_a_src_0];
   assign ctrl_alu_op = control_word[bitpos_alu_op_3 : bitpos_alu_op_0];
   assign ctrl_alu_mode = control_word[bitpos_alu_mode];

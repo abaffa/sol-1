@@ -22,24 +22,26 @@ module cpu_top import pa_microcode::*; (
   logic [7:0] ch, cl;
   logic [7:0] dh, dl;
   logic [7:0] gh, gl;
-  logic [7:0] pch, pcl;
-  logic [7:0] sph, spl;
-  logic [7:0] bph, bpl;
-  logic [7:0] sih, sil;
-  logic [7:0] dih, dil;
   
 // System registers
   logic [7:0] ir;
+  logic [7:0] pch, pcl;
   logic [7:0] ptb;
   logic [7:0] cpu_status;
   logic [7:0] alu_flags;
-  logic [7:0] ssph, sspl;
-  logic [7:0] marh, marl;
-  logic [7:0] mdrh, mdrl;
-  logic [7:0] tdrh, tdrl;
   logic [7:0] irq_masks;
   logic [7:0] irq_status;
   logic [7:0] irq_vector;
+
+// Special registers
+  logic [7:0] sph, spl;
+  logic [7:0] ssph, sspl;
+  logic [7:0] bph, bpl;
+  logic [7:0] sih, sil;
+  logic [7:0] dih, dil;
+  logic [7:0] marh, marl;
+  logic [7:0] mdrh, mdrl;
+  logic [7:0] tdrh, tdrl;
   
 // Buses
   logic [7:0] x_bus;
@@ -77,8 +79,8 @@ module cpu_top import pa_microcode::*; (
   logic ctrl_u_of_in_src;
   logic ctrl_ir_wrt;
   logic ctrl_status_flags_wrt;
-  logic [2:0] ctrl_shift_msb_src;
-  logic [1:0] ctrl_zbus_in_src_0;
+  logic [2:0] ctrl_shift_src;
+  logic [1:0] ctrl_zbus_src;
   logic [5:0] ctrl_alu_a_src;
   logic [3:0] ctrl_alu_op;
   logic ctrl_alu_mode;
@@ -166,6 +168,59 @@ module cpu_top import pa_microcode::*; (
   assign alu_sf = z_bus[7];
   assign alu_of = (z_bus[7] ^ x_bus[7]) & ~((x_bus[7] ^ y_bus[7]) ^ ~(ctrl_alu_op[0] & ctrl_alu_op[3] & ~(ctrl_alu_op[2] | ctrl_alu_op[1])));
   
+// msw flags
+  always_ff @(posedge clk) begin
+    case(ctrl_zf_in_src)
+      2'b00: alu_flags[bitpos_alu_flags_zf] <= alu_flags[bitpos_alu_flags_zf];
+      2'b01: alu_flags[bitpos_alu_flags_zf] <= alu_zf;
+      2'b10: alu_flags[bitpos_alu_flags_zf] <= alu_flags[bitpos_alu_flags_zf] & alu_zf;
+      2'b11: alu_flags[bitpos_alu_flags_zf] <= z_bus[0];
+    endcase
+    case(ctrl_cf_in_src)
+      3'b000: alu_flags[bitpos_alu_flags_cf] <= alu_flags[bitpos_alu_flags_cf];
+      3'b001: alu_flags[bitpos_alu_flags_cf] <= alu_final_cf;
+      3'b010: alu_flags[bitpos_alu_flags_cf] <= alu_out[0];
+      3'b011: alu_flags[bitpos_alu_flags_cf] <= z_bus[1];
+      3'b100: alu_flags[bitpos_alu_flags_cf] <= alu_out[7];
+      default: alu_flags[bitpos_alu_flags_cf] <= 1'b0;
+    endcase
+    case(ctrl_sf_in_src)
+      2'b00: alu_flags[bitpos_alu_flags_sf] <= alu_flags[bitpos_alu_flags_sf];
+      2'b01: alu_flags[bitpos_alu_flags_sf] <= z_bus[7];
+      2'b10: alu_flags[bitpos_alu_flags_sf] <= 1'b0;
+      2'b11: alu_flags[bitpos_alu_flags_sf] <= z_bus[2];
+    endcase
+    case(ctrl_of_in_src)
+      3'b000: alu_flags[bitpos_alu_flags_of] <= alu_flags[bitpos_alu_flags_of];
+      3'b001: alu_flags[bitpos_alu_flags_of] <= alu_of;
+      3'b010: alu_flags[bitpos_alu_flags_of] <= z_bus[7];
+      3'b011: alu_flags[bitpos_alu_flags_of] <= z_bus[3];
+      3'b100: alu_flags[bitpos_alu_flags_of] <= u_flags[bitpos_alu_flags_of] ^ z_bus[7];
+      default: alu_flags[bitpos_alu_flags_of] <= 1'b0;
+    endcase
+  end
+
+// z_bus assignments
+  always_comb begin
+    logic extremity_bit;
+    case(ctrl_shift_src)
+      3'b000: extremity_bit = 1'b0;
+      3'b001: extremity_bit = u_flags[1]; // u_cf
+      3'b010: extremity_bit = alu_flags[1]; // msw cf
+      3'b011: extremity_bit = alu_out[0];
+      3'b100: extremity_bit = alu_out[7];
+      3'b101: extremity_bit = 1'b1;
+      3'b110: extremity_bit = 1'b1;
+      3'b111: extremity_bit = 1'b1;
+    endcase
+    case(ctrl_zbus_src)
+      2'b00: z_bus = alu_out;
+      2'b01: z_bus = (alu_out >> 1) | {extremity_bit, 7'b000_0000};
+      2'b10: z_bus = (alu_out << 1) | {7'b000_0000, extremity_bit};
+      2'b11: z_bus = {8{alu_out[7]}};
+    endcase
+  end
+
 // w_bus assignment
   always_comb begin
     case(ctrl_alu_a_src[4:0])
@@ -219,8 +274,27 @@ module cpu_top import pa_microcode::*; (
     end
   end
   
+// k_bus assignment
+  always_comb begin
+    case(ctrl_alu_b_src[1:0])
+      2'b00: k_bus = mdrl;
+      2'b01: k_bus = mdrh;
+      2'b10: k_bus = tdrl;
+      2'b11: k_bus = tdrh;
+    endcase
+  end
 
-// ZBUS to Registers Block
+// y_bus assignment
+  always_comb begin
+    if(ctrl_alu_b_src[2] == 1'b0) begin
+      y_bus = ctrl_immy;
+    end
+    else begin
+      y_bus = k_bus;
+    end
+  end
+
+// z_bus to Registers Block
   always_ff @(posedge clk) begin
     if(ctrl_al_wrt == 1'b0) al <= z_bus;
     if(ctrl_ah_wrt == 1'b0) ah <= z_bus;
@@ -305,8 +379,8 @@ module cpu_top import pa_microcode::*; (
     .int_pending(int_pending),
     .ext_input(ext_input),
     .u_flags(u_flags),
-    // control word fields
-    .*
+
+    .* // control word
   );
 
   assign data_bus_out = ctrl_mdr_out_en ? (ctrl_mdr_out_src ? mdrh : mdrl) : 'z;

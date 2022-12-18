@@ -28,8 +28,8 @@ entity microcode_sequencer is
         ctrl_u_of_in_src: out    vl_logic;
         ctrl_ir_wrt     : out    vl_logic;
         ctrl_status_flags_wrt: out    vl_logic;
-        ctrl_shift_msb_src: out    vl_logic_vector(2 downto 0);
-        ctrl_zbus_in_src_0: out    vl_logic_vector(1 downto 0);
+        ctrl_shift_src  : out    vl_logic_vector(2 downto 0);
+        ctrl_zbus_src   : out    vl_logic_vector(1 downto 0);
         ctrl_alu_a_src  : out    vl_logic_vector(5 downto 0);
         ctrl_alu_op     : out    vl_logic_vector(3 downto 0);
         ctrl_alu_mode   : out    vl_logic;
