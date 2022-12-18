@@ -4,7 +4,7 @@ entity cpu_top is
     port(
         arst            : in     vl_logic;
         clk             : in     vl_logic;
-        data_in         : in     vl_logic_vector(7 downto 0);
+        data_bus_in     : in     vl_logic_vector(7 downto 0);
         ext_irq_req     : in     vl_logic_vector(7 downto 0);
         dma_req         : in     vl_logic;
         pad_wait        : in     vl_logic;

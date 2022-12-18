@@ -3,7 +3,7 @@ import pa_microcode::*;
 module cpu_top(
   input logic arst,
   input logic clk,
-  input logic [7:0] data_in,
+  input logic [7:0] data_bus_in,
   input logic [7:0] ext_irq_req,
   input logic dma_req,
   input logic pad_wait,
@@ -218,6 +218,9 @@ module cpu_top(
     if(ctrl_sp_h_wrt == 1'b0) sph <= z_bus;
     if(ctrl_pc_l_wrt == 1'b0) pcl <= z_bus;
     if(ctrl_pc_h_wrt == 1'b0) pch <= z_bus;
+    if(ctrl_irq_masks_wrt == 1'b0) irq_masks <= z_bus;
+    if(ctrl_sp_l_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) sspl <= z_bus;
+    if(ctrl_sp_h_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) ssph <= z_bus;
 
     if(ctrl_mar_l_wrt == 1'b0) begin
       if(ctrl_mar_in_src == 1'b0) marl <= z_bus;
@@ -227,11 +230,10 @@ module cpu_top(
       if(ctrl_mar_in_src == 1'b0) marh <= z_bus;
       else marh <= pch;
     end
-
-    if(ctrl_sp_l_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) sspl <= z_bus;
-    if(ctrl_sp_h_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) ssph <= z_bus;
-
-    if(ctrl_irq_masks_wrt == 1'b0) irq_masks <= z_bus;
+    if(ctrl_mar_l_wrt == 1'b0) marl <= ctrl_mar_in_src ? data_bus_in : z_bus;
+    if(ctrl_mar_h_wrt == 1'b0) marh <= ctrl_mar_in_src ? data_bus_in : z_bus;
+    if(ctrl_mdr_l_wrt == 1'b0) mdrl <= ctrl_mdr_in_src ? data_bus_in : z_bus;
+    if(ctrl_mdr_h_wrt == 1'b0) mdrh <= ctrl_mdr_in_src ? data_bus_in : z_bus;
   end
 
 // Microcode Sequencer
@@ -254,10 +256,11 @@ module cpu_top(
     .*
   );
 
+  assign data_out = ctrl_mdr_out_en ? (ctrl_mdr_out_src ? mdrh : mdrl) : 'z;
+
   always @(posedge arst, posedge clk) begin
     if(arst == 1'b1) begin
       addr <= 22'h0;
-      data_out <= 'z;
       rd <= 1'b0;
       wr <= 1'b0;
       mem_io <= 1'b0;

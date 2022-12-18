@@ -6,7 +6,7 @@ module testbench;
 	logic dma_req;
 
 	logic [21:0] addr;
-	logic [7:0] data_in;
+	logic [7:0] data_bus_in;
 	logic [7:0] data_out;
 	logic rd;
 	logic wr;
@@ -19,18 +19,22 @@ module testbench;
   
   logic pad_wait;
   logic ext_input;
-	
+	class C#(type a); 
+   static function void check;
+    a s;
+    $display($typename(s));
+  endfunction
+  endclass
   initial begin
 		ext_irq_req = {8{1'b0}};
 		dma_req = 1'b0;
 		stop_clk = 1'b0;
 		clk_sel = 3'b000;
-		data_in = 8'h00;
+		data_bus_in = 8'h00;
 		arst = 1'b1;
 		#500ns arst = 1'b0;	
 
-
-    $display($typename(pa_microcode::bitpos_cpu_status_dma_ack));
+    C#(bit)::check();
 
 		#20us $stop;
   end
@@ -53,7 +57,7 @@ module testbench;
 		.ext_irq_req(ext_irq_req),
 		.dma_req(dma_req),
 		.addr(addr),
-		.data_in(data_in),
+		.data_bus_in(data_bus_in),
 		.data_out(data_out),
 		.rd(rd),
 		.wr(wr),
