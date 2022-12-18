@@ -2,13 +2,13 @@ module cpu_top import pa_microcode::*; (
   input logic arst,
   input logic clk,
   input logic [7:0] data_bus_in,
-  input logic [7:0] ext_irq_req,
+  input logic [7:0] pins_irq_req,
   input logic dma_req,
-  input logic pad_wait,
+  input logic pin_wait,
   input logic ext_input,
   
-  output logic [21:0] addr,
-  output logic [7:0] data_out,
+  output logic [21:0] address_bus,
+  output logic [7:0] data_bus_out,
   output logic rd,
   output logic wr,
   output logic mem_io,
@@ -42,11 +42,13 @@ module cpu_top import pa_microcode::*; (
   logic [7:0] irq_vector;
   
 // Buses
-  logic [7:0] x_bus; 
+  logic [7:0] x_bus;
+  logic [7:0] w_bus;
   logic [7:0] y_bus; 
   logic [7:0] k_bus;
-  logic [7:0] w_bus;
   logic [7:0] z_bus; 
+
+  logic bus_tristate;
 
 // ALU
   logic [7:0] alu_out;
@@ -58,7 +60,7 @@ module cpu_top import pa_microcode::*; (
   logic int_pending;
   logic [7:0] u_flags;
   logic alu_cf_in;
-  logic int_request;
+  logic irq_request;
 // IRQ requests after passing through their corresponding DFFs
   logic [7:0] irq_dff;
   
@@ -131,6 +133,15 @@ module cpu_top import pa_microcode::*; (
   logic ctrl_force_user_ptb;   // goes to board as page_table_addr_source via or gate
   logic [7:0] ctrl_immy;
 
+/*************************
+ start of RTL code
+**************************/
+
+// address_bus is tristated if dma_ack true, or halt true.
+// databus is always tristated by default unless data is being output, so no need to tristate it as well here.
+  assign addr_bus_tristate = cpu_status[bitpos_cpu_status_dma_ack] | cpu_status[bitpos_cpu_status_halt];
+
+// ALU
   always_comb begin
     logic cf_muxed;
     case(ctrl_cf_in_src)
@@ -155,43 +166,61 @@ module cpu_top import pa_microcode::*; (
   assign alu_sf = z_bus[7];
   assign alu_of = (z_bus[7] ^ x_bus[7]) & ~((x_bus[7] ^ y_bus[7]) ^ ~(ctrl_alu_op[0] & ctrl_alu_op[3] & ~(ctrl_alu_op[2] | ctrl_alu_op[1])));
   
-  assign int_pending = int_request & cpu_status[1];
+// w_bus assignment
+  always_comb begin
+    case(ctrl_alu_a_src[4:0])
+      5'b00000: w_bus = al;
+      5'b00001: w_bus = ah;
+      5'b00010: w_bus = bl;
+      5'b00011: w_bus = bh;
+      5'b00100: w_bus = cl;
+      5'b00101: w_bus = ch;
+      5'b00110: w_bus = dl;
+      5'b00111: w_bus = dh;
+      5'b01000: w_bus = spl;
+      5'b01001: w_bus = sph;
+      5'b01010: w_bus = bpl;
+      5'b01011: w_bus = bph;
+      5'b01100: w_bus = sil;
+      5'b01101: w_bus = sih;
+      5'b01110: w_bus = dil;
+      5'b01111: w_bus = dih;
+      5'b10000: w_bus = pcl;
+      5'b10001: w_bus = pch;
+      5'b10010: w_bus = marl;
+      5'b10011: w_bus = marh;
+      5'b10100: w_bus = mdrl;
+      5'b10101: w_bus = mdrh;
+      5'b10110: w_bus = tdrl;
+      5'b10111: w_bus = tdrh;
+      5'b11000: w_bus = sspl;
+      5'b11001: w_bus = ssph;
+      5'b11010: w_bus = irq_vector;
+      5'b11011: w_bus = irq_masks;
+      5'b11100: w_bus = irq_status;
+      5'b11101: w_bus = 'x;
+      5'b11110: w_bus = 'x;
+      5'b11111: w_bus = 'x;
+    endcase
+  end     
+
+// x_bus assignment
+  always_comb begin
+    if(ctrl_alu_a_src[5] == 1'b0) begin
+      x_bus = w_bus;
+    end
+    else begin
+      case(ctrl_alu_a_src[1:0])
+        2'b00: x_bus = alu_flags;
+        2'b01: x_bus = cpu_status;
+        2'b10: x_bus = gl;
+        2'b11: x_bus = gh;
+      endcase
+    end
+  end
   
-// Interrupts
-  logic [7:0] irq_clear;
-  for(genvar i = 0; i < 8; i++) begin
-    assign irq_clear[i] = ctrl_int_ack && irq_vector[3:1] == i;
-    always_ff @(posedge ext_irq_req[i], posedge ctrl_clear_all_ints, posedge irq_clear[i]) begin
-      if(ctrl_clear_all_ints == 1'b1 || irq_clear[i] == 1'b1) irq_dff[i] <= 1'b0;
-      else irq_dff[i] <= 1'b1;
-    end
-  end
-  always_ff @(posedge clk) begin
-    irq_status <= irq_dff;
-  end
-  // IRQ Handling Block
-  always_ff @(posedge clk) begin
-    logic [7:0] irqs_masked;
-    logic [2:0] irq_encoded;
-    logic irq_req;
 
-    irqs_masked = irq_status & irq_masks;
-    irq_req = |irqs_masked; // Check if any IRQ is requested
-    if(irqs_masked[0] == 1'b1) irq_encoded = 000;
-    else if(irqs_masked[1] == 1'b1) irq_encoded = 3'b001;
-    else if(irqs_masked[2] == 1'b1) irq_encoded = 3'b010;
-    else if(irqs_masked[3] == 1'b1) irq_encoded = 3'b011;
-    else if(irqs_masked[4] == 1'b1) irq_encoded = 3'b100;
-    else if(irqs_masked[5] == 1'b1) irq_encoded = 3'b101;
-    else if(irqs_masked[6] == 1'b1) irq_encoded = 3'b110;
-    else if(irqs_masked[7] == 1'b1) irq_encoded = 3'b111;
-    
-    if(ctrl_int_vector_wrt == 1'b0) begin
-      irq_vector <= {4'b0000, irq_encoded[2:0], 1'b0};
-    end
-  end
-
-// Registers Block
+// ZBUS to Registers Block
   always_ff @(posedge clk) begin
     if(ctrl_al_wrt == 1'b0) al <= z_bus;
     if(ctrl_ah_wrt == 1'b0) ah <= z_bus;
@@ -226,6 +255,40 @@ module cpu_top import pa_microcode::*; (
     if(ctrl_mdr_h_wrt == 1'b0) mdrh <= ctrl_mdr_in_src ? data_bus_in : z_bus;
   end
 
+// Interrupts
+  logic [7:0] irq_clear;
+  for(genvar i = 0; i < 8; i++) begin
+    assign irq_clear[i] = ctrl_int_ack && irq_vector[3:1] == i;
+    always_ff @(posedge pins_irq_req[i], posedge ctrl_clear_all_ints, posedge irq_clear[i]) begin
+      if(ctrl_clear_all_ints == 1'b1 || irq_clear[i] == 1'b1) irq_dff[i] <= 1'b0;
+      else irq_dff[i] <= 1'b1;
+    end
+  end
+  always_ff @(posedge clk) begin
+    irq_status <= irq_dff;
+  end
+  // IRQ Handling Block
+  always_ff @(posedge clk) begin
+    logic [7:0] irqs_masked;
+    logic [2:0] irq_encoded;
+
+    irqs_masked = irq_status & irq_masks;
+    irq_request = |irqs_masked; // Check if any IRQ is requested
+    if(irqs_masked[0] == 1'b1) irq_encoded = 000;
+    else if(irqs_masked[1] == 1'b1) irq_encoded = 3'b001;
+    else if(irqs_masked[2] == 1'b1) irq_encoded = 3'b010;
+    else if(irqs_masked[3] == 1'b1) irq_encoded = 3'b011;
+    else if(irqs_masked[4] == 1'b1) irq_encoded = 3'b100;
+    else if(irqs_masked[5] == 1'b1) irq_encoded = 3'b101;
+    else if(irqs_masked[6] == 1'b1) irq_encoded = 3'b110;
+    else if(irqs_masked[7] == 1'b1) irq_encoded = 3'b111;
+    
+    if(ctrl_int_vector_wrt == 1'b0) begin
+      irq_vector <= {4'b0000, irq_encoded[2:0], 1'b0};
+    end
+  end
+  assign int_pending = irq_request & cpu_status[bitpos_cpu_status_irq_en];
+
 // Microcode Sequencer
   microcode_sequencer u_microcode_sequencer(
     .arst(arst),
@@ -246,11 +309,11 @@ module cpu_top import pa_microcode::*; (
     .*
   );
 
-  assign data_out = ctrl_mdr_out_en ? (ctrl_mdr_out_src ? mdrh : mdrl) : 'z;
+  assign data_bus_out = ctrl_mdr_out_en ? (ctrl_mdr_out_src ? mdrh : mdrl) : 'z;
 
   always @(posedge arst, posedge clk) begin
     if(arst == 1'b1) begin
-      addr <= 22'h0;
+      address_bus <= 22'h0;
       rd <= 1'b0;
       wr <= 1'b0;
       mem_io <= 1'b0;
