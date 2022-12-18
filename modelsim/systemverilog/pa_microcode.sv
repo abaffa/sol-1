@@ -128,7 +128,7 @@ package pa_microcode;
 
   //parameter byte unsigned bitpos_unused = base_u_rom11 + 0;
   parameter byte unsigned bitpos_int_vector_wrt = base_u_rom11 + 1;
-  parameter byte unsigned bitpos_mask_flags_wrt = base_u_rom11 + 2;		// << wrt signals are also active low, 	
+  parameter byte unsigned bitpos_irq_masks_wrt = base_u_rom11 + 2;		// << wrt signals are also active low, 	
   parameter byte unsigned bitpos_mar_in_src = base_u_rom11 + 3;
   parameter byte unsigned bitpos_int_ack = base_u_rom11 + 4;		//--- active high
   parameter byte unsigned bitpos_clear_all_ints = base_u_rom11 + 5;
@@ -153,5 +153,4 @@ package pa_microcode;
   parameter byte unsigned bitpos_immy_6 = base_u_rom13 + 6;
   parameter byte unsigned bitpos_immy_7 = base_u_rom13 + 7;
  
-
 endpackage

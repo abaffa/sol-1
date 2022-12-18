@@ -74,7 +74,7 @@ entity microcode_sequencer is
         ctrl_gl_wrt     : out    vl_logic;
         ctrl_gh_wrt     : out    vl_logic;
         ctrl_int_vector_wrt: out    vl_logic;
-        ctrl_mask_flags_wrt: out    vl_logic;
+        ctrl_irq_masks_wrt: out    vl_logic;
         ctrl_mar_in_src : out    vl_logic;
         ctrl_int_ack    : out    vl_logic;
         ctrl_clear_all_ints: out    vl_logic;

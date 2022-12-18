@@ -5,7 +5,7 @@ entity cpu_top is
         arst            : in     vl_logic;
         clk             : in     vl_logic;
         data_in         : in     vl_logic_vector(7 downto 0);
-        irq_in          : in     vl_logic_vector(7 downto 0);
+        ext_irq_req     : in     vl_logic_vector(7 downto 0);
         dma_req         : in     vl_logic;
         \WAIT\          : in     vl_logic;
         ext_input       : in     vl_logic;

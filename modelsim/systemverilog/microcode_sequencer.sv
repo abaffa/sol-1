@@ -75,7 +75,7 @@ module microcode_sequencer(
   output logic ctrl_gl_wrt,
   output logic ctrl_gh_wrt,
   output logic ctrl_int_vector_wrt,
-  output logic ctrl_mask_flags_wrt,		// wrt signals are also active low
+  output logic ctrl_irq_masks_wrt,		// wrt signals are also active low
   output logic ctrl_mar_in_src,
   output logic ctrl_int_ack,		      // active high
   output logic ctrl_clear_all_ints,
@@ -87,7 +87,6 @@ module microcode_sequencer(
 );
   logic [CONTROL_WORD_WIDTH - 1:0] control_word;
   logic any_interruption;
-
   assign any_interruption = dma_req | int_pending;
 
   assign ctrl_typ = control_word[bitpos_typ1 : bitpos_typ0];
@@ -148,7 +147,7 @@ module microcode_sequencer(
   assign ctrl_gl_wrt = control_word[bitpos_gl_wrt];
   assign ctrl_gh_wrt = control_word[bitpos_gh_wrt];
   assign ctrl_int_vector_wrt = control_word[bitpos_int_vector_wrt];
-  assign ctrl_mask_flags_wrt = control_word[bitpos_mask_flags_wrt];		// wrt signals are also active low
+  assign ctrl_irq_mask_wrt = control_word[bitpos_irq_masks_wrt];		// wrt signals are also active low
   assign ctrl_mar_in_src = control_word[bitpos_mar_in_src];
   assign ctrl_int_ack = control_word[bitpos_int_ack];		      // active high
   assign ctrl_clear_all_ints = control_word[bitpos_clear_all_ints];

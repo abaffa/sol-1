@@ -2,7 +2,7 @@ module testbench;
 	logic arst;
 	logic clk_in = 1'b0;
 	logic clk;
-	logic [7:0] irq_in;
+	logic [7:0] ext_irq_req;
 	logic dma_req;
 
 	logic [21:0] addr;
@@ -21,7 +21,7 @@ module testbench;
   logic ext_input;
 	
   initial begin
-		irq_in = {8{1'b0}};
+		ext_irq_req = {8{1'b0}};
 		dma_req = 1'b0;
 		stop_clk = 1'b0;
 		clk_sel = 3'b000;
@@ -50,7 +50,7 @@ module testbench;
 	cpu_top u_cpu_top(
 		.arst(arst),
 		.clk(clk),
-		.irq_in(irq_in),
+		.ext_irq_req(ext_irq_req),
 		.dma_req(dma_req),
 		.addr(addr),
 		.data_in(data_in),

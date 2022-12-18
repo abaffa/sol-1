@@ -4,7 +4,7 @@ module cpu_top(
   input logic arst,
   input logic clk,
   input logic [7:0] data_in,
-  input logic [7:0] irq_in,
+  input logic [7:0] ext_irq_req,
   input logic dma_req,
   input logic WAIT,
   input logic ext_input,
@@ -39,6 +39,7 @@ module cpu_top(
   logic [7:0] tdrh, tdrl;
   logic [7:0] irq_masks;
   logic [7:0] irq_status;
+  logic [7:0] irq_vector;
   
 // Buses
   logic [7:0] k_bus;
@@ -58,6 +59,8 @@ module cpu_top(
   logic [7:0] u_flags;
   logic alu_cf_in;
   logic int_request;
+// IRQ requests after passing through their corresponding DFFs
+  logic [7:0] irq_dff;
   
 // control word fields
   logic [1:0] ctrl_typ;
@@ -118,7 +121,7 @@ module cpu_top(
   logic ctrl_gl_wrt;
   logic ctrl_gh_wrt;
   logic ctrl_int_vector_wrt;
-  logic ctrl_mask_flags_wrt;		// wrt signals are also active low
+  logic ctrl_irq_masks_wrt;		// wrt signals are also active low
   logic ctrl_mar_in_src;
   logic ctrl_int_ack;		      // active high
   logic ctrl_clear_all_ints;
@@ -154,10 +157,46 @@ module cpu_top(
   
   assign int_pending = int_request & cpu_status[1];
   
-  always_comb begin
+// Interrupts
+  logic [7:0] irq_clear;
+  for(genvar i = 0; i < 8; i++) begin
+    assign irq_clear[i] = ctrl_int_ack && irq_vector[3:1] == i;
+    always_ff @(posedge ext_irq_req[i], posedge ctrl_clear_all_ints, posedge irq_clear[i]) begin
+      if(ctrl_clear_all_ints == 1'b1 || irq_clear[i] == 1'b1) irq_dff[i] <= 1'b0;
+      else irq_dff[i] <= 1'b1;
+    end
+  end
+  always_ff @(posedge clk) begin
+    irq_status <= irq_dff;
+  end
+  // IRQ Handling Block
+  always_ff @(posedge clk) begin
+    logic [7:0] irqs_masked;
+    logic [2:0] irq_encoded;
+    logic irq_req;
+
+    irqs_masked = irq_status & irq_masks;
+    irq_req = |irqs_masked; // Check if any IRQ is requested
+    if(irqs_masked[0] == 1'b1) irq_encoded = 000;
+    else if(irqs_masked[1] == 1'b1) irq_encoded = 3'b001;
+    else if(irqs_masked[2] == 1'b1) irq_encoded = 3'b010;
+    else if(irqs_masked[3] == 1'b1) irq_encoded = 3'b011;
+    else if(irqs_masked[4] == 1'b1) irq_encoded = 3'b100;
+    else if(irqs_masked[5] == 1'b1) irq_encoded = 3'b101;
+    else if(irqs_masked[6] == 1'b1) irq_encoded = 3'b110;
+    else if(irqs_masked[7] == 1'b1) irq_encoded = 3'b111;
     
+    if(ctrl_int_vector_wrt == 1'b0) begin
+      irq_vector <= {4'b0000, irq_encoded[2:0], 1'b0};
+    end
   end
 
+// Registers Block
+  always_ff @(posedge clk) begin
+    if(ctrl_irq_masks_wrt == 1'b0) irq_masks <= z_bus;
+  end
+
+// Microcode Sequencer
   microcode_sequencer u_microcode_sequencer(
     .arst(arst),
     .clk(clk),
