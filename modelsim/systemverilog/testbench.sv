@@ -19,6 +19,7 @@ module testbench;
   
   logic pad_wait;
   logic ext_input;
+
 	class C#(type a); 
    static function void check;
     a s;
