@@ -220,14 +220,6 @@ module cpu_top import pa_microcode::*; (
     if(ctrl_sp_l_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) sspl <= z_bus;
     if(ctrl_sp_h_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) ssph <= z_bus;
 
-    if(ctrl_mar_l_wrt == 1'b0) begin
-      if(ctrl_mar_in_src == 1'b0) marl <= z_bus;
-      else marl <= pcl;
-    end
-    if(ctrl_mar_h_wrt == 1'b0) begin
-      if(ctrl_mar_in_src == 1'b0) marh <= z_bus;
-      else marh <= pch;
-    end
     if(ctrl_mar_l_wrt == 1'b0) marl <= ctrl_mar_in_src ? data_bus_in : z_bus;
     if(ctrl_mar_h_wrt == 1'b0) marh <= ctrl_mar_in_src ? data_bus_in : z_bus;
     if(ctrl_mdr_l_wrt == 1'b0) mdrl <= ctrl_mdr_in_src ? data_bus_in : z_bus;

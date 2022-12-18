@@ -1,9 +1,3 @@
-class base;
-  virtual function hello;
-    return 0;
-  endfunction
-endclass
-
 module testbench;
 	logic arst;
 	logic clk_in = 1'b0;
@@ -26,12 +20,6 @@ module testbench;
   logic pad_wait;
   logic ext_input;
 
-	class C#(type a); 
-   static function void check;
-    a s;
-    $display($typename(s));
-  endfunction
-  endclass
   initial begin
 		ext_irq_req = {8{1'b0}};
 		dma_req = 1'b0;
@@ -40,8 +28,6 @@ module testbench;
 		data_bus_in = 8'h00;
 		arst = 1'b1;
 		#500ns arst = 1'b0;	
-
-    C#(bit)::check();
 
 		#20us $stop;
   end
