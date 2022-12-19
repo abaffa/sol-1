@@ -29,6 +29,7 @@ module testbench;
 		arst = 1'b1;
 		#500ns arst = 1'b0;	
 
+
 		#20us $stop;
   end
 
