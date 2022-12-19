@@ -1,3 +1,4 @@
+`default_net_type = none
 module cpu_top(
   input logic arst,
   input logic clk,
@@ -361,6 +362,7 @@ module cpu_top(
     .data_in(mdr_to_pagetable_data[15:8]),
     .data_out(mdr_to_pagetable_data[15:8])    
   );
+  assign bus_tristate = cpu_status[bitpos_cpu_status_dma_ack] || cpu_status[bitpos_cpu_status_halt]
   assign {bus_mem_io, address_bus} = bus_tristate ? 'z : cpu_status[bitpos_cpu_status_paging_en] ? {mdr_to_pagetable_data[11], mdr_to_pagetable_data[10:0], marh[2:0], marl[7:0]} : {1'b1, 6'b000000, marh, marl};
   assign bus_rd = bus_tristate ? 1'bz : ctrl_rd;
   assign bus_wr = bus_tristate ? 1'bz : ctrl_wr;
