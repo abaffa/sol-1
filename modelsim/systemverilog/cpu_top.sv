@@ -140,6 +140,10 @@ module cpu_top(
   logic int_pending;
 
 // Nets
+  wire logic [15:0] mdr_to_pagetable_data;
+  wire logic bus_rd;
+  wire logic bus_wr;
+  wire logic bus_mem_io;
 
 
 /*************************
@@ -340,7 +344,6 @@ module cpu_top(
 
 // Page Table
   assign pagetable_addr_source = ctrl_force_user_ptb || cpu_status[bitpos_cpu_status_mode];;
-  wire logic [15:0] mdr_to_pagetable_data;
   assign mdr_to_pagetable_data = ctrl_mdr_to_pagetable_data_en ? {mdrh, mdrl} : 'z;
   ram u_pagetable_low(
     .ce_n(1'b0),
@@ -358,8 +361,9 @@ module cpu_top(
     .data_in(mdr_to_pagetable_data[15:8]),
     .data_out(mdr_to_pagetable_data[15:8])    
   );
-  assign address_bus = bus_tristate ? 'z : cpu_status[bitpos_cpu_status_paging_en] ? {mdr_to_pagetable_data, marh[2:0], marl[7:0]} : {6'b000000, marh, marl}
-    
+  assign {bus_mem_io, address_bus} = bus_tristate ? 'z : cpu_status[bitpos_cpu_status_paging_en] ? {mdr_to_pagetable_data[11], mdr_to_pagetable_data[10:0], marh[2:0], marl[7:0]} : {1'b1, 6'b000000, marh, marl};
+  assign bus_rd = bus_tristate ? 1'bz : ctrl_rd;
+  assign bus_wr = bus_tristate ? 1'bz : ctrl_wr;
 
 // Interrupts
   logic [7:0] irq_clear;
@@ -407,7 +411,7 @@ module cpu_top(
     .alu_of(alu_of),
     .alu_final_cf(alu_final_cf),
     .dma_req(dma_req),
-    .WAIT(WAIT),
+    ._wait(pin_wait),
     .int_pending(int_pending),
     .ext_input(ext_input),
     .u_flags(u_flags),
@@ -418,17 +422,6 @@ module cpu_top(
   assign data_bus_out = ctrl_mdr_out_en ? (ctrl_mdr_out_src ? mdrh : mdrl) : 'z;
 
   always @(posedge arst, posedge clk) begin
-    if(arst == 1'b1) begin
-      address_bus <= 22'h0;
-      rd <= 1'b0;
-      wr <= 1'b0;
-      mem_io <= 1'b0;
-      dma_ack <= 1'b0;
-      halt <= 1'b0;
-    end
-    else begin
-      
-    end
   end
 
 

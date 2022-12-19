@@ -9,7 +9,7 @@ module microcode_sequencer(
   input logic alu_of,
   input logic alu_final_cf,
   input logic dma_req,
-  input logic WAIT,
+  input logic _wait,
   input logic int_pending,
   input logic ext_input,
   
@@ -79,7 +79,7 @@ module microcode_sequencer(
   output logic ctrl_clear_all_ints,
   output logic ctrl_ptb_wrt,
   output logic ctrl_page_table_we, 
-  output logic ctrl_mdr_to_pagetable_data_buffer,
+  output logic ctrl_mdr_to_pagetable_data_en,
   output logic ctrl_force_user_ptb,   // goes to board as page_table_addr_source via or gate
   output logic [7:0] ctrl_immy
 );
@@ -208,7 +208,7 @@ module microcode_sequencer(
         condition = cpu_status[pa_cpu::bitpos_cpu_status_mode];
       end
       4'b1001: begin
-        condition = WAIT;
+        condition = _wait;
       end
       4'b1010: begin
         condition = int_pending;
