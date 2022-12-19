@@ -1,21 +1,6 @@
 package pa_microcode;  
   parameter CONTROL_WORD_WIDTH = 8 * 14;
   
-  parameter byte unsigned bitpos_cpu_status_dma_ack = 0;
-  parameter byte unsigned bitpos_cpu_status_irq_en = 1;
-  parameter byte unsigned bitpos_cpu_status_mode = 2;
-  parameter byte unsigned bitpos_cpu_status_paging_en = 3;
-  parameter byte unsigned bitpos_cpu_status_halt = 4;
-  parameter byte unsigned bitpos_cpu_status_displayreg_load = 5;
-  // pos 6 undefined for now
-  parameter byte unsigned bitpos_cpu_status_dir = 7;
-
-  parameter byte unsigned bitpos_alu_flags_zf = 0;
-  parameter byte unsigned bitpos_alu_flags_cf = 1;
-  parameter byte unsigned bitpos_alu_flags_sf = 2;
-  parameter byte unsigned bitpos_alu_flags_of = 3;
-  
-  
   parameter byte unsigned base_u_rom0 = 0 * 8;
   parameter byte unsigned base_u_rom1 = 1 * 8;
   parameter byte unsigned base_u_rom2 = 2 * 8;
@@ -140,7 +125,7 @@ package pa_microcode;
   parameter byte unsigned bitpos_ptb_wrt = base_u_rom11 + 6;
   parameter byte unsigned bitpos_page_table_we = base_u_rom11 + 7; 
 
-  parameter byte unsigned bitpos_mdr_to_pagetable_data_buffer = base_u_rom12 + 0;
+  parameter byte unsigned bitpos_mdr_to_pagetable_data_en = base_u_rom12 + 0;
   parameter byte unsigned bitpos_force_user_ptb = base_u_rom12 + 1; // --->>> goes to board as page_table_addr_source via or gate
   //parameter byte unsigned bitpos_unused = base_u_rom12 + 2;
   //parameter byte unsigned bitpos_unused = base_u_rom12 + 3;

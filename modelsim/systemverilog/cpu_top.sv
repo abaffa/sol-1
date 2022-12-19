@@ -1,4 +1,4 @@
-module cpu_top import pa_microcode::*; (
+module cpu_top(
   input logic arst,
   input logic clk,
   input logic [7:0] data_bus_in,
@@ -15,6 +15,7 @@ module cpu_top import pa_microcode::*; (
   output logic halt,
   output logic dma_ack
 );
+  import pa_cpu::*; 
 
 // General registers
   logic [7:0] ah, al;
@@ -50,7 +51,6 @@ module cpu_top import pa_microcode::*; (
   logic [7:0] k_bus;
   logic [7:0] z_bus; 
 
-  logic bus_tristate;
 
 // ALU
   logic [7:0] alu_out;
@@ -59,14 +59,13 @@ module cpu_top import pa_microcode::*; (
   logic alu_sf;
   logic alu_of;
   logic alu_final_cf;
-  logic int_pending;
   logic [7:0] u_flags;
   logic alu_cf_in;
   logic irq_request;
 // IRQ requests after passing through their corresponding DFFs
   logic [7:0] irq_dff;
   
-// control word fields
+// Control word fields
   logic [1:0] ctrl_typ;
   logic [6:0] ctrl_offset;
   logic ctrl_cond_invert;
@@ -131,9 +130,17 @@ module cpu_top import pa_microcode::*; (
   logic ctrl_clear_all_ints;
   logic ctrl_ptb_wrt;
   logic ctrl_page_table_we; 
-  logic ctrl_mdr_to_pagetable_data_buffer;
+  logic ctrl_mdr_to_pagetable_data_en;
   logic ctrl_force_user_ptb;   // goes to board as page_table_addr_source via or gate
   logic [7:0] ctrl_immy;
+
+// Derived signals
+  logic pagetable_addr_source;
+  logic bus_tristate;
+  logic int_pending;
+
+// Nets
+
 
 /*************************
  start of RTL code
@@ -332,7 +339,27 @@ module cpu_top import pa_microcode::*; (
   end
 
 // Page Table
-
+  assign pagetable_addr_source = ctrl_force_user_ptb || cpu_status[bitpos_cpu_status_mode];;
+  wire logic [15:0] mdr_to_pagetable_data;
+  assign mdr_to_pagetable_data = ctrl_mdr_to_pagetable_data_en ? {mdrh, mdrl} : 'z;
+  ram u_pagetable_low(
+    .ce_n(1'b0),
+    .oe_n(ctrl_mdr_to_pagetable_data_en),
+    .we_n(~ctrl_page_table_we),
+    .address({page_table_address_source ? ptb : 8'h00, marh[7:3]}),
+    .data_in(mdr_to_pagetable_data[7:0]),
+    .data_out(mdr_to_pagetable_data[7:0])    
+  );
+  ram u_pagetable_high(
+    .ce_n(1'b0),
+    .oe_n(ctrl_mdr_to_pagetable_data_en),
+    .we_n(~ctrl_page_table_we),
+    .address({page_table_address_source ? ptb : 8'h00, marh[7:3]}),
+    .data_in(mdr_to_pagetable_data[15:8]),
+    .data_out(mdr_to_pagetable_data[15:8])    
+  );
+  assign address_bus = bus_tristate ? 'z : cpu_status[bitpos_cpu_status_paging_en] ? {mdr_to_pagetable_data, marh[2:0], marl[7:0]} : {6'b000000, marh, marl}
+    
 
 // Interrupts
   logic [7:0] irq_clear;

@@ -1,4 +1,4 @@
-module microcode_sequencer import pa_microcode::*; (
+module microcode_sequencer(
   input logic arst,
   input logic clk,
   input logic [7:0] ir,
@@ -83,6 +83,8 @@ module microcode_sequencer import pa_microcode::*; (
   output logic ctrl_force_user_ptb,   // goes to board as page_table_addr_source via or gate
   output logic [7:0] ctrl_immy
 );
+  import pa_microcode::*;
+
   logic [CONTROL_WORD_WIDTH - 1:0] control_word;
   logic any_interruption;
 
@@ -152,7 +154,7 @@ module microcode_sequencer import pa_microcode::*; (
   assign ctrl_clear_all_ints = control_word[bitpos_clear_all_ints];
   assign ctrl_ptb_wrt = control_word[bitpos_ptb_wrt];
   assign ctrl_page_table_we = control_word[bitpos_page_table_we]; 
-  assign ctrl_mdr_to_pagetable_data_buffer = control_word[bitpos_mdr_to_pagetable_data_buffer];
+  assign ctrl_mdr_to_pagetable_data_en = control_word[bitpos_mdr_to_pagetable_data_en];
   assign ctrl_force_user_ptb = control_word[bitpos_force_user_ptb];   // goes to board as page_table_addr_source via or gate
   assign ctrl_immy = control_word[bitpos_immy_7 : bitpos_immy_0];
 
@@ -203,7 +205,7 @@ module microcode_sequencer import pa_microcode::*; (
         condition = dma_req;
       end
       4'b1000: begin
-        condition = cpu_status[pa_microcode::bitpos_cpu_status_mode];
+        condition = cpu_status[pa_cpu::bitpos_cpu_status_mode];
       end
       4'b1001: begin
         condition = WAIT;
@@ -215,10 +217,10 @@ module microcode_sequencer import pa_microcode::*; (
         condition = ext_input;
       end
       4'b1100: begin
-        condition = fu_getStatusField(bitpos_cpu_status_dir);
+        condition = fu_getStatusField(pa_cpu::bitpos_cpu_status_dir);
       end
       4'b1101: begin
-        condition = cpu_status[bitpos_cpu_status_displayreg_load];
+        condition = cpu_status[pa_cpu::bitpos_cpu_status_displayreg_load];
       end
       4'b1110: condition = 1'b0;
       4'b1111: condition = 1'b0;
