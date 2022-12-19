@@ -6,6 +6,7 @@ entity ram is
         oe_n            : in     vl_logic;
         we_n            : in     vl_logic;
         address         : in     vl_logic_vector(12 downto 0);
-        data            : inout  vl_logic_vector(7 downto 0)
+        data_in         : in     vl_logic_vector(7 downto 0);
+        data_out        : out    vl_logic_vector(7 downto 0)
     );
 end ram;
