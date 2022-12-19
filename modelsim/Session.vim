@@ -202,12 +202,12 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 18 - ((8 * winheight(0) + 12) / 24)
+let s:l = 22 - ((18 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 18
-normal! 015|
+keepjumps 22
+normal! 0
 tabnext
 edit Desktop\SOL1_MiniComputer\modelsim\systemverilog\cpu_top.sv
 argglobal
@@ -342,12 +342,12 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 172 - ((27 * winheight(0) + 25) / 50)
+let s:l = 135 - ((27 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 172
-normal! 010|
+keepjumps 135
+normal! 025|
 tabnext
 edit Desktop\SOL1_MiniComputer\modelsim\systemverilog\ram.sv
 argglobal
@@ -483,11 +483,11 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 1 - ((0 * winheight(0) + 25) / 50)
+let s:l = 9 - ((8 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 1
+keepjumps 9
 normal! 0
 tabnext
 edit Desktop\SOL1_MiniComputer\modelsim\systemverilog\pa_cpu.sv
@@ -1638,7 +1638,7 @@ keepjumps exe s:l
 normal! zt
 keepjumps 17
 normal! 0
-tabnext 4
+tabnext 2
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
@@ -1653,7 +1653,6 @@ if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

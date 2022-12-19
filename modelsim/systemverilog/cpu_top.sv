@@ -331,6 +331,9 @@ module cpu_top import pa_microcode::*; (
     if(ctrl_ptb_wrt == 1'b0) ptb <= z_bus;
   end
 
+// Page Table
+
+
 // Interrupts
   logic [7:0] irq_clear;
   for(genvar i = 0; i < 8; i++) begin
