@@ -327,6 +327,8 @@ module cpu_top import pa_microcode::*; (
     if(ctrl_mar_h_wrt == 1'b0) marh <= ctrl_mar_in_src ? data_bus_in : z_bus;
     if(ctrl_mdr_l_wrt == 1'b0) mdrl <= ctrl_mdr_in_src ? data_bus_in : z_bus;
     if(ctrl_mdr_h_wrt == 1'b0) mdrh <= ctrl_mdr_in_src ? data_bus_in : z_bus;
+
+    if(ctrl_ptb_wrt == 1'b0) ptb <= z_bus;
   end
 
 // Interrupts

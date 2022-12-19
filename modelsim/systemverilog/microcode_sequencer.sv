@@ -85,6 +85,7 @@ module microcode_sequencer import pa_microcode::*; (
 );
   logic [CONTROL_WORD_WIDTH - 1:0] control_word;
   logic any_interruption;
+
   assign any_interruption = dma_req | int_pending;
 
   assign ctrl_typ = control_word[bitpos_typ1 : bitpos_typ0];
