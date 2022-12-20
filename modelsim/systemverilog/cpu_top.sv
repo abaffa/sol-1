@@ -1,4 +1,3 @@
-`default_net_type = none
 module cpu_top(
   input logic arst,
   input logic clk,
@@ -150,10 +149,6 @@ module cpu_top(
 /*************************
  start of RTL code
 **************************/
-
-// address_bus is tristated if dma_ack true, or halt true.
-// databus is always tristated by default unless data is being output, so no need to tristate it as well here.
-  assign addr_bus_tristate = cpu_status[bitpos_cpu_status_dma_ack] | cpu_status[bitpos_cpu_status_halt];
 
 // ALU
   always_comb begin
@@ -344,13 +339,13 @@ module cpu_top(
   end
 
 // Page Table
-  assign pagetable_addr_source = ctrl_force_user_ptb || cpu_status[bitpos_cpu_status_mode];;
+  assign pagetable_addr_source = ctrl_force_user_ptb || cpu_status[bitpos_cpu_status_mode];
   assign mdr_to_pagetable_data = ctrl_mdr_to_pagetable_data_en ? {mdrh, mdrl} : 'z;
   ram u_pagetable_low(
     .ce_n(1'b0),
     .oe_n(ctrl_mdr_to_pagetable_data_en),
     .we_n(~ctrl_page_table_we),
-    .address({page_table_address_source ? ptb : 8'h00, marh[7:3]}),
+    .address({pagetable_addr_source ? ptb : 8'h00, marh[7:3]}),
     .data_in(mdr_to_pagetable_data[7:0]),
     .data_out(mdr_to_pagetable_data[7:0])    
   );
@@ -358,11 +353,11 @@ module cpu_top(
     .ce_n(1'b0),
     .oe_n(ctrl_mdr_to_pagetable_data_en),
     .we_n(~ctrl_page_table_we),
-    .address({page_table_address_source ? ptb : 8'h00, marh[7:3]}),
+    .address({pagetable_addr_source ? ptb : 8'h00, marh[7:3]}),
     .data_in(mdr_to_pagetable_data[15:8]),
     .data_out(mdr_to_pagetable_data[15:8])    
   );
-  assign bus_tristate = cpu_status[bitpos_cpu_status_dma_ack] || cpu_status[bitpos_cpu_status_halt]
+  assign bus_tristate = cpu_status[bitpos_cpu_status_dma_ack] || cpu_status[bitpos_cpu_status_halt];
   assign {bus_mem_io, address_bus} = bus_tristate ? 'z : cpu_status[bitpos_cpu_status_paging_en] ? {mdr_to_pagetable_data[11], mdr_to_pagetable_data[10:0], marh[2:0], marl[7:0]} : {1'b1, 6'b000000, marh, marl};
   assign bus_rd = bus_tristate ? 1'bz : ctrl_rd;
   assign bus_wr = bus_tristate ? 1'bz : ctrl_wr;

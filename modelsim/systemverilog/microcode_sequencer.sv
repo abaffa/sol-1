@@ -148,7 +148,7 @@ module microcode_sequencer(
   assign ctrl_gl_wrt = control_word[bitpos_gl_wrt];
   assign ctrl_gh_wrt = control_word[bitpos_gh_wrt];
   assign ctrl_int_vector_wrt = control_word[bitpos_int_vector_wrt];
-  assign ctrl_irq_mask_wrt = control_word[bitpos_irq_masks_wrt];		// wrt signals are also active low
+  assign ctrl_irq_masks_wrt = control_word[bitpos_irq_masks_wrt];		// wrt signals are also active low
   assign ctrl_mar_in_src = control_word[bitpos_mar_in_src];
   assign ctrl_int_ack = control_word[bitpos_int_ack];		      // active high
   assign ctrl_clear_all_ints = control_word[bitpos_clear_all_ints];
