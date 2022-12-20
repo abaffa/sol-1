@@ -9815,6 +9815,8 @@ BECAUSE THAT IS THE IO AREA FOR WHEN PAGING IS ON</text>
 <text x="-828.04" y="160.02" size="5.08" layer="91">REWIRING THE A1/A27 OF THE ROMS WILL BE DIFFICULT 
 AND COULD DAMAGE THE WIRING AND DESTROY THE BOARD.</text>
 <text x="-477.52" y="680.72" size="6.4516" layer="91">add mux here to create ESC OPCODE</text>
+<text x="-218.44" y="1389.38" size="6.4516" layer="91">FORGOT WHAT THIS IS...
+ADDRESS BANKING PERHAPS?</text>
 </plain>
 <instances>
 <instance part="IC32" gate="A" x="-294.64" y="596.9">
