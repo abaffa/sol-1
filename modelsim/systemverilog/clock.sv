@@ -8,11 +8,12 @@ module clock(
 	logic [7:0] clk_counter;
 
   initial begin
+    clk = 1'b0;
     forever #1us clk = ~clk;
   end
 
 	always @(negedge clk, posedge arst) begin
-    if(arst) clk_counter <= '0;
+    if(arst) clk_counter <= 8'h1; // clock starts HIGH so that control bits can be written on the first falling edge.
 		else if(!stop_clk) clk_counter <= clk_counter + 8'h1;
 	end
 

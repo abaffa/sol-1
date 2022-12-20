@@ -1,4 +1,6 @@
 module testbench;
+  import pa_testbench::*;
+
 	logic arst;
 	logic [2:0] clk_sel;
 	logic stop_clk;
@@ -20,15 +22,15 @@ module testbench;
   logic bios_rom_cs;
 
   initial begin
+		arst = 1'b1;
 		stop_clk = 1'b0;
 		clk_sel = 3'b000;
-		arst = 1'b1;
-		#500ns arst = 1'b0;	
-
 		pins_irq_req = {8{1'b0}};
 		dma_req = 1'b0;
     ext_input = 1'b0;
     pin_wait = 1'b0;
+
+		#500ns arst = 1'b0;	
 
 		#20us $stop;
   end
@@ -57,19 +59,19 @@ module testbench;
     .ext_input(ext_input)
 	);
 
-  ram u_bios_rom(
+  ram #(_32KB) u_bios_rom(
     .ce_n(bios_rom_cs),
     .oe_n(rd),
     .we_n(1'b1),
-    .address(address_bus),
+    .address(address_bus[14:0]),
     .data_in(data_bus),
     .data_out(data_bus)
   );
-  ram u_bios_ram(
+  ram #(_32KB) u_bios_ram(
     .ce_n(bios_ram_cs),
     .oe_n(rd),
     .we_n(wr),
-    .address(address_bus),
+    .address(address_bus[14:0]),
     .data_in(data_bus),
     .data_out(data_bus)
   );

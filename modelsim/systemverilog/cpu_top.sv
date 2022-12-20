@@ -341,7 +341,7 @@ module cpu_top(
 // Page Table
   assign pagetable_addr_source = ctrl_force_user_ptb || cpu_status[bitpos_cpu_status_mode];
   assign mdr_to_pagetable_data = ctrl_mdr_to_pagetable_data_en ? {mdrh, mdrl} : 'z;
-  ram u_pagetable_low(
+  ram #(PAGETABLE_RAM_SIZE) u_pagetable_low(
     .ce_n(1'b0),
     .oe_n(ctrl_mdr_to_pagetable_data_en),
     .we_n(~ctrl_page_table_we),
@@ -349,7 +349,7 @@ module cpu_top(
     .data_in(mdr_to_pagetable_data[7:0]),
     .data_out(mdr_to_pagetable_data[7:0])    
   );
-  ram u_pagetable_high(
+  ram #(PAGETABLE_RAM_SIZE) u_pagetable_high(
     .ce_n(1'b0),
     .oe_n(ctrl_mdr_to_pagetable_data_en),
     .we_n(~ctrl_page_table_we),

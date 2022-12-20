@@ -1,15 +1,15 @@
-module ram import pa_cpu::*;#(
-  ram_size
+module ram #(
+  parameter RAM_SIZE
 )(
   input logic ce_n,
   input logic oe_n,
   input logic we_n,
-  input logic [12:0] address,
+  input logic [$clog2(RAM_SIZE) - 1 : 0] address,
   input logic [7:0] data_in,
   output logic [7:0] data_out
 );
 
-  logic [7:0] ram [PAGETABLE_RAM_SIZE - 1 : 0];
+  logic [7:0] ram [RAM_SIZE - 1 : 0];
 
   assign data_out = !ce_n && !oe_n && we_n ? ram[address] : 'z;
 
