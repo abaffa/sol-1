@@ -57,7 +57,15 @@ module testbench;
     .ext_input(ext_input)
 	);
 
-  ram u_ram(
+  ram u_bios_rom(
+    .ce_n(bios_rom_cs),
+    .oe_n(rd),
+    .we_n(1'b1),
+    .address(address_bus),
+    .data_in(data_bus),
+    .data_out(data_bus)
+  );
+  ram u_bios_ram(
     .ce_n(bios_ram_cs),
     .oe_n(rd),
     .we_n(wr),
@@ -66,7 +74,7 @@ module testbench;
     .data_out(data_bus)
   );
 
-
+  
 
 
 endmodule

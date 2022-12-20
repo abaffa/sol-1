@@ -1,4 +1,6 @@
-module ram import pa_cpu::*; (
+module ram import pa_cpu::*;#(
+  ram_size
+)(
   input logic ce_n,
   input logic oe_n,
   input logic we_n,
