@@ -59,7 +59,7 @@ module testbench;
     .ext_input(ext_input)
 	);
 
-  ram #(_32KB) u_bios_rom(
+  memory #(_32KB) u_bios_rom(
     .ce_n(bios_rom_cs),
     .oe_n(rd),
     .we_n(1'b1),
@@ -67,7 +67,7 @@ module testbench;
     .data_in(data_bus),
     .data_out(data_bus)
   );
-  ram #(_32KB) u_bios_ram(
+  memory #(_32KB) u_bios_ram(
     .ce_n(bios_ram_cs),
     .oe_n(rd),
     .we_n(wr),
@@ -76,7 +76,12 @@ module testbench;
     .data_out(data_bus)
   );
 
-  
+  wire logic real_mode_addr_space;
+  wire logic peripheral_addressing;
+  assign peripheral_addressing = & address_bus[14:7];
+  assign real_mode_addr_space = ~| address_bus[21:16];
 
+  assign bios_rom_cs = !(mem_io && real_mode_addr_space && !address_bus[15]);
+  assign bios_ram_cs = !(mem_io && real_mode_addr_space && !peripheral_addressing && address_bus[15]);
 
 endmodule
