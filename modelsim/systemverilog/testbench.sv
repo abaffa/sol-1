@@ -22,7 +22,6 @@ module testbench;
 // Chip selects
   logic bios_ram_cs;
   logic bios_rom_cs;
-
   logic uart0_cs;
   logic uart1_cs;
   logic rtc_cs;
@@ -34,7 +33,8 @@ module testbench;
 
 // Address decoding support wires
   wire logic inside_real_mode_addr_space;
-  wire logic peripheral_addressing;
+  wire logic addr_bus_7_to_14_alltrue;
+  wire logic peripheral_access;
 
   initial begin
 		arst = 1'b1;
@@ -91,26 +91,20 @@ module testbench;
     .data_out(data_bus)
   );
 
-  assign peripheral_addressing = & address_bus[14:7];
+
+  assign addr_bus_7_to_14_alltrue = & address_bus[14:7];
   assign inside_real_mode_addr_space = ~| address_bus[21:16];
+  assign peripheral_access = addr_bus_7_to_14_alltrue && address_bus[15] && mem_io;
 
-  assign bios_rom_cs = !(mem_io && inside_real_mode_addr_space && !address_bus[15]);
-  assign bios_ram_cs = !(mem_io && inside_real_mode_addr_space && !peripheral_addressing && address_bus[15]);
+  assign bios_rom_cs    = !(mem_io && inside_real_mode_addr_space && !address_bus[15]);
+  assign bios_ram_cs    = !(mem_io && inside_real_mode_addr_space && !addr_bus_7_to_14_alltrue && address_bus[15]);
+  assign uart0_cs       = peripheral_access ? !(address_bus[6:4] == 3'b000) : 1'b1;
+  assign uart1_cs       = peripheral_access ? !(address_bus[6:4] == 3'b001) : 1'b1;
+  assign rtc_cs         = peripheral_access ? !(address_bus[6:4] == 3'b010) : 1'b1;
+  assign pio0_cs        = peripheral_access ? !(address_bus[6:4] == 3'b011) : 1'b1;
+  assign pio1_cs        = peripheral_access ? !(address_bus[6:4] == 3'b100) : 1'b1;
+  assign ide_cs         = peripheral_access ? !(address_bus[6:4] == 3'b101) : 1'b1;
+  assign timer_cs       = peripheral_access ? !(address_bus[6:4] == 3'b110) : 1'b1;
+  assign bios_config_cs = peripheral_access ? !(address_bus[6:4] == 3'b111) : 1'b1;
 
-  always_comb begin
-    if(peripheral_addressing && address_bus[15] && mem_io) begin
-      case(address_bus[6:4])
-        3'b000: {bios_config_cs, timer_cs, ide_cs, pio1_cs, pio0_cs, rtc_cs, uart1_cs, uart0_cs} = 8'b1111_1110;
-        3'b001: {bios_config_cs, timer_cs, ide_cs, pio1_cs, pio0_cs, rtc_cs, uart1_cs, uart0_cs} = 8'b1111_1101;
-        3'b010: {bios_config_cs, timer_cs, ide_cs, pio1_cs, pio0_cs, rtc_cs, uart1_cs, uart0_cs} = 8'b1111_1011;
-        3'b011: {bios_config_cs, timer_cs, ide_cs, pio1_cs, pio0_cs, rtc_cs, uart1_cs, uart0_cs} = 8'b1111_0111;
-        3'b100: {bios_config_cs, timer_cs, ide_cs, pio1_cs, pio0_cs, rtc_cs, uart1_cs, uart0_cs} = 8'b1110_1111;
-        3'b101: {bios_config_cs, timer_cs, ide_cs, pio1_cs, pio0_cs, rtc_cs, uart1_cs, uart0_cs} = 8'b1101_1111;
-        3'b110: {bios_config_cs, timer_cs, ide_cs, pio1_cs, pio0_cs, rtc_cs, uart1_cs, uart0_cs} = 8'b1011_1111;
-        3'b111: {bios_config_cs, timer_cs, ide_cs, pio1_cs, pio0_cs, rtc_cs, uart1_cs, uart0_cs} = 8'b0111_1111;
-      endcase
-    end
-    else {bios_config_cs, timer_cs, ide_cs, pio1_cs, pio0_cs, rtc_cs, uart1_cs, uart0_cs} = 8'b1111_1111;
-  end
-  
 endmodule
