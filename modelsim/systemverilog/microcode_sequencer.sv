@@ -26,7 +26,7 @@ module microcode_sequencer(
   output logic ctrl_u_sf_in_src,
   output logic ctrl_u_of_in_src,
   output logic ctrl_ir_wrt,
-  output logic ctrl_status_flags_wrt,
+  output logic ctrl_status_wrt,
   output logic [2:0] ctrl_shift_src,
   output logic [1:0] ctrl_zbus_src,
   output logic [5:0] ctrl_alu_a_src,
@@ -53,7 +53,7 @@ module microcode_sequencer(
   output logic ctrl_ah_wrt,
   output logic ctrl_mdr_in_src,
   output logic ctrl_mdr_out_src,
-  output logic ctrl_mdr_out_en,			// must invert before sending
+  output logic ctrl_mdr_out_en,
   output logic ctrl_mdr_l_wrt,			
   output logic ctrl_mdr_h_wrt,
   output logic ctrl_tdr_l_wrt,
@@ -85,8 +85,23 @@ module microcode_sequencer(
 );
   import pa_microcode::*;
 
-  logic [CONTROL_WORD_WIDTH - 1:0] control_word;
   logic any_interruption;
+  logic [CONTROL_WORD_WIDTH - 1 : 0] ucode_roms [CYCLES_PER_INSTRUCTION * NBR_INSTRUCTIONS];
+  logic [CONTROL_WORD_WIDTH - 1 : 0] control_word;
+  logic [CONTROL_WORD_WIDTH - 1 : 0] control_word_n;
+  logic [13:0] u_address;
+  logic final_condition;
+  logic cond_flag_src;
+  logic [1:0] u_zf_in_src, u_cf_in_src;
+  logic u_sf_in_src, u_of_in_src;
+  logic cond_invert;
+  logic [3:0] cond_sel;
+  logic u_escape;
+
+  assign control_word = ucode_roms[u_address];
+  always_ff @(negedge clk) begin
+    control_word_n <= control_word;
+  end
 
   assign any_interruption = dma_req | int_pending;
 
@@ -96,79 +111,68 @@ module microcode_sequencer(
   assign ctrl_cond_flag_src = control_word[bitpos_cond_flag_src];
   assign ctrl_cond_sel = control_word[bitpos_cond_sel_3 : bitpos_cond_sel_0];
   assign ctrl_escape = control_word[bitpos_escape];
-  assign ctrl_u_zf_in_src = control_word[bitpos_u_zf_in_src_1 : bitpos_u_zf_in_src_0];
-  assign ctrl_u_cf_in_src = control_word[bitpos_u_cf_in_src_1 : bitpos_u_cf_in_src_0];
-  assign ctrl_u_sf_in_src = control_word[bitpos_u_sf_in_src];
-  assign ctrl_u_of_in_src = control_word[bitpos_u_of_in_src];
-  assign ctrl_ir_wrt = control_word[bitpos_ir_wrt];
-  assign ctrl_status_flags_wrt = control_word[bitpos_status_flags_wrt];
-  assign ctrl_shift_src = control_word[bitpos_shift_src_2 : bitpos_shift_src_0];
-  assign ctrl_zbus_src = control_word[bitpos_zbus_src_1 : bitpos_zbus_src_0];
-  assign ctrl_alu_a_src = control_word[bitpos_alu_a_src_5 : bitpos_alu_a_src_0];
-  assign ctrl_alu_op = control_word[bitpos_alu_op_3 : bitpos_alu_op_0];
-  assign ctrl_alu_mode = control_word[bitpos_alu_mode];
-  assign ctrl_alu_cf_in_src = control_word[bitpos_alu_cf_in_src_1 : bitpos_alu_cf_in_src_0];
-  assign ctrl_alu_cf_in_invert = control_word[bitpos_alu_cf_in_invert];
-  assign ctrl_alu_cf_out_invert = control_word[bitpos_alu_cf_out_invert];
-  assign ctrl_zf_in_src = control_word[bitpos_zf_in_src_1 : bitpos_zf_in_src_0];
-  assign ctrl_cf_in_src = control_word[bitpos_cf_in_src_2 : bitpos_cf_in_src_0];
-  assign ctrl_sf_in_src = control_word[bitpos_sf_in_src_1 : bitpos_sf_in_src_0];
-  assign ctrl_of_in_src = control_word[bitpos_of_in_src_2 : bitpos_of_in_src_0];
-  assign ctrl_rd = control_word[bitpos_rd];
-  assign ctrl_wr = control_word[bitpos_wr];
-  assign ctrl_alu_b_src = control_word[bitpos_alu_b_src_2 : bitpos_alu_b_src_0];
-  assign ctrl_display_reg_load = control_word[bitpos_display_reg_load]; // used during fetch to select and load register display
-  assign ctrl_dl_wrt = control_word[bitpos_dl_wrt];
-  assign ctrl_dh_wrt = control_word[bitpos_dh_wrt];
-  assign ctrl_cl_wrt = control_word[bitpos_cl_wrt];
-  assign ctrl_ch_wrt = control_word[bitpos_ch_wrt];
-  assign ctrl_bl_wrt = control_word[bitpos_bl_wrt];
-  assign ctrl_bh_wrt = control_word[bitpos_bh_wrt];
-  assign ctrl_al_wrt = control_word[bitpos_al_wrt];
-  assign ctrl_ah_wrt = control_word[bitpos_ah_wrt];
-  assign ctrl_mdr_in_src = control_word[bitpos_mdr_in_src];
-  assign ctrl_mdr_out_src = control_word[bitpos_mdr_out_src];
-  assign ctrl_mdr_out_en = control_word[bitpos_mdr_out_en];			// must invert before sending
-  assign ctrl_mdr_l_wrt = control_word[bitpos_mdr_l_wrt];			
-  assign ctrl_mdr_h_wrt = control_word[bitpos_mdr_h_wrt];
-  assign ctrl_tdr_l_wrt = control_word[bitpos_tdr_l_wrt];
-  assign ctrl_tdr_h_wrt = control_word[bitpos_tdr_h_wrt];
-  assign ctrl_di_l_wrt = control_word[bitpos_di_l_wrt];
-  assign ctrl_di_h_wrt = control_word[bitpos_di_h_wrt];
-  assign ctrl_si_l_wrt = control_word[bitpos_si_l_wrt];
-  assign ctrl_si_h_wrt = control_word[bitpos_si_h_wrt];
-  assign ctrl_mar_l_wrt = control_word[bitpos_mar_l_wrt];
-  assign ctrl_mar_h_wrt = control_word[bitpos_mar_h_wrt];
-  assign ctrl_bp_l_wrt = control_word[bitpos_bp_l_wrt];
-  assign ctrl_bp_h_wrt = control_word[bitpos_bp_h_wrt];
-  assign ctrl_pc_l_wrt = control_word[bitpos_pc_l_wrt];
-  assign ctrl_pc_h_wrt = control_word[bitpos_pc_h_wrt];
-  assign ctrl_sp_l_wrt = control_word[bitpos_sp_l_wrt];
-  assign ctrl_sp_h_wrt = control_word[bitpos_sp_h_wrt];
-  assign ctrl_gl_wrt = control_word[bitpos_gl_wrt];
-  assign ctrl_gh_wrt = control_word[bitpos_gh_wrt];
-  assign ctrl_int_vector_wrt = control_word[bitpos_int_vector_wrt];
-  assign ctrl_irq_masks_wrt = control_word[bitpos_irq_masks_wrt];		// wrt signals are also active low
-  assign ctrl_mar_in_src = control_word[bitpos_mar_in_src];
-  assign ctrl_int_ack = control_word[bitpos_int_ack];		      // active high
-  assign ctrl_clear_all_ints = control_word[bitpos_clear_all_ints];
-  assign ctrl_ptb_wrt = control_word[bitpos_ptb_wrt];
-  assign ctrl_page_table_we = control_word[bitpos_page_table_we]; 
-  assign ctrl_mdr_to_pagetable_data_en = control_word[bitpos_mdr_to_pagetable_data_en];
-  assign ctrl_force_user_ptb = control_word[bitpos_force_user_ptb];   // goes to board as page_table_addr_source via or gate
-  assign ctrl_immy = control_word[bitpos_immy_7 : bitpos_immy_0];
 
-  logic [13:0] u_address;
-  logic final_condition;
-  logic fetch_u_address;
-  logic trap_u_address;
-  logic cond_flag_src;
-  logic [1:0] u_zf_in_src, u_cf_in_src;
-  logic u_sf_in_src, u_of_in_src;
-  logic cond_invert;
-  logic [3:0] cond_sel;
-  logic u_escape;
-
+  assign ctrl_u_zf_in_src = control_word_n[bitpos_u_zf_in_src_1 : bitpos_u_zf_in_src_0];
+  assign ctrl_u_cf_in_src = control_word_n[bitpos_u_cf_in_src_1 : bitpos_u_cf_in_src_0];
+  assign ctrl_u_sf_in_src = control_word_n[bitpos_u_sf_in_src];
+  assign ctrl_u_of_in_src = control_word_n[bitpos_u_of_in_src];
+  assign ctrl_ir_wrt = control_word_n[bitpos_ir_wrt];
+  assign ctrl_status_wrt = control_word_n[bitpos_status_wrt];
+  assign ctrl_shift_src = control_word_n[bitpos_shift_src_2 : bitpos_shift_src_0];
+  assign ctrl_zbus_src = control_word_n[bitpos_zbus_src_1 : bitpos_zbus_src_0];
+  assign ctrl_alu_a_src = control_word_n[bitpos_alu_a_src_5 : bitpos_alu_a_src_0];
+  assign ctrl_alu_op = control_word_n[bitpos_alu_op_3 : bitpos_alu_op_0];
+  assign ctrl_alu_mode = control_word_n[bitpos_alu_mode];
+  assign ctrl_alu_cf_in_src = control_word_n[bitpos_alu_cf_in_src_1 : bitpos_alu_cf_in_src_0];
+  assign ctrl_alu_cf_in_invert = control_word_n[bitpos_alu_cf_in_invert];
+  assign ctrl_alu_cf_out_invert = control_word_n[bitpos_alu_cf_out_invert];
+  assign ctrl_zf_in_src = control_word_n[bitpos_zf_in_src_1 : bitpos_zf_in_src_0];
+  assign ctrl_cf_in_src = control_word_n[bitpos_cf_in_src_2 : bitpos_cf_in_src_0];
+  assign ctrl_sf_in_src = control_word_n[bitpos_sf_in_src_1 : bitpos_sf_in_src_0];
+  assign ctrl_of_in_src = control_word_n[bitpos_of_in_src_2 : bitpos_of_in_src_0];
+  assign ctrl_rd = control_word_n[bitpos_rd];
+  assign ctrl_wr = control_word_n[bitpos_wr];
+  assign ctrl_alu_b_src = control_word_n[bitpos_alu_b_src_2 : bitpos_alu_b_src_0];
+  assign ctrl_display_reg_load = control_word_n[bitpos_display_reg_load]; // used during fetch to select and load register display
+  assign ctrl_dl_wrt = control_word_n[bitpos_dl_wrt];
+  assign ctrl_dh_wrt = control_word_n[bitpos_dh_wrt];
+  assign ctrl_cl_wrt = control_word_n[bitpos_cl_wrt];
+  assign ctrl_ch_wrt = control_word_n[bitpos_ch_wrt];
+  assign ctrl_bl_wrt = control_word_n[bitpos_bl_wrt];
+  assign ctrl_bh_wrt = control_word_n[bitpos_bh_wrt];
+  assign ctrl_al_wrt = control_word_n[bitpos_al_wrt];
+  assign ctrl_ah_wrt = control_word_n[bitpos_ah_wrt];
+  assign ctrl_mdr_in_src = control_word_n[bitpos_mdr_in_src];
+  assign ctrl_mdr_out_src = control_word_n[bitpos_mdr_out_src];
+  assign ctrl_mdr_out_en = control_word_n[bitpos_mdr_out_en];
+  assign ctrl_mdr_l_wrt = control_word_n[bitpos_mdr_l_wrt];			
+  assign ctrl_mdr_h_wrt = control_word_n[bitpos_mdr_h_wrt];
+  assign ctrl_tdr_l_wrt = control_word_n[bitpos_tdr_l_wrt];
+  assign ctrl_tdr_h_wrt = control_word_n[bitpos_tdr_h_wrt];
+  assign ctrl_di_l_wrt = control_word_n[bitpos_di_l_wrt];
+  assign ctrl_di_h_wrt = control_word_n[bitpos_di_h_wrt];
+  assign ctrl_si_l_wrt = control_word_n[bitpos_si_l_wrt];
+  assign ctrl_si_h_wrt = control_word_n[bitpos_si_h_wrt];
+  assign ctrl_mar_l_wrt = control_word_n[bitpos_mar_l_wrt];
+  assign ctrl_mar_h_wrt = control_word_n[bitpos_mar_h_wrt];
+  assign ctrl_bp_l_wrt = control_word_n[bitpos_bp_l_wrt];
+  assign ctrl_bp_h_wrt = control_word_n[bitpos_bp_h_wrt];
+  assign ctrl_pc_l_wrt = control_word_n[bitpos_pc_l_wrt];
+  assign ctrl_pc_h_wrt = control_word_n[bitpos_pc_h_wrt];
+  assign ctrl_sp_l_wrt = control_word_n[bitpos_sp_l_wrt];
+  assign ctrl_sp_h_wrt = control_word_n[bitpos_sp_h_wrt];
+  assign ctrl_gl_wrt = control_word_n[bitpos_gl_wrt];
+  assign ctrl_gh_wrt = control_word_n[bitpos_gh_wrt];
+  assign ctrl_int_vector_wrt = control_word_n[bitpos_int_vector_wrt];
+  assign ctrl_irq_masks_wrt = control_word_n[bitpos_irq_masks_wrt];		// wrt signals are also active low
+  assign ctrl_mar_in_src = control_word_n[bitpos_mar_in_src];
+  assign ctrl_int_ack = control_word_n[bitpos_int_ack];		      // active high
+  assign ctrl_clear_all_ints = control_word_n[bitpos_clear_all_ints];
+  assign ctrl_ptb_wrt = control_word_n[bitpos_ptb_wrt];
+  assign ctrl_page_table_we = control_word_n[bitpos_page_table_we]; 
+  assign ctrl_mdr_to_pagetable_data_en = control_word_n[bitpos_mdr_to_pagetable_data_en];
+  assign ctrl_force_user_ptb = control_word_n[bitpos_force_user_ptb];   // goes to board as page_table_addr_source via or gate
+  assign ctrl_immy = control_word_n[bitpos_immy_7 : bitpos_immy_0];
 
   always_comb begin
     logic zf_muxed, cf_muxed, sf_muxed, of_muxed;
@@ -262,22 +266,40 @@ module microcode_sequencer(
   end
 
   always_ff @(posedge clk, posedge arst) begin
-    case(ctrl_typ)
+    if(arst) u_address <= '0;
+    else case(ctrl_typ)
       2'b00:
         u_address <= u_address + ctrl_offset;
       2'b01:
-        if(final_condition == 1'b1) u_address <= u_address + ctrl_offset;
+        if(final_condition) u_address <= u_address + ctrl_offset;
         else u_address <= u_address + 14'b1;
       2'b10:
-        if(any_interruption == 1'b1) u_address <= trap_u_address;
-        else u_address <= fetch_u_address;
+        if(any_interruption) u_address <= TRAP_U_ADDR;
+        else u_address <= FETCH_U_ADDR;
       2'b11:
         u_address <= {{6{1'b0}}, ir};
     endcase
-
   end
-  
 
+// Load microcode ROM files into microcode memory
+  initial begin
+    bit [7:0] rom [CYCLES_PER_INSTRUCTION * NBR_INSTRUCTIONS];
+    static string rom_base = "../hardware/microcode/roms/rom";
+    int file;
+    string filename;
+
+    for(int rom_number = 0; rom_number <= 14; rom_number++) begin
+      filename = $sformatf("%s%0d", rom_base, rom_number);
+      file = $fopen(filename, "rb");
+      if(!file) $fatal("Failed to open file.");
+      if(!$fread(rom, file)) $fatal("Failed to read file.");
+
+      $display("Loading microcode ROM: ", filename);
+      for(int i = 0; i < CYCLES_PER_INSTRUCTION * NBR_INSTRUCTIONS; i++) begin
+        ucode_roms[i][rom_number * 8 +: 8] = rom[i][7:0];
+      end
+    end
+  end
 
 
 

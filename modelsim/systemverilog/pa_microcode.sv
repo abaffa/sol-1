@@ -1,5 +1,10 @@
 package pa_microcode;  
-  parameter CONTROL_WORD_WIDTH = 8 * 14;
+  parameter CONTROL_WORD_WIDTH = 8 * 15;
+  parameter CYCLES_PER_INSTRUCTION = 64;
+  parameter NBR_INSTRUCTIONS = 256;
+
+  parameter bit [13:0] FETCH_U_ADDR = 16;
+  parameter bit [13:0] TRAP_U_ADDR = 32;
   
   parameter byte unsigned base_u_rom0 = 0 * 8;
   parameter byte unsigned base_u_rom1 = 1 * 8;
@@ -42,7 +47,7 @@ package pa_microcode;
   parameter byte unsigned bitpos_u_sf_in_src = base_u_rom2 + 4;
   parameter byte unsigned bitpos_u_of_in_src = base_u_rom2 + 5;
   parameter byte unsigned bitpos_ir_wrt = base_u_rom2 + 6;
-  parameter byte unsigned bitpos_status_flags_wrt = base_u_rom2 + 7;
+  parameter byte unsigned bitpos_status_wrt = base_u_rom2 + 7;
 
   parameter byte unsigned bitpos_shift_src_0 = base_u_rom3 + 0;
   parameter byte unsigned bitpos_shift_src_1 = base_u_rom3 + 1;

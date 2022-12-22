@@ -31,23 +31,29 @@ module testbench;
   logic timer_cs;
   logic bios_config_cs;
 
-// Address decoding support wires
+  // Address decoding support wires
   wire logic inside_real_mode_addr_space;
   wire logic addr_bus_7_to_14_alltrue;
   wire logic peripheral_access;
 
   initial begin
-		arst = 1'b1;
+    // Load bios code into rom
+    static int fp = $fopen("../software/bios.obj", "rb");
+    if(!fp) $fatal("Failed to open bios.obj");
+    if(!$fread(testbench.u_bios_rom.mem, fp)) $fatal("Failed to read bios.obj");
+    $display("OK.");
+
+    // Start CPU...
+    arst = 1'b1;
 		stop_clk = 1'b0;
 		clk_sel = 3'b000;
 		pins_irq_req = {8{1'b0}};
 		dma_req = 1'b0;
     ext_input = 1'b0;
     pin_wait = 1'b0;
+		#100ns arst = 1'b0;	
 
-		#500ns arst = 1'b0;	
-
-		#20us $stop;
+		#100us $stop;
   end
 
 	clock u_clock(

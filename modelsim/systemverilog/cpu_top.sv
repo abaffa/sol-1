@@ -77,7 +77,7 @@ module cpu_top(
   logic ctrl_u_sf_in_src;
   logic ctrl_u_of_in_src;
   logic ctrl_ir_wrt;
-  logic ctrl_status_flags_wrt;
+  logic ctrl_status_wrt;
   logic [2:0] ctrl_shift_src;
   logic [1:0] ctrl_zbus_src;
   logic [5:0] ctrl_alu_a_src;
@@ -104,7 +104,7 @@ module cpu_top(
   logic ctrl_ah_wrt;
   logic ctrl_mdr_in_src;
   logic ctrl_mdr_out_src;
-  logic ctrl_mdr_out_en;			// must invert before sending
+  logic ctrl_mdr_out_en;
   logic ctrl_mdr_l_wrt;			
   logic ctrl_mdr_h_wrt;
   logic ctrl_tdr_l_wrt;
@@ -145,6 +145,10 @@ module cpu_top(
   wire logic bus_wr;
   wire logic bus_mem_io;
 
+  assign rd = ~bus_rd;
+  assign wr = ~bus_wr;
+  assign mem_io = bus_mem_io;
+  assign dma_ack = cpu_status[bitpos_cpu_status_dma_ack];
 
 /*************************
  start of RTL code
@@ -260,9 +264,9 @@ module cpu_top(
       5'b11010: w_bus = irq_vector;
       5'b11011: w_bus = irq_masks;
       5'b11100: w_bus = irq_status;
-      5'b11101: w_bus = 'x;
-      5'b11110: w_bus = 'x;
-      5'b11111: w_bus = 'x;
+      5'b11101: w_bus = '0;
+      5'b11110: w_bus = '0;
+      5'b11111: w_bus = '0;
     endcase
   end     
 
@@ -326,12 +330,14 @@ module cpu_top(
     if(ctrl_sp_h_wrt == 1'b0) sph <= z_bus;
     if(ctrl_pc_l_wrt == 1'b0) pcl <= z_bus;
     if(ctrl_pc_h_wrt == 1'b0) pch <= z_bus;
+    if(ctrl_status_wrt == 1'b0) cpu_status <= z_bus;
     if(ctrl_irq_masks_wrt == 1'b0) irq_masks <= z_bus;
     if(ctrl_sp_l_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) sspl <= z_bus;
     if(ctrl_sp_h_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) ssph <= z_bus;
 
-    if(ctrl_mar_l_wrt == 1'b0) marl <= ctrl_mar_in_src ? data_bus_in : z_bus;
-    if(ctrl_mar_h_wrt == 1'b0) marh <= ctrl_mar_in_src ? data_bus_in : z_bus;
+    if(ctrl_ir_wrt == 1'b0) ir <= data_bus_in;
+    if(ctrl_mar_l_wrt == 1'b0) marl <= ctrl_mar_in_src ? pcl : z_bus;
+    if(ctrl_mar_h_wrt == 1'b0) marh <= ctrl_mar_in_src ? pch : z_bus;
     if(ctrl_mdr_l_wrt == 1'b0) mdrl <= ctrl_mdr_in_src ? data_bus_in : z_bus;
     if(ctrl_mdr_h_wrt == 1'b0) mdrh <= ctrl_mdr_in_src ? data_bus_in : z_bus;
 
@@ -418,9 +424,7 @@ module cpu_top(
     .* // control word
   );
 
-
-  always @(posedge arst, posedge clk) begin
-  end
+  assign halt = cpu_status[bitpos_cpu_status_halt];
 
 
 
