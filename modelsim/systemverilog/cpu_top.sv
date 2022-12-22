@@ -29,7 +29,7 @@ module cpu_top(
   logic [7:0] pch, pcl;
   logic [7:0] ptb;
   logic [7:0] cpu_status;
-  logic [7:0] alu_flags;
+  logic [7:0] cpu_flags;
   logic [7:0] irq_masks;
   logic [7:0] irq_status;
   logic [7:0] irq_vector;
@@ -157,9 +157,9 @@ module cpu_top(
 // ALU
   always_comb begin
     logic cf_muxed;
-    case(ctrl_cf_in_src)
+    case(ctrl_alu_cf_in_src)
       2'b00: cf_muxed = 1'b1;
-      2'b01: cf_muxed = alu_flags[1];
+      2'b01: cf_muxed = cpu_flags[1];
       2'b10: cf_muxed = u_flags[1];
       2'b11: cf_muxed = 1'b0;
     endcase
@@ -179,35 +179,35 @@ module cpu_top(
   assign alu_sf = z_bus[7];
   assign alu_of = (z_bus[7] ^ x_bus[7]) & ~((x_bus[7] ^ y_bus[7]) ^ ~(ctrl_alu_op[0] & ctrl_alu_op[3] & ~(ctrl_alu_op[2] | ctrl_alu_op[1])));
   
-// msw flags
+// CPU Flags
   always_ff @(posedge clk) begin
     case(ctrl_zf_in_src)
-      2'b00: alu_flags[bitpos_alu_flags_zf] <= alu_flags[bitpos_alu_flags_zf];
-      2'b01: alu_flags[bitpos_alu_flags_zf] <= alu_zf;
-      2'b10: alu_flags[bitpos_alu_flags_zf] <= alu_flags[bitpos_alu_flags_zf] & alu_zf;
-      2'b11: alu_flags[bitpos_alu_flags_zf] <= z_bus[0];
+      2'b00: cpu_flags[bitpos_cpu_flags_zf] <= cpu_flags[bitpos_cpu_flags_zf];
+      2'b01: cpu_flags[bitpos_cpu_flags_zf] <= alu_zf;
+      2'b10: cpu_flags[bitpos_cpu_flags_zf] <= cpu_flags[bitpos_cpu_flags_zf] & alu_zf;
+      2'b11: cpu_flags[bitpos_cpu_flags_zf] <= z_bus[0];
     endcase
     case(ctrl_cf_in_src)
-      3'b000: alu_flags[bitpos_alu_flags_cf] <= alu_flags[bitpos_alu_flags_cf];
-      3'b001: alu_flags[bitpos_alu_flags_cf] <= alu_final_cf;
-      3'b010: alu_flags[bitpos_alu_flags_cf] <= alu_out[0];
-      3'b011: alu_flags[bitpos_alu_flags_cf] <= z_bus[1];
-      3'b100: alu_flags[bitpos_alu_flags_cf] <= alu_out[7];
-      default: alu_flags[bitpos_alu_flags_cf] <= 1'b0;
+      3'b000: cpu_flags[bitpos_cpu_flags_cf] <= cpu_flags[bitpos_cpu_flags_cf];
+      3'b001: cpu_flags[bitpos_cpu_flags_cf] <= alu_final_cf;
+      3'b010: cpu_flags[bitpos_cpu_flags_cf] <= alu_out[0];
+      3'b011: cpu_flags[bitpos_cpu_flags_cf] <= z_bus[1];
+      3'b100: cpu_flags[bitpos_cpu_flags_cf] <= alu_out[7];
+      default: cpu_flags[bitpos_cpu_flags_cf] <= cpu_flags[bitpos_cpu_flags_cf];
     endcase
     case(ctrl_sf_in_src)
-      2'b00: alu_flags[bitpos_alu_flags_sf] <= alu_flags[bitpos_alu_flags_sf];
-      2'b01: alu_flags[bitpos_alu_flags_sf] <= z_bus[7];
-      2'b10: alu_flags[bitpos_alu_flags_sf] <= 1'b0;
-      2'b11: alu_flags[bitpos_alu_flags_sf] <= z_bus[2];
+      2'b00: cpu_flags[bitpos_cpu_flags_sf] <= cpu_flags[bitpos_cpu_flags_sf];
+      2'b01: cpu_flags[bitpos_cpu_flags_sf] <= z_bus[7];
+      2'b10: cpu_flags[bitpos_cpu_flags_sf] <= 1'b0;
+      2'b11: cpu_flags[bitpos_cpu_flags_sf] <= z_bus[2];
     endcase
     case(ctrl_of_in_src)
-      3'b000: alu_flags[bitpos_alu_flags_of] <= alu_flags[bitpos_alu_flags_of];
-      3'b001: alu_flags[bitpos_alu_flags_of] <= alu_of;
-      3'b010: alu_flags[bitpos_alu_flags_of] <= z_bus[7];
-      3'b011: alu_flags[bitpos_alu_flags_of] <= z_bus[3];
-      3'b100: alu_flags[bitpos_alu_flags_of] <= u_flags[bitpos_alu_flags_of] ^ z_bus[7];
-      default: alu_flags[bitpos_alu_flags_of] <= 1'b0;
+      3'b000: cpu_flags[bitpos_cpu_flags_of] <= cpu_flags[bitpos_cpu_flags_of];
+      3'b001: cpu_flags[bitpos_cpu_flags_of] <= alu_of;
+      3'b010: cpu_flags[bitpos_cpu_flags_of] <= z_bus[7];
+      3'b011: cpu_flags[bitpos_cpu_flags_of] <= z_bus[3];
+      3'b100: cpu_flags[bitpos_cpu_flags_of] <= u_flags[bitpos_cpu_flags_sf] ^ z_bus[7];
+      default: cpu_flags[bitpos_cpu_flags_of] <= cpu_flags[bitpos_cpu_flags_of];
     endcase
   end
 
@@ -217,7 +217,7 @@ module cpu_top(
     case(ctrl_shift_src)
       3'b000: extremity_bit = 1'b0;
       3'b001: extremity_bit = u_flags[1]; // u_cf
-      3'b010: extremity_bit = alu_flags[1]; // msw cf
+      3'b010: extremity_bit = cpu_flags[1]; // msw cf
       3'b011: extremity_bit = alu_out[0];
       3'b100: extremity_bit = alu_out[7];
       3'b101: extremity_bit = 1'b1;
@@ -277,7 +277,7 @@ module cpu_top(
     end
     else begin
       case(ctrl_alu_a_src[1:0])
-        2'b00: x_bus = alu_flags;
+        2'b00: x_bus = cpu_flags;
         2'b01: x_bus = cpu_status;
         2'b10: x_bus = gl;
         2'b11: x_bus = gh;
@@ -409,10 +409,11 @@ module cpu_top(
     .arst(arst),
     .clk(clk),
     .ir(ir),
-    .alu_flags(alu_flags),
+    .cpu_flags(cpu_flags),
     .cpu_status(cpu_status),
-    .alu_out(alu_out),
     .z_bus(z_bus),
+    .alu_out(alu_out),
+    .alu_zf(alu_zf),
     .alu_of(alu_of),
     .alu_final_cf(alu_final_cf),
     .dma_req(dma_req),

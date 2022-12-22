@@ -10,9 +10,9 @@ package pa_cpu;
   // pos 6 undefined for now
   parameter byte unsigned bitpos_cpu_status_dir = 7;
 
-  parameter byte unsigned bitpos_alu_flags_zf = 0;
-  parameter byte unsigned bitpos_alu_flags_cf = 1;
-  parameter byte unsigned bitpos_alu_flags_sf = 2;
-  parameter byte unsigned bitpos_alu_flags_of = 3;
+  parameter byte unsigned bitpos_cpu_flags_zf = 0;
+  parameter byte unsigned bitpos_cpu_flags_cf = 1;
+  parameter byte unsigned bitpos_cpu_flags_sf = 2;
+  parameter byte unsigned bitpos_cpu_flags_of = 3;
 
 endpackage

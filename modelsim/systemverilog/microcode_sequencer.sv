@@ -2,10 +2,11 @@ module microcode_sequencer(
   input logic arst,
   input logic clk,
   input logic [7:0] ir,
-  input logic [7:0] alu_flags,
+  input logic [7:0] cpu_flags,
   input logic [7:0] cpu_status,
-  input logic [7:0] alu_out,
   input logic [7:0] z_bus,
+  input logic [7:0] alu_out,
+  input logic alu_zf,
   input logic alu_of,
   input logic alu_final_cf,
   input logic dma_req,
@@ -91,12 +92,6 @@ module microcode_sequencer(
   logic [CONTROL_WORD_WIDTH - 1 : 0] control_word_n;
   logic [13:0] u_address;
   logic final_condition;
-  logic cond_flag_src;
-  logic [1:0] u_zf_in_src, u_cf_in_src;
-  logic u_sf_in_src, u_of_in_src;
-  logic cond_invert;
-  logic [3:0] cond_sel;
-  logic u_escape;
 
   assign control_word = ucode_roms[u_address];
   always_ff @(negedge clk) begin
@@ -178,12 +173,12 @@ module microcode_sequencer(
     logic zf_muxed, cf_muxed, sf_muxed, of_muxed;
     logic condition;
     
-    zf_muxed = cond_flag_src ? u_flags[0] : alu_flags[0];
-    cf_muxed = cond_flag_src ? u_flags[1] : alu_flags[1];
-    sf_muxed = cond_flag_src ? u_flags[2] : alu_flags[2];
-    of_muxed = cond_flag_src ? u_flags[3] : alu_flags[3];
+    zf_muxed = ctrl_cond_flag_src ? u_flags[0] : cpu_flags[0];
+    cf_muxed = ctrl_cond_flag_src ? u_flags[1] : cpu_flags[1];
+    sf_muxed = ctrl_cond_flag_src ? u_flags[2] : cpu_flags[2];
+    of_muxed = ctrl_cond_flag_src ? u_flags[3] : cpu_flags[3];
 
-    case(cond_sel)
+    case(ctrl_cond_sel)
       4'b0000: begin
         condition = zf_muxed;
       end
@@ -221,7 +216,7 @@ module microcode_sequencer(
         condition = ext_input;
       end
       4'b1100: begin
-        condition = fu_getStatusField(pa_cpu::bitpos_cpu_status_dir);
+        condition = cpu_status[pa_cpu::bitpos_cpu_status_dir];
       end
       4'b1101: begin
         condition = cpu_status[pa_cpu::bitpos_cpu_status_displayreg_load];
@@ -230,36 +225,32 @@ module microcode_sequencer(
       4'b1111: condition = 1'b0;
     endcase
 
-    final_condition = condition ^ cond_invert;
+    final_condition = condition ^ ctrl_cond_invert;
   end
 
-  function logic fu_getStatusField(logic [7:0] field);
-    return cpu_status[field];
-  endfunction
-  
   // DFF for u_flags register
   always_ff @(posedge clk) begin
     // u_zf
-    case(u_zf_in_src)
+    case(ctrl_u_zf_in_src)
       2'b00: u_flags[0] <= u_flags[0];
-      2'b01: u_flags[0] <= alu_flags[0];
-      2'b10: u_flags[0] <= alu_flags[0] & u_flags[0];
+      2'b01: u_flags[0] <= alu_zf;
+      2'b10: u_flags[0] <= u_flags[0] & alu_zf;
       2'b11: u_flags[0] <= u_flags[0];
     endcase
     // u_cf
-    case(u_cf_in_src)
+    case(ctrl_u_cf_in_src)
       2'b00: u_flags[1] <= u_flags[1];
       2'b01: u_flags[1] <= alu_final_cf;
       2'b10: u_flags[1] <= alu_out[0];
       2'b11: u_flags[1] <= alu_out[7];
     endcase
     // u_sf
-    case(u_sf_in_src)
+    case(ctrl_u_sf_in_src)
       1'b0: u_flags[2] <= u_flags[2];
       1'b1: u_flags[2] <= z_bus[7];
     endcase
     // u_of
-    case(u_of_in_src)
+    case(ctrl_u_of_in_src)
       1'b0: u_flags[3] <= u_flags[3];
       1'b1: u_flags[3] <= alu_of;
     endcase
@@ -277,7 +268,7 @@ module microcode_sequencer(
         if(any_interruption) u_address <= TRAP_U_ADDR;
         else u_address <= FETCH_U_ADDR;
       2'b11:
-        u_address <= {{6{1'b0}}, ir};
+        u_address <= {ir, 6'b000000};
     endcase
   end
 
