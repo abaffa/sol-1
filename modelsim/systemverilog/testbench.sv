@@ -53,7 +53,7 @@ module testbench;
     pin_wait = 1'b0;
 		#100ns arst = 1'b0;	
 
-		#100us $stop;
+		#300us $stop;
   end
 
 	clock u_clock(
