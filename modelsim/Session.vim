@@ -228,12 +228,12 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 40 - ((28 * winheight(0) + 25) / 50)
+let s:l = 45 - ((18 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 40
-normal! 05|
+keepjumps 45
+normal! 0
 tabnext
 edit ~\Desktop\SOL1_MiniComputer\modelsim\systemverilog\cpu_top.sv
 argglobal
@@ -368,12 +368,12 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 412 - ((29 * winheight(0) + 25) / 50)
+let s:l = 233 - ((13 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 412
-normal! 06|
+keepjumps 233
+normal! 05|
 tabnext
 edit ~\Desktop\SOL1_MiniComputer\modelsim\systemverilog\microcode_sequencer.sv
 argglobal
@@ -510,12 +510,12 @@ setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 5 - ((4 * winheight(0) + 25) / 50)
+let s:l = 271 - ((25 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 5
-normal! 03|
+keepjumps 271
+normal! 035|
 tabnext
 edit ~\Desktop\SOL1_MiniComputer\modelsim\systemverilog\alu.sv
 argglobal
@@ -651,12 +651,12 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 40 - ((0 * winheight(0) + 25) / 50)
+let s:l = 53 - ((43 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 40
-normal! 020|
+keepjumps 53
+normal! 029|
 tabnext
 edit ~\Desktop\SOL1_MiniComputer\modelsim\systemverilog\clock.sv
 argglobal
@@ -1216,12 +1216,12 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 3 - ((1 * winheight(0) + 12) / 24)
+let s:l = 16 - ((15 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 3
-normal! 0
+keepjumps 16
+normal! 035|
 tabnext
 edit ~\Desktop\SOL1_MiniComputer\modelsim\systemverilog\pa_microcode.sv
 argglobal
@@ -1357,12 +1357,12 @@ setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 40 - ((39 * winheight(0) + 25) / 50)
+let s:l = 57 - ((22 * winheight(0) + 25) / 50)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 40
-normal! 027|
+keepjumps 57
+normal! 034|
 tabnext
 edit ~\Desktop\SOL1_MiniComputer\hardware\control_bits.txt
 argglobal
@@ -1786,7 +1786,7 @@ keepjumps exe s:l
 normal! zt
 keepjumps 1
 normal! 020|
-tabnext 6
+tabnext 1
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
