@@ -2,8 +2,7 @@ module testbench;
   import pa_testbench::*;
 
 	logic arst;
-	logic [2:0] clk_sel;
-	logic stop_clk;
+	logic stop_clk_req;
   logic clk;
 	logic halt;
 	logic dma_req;
@@ -45,21 +44,19 @@ module testbench;
 
     // Start CPU...
     arst = 1'b1;
-		stop_clk = 1'b0;
-		clk_sel = 3'b000;
-		pins_irq_req = {8{1'b0}};
+		stop_clk_req = 1'b0;
+		pins_irq_req = 8'h00;
 		dma_req = 1'b0;
     ext_input = 1'b0;
     pin_wait = 1'b0;
 		#100ns arst = 1'b0;	
 
-		#300us $stop;
+		#600us $stop;
   end
 
 	clock u_clock(
 		.arst(arst),
-		.clk_sel(clk_sel),
-		.stop_clk(stop_clk),
+		.stop_clk_req(stop_clk_req),
 		.clk_out(clk)
 	);
 

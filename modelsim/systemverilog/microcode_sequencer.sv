@@ -268,7 +268,7 @@ module microcode_sequencer(
         if(any_interruption) u_address <= TRAP_U_ADDR;
         else u_address <= FETCH_U_ADDR;
       2'b11:
-        u_address <= {ir, 6'b000000};
+        u_address <= {ir, 1'b0, ctrl_escape, 4'b0000};
     endcase
   end
 

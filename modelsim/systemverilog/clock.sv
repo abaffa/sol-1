@@ -1,23 +1,23 @@
 module clock(
 	input logic arst,
-	input logic [2:0] clk_sel,
-	input logic stop_clk,
+	input logic stop_clk_req,
 	output logic clk_out
 );
   logic clk;
-	logic [7:0] clk_counter;
+  logic stop_clk;
 
   initial begin
     clk = 1'b0;
     forever #1us clk = ~clk;
   end
 
-	always @(negedge clk, posedge arst) begin
-    if(arst) clk_counter <= 8'h1; // clock starts HIGH so that control bits can be written on the first falling edge.
-		else if(!stop_clk) clk_counter <= clk_counter + 8'h1;
-	end
+  always @(negedge clk) begin
+    stop_clk <= stop_clk_req;
+  end
 
-	assign clk_out = clk_counter[clk_sel];
-	
+	always @(posedge clk, posedge arst) begin
+    if(arst) clk_out <= 1'b1; // clock starts HIGH so that control bits can be written on the first falling edge.
+		else if(!stop_clk) clk_out <= ~clk_out;
+	end
 
 endmodule

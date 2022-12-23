@@ -172,7 +172,7 @@ module cpu_top(
     .op(ctrl_alu_op),
     .mode(ctrl_alu_mode),
     .alu_out(alu_out),
-    .cf_out(alu_cf)
+    .alu_cf_out(alu_cf)
   );
   assign alu_zf = ~|alu_out;
   assign alu_final_cf = ctrl_alu_cf_out_invert ^ alu_cf;
