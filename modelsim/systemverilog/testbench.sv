@@ -81,7 +81,7 @@ module testbench;
     .ext_input(ext_input)
 	);
 
-  memory #(_32KB) u_bios_rom(
+  memory #(32 * KB) u_bios_rom(
     .ce_n(bios_rom_cs),
     .oe_n(rd),
     .we_n(1'b1),
@@ -89,7 +89,7 @@ module testbench;
     .data_in(data_bus),
     .data_out(data_bus)
   );
-  memory #(_32KB) u_bios_ram(
+  memory #(32 * KB) u_bios_ram(
     .ce_n(bios_ram_cs),
     .oe_n(rd),
     .we_n(wr),
@@ -98,6 +98,17 @@ module testbench;
     .data_out(data_bus)
   );
 
+  // Declare 8x 512KB RAM modules
+  generate for(genvar i = 0; i < 8; i++) begin
+    memory #(512 * KB) u_ram(
+      .ce_n(!(address_bus[21:19] == i[2:0] && !mem_io)),
+      .oe_n(rd),
+      .we_n(wr),
+      .address(address_bus[18:0]),
+      .data_in(data_bus),
+      .data_out(data_bus)
+    );
+  end endgenerate
 
   assign addr_bus_7_to_14_alltrue = & address_bus[14:7];
   assign inside_real_mode_addr_space = ~| address_bus[21:16];
