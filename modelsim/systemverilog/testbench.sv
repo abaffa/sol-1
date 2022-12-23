@@ -43,13 +43,17 @@ module testbench;
     $display("OK.");
 
     // Start CPU...
-    arst = 1'b1;
-		stop_clk_req = 1'b0;
 		pins_irq_req = 8'h00;
 		dma_req = 1'b0;
     ext_input = 1'b0;
     pin_wait = 1'b0;
-		#100ns arst = 1'b0;	
+
+    arst = 1'b1;
+		stop_clk_req = 1'b1;
+    #100ns;
+		arst = 1'b0;	
+    #100ns;
+		stop_clk_req = 1'b0;
 
 		#600us $stop;
   end

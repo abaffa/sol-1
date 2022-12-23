@@ -1,14 +1,18 @@
-module clock(
+module clock #(
+  parameter FREQ = 2.75 // MHz
+)(
 	input logic arst,
 	input logic stop_clk_req,
 	output logic clk_out
 );
   logic clk;
   logic stop_clk;
+  real period = 1.0 / FREQ;
+  real halfperiod = period / 2.0;
 
   initial begin
     clk = 1'b0;
-    forever #1us clk = ~clk;
+    forever #(halfperiod / 2.0 * 1us) clk = ~clk; // Use halfperiod / 2 instead of halfperiod because clock_out is clk / 2
   end
 
   always @(negedge clk) begin
