@@ -143,7 +143,7 @@ add wave -noupdate /testbench/u_cpu_top/ctrl_wr
 add wave -noupdate /testbench/u_cpu_top/ctrl_zbus_src
 add wave -noupdate /testbench/u_cpu_top/ctrl_zf_in_src
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {216049794 ps} 0}
+WaveRestoreCursors {{Cursor 1} {206962442 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 190
 configure wave -valuecolwidth 100
