@@ -55,7 +55,7 @@ module cpu_top(
 // ALU
   logic [7:0] alu_out;
   logic alu_zf;
-  logic alu_cf;
+  logic alu_cf_out;
   logic alu_sf;
   logic alu_of;
   logic alu_final_cf;
@@ -172,10 +172,10 @@ module cpu_top(
     .op(ctrl_alu_op),
     .mode(ctrl_alu_mode),
     .alu_out(alu_out),
-    .alu_cf_out(alu_cf)
+    .alu_cf_out(alu_cf_out)
   );
   assign alu_zf = ~|alu_out;
-  assign alu_final_cf = ctrl_alu_cf_out_invert ^ alu_cf;
+  assign alu_final_cf = ctrl_alu_cf_out_invert ^ alu_cf_out;
   assign alu_sf = z_bus[7];
   assign alu_of = (z_bus[7] ^ x_bus[7]) & ~((x_bus[7] ^ y_bus[7]) ^ ~(ctrl_alu_op[0] & ctrl_alu_op[3] & ~(ctrl_alu_op[2] | ctrl_alu_op[1])));
   
