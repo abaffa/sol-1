@@ -82,11 +82,3 @@ module testbench;
 
 endmodule
 
-interface inter;
-
-endinterface
-
-program prog;
-
-
-endprogram

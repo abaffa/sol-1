@@ -1,4 +1,4 @@
-module ide_drive(
+module ide(
   input logic arst,
   input logic clk,
   input logic ce_n,
@@ -11,13 +11,14 @@ module ide_drive(
 );
   import pa_testbench::*;
   
-  typedef enum logic [2:0] {
-    RESET_ST = 3'b000,
+  typedef enum logic [3:0] {
+    RESET_ST = 4'h0,
     BUSY_ST,
+    READ_START_ST,
     READ_ST,
+    WRITE_START_ST,
     WRITE_ST,
-    READ_COMPLETE_ST,
-    WRITE_COMPLETE_ST
+    COMPLETE_ST
   } t_ideState;
 
   t_ideState currentState;
@@ -25,49 +26,86 @@ module ide_drive(
 
   logic [7:0] LBA [2:0];
   logic [8:0] byteCounter;
-  logic [7:0] mem [1025 * KB];
+  logic [7:0] mem [2 * KB];
   logic [7:0] registers [7:0];
+  logic [7:0] command;
+  logic [7:0] status;
 
-  always @(posedge clk, posedge arst) begin
-    if(arst) begin
-      for(byte i = 0; i < 8; i++) registers[i] = '0;
-    end else begin
-      if(!we_n && !ce_n) registers[address] = data_in;
-    end
+  initial begin
+     for(int i = 0; i < 512; i++) mem[i] <= $urandom;
   end
 
-  assign data_out = !ce_n && !oe_n && we_n ? registers[address] : 'z;
+  assign data_out = !ce_n && !oe_n && we_n ? address == 3'h7 ? status : registers[address] : 'z;
   assign LBA = registers[5:3];
 
 // State machine
-  always_ff @(posedge clk, posedge arst) begin
+  always @(posedge clk, posedge arst) begin
     if(arst) begin
+      command <= '0;
+      status <= 8'b0000_0000;
       byteCounter <= '0;
     end
     else case(currentState)
       RESET_ST: begin
-        if(registers[7] == 8'h20) begin
-          currentState <= READ_ST;
-          byteCounter <= 9'h1;
-          registers[0] <= mem[{LBA[2], LBA[1], LBA[0]}];
-        end
-        else if(registers[7] == 8'h30) begin
-          currentState <= WRITE_ST;
-          byteCounter <= 9'h1;
-          registers[0] <= mem[{LBA[2], LBA[1], LBA[0]}];
-        end
       end
-      READ_ST: begin
-        if(byteCounter == 9'd512) currentState <= READ_COMPLETE_ST;
-        else begin
-          currentState <= READ_ST;
-          byteCounter <= byteCounter + 9'd1;
-        end
-        registers[0] <= mem[{LBA[2], LBA[1], LBA[0]} + byteCounter];
+      WRITE_START_ST: begin
+        byteCounter <= '0;
+        status <= status | 8'b0000_1000; // not finished
+        command <= '0;
+      end
+      READ_START_ST: begin
+        byteCounter <= '0;
+        status <= status | 8'b0000_1000; // not finished
+        command <= '0;
+      end
+      COMPLETE_ST: begin
+        status <= status & 8'b1111_0111; // finished
       end
     endcase
   end
 
+  always @(negedge oe_n, negedge we_n) begin
+    if(!oe_n && address == 3'h0 && !ce_n) begin
+      registers[0] <= mem[{LBA[2], LBA[1], LBA[0]} + byteCounter];
+      byteCounter <= byteCounter + 1;
+    end
+    else if(!we_n && !ce_n) begin
+      if(address == 3'h0) begin
+        mem[{LBA[2], LBA[1], LBA[0]} + byteCounter] <= data_in;
+        registers[0] <= data_in; // for completion sake
+        byteCounter <= byteCounter + 1;
+      end
+      else if(!we_n && !ce_n && address == 3'h7) command <= data_in;
+      else registers[address] <= data_in;
+    end
+  end
 
+  always_ff @(posedge clk, posedge arst) begin
+    if(arst) begin
+      currentState <= RESET_ST;
+    end
+    else currentState <= nextState;
+  end
+
+  always_comb begin
+    nextState = currentState;
+    case(currentState)
+      RESET_ST:
+        if(command == 8'h20) nextState = READ_START_ST;
+        else if(command == 8'h30) nextState = WRITE_START_ST;
+      WRITE_START_ST:
+        nextState = WRITE_ST;
+      READ_START_ST:
+        nextState = READ_ST;
+      READ_ST:
+        if(byteCounter == 9'h3) nextState = COMPLETE_ST;
+        else if(!oe_n && !ce_n && address == 3'h0) nextState = READ_ST;
+      WRITE_ST:
+        if(byteCounter == 9'h3) nextState = COMPLETE_ST;
+        else if(!we_n && !ce_n && address == 3'h0) nextState = WRITE_ST;
+      COMPLETE_ST:
+        nextState = RESET_ST;
+    endcase
+  end
 
 endmodule
