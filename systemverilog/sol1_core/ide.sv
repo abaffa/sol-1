@@ -25,7 +25,7 @@ module ide(
   t_ideState nextState;
 
   logic [7:0] LBA [2:0];
-  logic [8:0] byteCounter;
+  logic [9:0] byteCounter;
   logic [7:0] mem [2 * KB];
   logic [7:0] registers [7:0];
   logic [7:0] command;
@@ -46,7 +46,6 @@ module ide(
   always @(posedge clk, posedge arst) begin
     if(arst) begin
       command <= '0;
-      status <= 8'b0000_0000;
       byteCounter <= '0;
     end
     else case(currentState)
@@ -55,15 +54,14 @@ module ide(
       WRITE_START_ST: begin
         byteCounter <= '0;
         status <= status | 8'b0000_1000; // not finished
-        command <= '0;
       end
       READ_START_ST: begin
         byteCounter <= '0;
         status <= status | 8'b0000_1000; // not finished
-        command <= '0;
       end
       COMPLETE_ST: begin
         status <= status & 8'b1111_0111; // finished
+        command <= '0;
       end
     endcase
   end
@@ -71,13 +69,13 @@ module ide(
   always @(negedge oe_n, negedge we_n) begin
     if(!oe_n && address == 3'h0 && !ce_n) begin
       registers[0] <= mem[{LBA[2], LBA[1], LBA[0]} + byteCounter];
-      byteCounter <= byteCounter + 1;
+      byteCounter <= byteCounter + 10'd1;
     end
     else if(!we_n && !ce_n) begin
       if(address == 3'h0) begin
         mem[{LBA[2], LBA[1], LBA[0]} + byteCounter] <= data_in;
         registers[0] <= data_in; // for completion sake
-        byteCounter <= byteCounter + 1;
+        byteCounter <= byteCounter + 10'd1;
       end
       else if(!we_n && !ce_n && address == 3'h7) command <= data_in;
       else registers[address] <= data_in;
@@ -102,10 +100,10 @@ module ide(
       READ_START_ST:
         nextState = READ_ST;
       READ_ST:
-        if(byteCounter == 9'h512) nextState = COMPLETE_ST;
+        if(byteCounter == 10'd512) nextState = COMPLETE_ST;
         else if(!oe_n && !ce_n && address == 3'h0) nextState = READ_ST;
       WRITE_ST:
-        if(byteCounter == 9'h512) nextState = COMPLETE_ST;
+        if(byteCounter == 10'd512) nextState = COMPLETE_ST;
         else if(!we_n && !ce_n && address == 3'h0) nextState = WRITE_ST;
       COMPLETE_ST:
         nextState = RESET_ST;

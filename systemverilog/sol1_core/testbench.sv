@@ -55,7 +55,7 @@ module testbench;
     #100ns;
 		stop_clk_req = 1'b0;
 
-		#15000us $stop;
+		#50ms $stop;
   end
 
 	clock u_clock(
