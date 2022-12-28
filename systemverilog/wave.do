@@ -1,4 +1,5 @@
 onerror {resume}
+quietly virtual function -install /testbench/u_cpu_top/u_microcode_sequencer -env /testbench/#INITIAL#38(#ublk#178839128#38) { &{/testbench/u_cpu_top/u_microcode_sequencer/u_address[5], /testbench/u_cpu_top/u_microcode_sequencer/u_address[4], /testbench/u_cpu_top/u_microcode_sequencer/u_address[3], /testbench/u_cpu_top/u_microcode_sequencer/u_address[2], /testbench/u_cpu_top/u_microcode_sequencer/u_address[1], /testbench/u_cpu_top/u_microcode_sequencer/u_address[0] }} u_cycle
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /testbench/arst
 add wave -noupdate /testbench/stop_clk_req
@@ -12,8 +13,39 @@ add wave -noupdate /testbench/wr
 add wave -noupdate /testbench/mem_io
 add wave -noupdate /testbench/address_bus
 add wave -noupdate /testbench/data_bus
+add wave -noupdate -divider {== IDE ==}
+add wave -noupdate /testbench/u_ide/address
+add wave -noupdate /testbench/u_ide/arst
+add wave -noupdate /testbench/u_ide/byteCounter
+add wave -noupdate /testbench/u_ide/ce_n
+add wave -noupdate /testbench/u_ide/command
+add wave -noupdate /testbench/u_ide/currentState
+add wave -noupdate /testbench/u_ide/nextState
+add wave -noupdate /testbench/u_ide/data_in
+add wave -noupdate /testbench/u_ide/data_out
+add wave -noupdate /testbench/u_ide/LBA
+add wave -noupdate /testbench/u_ide/mem
+add wave -noupdate /testbench/u_ide/oe_n
+add wave -noupdate /testbench/u_ide/registers
+add wave -noupdate /testbench/u_ide/status
+add wave -noupdate /testbench/u_ide/we_n
+add wave -noupdate -divider {== CS ==}
+add wave -noupdate /testbench/bios_config_cs
+add wave -noupdate /testbench/bios_ram_cs
+add wave -noupdate /testbench/bios_rom_cs
+add wave -noupdate /testbench/ide_cs
+add wave -noupdate /testbench/pio0_cs
+add wave -noupdate /testbench/pio1_cs
+add wave -noupdate /testbench/rtc_cs
+add wave -noupdate /testbench/timer_cs
+add wave -noupdate /testbench/uart0_cs
+add wave -noupdate /testbench/uart1_cs
 add wave -noupdate -divider {== MICROCODE ==}
+add wave -noupdate /testbench/u_cpu_top/ctrl_cond_flag_src
+add wave -noupdate /testbench/u_cpu_top/ctrl_cond_invert
+add wave -noupdate /testbench/u_cpu_top/ctrl_cond_sel
 add wave -noupdate /testbench/u_cpu_top/u_microcode_sequencer/ir
+add wave -noupdate /testbench/u_cpu_top/u_microcode_sequencer/u_cycle
 add wave -noupdate /testbench/u_cpu_top/u_microcode_sequencer/u_address
 add wave -noupdate /testbench/u_cpu_top/u_microcode_sequencer/u_flags
 add wave -noupdate /testbench/u_cpu_top/u_microcode_sequencer/any_interruption
@@ -34,7 +66,16 @@ add wave -noupdate /testbench/u_cpu_top/spl
 add wave -noupdate /testbench/u_cpu_top/sph
 add wave -noupdate /testbench/u_cpu_top/sspl
 add wave -noupdate /testbench/u_cpu_top/ssph
+add wave -noupdate /testbench/u_cpu_top/al
+add wave -noupdate /testbench/u_cpu_top/ah
 add wave -noupdate -divider {== ALU ==}
+add wave -noupdate /testbench/u_cpu_top/ctrl_alu_a_src
+add wave -noupdate /testbench/u_cpu_top/ctrl_alu_b_src
+add wave -noupdate /testbench/u_cpu_top/ctrl_alu_cf_in_invert
+add wave -noupdate /testbench/u_cpu_top/ctrl_alu_cf_in_src
+add wave -noupdate /testbench/u_cpu_top/ctrl_alu_cf_out_invert
+add wave -noupdate /testbench/u_cpu_top/ctrl_alu_mode
+add wave -noupdate /testbench/u_cpu_top/ctrl_alu_op
 add wave -noupdate /testbench/u_cpu_top/w_bus
 add wave -noupdate /testbench/u_cpu_top/x_bus
 add wave -noupdate /testbench/u_cpu_top/k_bus
@@ -77,13 +118,6 @@ add wave -noupdate /testbench/u_cpu_top/pagetable_addr_source
 add wave -noupdate -divider {== CONTROL ==}
 add wave -noupdate /testbench/u_cpu_top/ctrl_ah_wrt
 add wave -noupdate /testbench/u_cpu_top/ctrl_al_wrt
-add wave -noupdate /testbench/u_cpu_top/ctrl_alu_a_src
-add wave -noupdate /testbench/u_cpu_top/ctrl_alu_b_src
-add wave -noupdate /testbench/u_cpu_top/ctrl_alu_cf_in_invert
-add wave -noupdate /testbench/u_cpu_top/ctrl_alu_cf_in_src
-add wave -noupdate /testbench/u_cpu_top/ctrl_alu_cf_out_invert
-add wave -noupdate /testbench/u_cpu_top/ctrl_alu_mode
-add wave -noupdate /testbench/u_cpu_top/ctrl_alu_op
 add wave -noupdate /testbench/u_cpu_top/ctrl_bh_wrt
 add wave -noupdate /testbench/u_cpu_top/ctrl_bl_wrt
 add wave -noupdate /testbench/u_cpu_top/ctrl_bp_h_wrt
@@ -94,7 +128,7 @@ add wave -noupdate /testbench/u_cpu_top/ctrl_cl_wrt
 add wave -noupdate /testbench/u_cpu_top/ctrl_clear_all_ints
 add wave -noupdate /testbench/u_cpu_top/ctrl_cond_flag_src
 add wave -noupdate /testbench/u_cpu_top/ctrl_cond_invert
-add wave -noupdate /testbench/u_cpu_top/ctrl_cond_sel
+add wave -noupdate -expand /testbench/u_cpu_top/ctrl_cond_sel
 add wave -noupdate /testbench/u_cpu_top/ctrl_dh_wrt
 add wave -noupdate /testbench/u_cpu_top/ctrl_di_h_wrt
 add wave -noupdate /testbench/u_cpu_top/ctrl_di_l_wrt
@@ -143,7 +177,7 @@ add wave -noupdate /testbench/u_cpu_top/ctrl_wr
 add wave -noupdate /testbench/u_cpu_top/ctrl_zbus_src
 add wave -noupdate /testbench/u_cpu_top/ctrl_zf_in_src
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {624249286 ps} 0}
+WaveRestoreCursors {{Cursor 1} {990412809 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 190
 configure wave -valuecolwidth 100
@@ -159,4 +193,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {0 ps} {630210 ns}
+WaveRestoreZoom {988358967 ps} {997831789 ps}

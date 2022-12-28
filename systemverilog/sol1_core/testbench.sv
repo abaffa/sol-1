@@ -55,7 +55,7 @@ module testbench;
     #100ns;
 		stop_clk_req = 1'b0;
 
-		#600us $stop;
+		#15000us $stop;
   end
 
 	clock u_clock(
@@ -94,6 +94,28 @@ module testbench;
     .oe_n(rd),
     .we_n(wr),
     .address(address_bus[14:0]),
+    .data_in(data_bus),
+    .data_out(data_bus)
+  );
+
+  ide u_ide(
+    .arst(arst),
+    .clk(clk),
+    .ce_n(ide_cs),
+    .oe_n(rd),
+    .we_n(wr),
+    .address(address_bus[2:0]),
+    .data_in(data_bus),
+    .data_out(data_bus)
+  );
+
+  uart u_uart0(
+    .arst(arst),
+    .clk(clk),
+    .ce_n(uart0_cs),
+    .oe_n(rd),
+    .we_n(wr),
+    .address(address_bus[2:0]),
     .data_in(data_bus),
     .data_out(data_bus)
   );

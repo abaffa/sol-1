@@ -32,7 +32,11 @@ module ide(
   logic [7:0] status;
 
   initial begin
-     for(int i = 0; i < 512; i++) mem[i] <= $urandom;
+    static int fp = $fopen("../software/DISK_BACKUPS/image", "rb");
+    $display("Loading disk image...");
+    if(!fp) $fatal("Failed to open disk image");
+    if(!$fread(mem, fp)) $fatal("Failed to read disk image");
+    $display("OK.");
   end
 
   assign data_out = !ce_n && !oe_n && we_n ? address == 3'h7 ? status : registers[address] : 'z;
@@ -98,10 +102,10 @@ module ide(
       READ_START_ST:
         nextState = READ_ST;
       READ_ST:
-        if(byteCounter == 9'h3) nextState = COMPLETE_ST;
+        if(byteCounter == 9'h512) nextState = COMPLETE_ST;
         else if(!oe_n && !ce_n && address == 3'h0) nextState = READ_ST;
       WRITE_ST:
-        if(byteCounter == 9'h3) nextState = COMPLETE_ST;
+        if(byteCounter == 9'h512) nextState = COMPLETE_ST;
         else if(!we_n && !ce_n && address == 3'h0) nextState = WRITE_ST;
       COMPLETE_ST:
         nextState = RESET_ST;
