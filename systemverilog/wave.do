@@ -16,7 +16,7 @@ add wave -noupdate /testbench/data_bus
 add wave -noupdate -divider {== IDE ==}
 add wave -noupdate /testbench/u_ide/address
 add wave -noupdate /testbench/u_ide/arst
-add wave -noupdate /testbench/u_ide/byteCounter
+add wave -noupdate -radix unsigned /testbench/u_ide/byteCounter
 add wave -noupdate /testbench/u_ide/ce_n
 add wave -noupdate /testbench/u_ide/command
 add wave -noupdate /testbench/u_ide/currentState
@@ -27,7 +27,7 @@ add wave -noupdate /testbench/u_ide/LBA
 add wave -noupdate /testbench/u_ide/mem
 add wave -noupdate /testbench/u_ide/oe_n
 add wave -noupdate /testbench/u_ide/registers
-add wave -noupdate /testbench/u_ide/status
+add wave -noupdate -radix unsigned -childformat {{{/testbench/u_ide/status[7]} -radix unsigned} {{/testbench/u_ide/status[6]} -radix unsigned} {{/testbench/u_ide/status[5]} -radix unsigned} {{/testbench/u_ide/status[4]} -radix unsigned} {{/testbench/u_ide/status[3]} -radix unsigned} {{/testbench/u_ide/status[2]} -radix unsigned} {{/testbench/u_ide/status[1]} -radix unsigned} {{/testbench/u_ide/status[0]} -radix unsigned}} -subitemconfig {{/testbench/u_ide/status[7]} {-radix unsigned} {/testbench/u_ide/status[6]} {-radix unsigned} {/testbench/u_ide/status[5]} {-radix unsigned} {/testbench/u_ide/status[4]} {-radix unsigned} {/testbench/u_ide/status[3]} {-radix unsigned} {/testbench/u_ide/status[2]} {-radix unsigned} {/testbench/u_ide/status[1]} {-radix unsigned} {/testbench/u_ide/status[0]} {-radix unsigned}} /testbench/u_ide/status
 add wave -noupdate /testbench/u_ide/we_n
 add wave -noupdate -divider {== CS ==}
 add wave -noupdate /testbench/bios_config_cs
@@ -177,7 +177,7 @@ add wave -noupdate /testbench/u_cpu_top/ctrl_wr
 add wave -noupdate /testbench/u_cpu_top/ctrl_zbus_src
 add wave -noupdate /testbench/u_cpu_top/ctrl_zf_in_src
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {990412809 ps} 0}
+WaveRestoreCursors {{Cursor 1} {27042731357 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 190
 configure wave -valuecolwidth 100
@@ -193,4 +193,7 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {988358967 ps} {997831789 ps}
+WaveRestoreZoom {27041948331 ps} {27046366383 ps}
+bookmark add wave bookmark0 {{8339320171 ps} {8349290586 ps}} 16
+bookmark add wave bookmark1 {{8307101692 ps} {8389800233 ps}} 0
+bookmark add wave bookmark2 {{27041948331 ps} {27046366383 ps}} 24

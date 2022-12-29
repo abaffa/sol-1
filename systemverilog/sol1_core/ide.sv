@@ -26,7 +26,7 @@ module ide(
 
   logic [7:0] LBA [2:0];
   logic [9:0] byteCounter;
-  logic [7:0] mem [2 * KB];
+  logic [7:0] mem [672 * KB];
   logic [7:0] registers [7:0];
   logic [7:0] command;
   logic [7:0] status;
@@ -46,6 +46,7 @@ module ide(
   always @(posedge clk, posedge arst) begin
     if(arst) begin
       command <= '0;
+      status <= 8'b0000_0000;
       byteCounter <= '0;
     end
     else case(currentState)
