@@ -85,6 +85,15 @@ module microcode_sequencer(
   output logic [7:0] ctrl_immy
 );
   import pa_microcode::*;
+  import pa_cpu::*;
+
+  logic status_dma_ack;
+  logic status_irq_en;
+  logic status_mode;
+  logic status_paging_en;
+  logic status_halt;
+  logic status_displayreg_load;
+  logic status_dir;
 
   logic any_interruption;
   logic [CONTROL_WORD_WIDTH - 1 : 0] ucode_roms [CYCLES_PER_INSTRUCTION * NBR_INSTRUCTIONS];
@@ -93,7 +102,16 @@ module microcode_sequencer(
   logic [13:0] u_address;
   logic final_condition;
 
+  assign status_dma_ack         = cpu_status[bitpos_cpu_status_dma_ack];
+  assign status_irq_en          = cpu_status[bitpos_cpu_status_irq_en];
+  assign status_mode            = cpu_status[bitpos_cpu_status_mode];
+  assign status_paging_en       = cpu_status[bitpos_cpu_status_paging_en];
+  assign status_halt            = cpu_status[bitpos_cpu_status_halt];
+  assign status_displayreg_load = cpu_status[bitpos_cpu_status_displayreg_load];
+  assign status_dir             = cpu_status[bitpos_cpu_status_dir];
+
   assign control_word = ucode_roms[u_address];
+
   always_ff @(negedge clk) begin
     control_word_n <= control_word;
   end
@@ -204,7 +222,7 @@ module microcode_sequencer(
         condition = dma_req;
       end
       4'b1000: begin
-        condition = cpu_status[pa_cpu::bitpos_cpu_status_mode];
+        condition = status_mode;
       end
       4'b1001: begin
         condition = _wait;
@@ -216,10 +234,10 @@ module microcode_sequencer(
         condition = ext_input;
       end
       4'b1100: begin
-        condition = cpu_status[pa_cpu::bitpos_cpu_status_dir];
+        condition = status_dir;
       end
       4'b1101: begin
-        condition = cpu_status[pa_cpu::bitpos_cpu_status_displayreg_load];
+        condition = status_displayreg_load;
       end
       4'b1110: condition = 1'b0;
       4'b1111: condition = 1'b0;

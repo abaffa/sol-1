@@ -1,14 +1,15 @@
 module cpu_top(
   input logic arst,
   input logic clk,
-  input logic [7:0] data_bus_in,
+  //input logic [7:0] data_bus,
   input logic [7:0] pins_irq_req,
   input logic dma_req,
   input logic pin_wait,
   input logic ext_input,
   
+  inout logic [7:0] data_bus,
   output logic [21:0] address_bus,
-  output logic [7:0] data_bus_out,
+  //output logic [7:0] data_bus_out,
   output logic rd,
   output logic wr,
   output logic mem_io,
@@ -33,6 +34,15 @@ module cpu_top(
   logic [7:0] irq_masks;
   logic [7:0] irq_status;
   logic [7:0] irq_vector;
+  logic [7:0] irq_clear;
+
+  logic status_dma_ack;
+  logic status_irq_en;
+  logic status_mode;
+  logic status_paging_en;
+  logic status_halt;
+  logic status_displayreg_load;
+  logic status_dir;
 
 // Special registers
   logic [7:0] sph, spl;
@@ -50,7 +60,6 @@ module cpu_top(
   logic [7:0] y_bus; 
   logic [7:0] k_bus;
   logic [7:0] z_bus; 
-
 
 // ALU
   logic [7:0] alu_out;
@@ -148,10 +157,19 @@ module cpu_top(
   assign rd = ~bus_rd;
   assign wr = ~bus_wr;
   assign mem_io = bus_mem_io;
-  assign dma_ack = cpu_status[bitpos_cpu_status_dma_ack];
+  assign halt = status_halt;
+  assign dma_ack = status_dma_ack;
+
+  assign status_dma_ack         = cpu_status[bitpos_cpu_status_dma_ack];
+  assign status_irq_en          = cpu_status[bitpos_cpu_status_irq_en];
+  assign status_mode            = cpu_status[bitpos_cpu_status_mode];
+  assign status_paging_en       = cpu_status[bitpos_cpu_status_paging_en];
+  assign status_halt            = cpu_status[bitpos_cpu_status_halt];
+  assign status_displayreg_load = cpu_status[bitpos_cpu_status_displayreg_load];
+  assign status_dir             = cpu_status[bitpos_cpu_status_dir];
 
 /*************************
- start of RTL code
+ Start of RTL code
 **************************/
 
 // ALU
@@ -332,20 +350,20 @@ module cpu_top(
     if(ctrl_pc_h_wrt == 1'b0) pch <= z_bus;
     if(ctrl_status_wrt == 1'b0) cpu_status <= z_bus;
     if(ctrl_irq_masks_wrt == 1'b0) irq_masks <= z_bus;
-    if(ctrl_sp_l_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) sspl <= z_bus;
-    if(ctrl_sp_h_wrt == 1'b0 && cpu_status[bitpos_cpu_status_mode] == 1'b0) ssph <= z_bus;
+    if(ctrl_sp_l_wrt == 1'b0 && status_mode == 1'b0) sspl <= z_bus;
+    if(ctrl_sp_h_wrt == 1'b0 && status_mode == 1'b0) ssph <= z_bus;
 
-    if(ctrl_ir_wrt == 1'b0) ir <= data_bus_in;
+    if(ctrl_ir_wrt == 1'b0) ir <= data_bus;
     if(ctrl_mar_l_wrt == 1'b0) marl <= ctrl_mar_in_src ? pcl : z_bus;
     if(ctrl_mar_h_wrt == 1'b0) marh <= ctrl_mar_in_src ? pch : z_bus;
-    if(ctrl_mdr_l_wrt == 1'b0) mdrl <= ctrl_mdr_in_src ? data_bus_in : z_bus;
-    if(ctrl_mdr_h_wrt == 1'b0) mdrh <= ctrl_mdr_in_src ? data_bus_in : z_bus;
+    if(ctrl_mdr_l_wrt == 1'b0) mdrl <= ctrl_mdr_in_src ? data_bus : z_bus;
+    if(ctrl_mdr_h_wrt == 1'b0) mdrh <= ctrl_mdr_in_src ? data_bus : z_bus;
 
     if(ctrl_ptb_wrt == 1'b0) ptb <= z_bus;
   end
 
 // Page Table
-  assign pagetable_addr_source = ctrl_force_user_ptb || cpu_status[bitpos_cpu_status_mode];
+  assign pagetable_addr_source = ctrl_force_user_ptb || status_mode;
   assign mdr_to_pagetable_data = ctrl_mdr_to_pagetable_data_en ? {mdrh, mdrl} : 'z;
   memory #(PAGETABLE_RAM_SIZE) u_pagetable_low(
     .ce_n(1'b0),
@@ -363,15 +381,14 @@ module cpu_top(
     .data_in(mdr_to_pagetable_data[15:8]),
     .data_out(mdr_to_pagetable_data[15:8])    
   );
-  assign bus_tristate = cpu_status[bitpos_cpu_status_dma_ack] || cpu_status[bitpos_cpu_status_halt];
-  assign address_bus = bus_tristate ? 'z : cpu_status[bitpos_cpu_status_paging_en] ? {mdr_to_pagetable_data[10:0], marh[2:0], marl[7:0]} : {6'b000000, marh, marl};
-  assign bus_mem_io = bus_tristate ? 1'bz : cpu_status[bitpos_cpu_status_paging_en] ? mdr_to_pagetable_data[11] : 1'b1;
+  assign bus_tristate = status_dma_ack || status_halt;
+  assign address_bus = bus_tristate ? 'z : status_paging_en ? {mdr_to_pagetable_data[10:0], marh[2:0], marl[7:0]} : {6'b000000, marh, marl};
+  assign bus_mem_io = bus_tristate ? 1'bz : status_paging_en ? mdr_to_pagetable_data[11] : 1'b1;
   assign bus_rd = bus_tristate ? 1'bz : ctrl_rd;
   assign bus_wr = bus_tristate ? 1'bz : ctrl_wr;
-  assign data_bus_out = ctrl_mdr_out_en ? ctrl_mdr_out_src ? mdrh : mdrl : 'z;
+  assign data_bus = ctrl_mdr_out_en ? ctrl_mdr_out_src ? mdrh : mdrl : 'z;
 
 // Interrupts
-  logic [7:0] irq_clear;
   for(genvar i = 0; i < 8; i++) begin
     assign irq_clear[i] = ctrl_int_ack && irq_vector[3:1] == i;
     always_ff @(posedge pins_irq_req[i], posedge ctrl_clear_all_ints, posedge irq_clear[i]) begin
@@ -402,7 +419,7 @@ module cpu_top(
       irq_vector <= {4'b0000, irq_encoded[2:0], 1'b0};
     end
   end
-  assign int_pending = irq_request & cpu_status[bitpos_cpu_status_irq_en];
+  assign int_pending = irq_request & status_irq_en;
 
 // Microcode Sequencer
   microcode_sequencer u_microcode_sequencer(
@@ -424,10 +441,6 @@ module cpu_top(
 
     .* // control word
   );
-
-  assign halt = cpu_status[bitpos_cpu_status_halt];
-
-
 
 
 endmodule
