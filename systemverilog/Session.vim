@@ -63,16 +63,17 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\alu.sv
-badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\clock.sv
-badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\cpu_top.sv
-badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\ide.sv
-badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\memory.sv
-badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\microcode_sequencer.sv
-badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\pa_cpu.sv
-badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\pa_microcode.sv
-badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\pa_testbench.sv
-badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\testbench.sv
+badd +1 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\alu.sv
+badd +1 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\clock.sv
+badd +1 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\cpu_top.sv
+badd +1 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\ide.sv
+badd +1 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\memory.sv
+badd +1 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\microcode_sequencer.sv
+badd +1 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\pa_cpu.sv
+badd +1 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\pa_microcode.sv
+badd +1 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\pa_testbench.sv
+badd +1 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\testbench.sv
+badd +0 ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\sol1_top.sv
 argglobal
 %argdel
 set stal=2
@@ -86,9 +87,9 @@ tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabrewind
-edit ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\testbench.sv
+edit ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\sol1_top.sv
 argglobal
-balt ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\pa_testbench.sv
+balt ~\Desktop\SOL1_MiniComputer\systemverilog\sol1_core\testbench.sv
 setlocal keymap=
 setlocal noarabic
 setlocal autoindent
@@ -1494,7 +1495,7 @@ keepjumps exe s:l
 normal! zt
 keepjumps 1
 normal! 0
-tabnext 2
+tabnext 1
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf

@@ -1,4 +1,4 @@
-module testbench;
+module sol1_top;
   import pa_testbench::*;
 
 	logic arst;
@@ -39,7 +39,7 @@ module testbench;
     // Load bios code into rom
     static int fp = $fopen("../software/bios.obj", "rb");
     if(!fp) $fatal("Failed to open bios.obj");
-    if(!$fread(testbench.u_bios_rom.mem, fp)) $fatal("Failed to read bios.obj");
+    if(!$fread(sol1_top.u_bios_rom.mem, fp)) $fatal("Failed to read bios.obj");
     $display("OK.");
 
     // Start CPU...
@@ -55,7 +55,7 @@ module testbench;
     #100ns;
 		stop_clk_req = 1'b0;
 
-		#50ms $stop;
+		#100ms $stop;
   end
 
 	clock u_clock(
