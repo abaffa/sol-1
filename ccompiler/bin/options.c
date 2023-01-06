@@ -37,12 +37,17 @@ int main(void) {
 		pascal();
 	}
 	else{
+    test(45);
 		primes();
 	}
 
 	asm{
 		syscall sys_terminate_proc
 	}
+}
+
+void test(int i){
+  return i;
 }
 
 void factors(void){
