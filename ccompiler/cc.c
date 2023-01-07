@@ -294,7 +294,6 @@ void declare_func(void){
             bp_offset += 1; // not a pointer
           }
           break;
-
         case INT:
           func -> parameters[param_count].type = DT_INT;
           bp_offset += 2; // offset is +2 whether it is a pointer or not
@@ -853,7 +852,7 @@ void parse_factors(void){
 
 void parse_atom(void){
   int var_id;
-  int func_index;
+  int func_id;
   char temp_name[ID_LEN];
   char temp[64];
 
@@ -895,14 +894,31 @@ void parse_atom(void){
     strcpy(temp_name, token);
     get_token();
     if(tok == OPENING_PAREN){ // function call      
-      func_index = find_function(temp_name);
-      if(func_index != -1){
-        parse_function_arguments(func_index);
+      func_id = find_function(temp_name);
+      if(func_id != -1){
+        parse_function_arguments(func_id);
         emit("\tcall ");
         emitln(temp_name);
-        get_token();
         if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
         // the function's return value is in register B
+
+        // clean stack of the arguments added to it
+        int i, bp_offsetclean = 0;
+        char bp_offset_string[10];
+        for(i = 0; *function_table[func_id].parameters[i].param_name; i++){
+          if(function_table[func_id].parameters[i].ind_level > 0) bp_offsetclean += 2;
+          else switch(function_table[func_id].parameters[i].type){
+            case DT_CHAR:
+              bp_offsetclean += 1;
+              break;
+            case DT_INT:
+              bp_offsetclean += 2;
+              break;
+          }
+        }
+        sprintf(bp_offset_string, "%i", bp_offsetclean);
+        emit("\tadd sp, ");
+        emitln(bp_offset_string);
       }
       else trigger_err(UNDECLARED_FUNC);
       
@@ -948,11 +964,11 @@ void parse_atom(void){
   get_token(); // gets the next token (it must be a delimiter)
 }
 
-void parse_function_arguments(int func_index){
+void parse_function_arguments(int func_id){
   _USER_FUNC *func; // variable to hold a pointer to the user function
   int param_index;
 
-  func = &function_table[func_index];
+  func = &function_table[func_id];
   param_index = 0;
 
   get_token();
@@ -969,15 +985,15 @@ void parse_function_arguments(int func_index){
       case DT_CHAR:
         if(token_type != CHAR_CONST) trigger_err(INCOMPATIBLE_ARGUMENT_TYPE);
         else{
-          emit("\tpush byte ");
-          emitln(string_constant);
+          parse_expr();
+          emitln("\tpush bl");
         }
         break;
       case DT_INT:
         if(token_type != INTEGER_CONST) trigger_err(INCOMPATIBLE_ARGUMENT_TYPE);
         else{
-          emit("\tpush word ");
-          emitln(token);
+          parse_expr();
+          emitln("\tpush b");
         }
         break;
     }
@@ -986,74 +1002,33 @@ void parse_function_arguments(int func_index){
   
 }
 
-void call_func(int func_index){
+void call_func(int func_id){
   char *t;
   int temp_local_tos;
   
-  if(user_func_call_index == MAX_USER_FUNC_CALLS) show_error(USER_FUNC_CALLS_LIMIT_REACHED);
+  if(user_func_call_index == MAX_USER_FUNC_CALLS) trigger_err(USER_FUNC_CALLS_LIMIT_REACHED);
 
-  current_func_index = func_index;
+  current_func_id = func_id;
 
   temp_local_tos = local_var_tos;
-  get_func_parameters(func_index); // pushes the parameter variables into the local variables stack
+  parse_function_arguments(func_id); // pushes the parameter variables into the local variables stack
 
-  if(tok != CLOSING_PAREN) show_error(CLOSING_PAREN_EXPECTED);
+  if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
   
   local_var_tos_history[user_func_call_index] = temp_local_tos;
   user_func_call_index++;
 
 // saves the current program address
   t = prog;
-  prog = user_func_table[func_index].code_location; // sets the program pointer to the beginning of the function code, just before the "{" token
+  prog = function_table[func_id].code_location; // sets the program pointer to the beginning of the function code, just before the "{" token
 
-// resets the function returning value to 0
-  func_ret.value.c = 0;
-  func_ret.value.i = 0;
-  func_ret.value.f = 0.0;
-  func_ret.value.d = 0.0;
-
-// starts executing the function code
-  interp_block();
-
-// converts the expression value into the type defined by the function, if the function is not of the void type
-  convert_data(&func_ret, user_func_table[func_index].return_type);
-  
 // recovers the previous program address
   prog = t;
-  
-// frees any arrays created by this function
-  register int i;
-  for(i = local_var_tos_history[user_func_call_index - 1]; i < local_var_tos; i++)
-    if(_is_matrix(&local_variables[i])) free(local_variables[i].data.value.p);
   
 //recovers the previous local variable top of stack
   user_func_call_index--;
   local_var_tos = local_var_tos_history[user_func_call_index];
 
-// resets the block jump flag
-  jump_flag = JF_NULL;
-}
-
-void get_func_parameters(int func_index){
-  register int i;
-  _VAR var;
-
-  // if this function has no parameters
-  if(!*user_func_table[func_index].parameters[0].param_name){
-    get_token();
-    return;
-  }
-
-  for(i = 0; *user_func_table[func_index].parameters[i].param_name; i++){
-    eval(&var.data);
-    convert_data(&var.data, user_func_table[func_index].parameters[i].type);
-    var.data.ind_level = user_func_table[func_index].parameters[i].ind_level;
-    strcpy(var.var_name, user_func_table[func_index].parameters[i].param_name);
-    var.constant = user_func_table[func_index].parameters[i].constant;
-    var.dims[0] = 0;
-    local_push(&var);
-    if(tok != COMMA && tok != CLOSING_PAREN) show_error(SYNTAX);
-  }
 }
 
 int find_global_var(char *var_name){

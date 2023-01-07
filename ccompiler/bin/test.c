@@ -6,7 +6,7 @@ int i, j;
 int main(void) {
     i = 50;
     j = 100;
-    test(i + 1, j - 1);
+    test(i , j);
 
   asm{
     syscall sys_terminate_proc

@@ -263,6 +263,7 @@ char *error_table[] = {
 
 int current_function_var_bp_offset;  // this is used to position local variables correctly relative to BP.
 int current_func_id;
+int local_var_tos_history[MAX_USER_FUNC_CALLS]; // holds the previous local variable stack upper bound;
 int function_table_tos;
 int user_func_table_tos;
 int user_func_call_index; // holds the current function call count (for use with the local stack history array
