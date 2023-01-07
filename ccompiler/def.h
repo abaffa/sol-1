@@ -261,6 +261,7 @@ char *error_table[] = {
   "incompatible argument type in function"
 };
 
+int total_bytes_for_locals;
 int current_function_var_bp_offset;  // this is used to position local variables correctly relative to BP.
 int current_func_id;
 int local_var_tos_history[MAX_USER_FUNC_CALLS]; // holds the previous local variable stack upper bound;

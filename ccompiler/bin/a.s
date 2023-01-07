@@ -9,12 +9,20 @@ main:
 	mov a, 0
 	mov b, 100
 	mov [_var_j], b
+	mov b, [_var_i]
+	push bl
+	mov b, [_var_j]
+	push b
+	call test
+	add sp, 3
 ; -----begin inline asm block-----
 	syscall sys_terminate_proc
 ; -----end inline asm block-----
 test:
 	push bp
 	mov bp, sp
+	push word 0
+	push byte 0
 	push word 0
 	mov b, [_var_i]
 	push a
@@ -23,6 +31,7 @@ test:
 	add a, b
 	mov b, a
 	pop a
+	add sp, 5
 	leave
 	ret
 

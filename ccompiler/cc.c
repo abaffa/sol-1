@@ -249,7 +249,6 @@ void declare_func(void){
       break;
     case DOUBLE:
       func -> return_type = DT_DOUBLE;
-    
   }
 
   get_token(); // gets the function name
@@ -317,7 +316,8 @@ void declare_func(void){
             bp_offset += 4; // not a pointer
           }
       }
-      
+
+      get_token();
       if(token_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
       strcpy(func -> parameters[param_count].param_name, token);
         
@@ -535,11 +535,15 @@ void parse_if(void){
 }
 
 void parse_return(void){
+  char current_function_var_bp_offset_str[16];
   get_token();
   if(tok != SEMICOLON){
     putback();
     parse_expr();  // return value in register B
   }
+  emit("\tadd sp, ");
+  sprintf(current_function_var_bp_offset_str, "%d", current_function_var_bp_offset);
+  emitln(current_function_var_bp_offset_str);
   emitln("\tleave");
   emitln("\tret");
 }
@@ -980,21 +984,13 @@ void parse_function_arguments(int func_id){
   putback();
 
   do{
-    get_token();
+    parse_expr();
     switch(func -> parameters[param_index].type){
       case DT_CHAR:
-        if(token_type != CHAR_CONST) trigger_err(INCOMPATIBLE_ARGUMENT_TYPE);
-        else{
-          parse_expr();
-          emitln("\tpush bl");
-        }
+        emitln("\tpush bl");
         break;
       case DT_INT:
-        if(token_type != INTEGER_CONST) trigger_err(INCOMPATIBLE_ARGUMENT_TYPE);
-        else{
-          parse_expr();
-          emitln("\tpush b");
-        }
+        emitln("\tpush b");
         break;
     }
     param_index++;
@@ -1219,14 +1215,6 @@ void declare_local(void){
     // whenever a new function is parsed, this is reset to 0.
     // then inside the function it can increase according to how any local vars there are.
     new_var.bp_offset = current_function_var_bp_offset;
-    switch(dt){
-      case DT_CHAR:
-        current_function_var_bp_offset -= 1;
-        break;
-      case DT_INT:
-        current_function_var_bp_offset -= 2;
-        break;
-    }
 
     new_var.constant = constant;
 
@@ -1246,6 +1234,19 @@ void declare_local(void){
       get_token();
     }    
 // *********************************************************************************************
+    if(ind_level > 0){
+      current_function_var_bp_offset += 2;
+    }
+    else switch(dt){
+      case DT_CHAR:
+        current_function_var_bp_offset += 1;
+        break;
+      case DT_INT:
+        current_function_var_bp_offset += 2;
+        break;
+      default: 
+        current_function_var_bp_offset += 2;
+    }
     if(token_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
 
     if(local_var_exists(token) != -1) trigger_err(DUPLICATE_LOCAL_VARIABLE);
@@ -1281,7 +1282,6 @@ void declare_local(void){
           break;
       }
     }
-
 
     // the indirection level needs to be reset now, because if it not, its value might be changed to the expression ind_level    
     new_var.data.ind_level = ind_level;

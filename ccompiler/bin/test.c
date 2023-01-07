@@ -13,7 +13,8 @@ int main(void) {
   }
 }
 
-void test(int i, int j){
-  int ii;
+void test(char i, int j){
+  int ii; char c;
+  int jj;
   return i+j;
 }
