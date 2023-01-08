@@ -1,18 +1,14 @@
 #define STRING_TABLE_SIZE      250
-#define MAX_USER_FUNC        50
-#define MAX_USER_FUNC_PARAMS      10
-#define MAX_USER_FUNC_CALLS      1000
-#define MAX_GLOBAL_VARS        50
-#define MAX_LOCAL_VARS        200
-#define ID_LEN          50
-#define CONST_LEN        500
-#define PROG_SIZE        99999
-#define ACTIVE_FUNC_TABLE_SIZE      250
-#define ACTIVE_CONST_TABLE_SIZE      250
-#define MAX_MATRIX_DIMS        10
+#define MAX_USER_FUNC          50
+#define MAX_GLOBAL_VARS        100
+#define MAX_LOCAL_VARS         100
+#define ID_LEN                 50
+#define CONST_LEN              500
+#define PROG_SIZE              99999
+#define MAX_MATRIX_DIMS           10
 
-#define TRUE          1
-#define FALSE          0
+#define TRUE      1
+#define FALSE     0
 
 typedef enum {
   DIRECTIVE = 1, INCLUDE,
@@ -48,8 +44,8 @@ typedef enum {
   DELIMITER = 1,
   CHAR_CONST, STRING_CONST, INTEGER_CONST, FLOAT_CONST, DOUBLE_CONST,
   IDENTIFIER, RESERVED, END
-} _ATOM_TYPE;
-_ATOM_TYPE token_type;
+} _TOKEN_TYPE;
+_TOKEN_TYPE token_type;
 
 typedef enum {
   JF_NULL, 
