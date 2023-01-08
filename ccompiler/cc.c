@@ -560,15 +560,11 @@ void parse_if(void){
 }
 
 void parse_return(void){
-  char current_function_var_bp_offset_str[16];
   get_token();
   if(tok != SEMICOLON){
     putback();
     parse_expr();  // return value in register B
   }
-  emit("  add sp, ");
-  sprintf(current_function_var_bp_offset_str, "%d", current_function_var_bp_offset);
-  emitln(current_function_var_bp_offset_str);
   emitln("  leave");
   emitln("  ret");
 }

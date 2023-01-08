@@ -12,8 +12,12 @@ int main(void) {
 
 void test(char c, int j, int k){
   int ii;
+  char d;
+  int jj;
 
   ii = 56;
+  d = 'a';
+  jj = 11;
 
   c = 1;
   j = 2;

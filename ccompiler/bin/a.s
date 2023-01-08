@@ -18,11 +18,23 @@ test:
   push bp
   mov bp, sp
   push word 0
+  push byte 0
+  push word 0
   mov a, 0
   mov b, 56
   mov a, b
   swp a
   mov [bp + -1], a
+  mov a, 0
+  mov bl, 'a'
+  mov bh, 0
+  mov al, bl
+  mov [bp + -2], al
+  mov a, 0
+  mov b, 11
+  mov a, b
+  swp a
+  mov [bp + -4], a
   mov a, 0
   mov b, 1
   mov al, bl
@@ -37,7 +49,6 @@ test:
   mov a, b
   swp a
   mov [bp + 5], a
-  add sp, 2
   leave
   ret
 
