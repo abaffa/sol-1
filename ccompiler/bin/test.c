@@ -10,18 +10,14 @@ int main(void) {
   }
 }
 
-void test(char c, int j, int k){
+void test(char c, int i, int k){
   int ii;
   char d;
   int jj;
 
-  ii = 56;
-  d = 'a';
-  jj = 11;
-
-  c = 1;
-  j = 2;
-  k = 3;
+  for(i=0;i<10;i++){
+    
+  } 
 
   return;
 }

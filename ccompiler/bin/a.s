@@ -20,37 +20,33 @@ test:
   push word 0
   push byte 0
   push word 0
+_for1_init:
   mov a, 0
-  mov b, 56
-  mov a, b
-  swp a
-  mov [bp + -1], a
-  mov a, 0
-  mov bl, 'a'
-  mov bh, 0
-  mov al, bl
-  mov [bp + -2], al
-  mov a, 0
-  mov b, 11
-  mov a, b
-  swp a
-  mov [bp + -4], a
-  mov a, 0
-  mov b, 1
-  mov al, bl
-  mov [bp + 9], al
-  mov a, 0
-  mov b, 2
+  mov b, 0
   mov a, b
   swp a
   mov [bp + 7], a
-  mov a, 0
-  mov b, 3
+_for1_cond:
+  mov b, [bp + 3]
+  swp b
+  push a
   mov a, b
-  swp a
-  mov [bp + 5], a
-  leave
-  ret
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000010
+  mov ah, 0
+  mov b, a
+  pop a
+  mov a, b
+  cmp a, 0
+  je _for1_exit
+_for1_block:
+_for1_update:
+  mov b, [bp + 3]
+  swp b
+  jmp _for1_cond
+_for1_exit:
 
 ; -----end text block-----
 
