@@ -15,9 +15,8 @@ void test(char c, int i, int k){
   char d;
   int jj;
 
-  for(i=0;i<10;i++){
-    
-  } 
+
+  c = 'a';
 
   return;
 }
