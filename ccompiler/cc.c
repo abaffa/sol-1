@@ -169,8 +169,8 @@ void parse_functions(void){
       prog = function_table[i].code_location;
       emit(function_table[i].func_name);
       emitln(":");
-      emitln("\tpush bp");
-      emitln("\tmov bp, sp");
+      emitln("  push bp");
+      emitln("  mov bp, sp");
       parse_block(); // starts parsing the function block;
     }
 }
@@ -376,7 +376,7 @@ void parse_asm(void){
     do{
       get_line();
       if(*string_constant != '}'){
-        emit("\t");
+        emit("  ");
         emitln(string_constant);
       }
     } while(*string_constant != '}');
@@ -386,7 +386,7 @@ void parse_asm(void){
     emit("; -----inline asm block-----\n");
     putback();
     get_line();
-    emit("\t");
+    emit("  ");
     emitln(string_constant);
   }
 
@@ -395,7 +395,7 @@ void parse_asm(void){
 void parse_break(void){
   char s_label[64];
   
-  sprintf(s_label, "\tjmp _while%d_exit", current_label_index_loop);
+  sprintf(s_label, "  jmp _while%d_exit", current_label_index_loop);
   emitln(s_label);
 }
 
@@ -431,12 +431,12 @@ void parse_for(void){
     if(tok != SEMICOLON) trigger_err(SEMICOLON_EXPECTED);
   }
   else{
-    emitln("\tmov b, 1"); // emit a TRUE condition
+    emitln("  mov b, 1"); // emit a TRUE condition
   }
 
-  emitln("\tmov a, b");
-  emitln("\tcmp a, 0");
-  sprintf(s_label, "\tje _for%d_exit", current_label_index_loop);
+  emitln("  mov a, b");
+  emitln("  cmp a, 0");
+  sprintf(s_label, "  je _for%d_exit", current_label_index_loop);
   emitln(s_label);
   sprintf(s_label, "_for%d_block:", current_label_index_loop);
   emitln(s_label);
@@ -465,7 +465,7 @@ void parse_for(void){
     parse_expr();
   }
     
-  sprintf(s_label, "\tjmp _for%d_cond", current_label_index_loop);
+  sprintf(s_label, "  jmp _for%d_cond", current_label_index_loop);
   emitln(s_label);
 
   find_end_of_block();
@@ -491,14 +491,14 @@ void parse_while(void){
   if(tok != OPENING_PAREN) trigger_err(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
-  emitln("\tmov a, b");
-  emitln("\tcmp a, 0");
-  sprintf(s_label, "\tje _while%d_exit", current_label_index_loop);
+  emitln("  mov a, b");
+  emitln("  cmp a, 0");
+  sprintf(s_label, "  je _while%d_exit", current_label_index_loop);
   emitln(s_label);
   sprintf(s_label, "_while%d_block:", current_label_index_loop);
   emitln(s_label);
   parse_block();  // parse while block
-  sprintf(s_label, "\tjmp _while%d_cond", current_label_index_loop);
+  sprintf(s_label, "  jmp _while%d_cond", current_label_index_loop);
   emitln(s_label);
   sprintf(s_label, "_while%d_exit:", current_label_index_loop);
   emitln(s_label);
@@ -522,17 +522,17 @@ void parse_if(void){
   if(tok != OPENING_PAREN) trigger_err(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
-  emitln("\tcmp b, 0");
+  emitln("  cmp b, 0");
   
   temp_p = prog;
   find_end_of_block(); // skip main IF block in order to check for ELSE block.
   get_token();
   if(tok == ELSE){
-    sprintf(s_label, "\tje _if%d_else_block", current_label_index_if);
+    sprintf(s_label, "  je _if%d_else_block", current_label_index_if);
     emitln(s_label);
   }
   else{
-    sprintf(s_label, "\tje _if%d_exit", current_label_index_if);
+    sprintf(s_label, "  je _if%d_exit", current_label_index_if);
     emitln(s_label);
   }
 
@@ -540,7 +540,7 @@ void parse_if(void){
   sprintf(s_label, "_if%d_block:", current_label_index_if);
   emitln(s_label);
   parse_block();  // parse the positive condition block
-  sprintf(s_label, "\tjmp _if%d_exit", current_label_index_if);
+  sprintf(s_label, "  jmp _if%d_exit", current_label_index_if);
   emitln(s_label);
   get_token(); // look for 'else'
   if(tok == ELSE){
@@ -566,11 +566,11 @@ void parse_return(void){
     putback();
     parse_expr();  // return value in register B
   }
-  emit("\tadd sp, ");
+  emit("  add sp, ");
   sprintf(current_function_var_bp_offset_str, "%d", current_function_var_bp_offset);
   emitln(current_function_var_bp_offset_str);
-  emitln("\tleave");
-  emitln("\tret");
+  emitln("  leave");
+  emitln("  ret");
 }
 
 void parse_block(void){
@@ -706,14 +706,14 @@ void parse_attrib(){
     strcpy(var_name, token);
     get_token();
     if(tok == ASSIGNMENT){
-      emitln("\tmov a, 0");
+      emitln("  mov a, 0");
       parse_attrib();
 
       if(local_var_exists(var_name) != -1){ // is a local variable
         var_id = local_var_exists(var_name);
         if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
-          emitln("\tmov al, bl");
-          emit("\tmov [bp+");
+          emitln("  mov al, bl");
+          emit("  mov [bp + ");
           if(function_table[current_func_id].local_vars[var_id].is_parameter)
             // add +4 below to account for BP and PC offsets which were pushed into the stack
             sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
@@ -723,10 +723,10 @@ void parse_attrib(){
           emitln("], al");
         }
         else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-          emitln("\tmov a, b");
-          emitln("\tswp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+          emitln("  mov a, b");
+          emitln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
                     // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
-          emit("\tmov [bp+");
+          emit("  mov [bp + ");
           if(function_table[current_func_id].local_vars[var_id].is_parameter)
             // add +4 below to account for BP and PC offsets which were pushed into the stack
             sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
@@ -739,12 +739,12 @@ void parse_attrib(){
       else if(global_var_exists(var_name) != -1){  // is a global variable
         var_id = global_var_exists(var_name);
         if(global_variables[var_id].data.type == DT_CHAR){
-          emit("\tmov [");
+          emit("  mov [");
           emit(global_variables[var_id].var_name);
           emitln("], bl");
         }
         else if(global_variables[var_id].data.type == DT_INT){
-          emit("\tmov [");
+          emit("  mov [");
           emit(global_variables[var_id].var_name);
           emitln("], b");
         }
@@ -765,26 +765,26 @@ void parse_logical(void){
   parse_relational();
   while(tok == LOGICAL_AND || tok == LOGICAL_OR){
     temp_tok = tok;
-    emitln("\tpush a");
-    emitln("\tmov a, b");
+    emitln("  push a");
+    emitln("  mov a, b");
     parse_relational();
-    emitln("\tcmp b, 0");
-    emitln("\tpush a");
-    emitln("\tlodflgs");
-    emitln("\tmov b, a");
-    emitln("\tpop a");
-    emitln("\tnot bl");  
-    emitln("\tand bl, %00000001"); // isolate ZF only. 
-    emitln("\tmov bh, 0");
-    emitln("\tcmp a, 0");
-    emitln("\tlodflgs");
-    emitln("\tnot al");  
-    emitln("\tand al, %00000001"); // isolate ZF only. 
-    emitln("\tmov ah, 0");
-    if(temp_tok == LOGICAL_AND) emitln("\tand a, b");
-    else emitln("\tor a, b");
-    emitln("\tmov b, a");
-    emitln("\tpop a");
+    emitln("  cmp b, 0");
+    emitln("  push a");
+    emitln("  lodflgs");
+    emitln("  mov b, a");
+    emitln("  pop a");
+    emitln("  not bl");  
+    emitln("  and bl, %00000001"); // isolate ZF only. 
+    emitln("  mov bh, 0");
+    emitln("  cmp a, 0");
+    emitln("  lodflgs");
+    emitln("  not al");  
+    emitln("  and al, %00000001"); // isolate ZF only. 
+    emitln("  mov ah, 0");
+    if(temp_tok == LOGICAL_AND) emitln("  and a, b");
+    else emitln("  or a, b");
+    emitln("  mov b, a");
+    emitln("  pop a");
   }
 }
 
@@ -796,54 +796,54 @@ void parse_relational(void){
   while(tok == EQUAL || tok == NOT_EQUAL || tok == LESS_THAN || tok == LESS_THAN_OR_EQUAL
     || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
     temp_tok = tok;
-    emitln("\tpush a");
-    emitln("\tmov a, b");
+    emitln("  push a");
+    emitln("  mov a, b");
     parse_terms();
     switch(temp_tok){
       case EQUAL:
-        emitln("\tcmp a, b");
-        emitln("\tlodflgs");
-        emitln("\tand al, %00000001"); // isolate ZF only. therefore if ZF==1 then A == B
-        emitln("\tmov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000001"); // isolate ZF only. therefore if ZF==1 then A == B
+        emitln("  mov ah, 0");
         break;
       case NOT_EQUAL:
-        emitln("\tcmp a, b");
-        emitln("\tlodflgs");
-        emitln("\tand al, %00000001"); // isolate ZF only.
-        emitln("\txor al, %00000001"); // invert the condition
-        emitln("\tmov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000001"); // isolate ZF only.
+        emitln("  xor al, %00000001"); // invert the condition
+        emitln("  mov ah, 0");
         break;
       case LESS_THAN:
-        emitln("\tcmp a, b");
-        emitln("\tlodflgs");
-        emitln("\tand al, %00000010"); // isolate CF only. therefore if CF==1 then A < B
-        emitln("\tmov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000010"); // isolate CF only. therefore if CF==1 then A < B
+        emitln("  mov ah, 0");
         break;
       case LESS_THAN_OR_EQUAL:
-        emitln("\tcmp a, b");
-        emitln("\tlodflgs");
-        emitln("\tand al, %00000011"); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
-        emitln("\tmov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000011"); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
+        emitln("  mov ah, 0");
         break;
       case GREATER_THAN_OR_EQUAL:
-        emitln("\tcmp a, b");
-        emitln("\tlodflgs");
-        emitln("\tand al, %00000010"); 
-        emitln("\txor al, %00000010"); 
-        emitln("\tmov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000010"); 
+        emitln("  xor al, %00000010"); 
+        emitln("  mov ah, 0");
         break;
       case GREATER_THAN:
-        emitln("\tcmp a, b");
-        emitln("\tlodflgs");
-        emitln("\tand al, %00000011"); 
-        emitln("\tcmp al, 0");
-        emitln("\tlodflgs");
-        emitln("\tand al, %00000001"); 
-        emitln("\tmov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000011"); 
+        emitln("  cmp al, 0");
+        emitln("  lodflgs");
+        emitln("  and al, %00000001"); 
+        emitln("  mov ah, 0");
         break;
     }
-    emitln("\tmov b, a");
-    emitln("\tpop a");
+    emitln("  mov b, a");
+    emitln("  pop a");
   }
 }
 
@@ -853,12 +853,12 @@ void parse_terms(void){
   parse_factors();
   while(tok == PLUS || tok == MINUS){
     temp_tok = tok;
-    emitln("\tpush a");
-    emitln("\tmov a, b");
+    emitln("  push a");
+    emitln("  mov a, b");
     parse_factors();
-    if(temp_tok == PLUS) emitln("\tadd a, b"); else emitln("\tsub a, b");
-    emitln("\tmov b, a");
-    emitln("\tpop a");
+    if(temp_tok == PLUS) emitln("  add a, b"); else emitln("  sub a, b");
+    emitln("  mov b, a");
+    emitln("  pop a");
   }
 }
 
@@ -868,22 +868,22 @@ void parse_factors(void){
   parse_atom();
   while(tok == STAR || tok == FSLASH || tok == MOD){
     temp_tok = tok;
-    emitln("\tpush a");
-    emitln("\tmov a, b");
+    emitln("  push a");
+    emitln("  mov a, b");
     parse_atom();
     if(temp_tok == STAR){
-      emitln("\tmul a, b");
+      emitln("  mul a, b");
     }
     else if(temp_tok == FSLASH){
-      emitln("\tdiv a, b");
-      emitln("\tmov g, a");
-      emitln("\tmov a, b");
-      emitln("\tmov b, g");
+      emitln("  div a, b");
+      emitln("  mov g, a");
+      emitln("  mov a, b");
+      emitln("  mov b, g");
     }
     else if(temp_tok == MOD){
-      emitln("\tdiv a, b");
+      emitln("  div a, b");
     }
-    emitln("\tpop a");
+    emitln("  pop a");
   }
 }
 
@@ -900,27 +900,27 @@ void parse_atom(void){
  */
   if(tok == STAR){ // is a pointer operator
     parse_expr(); // parse expression after STAR, which could be inside parenthesis. result in B
-    emitln("\tmov d, b");// now we have the pointer value. we then get the data at the address.
-    emitln("\tmov bl, [d]"); // data fetched as a char! need to improve this to allow any types later.
-    emitln("\tmov bh, 0");
+    emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
+    emitln("  mov bl, [d]"); // data fetched as a char! need to improve this to allow any types later.
+    emitln("  mov bh, 0");
     putback();
   }
   else if(token_type == INTEGER_CONST){
-    emit("\tmov b, ");
+    emit("  mov b, ");
     emitln(token);
   }
   else if(token_type == CHAR_CONST){
-    emit("\tmov bl, "); emitln(token);
-    emitln("\tmov bh, 0");
+    emit("  mov bl, "); emitln(token);
+    emitln("  mov bh, 0");
   }
   else if(tok == MINUS){
     parse_atom();
-    emitln("\tneg b");
+    emitln("  neg b");
     putback();
   }
   else if(tok == BITWISE_NOT){
     parse_atom();
-    emitln("\tnot b");
+    emitln("  not b");
     putback();
   }
   else if(tok == OPENING_PAREN){
@@ -934,7 +934,7 @@ void parse_atom(void){
       func_id = find_function(temp_name);
       if(func_id != -1){
         parse_function_arguments(func_id);
-        emit("\tcall ");
+        emit("  call ");
         emitln(temp_name);
         if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
         // the function's return value is in register B
@@ -956,7 +956,7 @@ void parse_atom(void){
             }
           }
           sprintf(bp_offset_string, "%i", bp_offsetclean);
-          emit("\tadd sp, ");
+          emit("  add sp, ");
           emitln(bp_offset_string);
         }
       }
@@ -967,29 +967,29 @@ void parse_atom(void){
       if(local_var_exists(temp_name) != -1){ // is a local variable
         var_id = local_var_exists(temp_name);
         if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
-          emit("\tmov bl, [bp+");
+          emit("  mov bl, [bp + ");
           sprintf(temp, "%d", function_table[current_func_id].local_vars[var_id].bp_offset);
           emit(temp);
           emitln("]");
         }
         else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-          emit("\tmov b, [bp+");
+          emit("  mov b, [bp + ");
           sprintf(temp, "%d", function_table[current_func_id].local_vars[var_id].bp_offset - 1);
           emit(temp);
           emitln("]");
-          emitln("\tswp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+          emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
                     // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
         }
       }
       else if(global_var_exists(temp_name) != -1){  // is a global variable
         var_id = global_var_exists(temp_name);
         if(global_variables[var_id].data.type == DT_CHAR){
-          emit("\tmov bl, [");
+          emit("  mov bl, [");
           emit(global_variables[var_id].var_name);
           emitln("]");
         }
         else if(global_variables[var_id].data.type == DT_INT){
-          emit("\tmov b, [");
+          emit("  mov b, [");
           emit(global_variables[var_id].var_name);
           emitln("]");
         }
@@ -1023,10 +1023,10 @@ void parse_function_arguments(int func_id){
     parse_expr();
     switch(func->local_vars[param_index].data.type){
       case DT_CHAR:
-        emitln("\tpush bl");
+        emitln("  push bl");
         break;
       case DT_INT:
-        emitln("\tpush b");
+        emitln("  push b");
         break;
     }
     param_index++;
@@ -1260,11 +1260,11 @@ void declare_local(void){
     // emit ASM for variables
       switch(new_var.data.type){
         case DT_CHAR:
-          emit("\tpush byte ");
+          emit("  push byte ");
           emitln(token);
           break;
         case DT_INT:
-          emit("\tpush word ");
+          emit("  push word ");
           emitln(token);
           break;
       }
@@ -1273,10 +1273,10 @@ void declare_local(void){
     else{
       switch(new_var.data.type){
         case DT_CHAR:
-          emitln("\tpush byte 0");
+          emitln("  push byte 0");
           break;
         case DT_INT:
-          emitln("\tpush word 0");
+          emitln("  push word 0");
           break;
       }
     }

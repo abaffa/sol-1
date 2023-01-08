@@ -3,7 +3,7 @@
 
 
 int main(void) {
-    test(5, 10);
+    test(5, 10, 15);
 
   asm{
     syscall sys_terminate_proc
