@@ -92,7 +92,6 @@ void emit_global_variables(void){
 
 void initial_setup(void){
   global_var_tos = 0;
-  local_var_tos = 0;
   
   asmp = ASM_output;  // set ASM output pointer to the ASM array beginning
 }
@@ -225,7 +224,6 @@ void pre_scan(void){
 void declare_func(void){
   _USER_FUNC *func; // variable to hold a pointer to the user function top of stack
   _BASIC_DATA param_data_type; // function data type
-  char param_count; // number of parameters found in the declaration
   int bp_offset = 0; // for each parameter, keep the running offset of that parameter.
 
   if(function_table_tos == MAX_USER_FUNC - 1) trigger_err(EXCEEDED_FUNC_DECL_LIMIT);
@@ -236,54 +234,54 @@ void declare_func(void){
 
   switch(tok){
     case VOID:
-      func -> return_type = DT_VOID;
+      func->return_type = DT_VOID;
       break;
     case CHAR:
-      func -> return_type = DT_CHAR;
+      func->return_type = DT_CHAR;
       break;
     case INT:
-      func -> return_type = DT_INT;
+      func->return_type = DT_INT;
       break;
     case FLOAT:
-      func -> return_type = DT_FLOAT;
+      func->return_type = DT_FLOAT;
       break;
     case DOUBLE:
-      func -> return_type = DT_DOUBLE;
+      func->return_type = DT_DOUBLE;
   }
 
   get_token(); // gets the function name
-  strcpy(func -> func_name, token);
+  strcpy(func->func_name, token);
   get_token(); // gets past "("
 
-  param_count = 0;
+  func->local_var_tos = 0;
   
   get_token();
   if(tok == CLOSING_PAREN || tok == VOID){
-    func -> parameters[0].param_name[0] = '\0'; // assigns a null character to the name of the first parameter entry
     if(tok == VOID) get_token();
   }
   else{
     putback();
     do{
-      if(param_count == MAX_USER_FUNC_PARAMS) trigger_err(MAX_PARAMS_LIMIT_REACHED);
+      func->local_vars[func->local_var_tos].is_parameter = 1;
+
       get_token();
       if(tok == CONST){
-        func -> parameters[param_count].constant = 1;
+        func->local_vars[func->local_var_tos].constant = 1;
         get_token();
       }
       if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) trigger_err(VAR_TYPE_EXPECTED);
       
       // assign the bp offset of this parameter
-      func -> parameters[param_count].bp_offset = bp_offset;
+      func->local_vars[func->local_var_tos].bp_offset = bp_offset;
 
       // gets the parameter type
       switch(tok){
         case CHAR:
-          func -> parameters[param_count].type = DT_CHAR;
+          func->local_vars[func->local_var_tos].data.type = DT_CHAR;
           get_token();
           if(tok == STAR){
             while(tok == STAR){
-              func -> parameters[param_count].ind_level++;
+              func->local_vars[func->local_var_tos].data.ind_level++;
               get_token();
             }
             bp_offset += 2; // is a pointer, so offset is +2
@@ -294,19 +292,19 @@ void declare_func(void){
           }
           break;
         case INT:
-          func -> parameters[param_count].type = DT_INT;
+          func->local_vars[func->local_var_tos].data.type = DT_INT;
           bp_offset += 2; // offset is +2 whether it is a pointer or not
           break;
         case FLOAT:
-          func -> parameters[param_count].type = DT_FLOAT;
+          func->local_vars[func->local_var_tos].data.type = DT_FLOAT;
           bp_offset += 2; // offset is +2 whether it is a pointer or not
           break;
         case DOUBLE:
-          func -> parameters[param_count].type = DT_DOUBLE;
+          func->local_vars[func->local_var_tos].data.type = DT_DOUBLE;
           get_token();
           if(tok == STAR){
             while(tok == STAR){
-              func -> parameters[param_count].ind_level++;
+              func->local_vars[func->local_var_tos].data.ind_level++;
               get_token();
             }
             bp_offset += 2; // is a pointer, so offset is +2
@@ -319,22 +317,22 @@ void declare_func(void){
 
       get_token();
       if(token_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
-      strcpy(func -> parameters[param_count].param_name, token);
+      strcpy(func->local_vars[func->local_var_tos].var_name, token);
         
       get_token();
-      param_count++;
+      func->local_var_tos++;
     } while(tok == COMMA);
   }
     
   if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
 
-  func -> code_location = prog; // sets the function starting point to  just after the "(" token
+  func->code_location = prog; // sets the function starting point to  just after the "(" token
   
   get_token(); // gets to the "{" token
   if(tok != OPENING_BRACE) trigger_err(OPENING_BRACE_EXPECTED);
   putback(); // puts the "{" back so that it can be found by find_end_of_BLOCK()
 
-  *func -> parameters[param_count].param_name = '\0'; // marks the end of the parameter list with a null character
+  //*func->local_vars[func->local_var_tos].var_name = '\0'; // marks the end of the variable list with a null character
   function_table_tos++;
 }
 
@@ -686,19 +684,19 @@ void parse_attrib(){
 
       if(local_var_exists(var_name) != -1){ // is a local variable
         var_id = local_var_exists(var_name);
-        if(local_variables[var_id].data.type == DT_CHAR){
+        if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
           emitln("\tmov al, bl");
           emit("\tmov [bp+");
-          sprintf(temp, "%d", local_variables[var_id].bp_offset);
+          sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
           emit(temp);
           emitln("], al");
         }
-        else if(local_variables[var_id].data.type == DT_INT){
+        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
           emitln("\tmov a, b");
           emitln("\tswp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
                     // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
           emit("\tmov [bp+");
-          sprintf(temp, "%d", local_variables[var_id].bp_offset - 1);
+          sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
           emit(temp);
           emitln("], a");
         }
@@ -906,23 +904,26 @@ void parse_atom(void){
         if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
         // the function's return value is in register B
 
-        // clean stack of the arguments added to it
-        int i, bp_offsetclean = 0;
-        char bp_offset_string[10];
-        for(i = 0; *function_table[func_id].parameters[i].param_name; i++){
-          if(function_table[func_id].parameters[i].ind_level > 0) bp_offsetclean += 2;
-          else switch(function_table[func_id].parameters[i].type){
-            case DT_CHAR:
-              bp_offsetclean += 1;
-              break;
-            case DT_INT:
-              bp_offsetclean += 2;
-              break;
+        // if the first local var is a parameter then the function has defined parameters
+        if(function_table[func_id].local_vars[0].is_parameter){
+          // clean stack of the arguments added to it
+          int i, bp_offsetclean = 0;
+          char bp_offset_string[10];
+          for(i = 0; function_table[func_id].local_vars[i].is_parameter; i++){
+            if(function_table[func_id].local_vars[i].data.ind_level > 0) bp_offsetclean += 2;
+            else switch(function_table[func_id].local_vars[i].data.type){
+              case DT_CHAR:
+                bp_offsetclean += 1;
+                break;
+              case DT_INT:
+                bp_offsetclean += 2;
+                break;
+            }
           }
+          sprintf(bp_offset_string, "%i", bp_offsetclean);
+          emit("\tadd sp, ");
+          emitln(bp_offset_string);
         }
-        sprintf(bp_offset_string, "%i", bp_offsetclean);
-        emit("\tadd sp, ");
-        emitln(bp_offset_string);
       }
       else trigger_err(UNDECLARED_FUNC);
       
@@ -930,15 +931,15 @@ void parse_atom(void){
     else{
       if(local_var_exists(temp_name) != -1){ // is a local variable
         var_id = local_var_exists(temp_name);
-        if(local_variables[var_id].data.type == DT_CHAR){
+        if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
           emit("\tmov bl, [bp+");
-          sprintf(temp, "%d", local_variables[var_id].bp_offset);
+          sprintf(temp, "%d", function_table[current_func_id].local_vars[var_id].bp_offset);
           emit(temp);
           emitln("]");
         }
-        else if(local_variables[var_id].data.type == DT_INT){
+        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
           emit("\tmov b, [bp+");
-          sprintf(temp, "%d", local_variables[var_id].bp_offset - 1);
+          sprintf(temp, "%d", function_table[current_func_id].local_vars[var_id].bp_offset - 1);
           emit(temp);
           emitln("]");
           emitln("\tswp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
@@ -985,7 +986,7 @@ void parse_function_arguments(int func_id){
 
   do{
     parse_expr();
-    switch(func -> parameters[param_index].type){
+    switch(func->local_vars[param_index].data.type){
       case DT_CHAR:
         emitln("\tpush bl");
         break;
@@ -998,42 +999,11 @@ void parse_function_arguments(int func_id){
   
 }
 
-void call_func(int func_id){
-  char *t;
-  int temp_local_tos;
-  
-  if(user_func_call_index == MAX_USER_FUNC_CALLS) trigger_err(USER_FUNC_CALLS_LIMIT_REACHED);
-
-  current_func_id = func_id;
-
-  temp_local_tos = local_var_tos;
-  parse_function_arguments(func_id); // pushes the parameter variables into the local variables stack
-
-  if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
-  
-  local_var_tos_history[user_func_call_index] = temp_local_tos;
-  user_func_call_index++;
-
-// saves the current program address
-  t = prog;
-  prog = function_table[func_id].code_location; // sets the program pointer to the beginning of the function code, just before the "{" token
-
-// recovers the previous program address
-  prog = t;
-  
-//recovers the previous local variable top of stack
-  user_func_call_index--;
-  local_var_tos = local_var_tos_history[user_func_call_index];
-
-}
-
 int find_global_var(char *var_name){
   register int i;
-  char internal_name[ID_LEN] = "_var_";
   
-  strcat(internal_name, var_name);
   for(i = 0; (i < global_var_tos) && (*global_variables[i].var_name); i++)
-    if(!strcmp(global_variables[i].var_name, internal_name)) return i;
+    if(!strcmp(global_variables[i].var_name, var_name)) return i;
   
   return -1;
 }
@@ -1100,8 +1070,7 @@ void declare_global(void){
     global_variables[global_var_tos].data.type = dt;
     global_variables[global_var_tos].data.ind_level = ind_level;
     
-    strcpy(global_variables[global_var_tos].var_name, "_var_");
-    strcat(global_variables[global_var_tos].var_name, token);
+    strcpy(global_variables[global_var_tos].var_name, token);
     get_token();
 
     // checks for variable initialization
@@ -1154,24 +1123,19 @@ int find_function(char *func_name){
 
 int global_var_exists(char *var_name){
   register int i;
-  char internal_name[ID_LEN] = "_var_";
 
-  strcat(internal_name, var_name);
   for(i = 0; i < global_var_tos; i++)
-    if(!strcmp(global_variables[i].var_name, internal_name)) return i;
+    if(!strcmp(global_variables[i].var_name, var_name)) return i;
   
   return -1;
 }
 
 int local_var_exists(char *var_name){
   register int i;
-  char internal_name[ID_LEN] = "_var_";
 
-  strcat(internal_name, var_name);
   //check local variables whose function id is the id of current function being parsed
-  for(i = 0; i < local_var_tos; i++)
-    if(local_variables[i].function_id == current_func_id)
-      if(!strcmp(local_variables[i].var_name, internal_name)) return i;
+  for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
+    if(!strcmp(function_table[current_func_id].local_vars[i].var_name, var_name)) return i;
   
   return -1;
 }
@@ -1185,7 +1149,7 @@ void declare_local(void){
   get_token(); // gets past the data type
 
   if(tok == CONST){
-    constant = TRUE;
+    constant = 1;
     get_token();
   }
   
@@ -1207,7 +1171,7 @@ void declare_local(void){
   }
 
   do{
-    if(local_var_tos == MAX_LOCAL_VARS) trigger_err(LOCAL_VAR_LIMIT_REACHED);
+    if(function_table[current_func_id].local_var_tos == MAX_LOCAL_VARS) trigger_err(LOCAL_VAR_LIMIT_REACHED);
     
     new_var.function_id = current_func_id; // set variable owner function
 
@@ -1215,7 +1179,7 @@ void declare_local(void){
     // whenever a new function is parsed, this is reset to 0.
     // then inside the function it can increase according to how any local vars there are.
     new_var.bp_offset = current_function_var_bp_offset;
-
+    new_var.is_parameter = 0;
     new_var.constant = constant;
 
     // initializes the variable to 0
@@ -1253,8 +1217,7 @@ void declare_local(void){
 
     new_var.data.type = dt;
     new_var.data.ind_level = ind_level;
-    strcpy(new_var.var_name, "_var_");
-    strcat(new_var.var_name, token);
+    strcpy(new_var.var_name, token);
     get_token();
 
     if(tok == ASSIGNMENT){
@@ -1286,8 +1249,8 @@ void declare_local(void){
     // the indirection level needs to be reset now, because if it not, its value might be changed to the expression ind_level    
     new_var.data.ind_level = ind_level;
     // assigns the new variable to the local stack
-    local_variables[local_var_tos] = new_var;    
-    local_var_tos++;
+    function_table[current_func_id].local_vars[function_table[current_func_id].local_var_tos] = new_var;    
+    function_table[current_func_id].local_var_tos++;
   } while(tok == COMMA);
 
   if(tok != SEMICOLON) trigger_err(SEMICOLON_EXPECTED);
@@ -1297,9 +1260,9 @@ _LOCAL_VAR *get_local_var(char *var_name){
   register int i;
 
   //check local variables whose function id is the id of current function being parsed
-  for(i = 0; i < local_var_tos; i++)
-    if(local_variables[i].function_id == current_func_id)
-      if(!strcmp(local_variables[i].var_name, var_name)) return &local_variables[i];
+  for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
+    if(!strcmp(function_table[current_func_id].local_vars[i].var_name, var_name))
+      return &function_table[current_func_id].local_vars[i];
   
   return NULL;
 }
@@ -1311,11 +1274,6 @@ _GLOBAL_VAR *get_global_var(char *var_name){
     if(!strcmp(global_variables[i].var_name, var_name)) return &global_variables[i];
   
   return NULL;
-}
-
-void local_push(_LOCAL_VAR *var){
-  local_variables[local_var_tos] = *var;
-  local_var_tos++;
 }
 
 void trigger_err(_ERROR e){

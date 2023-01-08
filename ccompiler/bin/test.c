@@ -1,12 +1,9 @@
 #include "lib/stdio.asm"
 
 
-int i, j;
 
 int main(void) {
-    i = 50;
-    j = 100;
-    test(i , j);
+    test(5, 10);
 
   asm{
     syscall sys_terminate_proc
@@ -16,5 +13,23 @@ int main(void) {
 void test(char i, int j){
   int ii; char c;
   int jj;
-  return i+j;
+  ii = 1;
+  c = 2;
+  jj = 3;
+  i = 2;
+  j = 3;
+  return;
 }
+
+/*
+
+ARGUMENTS
+  char
+  int
+  int
+  int
+  pc
+  bp
+  locals <<< BP
+
+*/

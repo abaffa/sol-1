@@ -96,10 +96,10 @@ typedef struct {
   _DATA data; // holds the type of data and the value itself
   int dims[MAX_MATRIX_DIMS + 1];
   char constant;
+  char is_parameter; // is this a parameter variable or a normal local variable?
   int bp_offset; // if var is local, this holds the offset of the var from BP.
   int function_id; // the function does this local var belong to
 } _LOCAL_VAR;
-_LOCAL_VAR local_variables[MAX_LOCAL_VARS];
 
 typedef struct {
   char var_name[ID_LEN];
@@ -115,13 +115,8 @@ typedef struct {
   char func_name[ID_LEN];
   _BASIC_DATA return_type;
   char *code_location;
-  struct{ // holds information about each of the defined parameters, for later use when the function is called
-    char param_name[ID_LEN];
-    _BASIC_DATA type;
-    char constant;
-    int ind_level; // if the parameter is a pointer
-    int bp_offset; // offset of this parameter inside the stack (from BP)
-  } parameters[MAX_USER_FUNC_PARAMS + 1]; // one extra to mark the end of the list
+  _LOCAL_VAR local_vars[MAX_LOCAL_VARS + 1];
+  int local_var_tos;
 } _USER_FUNC;
 _USER_FUNC function_table[MAX_USER_FUNC];
 
@@ -261,14 +256,9 @@ char *error_table[] = {
   "incompatible argument type in function"
 };
 
-int total_bytes_for_locals;
 int current_function_var_bp_offset;  // this is used to position local variables correctly relative to BP.
 int current_func_id;
-int local_var_tos_history[MAX_USER_FUNC_CALLS]; // holds the previous local variable stack upper bound;
 int function_table_tos;
-int user_func_table_tos;
-int user_func_call_index; // holds the current function call count (for use with the local stack history array
-int local_var_tos; // holds the current local variable stack upper bound;
 int global_var_tos;
 
 char token[CONST_LEN + 2]; // string token representation

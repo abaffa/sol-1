@@ -3,15 +3,9 @@
 
 ; -----begin text block-----
 main:
-	mov a, 0
-	mov b, 50
-	mov [_var_i], b
-	mov a, 0
-	mov b, 100
-	mov [_var_j], b
-	mov b, [_var_i]
+	mov b, 5
 	push bl
-	mov b, [_var_j]
+	mov b, 10
 	push b
 	call test
 	add sp, 3
@@ -24,13 +18,29 @@ test:
 	push word 0
 	push byte 0
 	push word 0
-	mov b, [_var_i]
-	push a
+	mov a, 0
+	mov b, 1
 	mov a, b
-	mov b, [_var_j]
-	add a, b
-	mov b, a
-	pop a
+	swp a
+	mov [bp+-1], a
+	mov a, 0
+	mov b, 2
+	mov al, bl
+	mov [bp+-2], al
+	mov a, 0
+	mov b, 3
+	mov a, b
+	swp a
+	mov [bp+-4], a
+	mov a, 0
+	mov b, 2
+	mov al, bl
+	mov [bp+0], al
+	mov a, 0
+	mov b, 3
+	mov a, b
+	swp a
+	mov [bp+-2], a
 	add sp, 5
 	leave
 	ret
@@ -40,8 +50,6 @@ test:
 
 ; -----begin data block-----
 
-_var_i: .dw 0
-_var_j: .dw 0
 
 ; -----end data block-----
 
