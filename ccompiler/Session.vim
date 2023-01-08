@@ -20,6 +20,7 @@ set expandtab
 set fileencodings=ucs-bom,utf-8,default,latin1
 set helplang=en
 set history=200
+set hlsearch
 set incsearch
 set langnoremap
 set nolangremap
@@ -79,10 +80,10 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe 'vert 1resize ' . ((&columns * 100 + 117) / 235)
-exe 'vert 2resize ' . ((&columns * 55 + 117) / 235)
-exe 'vert 3resize ' . ((&columns * 41 + 117) / 235)
-exe 'vert 4resize ' . ((&columns * 36 + 117) / 235)
+exe 'vert 1resize ' . ((&columns * 124 + 117) / 235)
+exe 'vert 2resize ' . ((&columns * 31 + 117) / 235)
+exe 'vert 3resize ' . ((&columns * 38 + 117) / 235)
+exe 'vert 4resize ' . ((&columns * 39 + 117) / 235)
 argglobal
 setlocal keymap=
 setlocal noarabic
@@ -208,12 +209,12 @@ set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 230 - ((12 * winheight(0) + 27) / 54)
+let s:l = 290 - ((28 * winheight(0) + 27) / 54)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-230
-normal! 0
+290
+normal! 013|
 wincmd w
 argglobal
 if bufexists("def.h") | buffer def.h | else | edit def.h | endif
@@ -473,12 +474,12 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 18 - ((17 * winheight(0) + 27) / 54)
+let s:l = 13 - ((12 * winheight(0) + 27) / 54)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-18
-normal! 09|
+13
+normal! 031|
 wincmd w
 argglobal
 if bufexists("bin/a.s") | buffer bin/a.s | else | edit bin/a.s | endif
@@ -605,17 +606,17 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 17 - ((16 * winheight(0) + 27) / 54)
+let s:l = 21 - ((20 * winheight(0) + 27) / 54)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-17
-normal! 07|
+21
+normal! 08|
 wincmd w
-exe 'vert 1resize ' . ((&columns * 100 + 117) / 235)
-exe 'vert 2resize ' . ((&columns * 55 + 117) / 235)
-exe 'vert 3resize ' . ((&columns * 41 + 117) / 235)
-exe 'vert 4resize ' . ((&columns * 36 + 117) / 235)
+exe 'vert 1resize ' . ((&columns * 124 + 117) / 235)
+exe 'vert 2resize ' . ((&columns * 31 + 117) / 235)
+exe 'vert 3resize ' . ((&columns * 38 + 117) / 235)
+exe 'vert 4resize ' . ((&columns * 39 + 117) / 235)
 tabnext
 edit def.h
 set splitbelow splitright
@@ -750,12 +751,12 @@ setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 118 - ((34 * winheight(0) + 27) / 55)
+let s:l = 340 - ((54 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-118
-normal! 026|
+340
+normal! 037|
 tabnext
 edit bin/test.c
 set splitbelow splitright

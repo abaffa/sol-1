@@ -224,7 +224,9 @@ void pre_scan(void){
 void declare_func(void){
   _USER_FUNC *func; // variable to hold a pointer to the user function top of stack
   _BASIC_DATA param_data_type; // function data type
-  int bp_offset = 0; // for each parameter, keep the running offset of that parameter.
+  int bp_offset; // for each parameter, keep the running offset of that parameter.
+  char *temp_prog;
+  int total_parameter_bytes;
 
   if(function_table_tos == MAX_USER_FUNC - 1) trigger_err(EXCEEDED_FUNC_DECL_LIMIT);
 
@@ -261,6 +263,11 @@ void declare_func(void){
   }
   else{
     putback();
+    temp_prog = prog;
+    total_parameter_bytes = find_total_parameter_bytes();
+    bp_offset = total_parameter_bytes;
+    prog = temp_prog;
+
     do{
       func->local_vars[func->local_var_tos].is_parameter = 1;
 
@@ -284,20 +291,20 @@ void declare_func(void){
               func->local_vars[func->local_var_tos].data.ind_level++;
               get_token();
             }
-            bp_offset += 2; // is a pointer, so offset is +2
+            bp_offset -= 2; 
           }
           else{
             putback();
-            bp_offset += 1; // not a pointer
+            bp_offset -= 1; 
           }
           break;
         case INT:
           func->local_vars[func->local_var_tos].data.type = DT_INT;
-          bp_offset += 2; // offset is +2 whether it is a pointer or not
+          bp_offset -= 2; 
           break;
         case FLOAT:
           func->local_vars[func->local_var_tos].data.type = DT_FLOAT;
-          bp_offset += 2; // offset is +2 whether it is a pointer or not
+          bp_offset -= 2; 
           break;
         case DOUBLE:
           func->local_vars[func->local_var_tos].data.type = DT_DOUBLE;
@@ -307,11 +314,11 @@ void declare_func(void){
               func->local_vars[func->local_var_tos].data.ind_level++;
               get_token();
             }
-            bp_offset += 2; // is a pointer, so offset is +2
+            bp_offset -= 2;
           }
           else{
             putback();
-            bp_offset += 4; // not a pointer
+            bp_offset -= 4;
           }
       }
 
@@ -336,12 +343,32 @@ void declare_func(void){
   function_table_tos++;
 }
 
-/*
-asm{
-  line1
-  line2
+int find_total_parameter_bytes(void){
+  int total_bytes;
+
+  total_bytes = 0;
+  do{
+    get_token();
+    switch(tok){
+      case CHAR:
+        total_bytes += 1;
+        break;
+      case INT:
+        total_bytes += 2;
+        break;
+      case FLOAT:
+        total_bytes += 2;
+        break;
+      case DOUBLE:
+        total_bytes += 4;
+    }
+    get_token(); // get past parameter name
+    get_token(); // get possible comma
+  } while(tok == COMMA);
+
+  return total_bytes;
 }
-*/
+
 void parse_asm(void){
   get_token();
   if(tok == OPENING_BRACE){
@@ -687,7 +714,11 @@ void parse_attrib(){
         if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
           emitln("\tmov al, bl");
           emit("\tmov [bp+");
-          sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
+          if(function_table[current_func_id].local_vars[var_id].is_parameter)
+            // add +4 below to account for BP and PC offsets which were pushed into the stack
+            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
+          else
+            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
           emit(temp);
           emitln("], al");
         }
@@ -696,7 +727,11 @@ void parse_attrib(){
           emitln("\tswp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
                     // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
           emit("\tmov [bp+");
-          sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          if(function_table[current_func_id].local_vars[var_id].is_parameter)
+            // add +4 below to account for BP and PC offsets which were pushed into the stack
+            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          else
+            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
           emit(temp);
           emitln("], a");
         }

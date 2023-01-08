@@ -335,3 +335,6 @@ void parse_asm(void);
 
 void parse_function_arguments(int func_index);
 void call_func(int func_index);
+
+
+int find_total_parameter_bytes(void);

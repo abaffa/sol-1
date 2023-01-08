@@ -10,14 +10,15 @@ int main(void) {
   }
 }
 
-void test(char i, int j){
-  int ii; char c;
-  int jj;
-  ii = 1;
-  c = 2;
-  jj = 3;
-  i = 2;
-  j = 3;
+void test(char c, int j, int k){
+  int ii;
+
+  ii = 56;
+
+  c = 1;
+  j = 2;
+  k = 3;
+
   return;
 }
 
@@ -25,7 +26,6 @@ void test(char i, int j){
 
 ARGUMENTS
   char
-  int
   int
   int
   pc
