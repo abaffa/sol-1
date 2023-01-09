@@ -1,9 +1,7 @@
 #include "lib/stdio.asm"
 
-
-
 int main(void) {
-    test(5, 10, 15);
+  test(5, 10, 15, 1);
 
   asm{
     syscall sys_terminate_proc
@@ -12,11 +10,11 @@ int main(void) {
 
 void test(int c, int kk, int i, int k){
   int ii;
-  char d;
+  char d = 0;
   int jj;
 
-
-  c = 'a';
+  for(i = 0; i < 10; i++){
+  }
 
   return;
 }

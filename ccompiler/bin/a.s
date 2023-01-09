@@ -9,6 +9,8 @@ main:
   push b
   mov b, 15
   push b
+  mov b, 1
+  push b
   call test
   add sp, 8
 ; -----begin inline asm block-----
@@ -20,14 +22,33 @@ test:
   push word 0
   push byte 0
   push word 0
+_for1_init:
   mov a, 0
-  mov bl, 'a'
-  mov bh, 0
+  mov b, 0
   mov a, b
   swp a
-  mov [bp + 11], a
-  leave
-  ret
+  mov [bp + 7], a
+_for1_cond:
+  mov b, [bp + 7]
+  swp b
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000010
+  mov ah, 0
+  mov b, a
+  pop a
+  mov a, b
+  cmp a, 0
+  je _for1_exit
+_for1_block:
+_for1_update:
+  mov b, [bp + 7]
+  swp b
+  jmp _for1_cond
+_for1_exit:
 
 ; -----end text block-----
 
