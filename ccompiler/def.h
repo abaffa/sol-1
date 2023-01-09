@@ -37,8 +37,8 @@ typedef enum {
   SEMICOLON, COMMA,
 
   ASM
-} _ATOM; // internal token representation
-_ATOM tok;
+} _TOKEN; // internal token representation
+_TOKEN tok;
 
 typedef enum {
   DELIMITER = 1,
@@ -118,7 +118,7 @@ _USER_FUNC function_table[MAX_USER_FUNC];
 
 struct _keyword_table{
   char *keyword;
-  _ATOM key;
+  _TOKEN key;
 } keyword_table[] = {
   "void", VOID,
   "char", CHAR,

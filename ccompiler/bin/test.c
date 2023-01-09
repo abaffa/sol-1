@@ -10,7 +10,7 @@ int main(void) {
   }
 }
 
-void test(char c, int i, int k){
+void test(int c, int kk, int i, int k){
   int ii;
   char d;
   int jj;

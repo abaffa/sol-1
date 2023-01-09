@@ -4,13 +4,13 @@
 ; -----begin text block-----
 main:
   mov b, 5
-  push bl
+  push b
   mov b, 10
   push b
   mov b, 15
   push b
   call test
-  add sp, 5
+  add sp, 8
 ; -----begin inline asm block-----
   syscall sys_terminate_proc
 ; -----end inline asm block-----
@@ -23,8 +23,9 @@ test:
   mov a, 0
   mov bl, 'a'
   mov bh, 0
-  mov al, bl
-  mov [bp + 9], al
+  mov a, b
+  swp a
+  mov [bp + 11], a
   leave
   ret
 
