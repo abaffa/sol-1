@@ -1,21 +1,31 @@
+; -----begin include block-----
 .include "lib/kernel.exp"
+.include "lib/stdio.asm"
+; -----end include block-----
+
 .org PROC_TEXT_ORG
 
 ; -----begin text block-----
 main:
-  mov b, 5
-  push b
-  mov b, 10
-  push b
-  mov b, 15
-  push b
+  push bp
+  mov bp, sp
+  push word 0
+  mov a, 0
+  mov b, integer
+  push a
+  mov a, b
   mov b, 1
-  push b
-  call test
-  add sp, 8
+  add a, b
+  mov b, a
+  pop a
+  mov a, b
+  swp a
+  mov [bp + -1], a
 ; -----begin inline asm block-----
   syscall sys_terminate_proc
 ; -----end inline asm block-----
+  leave
+  ret
 test:
   push bp
   mov bp, sp
@@ -49,22 +59,12 @@ _for1_update:
   swp b
   jmp _for1_cond
 _for1_exit:
-
 ; -----end text block-----
 
-
 ; -----begin data block-----
-
-
+integer: .dw 25
+s_data: .db "hello world", 0
+s: .dw s_data
 ; -----end data block-----
-
-
-; -----begin include block-----
-
-.include "lib/stdio.asm"
-
-
-; -----end include block-----
-
 
 .end

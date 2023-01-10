@@ -1,11 +1,20 @@
+#include "lib/kernel.exp"
 #include "lib/stdio.asm"
 
+int integer = 25;
+char *s = "hello world";
+
 int main(void) {
-  test(5, 10, 15, 1);
+  int *p;
+
+  p = &integer + 1;
+
 
   asm{
     syscall sys_terminate_proc
   }
+
+  return;
 }
 
 void test(int c, int kk, int i, int k){

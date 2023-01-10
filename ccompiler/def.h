@@ -28,7 +28,7 @@ typedef enum {
   LOGICAL_AND, LOGICAL_OR, LOGICAL_NOT,
   ASSIGNMENT,
   
-  BITWISE_AND, BITWISE_OR, BITWISE_NOT, BITWISE_SL, BITWISE_SR, POINTER_REF,
+  BITWISE_AND, AMPERSAND = BITWISE_AND, BITWISE_OR, BITWISE_NOT, BITWISE_SL, BITWISE_SR,
   
   OPENING_PAREN, CLOSING_PAREN,
   OPENING_BRACE, CLOSING_BRACE,
@@ -309,7 +309,6 @@ void parse_atom();
 void parse_return(void);
 
 void parse_block(void);
-void parse_main(void);
 void parse_functions(void);
 
 void convert_data(_DATA *data_to_convert, _BASIC_DATA into_type);
