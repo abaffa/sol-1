@@ -728,6 +728,23 @@ void parse_attrib(){
       return;
     }
   }
+	else if(tok == STAR){ // tests if this is a pointer assignment
+		while(tok != SEMICOLON && token_type != END){
+			get_token();
+			if(tok == ATTRIBUTION){ // is an attribution statement
+				prog = temp_prog; // goes back to the beginning of the expression
+				get_token(); // gets past the first asterisk
+				parse_atom();
+        emitln("  push a"); // save 'a'
+				emitln("  mov a, b"); // pointer given in 'b', so mov 'b' into 'a'
+				// after evaluating the address expression, the token will be a "="
+				eval_atrib(); // evaluates the value to be attributed to the address, result in 'b'
+        emitln("  mov [a], b");
+
+				return;
+			}
+		}
+	}
   
   prog = temp_prog;
   parse_logical();
