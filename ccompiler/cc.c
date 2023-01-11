@@ -731,16 +731,14 @@ void parse_attrib(){
 	else if(tok == STAR){ // tests if this is a pointer assignment
 		while(tok != SEMICOLON && token_type != END){
 			get_token();
-			if(tok == ATTRIBUTION){ // is an attribution statement
+			if(tok == ASSIGNMENT){ // is an attribution statement
 				prog = temp_prog; // goes back to the beginning of the expression
 				get_token(); // gets past the first asterisk
 				parse_atom();
-        emitln("  push a"); // save 'a'
-				emitln("  mov a, b"); // pointer given in 'b', so mov 'b' into 'a'
+				emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
 				// after evaluating the address expression, the token will be a "="
-				eval_atrib(); // evaluates the value to be attributed to the address, result in 'b'
-        emitln("  mov [a], b");
-
+				parse_attrib(); // evaluates the value to be attributed to the address, result in 'b'
+        emitln("  mov [d], b");
 				return;
 			}
 		}
@@ -890,10 +888,9 @@ void parse_atom(void){
   a = *p;
  */
   if(tok == STAR){ // is a pointer operator
-    parse_expr(); // parse expression after STAR, which could be inside parenthesis. result in B
+    parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
-    emitln("  mov bl, [d]"); // data fetched as a char! need to improve this to allow any types later.
-    emitln("  mov bh, 0");
+    emitln("  mov b, [d]"); // data fetched as an int. need to improve this to allow any types later.
     putback();
   }
   else if(tok == AMPERSAND){

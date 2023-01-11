@@ -8,7 +8,7 @@ int main(void) {
 
   p = &integer;
 
-  *p = 22;
+  **p = 22;
 
 
   return;
