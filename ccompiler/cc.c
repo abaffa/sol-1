@@ -10,7 +10,7 @@ int main(int argc, char *argv[]){
     printf("usage: cc [filename]\n");
     return 0;
   }
-
+  
   prog = pbuf; // resets pointer to the beginning of the program
 
   initial_setup();
@@ -663,6 +663,20 @@ void find_end_of_BLOCK(void){
   if(brace && !*prog) trigger_err(CLOSING_BRACE_EXPECTED);
 }
 
+_BASIC_DATA get_var_type(char *var_name){
+	register int i;
+
+  for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
+    if(!strcmp(function_table[current_func_id].local_vars[i].var_name, var_name))
+			return function_table[current_func_id].local_vars[i].data.type;
+
+	for(i = 0; i < global_var_tos; i++)
+		if(!strcmp(global_variables[i].var_name, var_name)) 
+			return global_variables[i].data.type;
+
+	trigger_err(UNDECLARED_VARIABLE);
+}
+
 void parse_expr(){
   parse_attrib();
 }
@@ -713,11 +727,13 @@ void parse_attrib(){
       else if(global_var_exists(var_name) != -1){  // is a global variable
         var_id = global_var_exists(var_name);
         if(global_variables[var_id].data.type == DT_CHAR){
+          // need to check if var are pointers here
           emit("  mov [");
           emit(global_variables[var_id].var_name);
           emitln("], bl");
         }
         else if(global_variables[var_id].data.type == DT_INT){
+        // check for pointers here also
           emit("  mov [");
           emit(global_variables[var_id].var_name);
           emitln("], b");
@@ -731,6 +747,7 @@ void parse_attrib(){
 	else if(tok == STAR){ // tests if this is a pointer assignment
 		while(tok != SEMICOLON && token_type != END){
 			get_token();
+      if(token_type == IDENTIFIER) strcpy(var_name, token); // save var name
 			if(tok == ASSIGNMENT){ // is an attribution statement
 				prog = temp_prog; // goes back to the beginning of the expression
 				get_token(); // gets past the first asterisk
@@ -738,7 +755,15 @@ void parse_attrib(){
 				emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
 				// after evaluating the address expression, the token will be a "="
 				parse_attrib(); // evaluates the value to be attributed to the address, result in 'b'
-        emitln("  mov [d], b");
+        switch(get_var_type(var_name)){
+          case DT_CHAR:
+            emitln("  mov [d], bl");
+            break;
+          case DT_INT:
+            emitln("  mov [d], b");
+            break;
+          default: trigger_err(INVALID_POINTER);
+        }
 				return;
 			}
 		}

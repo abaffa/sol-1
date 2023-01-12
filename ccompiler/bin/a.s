@@ -10,21 +10,21 @@ main:
   push bp
   mov bp, sp
   mov a, 0
-  mov b, integer
-  mov [p], b
-  mov b, [p]
+  mov b, mychar
+  mov [p], bl
+  mov bl, [p]
   mov d, b
-  mov b, [d]
-  mov d, b
-  mov b, 22
-  mov [d], b
+  mov bl, 'b'
+  mov bh, 0
+  mov [d], bl
   leave
   ret
 ; -----end text block-----
 
 ; -----begin data block-----
-integer: .dw 25
-p: .dw 0
+mychar: .db $61
+p_data: .db "", 0
+p: .dw p_data
 ; -----end data block-----
 
 .end

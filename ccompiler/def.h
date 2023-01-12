@@ -176,6 +176,7 @@ typedef enum {
   DUPLICATE_LOCAL_VARIABLE,
   STRING_CONSTANT_EXPECTED,
   POINTER_EXPECTED,
+  INVALID_POINTER,
   INSUFFICIENT_ARGUMENTS,
   POINTER_SYNTAX,
   TOO_MANY_MATRIX_DIMENSIONS,
@@ -230,6 +231,7 @@ char *error_table[] = {
   "duplicate local variable declared",
   "string constant expected",
   "pointer expected",
+  "invalid pointer type",
   "insufficient function arguments",
   "pointer syntax error",
   "declared matrix exceeds the maximum number of dimensions (max = 10)",
@@ -313,6 +315,7 @@ void parse_functions(void);
 
 void convert_data(_DATA *data_to_convert, _BASIC_DATA into_type);
 
+_BASIC_DATA get_var_type(char *var_name);
 
 void parse_directive(void);
 void emit_global_variables(void);

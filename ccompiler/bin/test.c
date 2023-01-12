@@ -1,14 +1,14 @@
 #include "lib/kernel.exp"
 #include "lib/stdio.asm"
 
-int integer = 25;
-int *p;
+char mychar = 'a';
+char *p;
 
 int main(void) {
 
-  p = &integer;
+  p = &mychar;
 
-  **p = 22;
+  *p = 'b';
 
 
   return;
