@@ -166,13 +166,13 @@ void pre_scan(void){
   do{
     tp = prog;
     get_token();
-    if(token_type == END) return;
+    if(tok_type == END) return;
 
     if(tok == DIRECTIVE){
       get_token();
       if(tok != INCLUDE) trigger_err(UNKNOWN_DIRECTIVE);
       get_token();
-      if(token_type != STRING_CONST) trigger_err(DIRECTIVE_SYNTAX);
+      if(tok_type != STRING_CONST) trigger_err(DIRECTIVE_SYNTAX);
       include_lib(token);
       continue;
     }
@@ -183,7 +183,7 @@ void pre_scan(void){
     get_token();
     
     while(tok == STAR) get_token();
-    if(token_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
+    if(tok_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
 
     get_token();
     if(tok == OPENING_PAREN){ //it must be a function declaration
@@ -195,7 +195,7 @@ void pre_scan(void){
       prog = tp;
       declare_global();
     }
-  } while(token_type != END);
+  } while(tok_type != END);
   
 }
 
@@ -301,7 +301,7 @@ void declare_func(void){
       }
 
       get_token();
-      if(token_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
+      if(tok_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
       strcpy(func->local_vars[func->local_var_tos].var_name, token);
         
       get_token();
@@ -589,7 +589,7 @@ void parse_block(void){
         parse_return();
         break;
       default:
-        if(token_type == END) trigger_err(CLOSING_BRACE_EXPECTED);
+        if(tok_type == END) trigger_err(CLOSING_BRACE_EXPECTED);
         putback();
         parse_expr();
         if(tok != SEMICOLON) trigger_err(SEMICOLON_EXPECTED);
@@ -690,7 +690,7 @@ void parse_attrib(){
   temp_prog = prog;
 
   get_token();
-  if(token_type == IDENTIFIER){
+  if(tok_type == IDENTIFIER){
     strcpy(var_name, token);
     get_token();
     if(tok == ASSIGNMENT){
@@ -745,9 +745,9 @@ void parse_attrib(){
     }
   }
 	else if(tok == STAR){ // tests if this is a pointer assignment
-		while(tok != SEMICOLON && token_type != END){
+		while(tok != SEMICOLON && tok_type != END){
 			get_token();
-      if(token_type == IDENTIFIER) strcpy(var_name, token); // save var name
+      if(tok_type == IDENTIFIER) strcpy(var_name, token); // save var name
 			if(tok == ASSIGNMENT){ // is an attribution statement
 				prog = temp_prog; // goes back to the beginning of the expression
 				get_token(); // gets past the first asterisk
@@ -920,7 +920,7 @@ void parse_atom(void){
   }
   else if(tok == AMPERSAND){
     get_token(); // get variable name
-    if(token_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
+    if(tok_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
     if(local_var_exists(token) != -1){ // is a local variable
       var_id = local_var_exists(token);
       if(function_table[current_func_id].local_vars[var_id].is_parameter)
@@ -937,11 +937,11 @@ void parse_atom(void){
       emitln(global_variables[var_id].var_name);
     }
   }
-  else if(token_type == INTEGER_CONST){
+  else if(tok_type == INTEGER_CONST){
     emit("  mov b, ");
     emitln(token);
   }
-  else if(token_type == CHAR_CONST){
+  else if(tok_type == CHAR_CONST){
     emit("  mov bl, "); emitln(token);
     emitln("  mov bh, 0");
   }
@@ -959,7 +959,7 @@ void parse_atom(void){
     parse_expr();  // parses expression between parenthesis and result will be in B
     if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
   }
-  else if(token_type == IDENTIFIER){
+  else if(tok_type == IDENTIFIER){
     strcpy(temp_name, token);
     get_token();
     if(tok == OPENING_PAREN){ // function call      
@@ -1133,7 +1133,7 @@ void declare_global(void){
       get_token();
     }
 // *********************************************************************************************
-    if(token_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
+    if(tok_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
     
     // checks if there is another global variable with the same name
     if(find_global_var(token) != -1) trigger_err(DUPLICATE_GLOBAL_VARIABLE);
@@ -1152,7 +1152,7 @@ void declare_global(void){
         case DT_CHAR:
           if(ind_level > 0){ // if is a string
             get_token();
-            if(token_type != STRING_CONST) trigger_err(STRING_CONSTANT_EXPECTED);
+            if(tok_type != STRING_CONST) trigger_err(STRING_CONSTANT_EXPECTED);
             strcpy(global_variables[global_var_tos].as_string, string_constant);
           }
           else{
@@ -1282,7 +1282,7 @@ void declare_local(void){
       default: 
         current_function_var_bp_offset += 2;
     }
-    if(token_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
+    if(tok_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
 
     if(local_var_exists(token) != -1) trigger_err(DUPLICATE_LOCAL_VARIABLE);
 
@@ -1370,7 +1370,7 @@ void convert_constant(){
   char *s = string_constant;
   char *t = token;
   
-  if(token_type == CHAR_CONST){
+  if(tok_type == CHAR_CONST){
     t++;
     if(*t == '\\'){
       t++;
@@ -1413,7 +1413,7 @@ void convert_constant(){
       *s++ = *t;
     }
   }
-  else if(token_type == STRING_CONST){
+  else if(tok_type == STRING_CONST){
     t++;
     while(*t != '\"' && *t){
       *s++ = *t++;
@@ -1442,7 +1442,7 @@ void get_token(void){
   } while(isspace(*prog));
 
   if(*prog == '\0'){
-    token_type = END;
+    tok_type = END;
     return;
   }
   
@@ -1460,7 +1460,7 @@ void get_token(void){
     
     *t++ = '\'';
     prog++;
-    token_type = CHAR_CONST;
+    tok_type = CHAR_CONST;
     *t = '\0';
     convert_constant(); // converts this string token with quotation marks to a non quotation marks string, and also converts escape sequences to their real bytes
   }
@@ -1471,24 +1471,24 @@ void get_token(void){
     if(*prog != '\"') trigger_err(DOUBLE_QUOTE_EXPECTED);
     *t++ = '\"';
     prog++;
-    token_type = STRING_CONST;
+    tok_type = STRING_CONST;
     *t = '\0';
     convert_constant(); // converts this string token qith quotation marks to a non quotation marks string, and also converts escape sequences to their real bytes
   }
   else if(isdigit(*prog)){
     while(isdigit(*prog)) *t++ = *prog++;
-    token_type = INTEGER_CONST;
+    tok_type = INTEGER_CONST;
   }
   else if(is_idchar(*prog)){
     while(is_idchar(*prog) || isdigit(*prog))
       *t++ = *prog++;
     *t = '\0';
 
-    if((tok = find_keyword(token)) != -1) token_type = RESERVED;
-    else token_type = IDENTIFIER;
+    if((tok = find_keyword(token)) != -1) tok_type = RESERVED;
+    else tok_type = IDENTIFIER;
   }
   else if(isdelim(*prog)){
-    token_type = DELIMITER;  
+    tok_type = DELIMITER;  
     
     if(*prog == '#'){
       *t++ = *prog++;

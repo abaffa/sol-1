@@ -45,7 +45,7 @@ typedef enum {
   CHAR_CONST, STRING_CONST, INTEGER_CONST, FLOAT_CONST, DOUBLE_CONST,
   IDENTIFIER, RESERVED, END
 } _TOKEN_TYPE;
-_TOKEN_TYPE token_type;
+_TOKEN_TYPE tok_type;
 
 typedef enum {
   JF_NULL, 
@@ -259,21 +259,21 @@ int current_func_id;
 int function_table_tos;
 int global_var_tos;
 
-char token[CONST_LEN + 2]; // string token representation
-char string_constant[CONST_LEN + 2]; // holds string and char constants without quotes and with escape sequences converted into the correct bytes
-char *prog; // pointer to the current program position
-char pbuf[PROG_SIZE]; // pointer to the beginning of the source code
-char ASM_output[64*1024]; // ASM output 
+char token[CONST_LEN + 2];            // string token representation
+char string_constant[CONST_LEN + 2];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
+char *prog;                           // pointer to the current program position
+char pbuf[PROG_SIZE];                 // pointer to the beginning of the source code
+char ASM_output[64*1024];             // ASM output 
 char *asmp;
-char includes_list_ASM[1024]; // keeps a list of all included files
-int highest_label_index = 0;   // this keeps the next value of the label index for use in new labels.
-                //label values are never repeating. always increasing.
-int current_label_index_if = 0; // index of current 'if' label. starts at 0
-int current_label_index_loop = 0; // index of current 'while' label. starts at 0
-int label_stack_loop[64]; // for nested loop labels 
-int label_stack_if[64]; // for nested if labels 
-int label_tos_loop = 0; // label stack pointer
-int label_tos_if = 0; // label stack pointer
+char includes_list_ASM[1024];         // keeps a list of all included files
+int highest_label_index = 0;          // this keeps the next value of the label index for use in new labels.
+                                      //label values are never repeating. always increasing.
+int current_label_index_if = 0;       // index of current 'if' label. starts at 0
+int current_label_index_loop = 0;     // index of current 'while' label. starts at 0
+int label_stack_loop[64];             // for nested loop labels 
+int label_stack_if[64];               // for nested if labels 
+int label_tos_loop = 0;               // label stack pointer
+int label_tos_if = 0;                 // label stack pointer
 
 // functions
 char isdelim(char c);
