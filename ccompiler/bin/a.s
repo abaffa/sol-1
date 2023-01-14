@@ -9,25 +9,23 @@
 main:
   push bp
   mov bp, sp
-  mov b, 1
+_while1_cond:
+  mov b, [i1]
   push a
   mov a, b
-  mov b, 2
-  push a
-  mov a, b
-  mov b, 3
-  mul a, b
-  pop a
-  add a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000010
+  mov ah, 0
   mov b, a
   pop a
-  push a
   mov a, b
-  mov b, 5
-  add a, b
-  mov b, a
-  pop a
-  mov [i1], b
+  cmp a, 0
+  je _while1_exit
+_while1_block:
+  jmp _while1_cond
+_while1_exit:
   leave
   ret
 ; -----end text block-----
@@ -36,6 +34,8 @@ main:
 mychar: .db $61
 p_data: .db "", 0
 p: .dw p_data
+s_data: .db "Hello World", 0
+s: .dw s_data
 i1: .dw 0
 i2: .dw 0
 ; -----end data block-----

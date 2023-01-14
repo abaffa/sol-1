@@ -3,12 +3,11 @@
 
 char mychar = 'a';
 char *p;
+char *s = "Hello World";
 
 int i1, i2;
 
 int main(void) {
-
-  i1 = 1+2*3+5;
 
   return;
 }

@@ -10,7 +10,7 @@ int main(int argc, char *argv[]){
     printf("usage: cc [filename]\n");
     return 0;
   }
-  
+ 
   prog = pbuf; // resets pointer to the beginning of the program
 
   initial_setup();
@@ -79,7 +79,7 @@ void emit_global_variables(void){
     else{
       emit(global_variables[i].var_name); // var name
       emit(": .dw ");  
-      sprintf(s_init, "%d", global_variables[i].data.value.i);
+      sprintf(s_init, "%d", global_variables[i].data.value.shortint);
       emitln(s_init);
     }
   }
@@ -165,27 +165,27 @@ void pre_scan(void){
   
   do{
     tp = prog;
-    get_token();
+    get();
     if(tok_type == END) return;
 
     if(tok == DIRECTIVE){
-      get_token();
+      get();
       if(tok != INCLUDE) error(UNKNOWN_DIRECTIVE);
-      get_token();
+      get();
       if(tok_type != STRING_CONST) error(DIRECTIVE_SYNTAX);
       include_lib(token);
       continue;
     }
     
-    if(tok == CONST) get_token();
+    if(tok == CONST) get();
     if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) error(NOT_VAR_OR_FUNC_OUTSIDE);
     
-    get_token();
+    get();
     
-    while(tok == STAR) get_token();
+    while(tok == STAR) get();
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
 
-    get_token();
+    get();
     if(tok == OPENING_PAREN){ //it must be a function declaration
       prog = tp;
       declare_func();
@@ -210,7 +210,7 @@ void declare_func(void){
 
   func = &function_table[function_table_tos];
 
-  get_token();
+  get();
 
   switch(tok){
     case VOID:
@@ -229,15 +229,15 @@ void declare_func(void){
       func->return_type = DT_DOUBLE;
   }
 
-  get_token(); // gets the function name
+  get(); // gets the function name
   strcpy(func->func_name, token);
-  get_token(); // gets past "("
+  get(); // gets past "("
 
   func->local_var_tos = 0;
   
-  get_token();
+  get();
   if(tok == CLOSING_PAREN || tok == VOID){
-    if(tok == VOID) get_token();
+    if(tok == VOID) get();
   }
   else{
     putback();
@@ -249,10 +249,10 @@ void declare_func(void){
     do{
       func->local_vars[func->local_var_tos].is_parameter = 1;
 
-      get_token();
+      get();
       if(tok == CONST){
         func->local_vars[func->local_var_tos].constant = 1;
-        get_token();
+        get();
       }
       if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) error(VAR_TYPE_EXPECTED);
       
@@ -263,11 +263,11 @@ void declare_func(void){
       switch(tok){
         case CHAR:
           func->local_vars[func->local_var_tos].data.type = DT_CHAR;
-          get_token();
+          get();
           if(tok == STAR){
             while(tok == STAR){
               func->local_vars[func->local_var_tos].data.ind_level++;
-              get_token();
+              get();
             }
             bp_offset -= 2; 
           }
@@ -286,11 +286,11 @@ void declare_func(void){
           break;
         case DOUBLE:
           func->local_vars[func->local_var_tos].data.type = DT_DOUBLE;
-          get_token();
+          get();
           if(tok == STAR){
             while(tok == STAR){
               func->local_vars[func->local_var_tos].data.ind_level++;
-              get_token();
+              get();
             }
             bp_offset -= 2;
           }
@@ -300,11 +300,11 @@ void declare_func(void){
           }
       }
 
-      get_token();
+      get();
       if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
       strcpy(func->local_vars[func->local_var_tos].var_name, token);
         
-      get_token();
+      get();
       func->local_var_tos++;
     } while(tok == COMMA);
   }
@@ -313,7 +313,7 @@ void declare_func(void){
 
   func->code_location = prog; // sets the function starting point to  just after the "(" token
   
-  get_token(); // gets to the "{" token
+  get(); // gets to the "{" token
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
   putback(); // puts the "{" back so that it can be found by find_end_of_BLOCK()
 
@@ -326,7 +326,7 @@ int find_total_parameter_bytes(void){
 
   total_bytes = 0;
   do{
-    get_token();
+    get();
     switch(tok){
       case CHAR:
         total_bytes += 1;
@@ -340,15 +340,15 @@ int find_total_parameter_bytes(void){
       case DOUBLE:
         total_bytes += 4;
     }
-    get_token(); // get past parameter name
-    get_token(); // get possible comma
+    get(); // get past parameter name
+    get(); // get possible comma
   } while(tok == COMMA);
 
   return total_bytes;
 }
 
 void parse_asm(void){
-  get_token();
+  get();
   if(tok == OPENING_BRACE){
     emit("; -----begin inline asm block-----\n");
     do{
@@ -389,9 +389,9 @@ void parse_for(void){
 
   sprintf(s_label, "_for%d_init:", current_label_index_loop);
   emitln(s_label);
-  get_token();
+  get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
-  get_token();
+  get();
   if(tok != SEMICOLON){
     putback();
     parse_expr();
@@ -402,7 +402,7 @@ void parse_for(void){
   emitln(s_label);
   
   // checks for an empty condition, which means always true
-  get_token();
+  get();
   if(tok != SEMICOLON){
     putback();
     parse_expr();
@@ -437,7 +437,7 @@ void parse_for(void){
   
   prog = update_loc;
   // checks for an empty update expression
-  get_token();
+  get();
   if(tok != CLOSING_PAREN){
     putback();
     parse_expr();
@@ -465,7 +465,7 @@ void parse_while(void){
 
   sprintf(s_label, "_while%d_cond:", current_label_index_loop);
   emitln(s_label);
-  get_token();
+  get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
@@ -496,7 +496,7 @@ void parse_if(void){
 
   sprintf(s_label, "_if%d_cond:", current_label_index_if);
   emitln(s_label);
-  get_token();
+  get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
@@ -504,7 +504,7 @@ void parse_if(void){
   
   temp_p = prog;
   find_end_of_block(); // skip main IF block in order to check for ELSE block.
-  get_token();
+  get();
   if(tok == ELSE){
     sprintf(s_label, "  je _if%d_else_block", current_label_index_if);
     emitln(s_label);
@@ -520,7 +520,7 @@ void parse_if(void){
   parse_block();  // parse the positive condition block
   sprintf(s_label, "  jmp _if%d_exit", current_label_index_if);
   emitln(s_label);
-  get_token(); // look for 'else'
+  get(); // look for 'else'
   if(tok == ELSE){
     sprintf(s_label, "_if%d_else_block:", current_label_index_if);
     emitln(s_label);
@@ -538,7 +538,7 @@ void parse_if(void){
 }
 
 void parse_return(void){
-  get_token();
+  get();
   if(tok != SEMICOLON){
     putback();
     parse_expr();  // return value in register B
@@ -551,7 +551,7 @@ void parse_block(void){
   int brace = 0;
   
   do{
-    get_token();
+    get();
     switch(tok){
       case INT:
       case CHAR:
@@ -600,14 +600,14 @@ void parse_block(void){
 void find_end_of_block(void){
   int paren = 0;
 
-  get_token();
+  get();
   switch(tok){
     case ASM:
       find_end_of_block();
       break;
     case IF:
       // skips the conditional expression between parenthesis
-      get_token();
+      get();
       if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
       paren = 1; // found the first parenthesis
       do{
@@ -618,7 +618,7 @@ void find_end_of_block(void){
       if(!*prog) error(CLOSING_PAREN_EXPECTED);
 
       find_end_of_block();
-      get_token();
+      get();
       if(tok == ELSE) find_end_of_block();
       else
         putback();
@@ -628,7 +628,7 @@ void find_end_of_block(void){
       find_end_of_BLOCK();
       break;
     case FOR:
-      get_token();
+      get();
       if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
       paren = 1;
       do{
@@ -637,7 +637,7 @@ void find_end_of_block(void){
         prog++;
       } while(paren && *prog);
       if(!*prog) error(CLOSING_PAREN_EXPECTED);
-      get_token();
+      get();
       if(tok != SEMICOLON){
         putback();
         find_end_of_block();
@@ -689,10 +689,10 @@ void parse_attrib(){
 
   temp_prog = prog;
 
-  get_token();
+  get();
   if(tok_type == IDENTIFIER){
     strcpy(var_name, token);
-    get_token();
+    get();
     if(tok == ASSIGNMENT){
       //emitln("  mov a, 0");
       parse_attrib();
@@ -761,11 +761,11 @@ void parse_attrib(){
   }
 	else if(tok == STAR){ // tests if this is a pointer assignment
 		while(tok != SEMICOLON && tok_type != END){
-			get_token();
+			get();
       if(tok_type == IDENTIFIER) strcpy(var_name, token); // save var name
 			if(tok == ASSIGNMENT){ // is an attribution statement
 				prog = temp_prog; // goes back to the beginning of the expression
-				get_token(); // gets past the first asterisk
+				get(); // gets past the first asterisk
 				parse_atom();
 				emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
 				// after evaluating the address expression, the token will be a "="
@@ -922,7 +922,7 @@ void parse_atom(void){
   char temp_name[ID_LEN];
   char temp[64];
 
-  get_token();
+  get();
 
 /*   a = *(p+1);
   a = *p;
@@ -934,7 +934,7 @@ void parse_atom(void){
     putback();
   }
   else if(tok == AMPERSAND){
-    get_token(); // get variable name
+    get(); // get variable name
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
     if(local_var_exists(token) != -1){ // is a local variable
       var_id = local_var_exists(token);
@@ -977,7 +977,7 @@ void parse_atom(void){
   }
   else if(tok_type == IDENTIFIER){
     strcpy(temp_name, token);
-    get_token();
+    get();
     if(tok == OPENING_PAREN){ // function call      
       func_id = find_function(temp_name);
       if(func_id != -1){
@@ -1073,7 +1073,7 @@ void parse_atom(void){
   else
     error(INVALID_EXPRESSION);
 
-  get_token(); // gets the next token (it must be a delimiter)
+  get(); // gets the next token (it must be a delimiter)
 }
 
 void parse_function_arguments(int func_id){
@@ -1083,7 +1083,7 @@ void parse_function_arguments(int func_id){
   func = &function_table[func_id];
   param_index = 0;
 
-  get_token();
+  get();
   if(tok == CLOSING_PAREN) return;
 
   putback();
@@ -1123,10 +1123,10 @@ void declare_global(void){
   int ind_level;
   char constant = 0;
 
-  get_token(); // gets past the data type
+  get(); // gets past the data type
   if(tok == CONST){
     constant = 1;
-    get_token();
+    get();
   }
   
   switch(tok){
@@ -1153,17 +1153,17 @@ void declare_global(void){
 
     // initializes the variable to 0
     global_variables[global_var_tos].data.value.c = 0;
-    global_variables[global_var_tos].data.value.i = 0;
+    global_variables[global_var_tos].data.value.shortint = 0;
     global_variables[global_var_tos].data.value.f = 0.0;
     global_variables[global_var_tos].data.value.d = 0.0;
-    global_variables[global_var_tos].data.value.p = NULL;
+    global_variables[global_var_tos].data.value.p = 0;
     
-    get_token();
+    get();
 // **************** checks whether this is a pointer declaration *******************************
     ind_level = 0;
     while(tok == STAR){
       ind_level++;
-      get_token();
+      get();
     }
 // *********************************************************************************************
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
@@ -1173,36 +1173,37 @@ void declare_global(void){
     
     global_variables[global_var_tos].data.type = dt;
     global_variables[global_var_tos].data.ind_level = ind_level;
-    
     strcpy(global_variables[global_var_tos].var_name, token);
-    get_token();
 
+    get();
     // checks for variable initialization
     if(tok == ASSIGNMENT){
       switch(dt){
         case DT_VOID:
+          if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
           break;
         case DT_CHAR:
           if(ind_level > 0){ // if is a string
-            get_token();
+            get();
             if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
             strcpy(global_variables[global_var_tos].as_string, string_constant);
           }
           else{
-            get_token();
+            get();
             global_variables[global_var_tos].data.value.c = string_constant[0];
           }
           break;
         case DT_INT:
-          get_token();
-          global_variables[global_var_tos].data.value.i = atoi(token);
+          get();
+          if(ind_level > 0) global_variables[global_var_tos].data.value.p = atoi(token);
+          else global_variables[global_var_tos].data.value.shortint = atoi(token);
           break;
         case DT_FLOAT:
           break;
         case DT_DOUBLE:
           break;
       }
-      get_token();
+      get();
       //eval(&global_variables[global_var_tos].data);
       // after the value has been assigned, the data could be of any type, hence it needs to be converted into the correct type for this variable
       //convert_data(&global_variables[global_var_tos].data, dt);
@@ -1250,11 +1251,11 @@ void declare_local(void){
   char ind_level;
   char constant = 0;
   
-  get_token(); // gets past the data type
+  get(); // gets past the data type
 
   if(tok == CONST){
     constant = 1;
-    get_token();
+    get();
   }
   
   switch(tok){
@@ -1288,18 +1289,18 @@ void declare_local(void){
 
     // initializes the variable to 0
     new_var.data.value.c = 0;
-    new_var.data.value.i = 0;
+    new_var.data.value.shortint = 0;
     new_var.data.value.f = 0.0;
     new_var.data.value.d = 0.0;
-    new_var.data.value.p = NULL;
+    new_var.data.value.p = 0;
 
     // gets the variable name
-    get_token();
+    get();
 // **************** checks whether this is a pointer declaration *******************************
     ind_level = 0;
     while(tok == STAR){
       ind_level++;
-      get_token();
+      get();
     }    
 // *********************************************************************************************
     if(ind_level > 0){
@@ -1322,10 +1323,10 @@ void declare_local(void){
     new_var.data.type = dt;
     new_var.data.ind_level = ind_level;
     strcpy(new_var.var_name, token);
-    get_token();
+    get();
 
     if(tok == ASSIGNMENT){
-      get_token();
+      get();
     // emit ASM for variables
       switch(new_var.data.type){
         case DT_CHAR:
@@ -1337,7 +1338,7 @@ void declare_local(void){
           emitln(token);
           break;
       }
-      get_token();
+      get();
     }
     else{
       switch(new_var.data.type){
@@ -1456,7 +1457,7 @@ void convert_constant(){
   *s = '\0';
 }
 
-void get_token(void){
+void get(void){
   char *t;
   // skip blank spaces
 

@@ -56,14 +56,14 @@ typedef enum {
 
 typedef union {
   char c;
-  short int si;
-  int i;
-  long int li;
-  long long int lli;
+  short int shortint;
+  short int p; // pointer value. 2 bytes since Sol-1 integers/pointers are 2 bytes long
+  //int i;
+  long int longint;
+  long long int longlongint;
   float f;
   double d;
-  long double ld;
-  void *p;
+  long double longdouble;
 } _VALUE;
 
 // basic data types
@@ -102,7 +102,7 @@ typedef struct {
   _DATA data; // holds the type of data and the value itself
   int dims[MAX_MATRIX_DIMS + 1];
   char constant;
-  char as_string[256]; // this just saves the initialization string in case the var is a string. it makes it easier for the compiler
+  char as_string[1024]; // this just saves the initialization string in case the var is a string. it makes it easier for the compiler
   // but is a poor solution that needs fixing later
 } _GLOBAL_VAR;
 _GLOBAL_VAR global_variables[MAX_GLOBAL_VARS];
@@ -290,7 +290,7 @@ void initial_setup(void);
 void pre_scan(void);
 
 void get_line(void);
-void get_token(void);
+void get(void);
 void error(_ERROR e);
 void declare_func(void);
 void declare_global(void);
