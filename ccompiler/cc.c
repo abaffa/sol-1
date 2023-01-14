@@ -170,20 +170,20 @@ void pre_scan(void){
 
     if(tok == DIRECTIVE){
       get_token();
-      if(tok != INCLUDE) trigger_err(UNKNOWN_DIRECTIVE);
+      if(tok != INCLUDE) error(UNKNOWN_DIRECTIVE);
       get_token();
-      if(tok_type != STRING_CONST) trigger_err(DIRECTIVE_SYNTAX);
+      if(tok_type != STRING_CONST) error(DIRECTIVE_SYNTAX);
       include_lib(token);
       continue;
     }
     
     if(tok == CONST) get_token();
-    if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) trigger_err(NOT_VAR_OR_FUNC_OUTSIDE);
+    if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) error(NOT_VAR_OR_FUNC_OUTSIDE);
     
     get_token();
     
     while(tok == STAR) get_token();
-    if(tok_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
+    if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
 
     get_token();
     if(tok == OPENING_PAREN){ //it must be a function declaration
@@ -206,7 +206,7 @@ void declare_func(void){
   char *temp_prog;
   int total_parameter_bytes;
 
-  if(function_table_tos == MAX_USER_FUNC - 1) trigger_err(EXCEEDED_FUNC_DECL_LIMIT);
+  if(function_table_tos == MAX_USER_FUNC - 1) error(EXCEEDED_FUNC_DECL_LIMIT);
 
   func = &function_table[function_table_tos];
 
@@ -254,7 +254,7 @@ void declare_func(void){
         func->local_vars[func->local_var_tos].constant = 1;
         get_token();
       }
-      if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) trigger_err(VAR_TYPE_EXPECTED);
+      if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) error(VAR_TYPE_EXPECTED);
       
       // assign the bp offset of this parameter
       func->local_vars[func->local_var_tos].bp_offset = bp_offset;
@@ -301,7 +301,7 @@ void declare_func(void){
       }
 
       get_token();
-      if(tok_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
+      if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
       strcpy(func->local_vars[func->local_var_tos].var_name, token);
         
       get_token();
@@ -309,12 +309,12 @@ void declare_func(void){
     } while(tok == COMMA);
   }
     
-  if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
+  if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
 
   func->code_location = prog; // sets the function starting point to  just after the "(" token
   
   get_token(); // gets to the "{" token
-  if(tok != OPENING_BRACE) trigger_err(OPENING_BRACE_EXPECTED);
+  if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
   putback(); // puts the "{" back so that it can be found by find_end_of_BLOCK()
 
   //*func->local_vars[func->local_var_tos].var_name = '\0'; // marks the end of the variable list with a null character
@@ -390,13 +390,13 @@ void parse_for(void){
   sprintf(s_label, "_for%d_init:", current_label_index_loop);
   emitln(s_label);
   get_token();
-  if(tok != OPENING_PAREN) trigger_err(OPENING_PAREN_EXPECTED);
+  if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   get_token();
   if(tok != SEMICOLON){
     putback();
     parse_expr();
   }
-  if(tok != SEMICOLON) trigger_err(SEMICOLON_EXPECTED);
+  if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
 
   sprintf(s_label, "_for%d_cond:", current_label_index_loop);
   emitln(s_label);
@@ -406,7 +406,7 @@ void parse_for(void){
   if(tok != SEMICOLON){
     putback();
     parse_expr();
-    if(tok != SEMICOLON) trigger_err(SEMICOLON_EXPECTED);
+    if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
   }
   else{
     emitln("  mov b, 1"); // emit a TRUE condition
@@ -428,7 +428,7 @@ void parse_for(void){
     else if(*prog == ')') paren--;
     prog++;
   } while(paren && *prog);
-  if(!*prog) trigger_err(CLOSING_PAREN_EXPECTED);
+  if(!*prog) error(CLOSING_PAREN_EXPECTED);
 
   parse_block();
   
@@ -466,9 +466,9 @@ void parse_while(void){
   sprintf(s_label, "_while%d_cond:", current_label_index_loop);
   emitln(s_label);
   get_token();
-  if(tok != OPENING_PAREN) trigger_err(OPENING_PAREN_EXPECTED);
+  if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
-  if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
+  if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   emitln("  mov a, b");
   emitln("  cmp a, 0");
   sprintf(s_label, "  je _while%d_exit", current_label_index_loop);
@@ -497,9 +497,9 @@ void parse_if(void){
   sprintf(s_label, "_if%d_cond:", current_label_index_if);
   emitln(s_label);
   get_token();
-  if(tok != OPENING_PAREN) trigger_err(OPENING_PAREN_EXPECTED);
+  if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
-  if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
+  if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   emitln("  cmp b, 0");
   
   temp_p = prog;
@@ -589,10 +589,10 @@ void parse_block(void){
         parse_return();
         break;
       default:
-        if(tok_type == END) trigger_err(CLOSING_BRACE_EXPECTED);
+        if(tok_type == END) error(CLOSING_BRACE_EXPECTED);
         putback();
         parse_expr();
-        if(tok != SEMICOLON) trigger_err(SEMICOLON_EXPECTED);
+        if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
     }    
   } while(brace); // exits when it finds the last closing brace
 }
@@ -608,14 +608,14 @@ void find_end_of_block(void){
     case IF:
       // skips the conditional expression between parenthesis
       get_token();
-      if(tok != OPENING_PAREN) trigger_err(OPENING_PAREN_EXPECTED);
+      if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
       paren = 1; // found the first parenthesis
       do{
         if(*prog == '(') paren++;
         else if(*prog == ')') paren--;
         prog++;
       } while(paren && *prog);
-      if(!*prog) trigger_err(CLOSING_PAREN_EXPECTED);
+      if(!*prog) error(CLOSING_PAREN_EXPECTED);
 
       find_end_of_block();
       get_token();
@@ -629,14 +629,14 @@ void find_end_of_block(void){
       break;
     case FOR:
       get_token();
-      if(tok != OPENING_PAREN) trigger_err(OPENING_PAREN_EXPECTED);
+      if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
       paren = 1;
       do{
         if(*prog == '(') paren++;
         else if(*prog == ')') paren--;
         prog++;
       } while(paren && *prog);
-      if(!*prog) trigger_err(CLOSING_PAREN_EXPECTED);
+      if(!*prog) error(CLOSING_PAREN_EXPECTED);
       get_token();
       if(tok != SEMICOLON){
         putback();
@@ -647,7 +647,7 @@ void find_end_of_block(void){
     default: // if it's not a keyword, then it must be an expression
       putback(); // puts the last token back, which might be a ";" token
       while(*prog++ != ';' && *prog);
-      if(!*prog) trigger_err(SEMICOLON_EXPECTED);
+      if(!*prog) error(SEMICOLON_EXPECTED);
   }
 }
 
@@ -660,7 +660,7 @@ void find_end_of_BLOCK(void){
     prog++;
   } while(brace && *prog);
 
-  if(brace && !*prog) trigger_err(CLOSING_BRACE_EXPECTED);
+  if(brace && !*prog) error(CLOSING_BRACE_EXPECTED);
 }
 
 _BASIC_DATA get_var_type(char *var_name){
@@ -674,7 +674,7 @@ _BASIC_DATA get_var_type(char *var_name){
 		if(!strcmp(global_variables[i].var_name, var_name)) 
 			return global_variables[i].data.type;
 
-	trigger_err(UNDECLARED_VARIABLE);
+	error(UNDECLARED_VARIABLE);
 }
 
 void parse_expr(){
@@ -694,12 +694,24 @@ void parse_attrib(){
     strcpy(var_name, token);
     get_token();
     if(tok == ASSIGNMENT){
-      emitln("  mov a, 0");
+      //emitln("  mov a, 0");
       parse_attrib();
-
       if(local_var_exists(var_name) != -1){ // is a local variable
         var_id = local_var_exists(var_name);
-        if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
+        if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){ // is a pointer
+          emitln("  mov a, b");
+          emitln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+                    // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
+          emit("  mov [bp + ");
+          if(function_table[current_func_id].local_vars[var_id].is_parameter)
+            // add +4 below to account for BP and PC offsets which were pushed into the stack
+            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          else
+            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          emit(temp);
+          emitln("], a");
+        }
+        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
           emitln("  mov al, bl");
           emit("  mov [bp + ");
           if(function_table[current_func_id].local_vars[var_id].is_parameter)
@@ -726,20 +738,23 @@ void parse_attrib(){
       }
       else if(global_var_exists(var_name) != -1){  // is a global variable
         var_id = global_var_exists(var_name);
-        if(global_variables[var_id].data.type == DT_CHAR){
-          // need to check if var are pointers here
-          emit("  mov [");
-          emit(global_variables[var_id].var_name);
-          emitln("], bl");
-        }
-        else if(global_variables[var_id].data.type == DT_INT){
-        // check for pointers here also
+        if(global_variables[var_id].data.ind_level > 0){ // is a pointer
           emit("  mov [");
           emit(global_variables[var_id].var_name);
           emitln("], b");
         }
+        else if(global_variables[var_id].data.type == DT_CHAR){
+            emit("  mov [");
+            emit(global_variables[var_id].var_name);
+            emitln("], bl");
+        }
+        else if(global_variables[var_id].data.type == DT_INT){
+            emit("  mov [");
+            emit(global_variables[var_id].var_name);
+            emitln("], b");
+        }
       }
-      else trigger_err(UNDECLARED_VARIABLE);
+      else error(UNDECLARED_VARIABLE);
 
       return;
     }
@@ -762,7 +777,7 @@ void parse_attrib(){
           case DT_INT:
             emitln("  mov [d], b");
             break;
-          default: trigger_err(INVALID_POINTER);
+          default: error(INVALID_POINTER);
         }
 				return;
 			}
@@ -920,7 +935,7 @@ void parse_atom(void){
   }
   else if(tok == AMPERSAND){
     get_token(); // get variable name
-    if(tok_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
+    if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
     if(local_var_exists(token) != -1){ // is a local variable
       var_id = local_var_exists(token);
       if(function_table[current_func_id].local_vars[var_id].is_parameter)
@@ -942,8 +957,9 @@ void parse_atom(void){
     emitln(token);
   }
   else if(tok_type == CHAR_CONST){
-    emit("  mov bl, "); emitln(token);
-    emitln("  mov bh, 0");
+    emit("  mov bl, ");
+    emitln(token);
+    //emitln("  mov bh, 0"); // not sure why i set bh to 0 here, but removing as doesnt seem to be needed
   }
   else if(tok == MINUS){
     parse_atom();
@@ -957,7 +973,7 @@ void parse_atom(void){
   }
   else if(tok == OPENING_PAREN){
     parse_expr();  // parses expression between parenthesis and result will be in B
-    if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
+    if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   }
   else if(tok_type == IDENTIFIER){
     strcpy(temp_name, token);
@@ -968,7 +984,7 @@ void parse_atom(void){
         parse_function_arguments(func_id);
         emit("  call ");
         emitln(temp_name);
-        if(tok != CLOSING_PAREN) trigger_err(CLOSING_PAREN_EXPECTED);
+        if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
         // the function's return value is in register B
 
         // if the first local var is a parameter then the function has defined parameters
@@ -992,12 +1008,24 @@ void parse_atom(void){
           emitln(bp_offset_string);
         }
       }
-      else trigger_err(UNDECLARED_FUNC);
+      else error(UNDECLARED_FUNC);
     }
     else{
       if(local_var_exists(temp_name) != -1){ // is a local variable
         var_id = local_var_exists(temp_name);
-        if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
+        if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){ // is a pointer
+          emit("  mov b, [bp + ");
+          if(function_table[current_func_id].local_vars[var_id].is_parameter)
+            // add +4 below to account for BP and PC offsets which were pushed into the stack
+            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          else
+            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          emit(temp);
+          emitln("]");
+          emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+                    // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
+        }
+        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
           emit("  mov bl, [bp + ");
           if(function_table[current_func_id].local_vars[var_id].is_parameter)
             // add +4 below to account for BP and PC offsets which were pushed into the stack
@@ -1022,7 +1050,12 @@ void parse_atom(void){
       }
       else if(global_var_exists(temp_name) != -1){  // is a global variable
         var_id = global_var_exists(temp_name);
-        if(global_variables[var_id].data.type == DT_CHAR){
+        if(global_variables[var_id].data.ind_level > 0){ // is a pointer
+          emit("  mov b, [");
+          emit(global_variables[var_id].var_name);
+          emitln("]");
+        }
+        else if(global_variables[var_id].data.type == DT_CHAR){
           emit("  mov bl, [");
           emit(global_variables[var_id].var_name);
           emitln("]");
@@ -1033,12 +1066,12 @@ void parse_atom(void){
           emitln("]");
         }
       }
-      else trigger_err(UNDECLARED_VARIABLE);
+      else error(UNDECLARED_VARIABLE);
       putback();
     }
   }
   else
-    trigger_err(INVALID_EXPRESSION);
+    error(INVALID_EXPRESSION);
 
   get_token(); // gets the next token (it must be a delimiter)
 }
@@ -1114,7 +1147,7 @@ void declare_global(void){
   }
 
   do{
-    if(global_var_tos == MAX_GLOBAL_VARS) trigger_err(EXCEEDED_GLOBAL_VAR_LIMIT);
+    if(global_var_tos == MAX_GLOBAL_VARS) error(EXCEEDED_GLOBAL_VAR_LIMIT);
 
     global_variables[global_var_tos].constant = constant;
 
@@ -1133,10 +1166,10 @@ void declare_global(void){
       get_token();
     }
 // *********************************************************************************************
-    if(tok_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
+    if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
     
     // checks if there is another global variable with the same name
-    if(find_global_var(token) != -1) trigger_err(DUPLICATE_GLOBAL_VARIABLE);
+    if(find_global_var(token) != -1) error(DUPLICATE_GLOBAL_VARIABLE);
     
     global_variables[global_var_tos].data.type = dt;
     global_variables[global_var_tos].data.ind_level = ind_level;
@@ -1152,7 +1185,7 @@ void declare_global(void){
         case DT_CHAR:
           if(ind_level > 0){ // if is a string
             get_token();
-            if(tok_type != STRING_CONST) trigger_err(STRING_CONSTANT_EXPECTED);
+            if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
             strcpy(global_variables[global_var_tos].as_string, string_constant);
           }
           else{
@@ -1179,7 +1212,7 @@ void declare_global(void){
     global_var_tos++;  
   } while(tok == COMMA);
 
-  if(tok != SEMICOLON) trigger_err(SEMICOLON_EXPECTED);
+  if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
 }
 
 int find_function(char *func_name){
@@ -1242,7 +1275,7 @@ void declare_local(void){
   }
 
   do{
-    if(function_table[current_func_id].local_var_tos == MAX_LOCAL_VARS) trigger_err(LOCAL_VAR_LIMIT_REACHED);
+    if(function_table[current_func_id].local_var_tos == MAX_LOCAL_VARS) error(LOCAL_VAR_LIMIT_REACHED);
     
     new_var.function_id = current_func_id; // set variable owner function
 
@@ -1282,9 +1315,9 @@ void declare_local(void){
       default: 
         current_function_var_bp_offset += 2;
     }
-    if(tok_type != IDENTIFIER) trigger_err(IDENTIFIER_EXPECTED);
+    if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
 
-    if(local_var_exists(token) != -1) trigger_err(DUPLICATE_LOCAL_VARIABLE);
+    if(local_var_exists(token) != -1) error(DUPLICATE_LOCAL_VARIABLE);
 
     new_var.data.type = dt;
     new_var.data.ind_level = ind_level;
@@ -1324,7 +1357,7 @@ void declare_local(void){
     function_table[current_func_id].local_var_tos++;
   } while(tok == COMMA);
 
-  if(tok != SEMICOLON) trigger_err(SEMICOLON_EXPECTED);
+  if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
 }
 
 _LOCAL_VAR *get_local_var(char *var_name){
@@ -1347,7 +1380,7 @@ _GLOBAL_VAR *get_global_var(char *var_name){
   return NULL;
 }
 
-void trigger_err(_ERROR e){
+void error(_ERROR e){
   int line = 1;
   char *t = pbuf;
 
@@ -1431,7 +1464,7 @@ void get_token(void){
   tok = 0;
   t = token;
   
-/* a comment */
+/* Skip comments and whitespaces */
   do{
     while(isspace(*prog)) prog++;
     if(*prog == '/' && *(prog+1) == '*'){
@@ -1439,7 +1472,11 @@ void get_token(void){
       while(!(*prog == '*' && *(prog+1) == '/')) prog++;
       prog = prog + 2;
     }
-  } while(isspace(*prog));
+    else if(*prog == '/' && *(prog+1) == '/'){
+      while(*prog != '\n') prog++;
+      prog++;
+    }
+  } while(isspace(*prog) || (*prog == '/' && *(prog+1) == '/'));
 
   if(*prog == '\0'){
     tok_type = END;
@@ -1456,7 +1493,7 @@ void get_token(void){
     }
     else *t++ = *prog++;
     
-    if(*prog != '\'') trigger_err(SINGLE_QUOTE_EXPECTED);
+    if(*prog != '\'') error(SINGLE_QUOTE_EXPECTED);
     
     *t++ = '\'';
     prog++;
@@ -1468,7 +1505,7 @@ void get_token(void){
     *t++ = '\"';
     prog++;
     while(*prog != '\"' && *prog) *t++ = *prog++;
-    if(*prog != '\"') trigger_err(DOUBLE_QUOTE_EXPECTED);
+    if(*prog != '\"') error(DOUBLE_QUOTE_EXPECTED);
     *t++ = '\"';
     prog++;
     tok_type = STRING_CONST;
@@ -1627,7 +1664,7 @@ void get_line(void){
   } while(isspace(*prog));
 
   if(*prog == '\0'){
-    trigger_err(UNEXPECTED_EOF);
+    error(UNEXPECTED_EOF);
   }
 
   while(*prog != '\n'){

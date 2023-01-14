@@ -4,12 +4,11 @@
 char mychar = 'a';
 char *p;
 
+int i1, i2;
+
 int main(void) {
 
-  p = &mychar;
-
-  *p = 'b';
-
+  i1 = 1+2*3+5;
 
   return;
 }

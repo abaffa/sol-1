@@ -291,7 +291,7 @@ void pre_scan(void);
 
 void get_line(void);
 void get_token(void);
-void trigger_err(_ERROR e);
+void error(_ERROR e);
 void declare_func(void);
 void declare_global(void);
 void declare_local(void);
