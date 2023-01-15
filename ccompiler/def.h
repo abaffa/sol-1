@@ -306,6 +306,7 @@ void parse_return(void);
 
 void parse_block(void);
 void parse_functions(void);
+void parse_main(void);
 
 void convert_data(_DATA *data_to_convert, _BASIC_DATA into_type);
 

@@ -1,15 +1,12 @@
-; -----begin include block-----
-.include "lib/stdio.asm"
-; -----end include block-----
+
+.include "lib/kernel.exp"
 
 .org PROC_TEXT_ORG
 
 ; -----begin text block-----
 main:
-  push bp
-  mov bp, sp
 ; -----begin inline asm block-----
-  mov d, s
+  mov d, s_data
   call puts
   call scan_u16d
   mov [rows], a
@@ -177,7 +174,7 @@ _for3_update:
   jmp _for3_cond
 _for3_exit:
 ; -----begin inline asm block-----
-  mov d, nl
+  mov d, nl_data
   call puts
 ; -----end inline asm block-----
 _for1_update:
@@ -195,10 +192,10 @@ _for1_exit:
   syscall sys_terminate_proc
 ; -----end inline asm block-----
 print:
-  push bp
-  mov bp, sp
+	push bp
+	mov bp, sp
 ; -----begin inline asm block-----
-  mov d, ss
+  mov d, ss_data
   call puts
 ; -----end inline asm block-----
   leave
@@ -218,5 +215,8 @@ j: .dw 0
 nl_data: .db "\n", 0
 nl: .dw nl_data
 ; -----end data block-----
+; -----begin include block-----
+.include "lib/stdio.asm"
+; -----end include block-----
 
 .end

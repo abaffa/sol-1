@@ -7,7 +7,7 @@ char *nl = "\n";
 
 int main(void) {
 	asm{
-		mov d, s
+		mov d, s_data
 		call puts
 		call scan_u16d
 		mov [rows], a
@@ -28,7 +28,7 @@ int main(void) {
 		}
       }
 		asm{
-			mov d, nl
+			mov d, nl_data
 			call puts
 		}
    }
@@ -40,7 +40,7 @@ int main(void) {
 void print(void){
 	
 	asm{
-		mov d, ss
+		mov d, ss_data
 		call puts
 		}
 	return;

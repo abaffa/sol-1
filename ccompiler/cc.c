@@ -16,14 +16,16 @@ int main(int argc, char *argv[]){
   initial_setup();
   pre_scan();
 
-  emit_libraries();
+  emitln("\n.include \"lib/kernel.exp\"");
   emitln("\n.org PROC_TEXT_ORG");
 
   emitln("\n; -----begin text block-----");
+  parse_main();
   parse_functions();
   emitln("; -----end text block-----");
   
   emit_global_variables();
+  emit_libraries();
 
   emitln("\n.end");
 
@@ -153,21 +155,37 @@ void dbg(char *s){
   puts(s);
 }
 
+void parse_main(void){
+  register int i;
+
+  emitln("main:");
+  for(i = 0; *function_table[i].func_name; i++)
+    if(!strcmp(function_table[i].func_name, "main")){
+      current_func_id = i;
+      prog = function_table[i].code_location;
+      parse_block(); // starts interpreting the main function block;
+      return;
+    }
+  
+  error(NO_MAIN_FOUND);
+}
+
 void parse_functions(void){
   register int i;
 
-  for(i = 0; *function_table[i].func_name; i++){
-    current_function_var_bp_offset = 0; // this is used to position local variables correctly relative to BP.
-                      // whenever a new function is parsed, this is reset to 0.
-                      // then inside the function it can increase according to how any local vars there are.
-    current_func_id = i;
-    prog = function_table[i].code_location;
-    emit(function_table[i].func_name);
-    emitln(":");
-    emitln("  push bp");
-    emitln("  mov bp, sp");
-    parse_block(); // starts parsing the function block;
-  }
+  for(i = 0; *function_table[i].func_name; i++)
+    if(strcmp(function_table[i].func_name, "main") != 0){ // skip 'main'
+      current_function_var_bp_offset = 0; // this is used to position local variables correctly relative to BP.
+                        // whenever a new function is parsed, this is reset to 0.
+                        // then inside the function it can increase according to how any local vars there are.
+      current_func_id = i;
+      prog = function_table[i].code_location;
+      emit(function_table[i].func_name);
+      emitln(":");
+      emitln("\tpush bp");
+      emitln("\tmov bp, sp");
+      parse_block(); // starts parsing the function block;
+    }
 }
 
 void include_lib(char *lib_name){

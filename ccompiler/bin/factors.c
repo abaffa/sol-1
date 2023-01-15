@@ -7,20 +7,20 @@ int num, i;
 
 int main(void) {
 	asm{
-		mov d, _var_s
+		mov d, s
 		call puts
 		call scan_u16d
-		mov [_var_num], a
-		mov d, _var_s2
+		mov [num], a
+		mov d, s2
 		call puts
 	}
 
     for (i = 1; i < num; i=i+1) {
         if (num % i == 0) {
 			asm{
-				mov a, [_var_i]
+				mov a, [i]
 				call print_u16d
-				mov d, _var_nl
+				mov d, nl
 				call puts
 			}
         }
