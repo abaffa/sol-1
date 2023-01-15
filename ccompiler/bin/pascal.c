@@ -7,10 +7,10 @@ char *nl = "\n";
 
 int main(void) {
 	asm{
-		mov d, _var_s
+		mov d, s
 		call puts
 		call scan_u16d
-		mov [_var_rows], a
+		mov [rows], a
 	}
 
    for (i = 0; i < rows; i=i+1) {
@@ -23,12 +23,12 @@ int main(void) {
             coef = coef * (i - j + 1) / j;
 		print();
 		asm{
-			mov a, [_var_coef]
+			mov a, [coef]
 			call print_u16d
 		}
       }
 		asm{
-			mov d, _var_nl
+			mov d, nl
 			call puts
 		}
    }
@@ -40,7 +40,7 @@ int main(void) {
 void print(void){
 	
 	asm{
-		mov d, _var_ss
+		mov d, ss
 		call puts
 		}
 	return;

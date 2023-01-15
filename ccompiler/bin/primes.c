@@ -41,9 +41,9 @@ void primes(void){
 		if(divides==0){
 			count=count+1;	
 			asm{
-				mov a, [_var_n]
+				mov a, [n]
 				call print_u16d
-				mov d, _var_newline
+				mov d, newline
 				mov a, [d]
 				mov d, a
 				call puts
