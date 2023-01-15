@@ -55,28 +55,44 @@ void emit_libraries(void){
 
 void emit_global_variables(void){
   int i;
-  char s_init[64];
+  char s_init[1024];
 
   emitln("\n; -----begin data block-----");
   for(i = 0; i < global_var_tos; i++){
-    if(global_variables[i].data.type == DT_CHAR && global_variables[i].data.ind_level > 0){
-      emit(global_variables[i].var_name); // var name
-      emit("_data");
-      emit(": .db \"");
-      emit(global_variables[i].as_string);
-      emitln("\", 0");
-      emit(global_variables[i].var_name); // var name
-      emit(": .dw ");
-      emit(global_variables[i].var_name); // var name
-      emitln("_data");
+    if(global_variables[i].data.ind_level > 0){
+      switch(global_variables[i].data.type){
+        case DT_CHAR:
+          if(global_variables[i].as_string[0] != '\0'){ // if var was initialized, then instantiate its data in assembly data block
+            emit(global_variables[i].var_name); // var name
+            emit("_data");
+            emit(": .db \"");
+            emit(global_variables[i].as_string);
+            emitln("\", 0");
+            emit(global_variables[i].var_name); // var name
+            emit(": .dw ");
+            emit(global_variables[i].var_name); // var name
+            emitln("_data");
+          }
+          else{
+            emit(global_variables[i].var_name); // var name
+            emitln(": .dw 0");
+          }
+          break;
+        case DT_INT:
+          emit(global_variables[i].var_name); // var name
+          emit(": .dw ");
+          sprintf(s_init, "%d", global_variables[i].data.value.p);
+          emitln(s_init);
+      }
     }
     else if(global_variables[i].data.type == DT_CHAR){
       emit(global_variables[i].var_name); // var name
-      emit(": .db ");  
-      sprintf(s_init, "$%x", global_variables[i].data.value.c);
+      emit(": .db ");
+      if(global_variables[i].data.value.c != 0) sprintf(s_init, "'%c'", global_variables[i].data.value.c);
+      else sprintf(s_init, "%d", 0);
       emitln(s_init);
     }
-    else{
+    else if(global_variables[i].data.type == DT_INT){
       emit(global_variables[i].var_name); // var name
       emit(": .dw ");  
       sprintf(s_init, "%d", global_variables[i].data.value.shortint);
@@ -1157,6 +1173,7 @@ void declare_global(void){
     global_variables[global_var_tos].data.value.f = 0.0;
     global_variables[global_var_tos].data.value.d = 0.0;
     global_variables[global_var_tos].data.value.p = 0;
+    global_variables[global_var_tos].as_string[0] = '\0';
     
     get();
 // **************** checks whether this is a pointer declaration *******************************
@@ -1167,7 +1184,8 @@ void declare_global(void){
     }
 // *********************************************************************************************
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
-    
+    if(dt == DT_VOID && ind_level == 0) error(INVALID_TYPE_IN_VARIABLE);
+
     // checks if there is another global variable with the same name
     if(find_global_var(token) != -1) error(DUPLICATE_GLOBAL_VARIABLE);
     
@@ -1180,7 +1198,8 @@ void declare_global(void){
     if(tok == ASSIGNMENT){
       switch(dt){
         case DT_VOID:
-          if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
+          get();
+          global_variables[global_var_tos].data.value.p = atoi(token);
           break;
         case DT_CHAR:
           if(ind_level > 0){ // if is a string
@@ -1204,12 +1223,7 @@ void declare_global(void){
           break;
       }
       get();
-      //eval(&global_variables[global_var_tos].data);
-      // after the value has been assigned, the data could be of any type, hence it needs to be converted into the correct type for this variable
-      //convert_data(&global_variables[global_var_tos].data, dt);
     }
-// the indirection level needs to be reset now, because if it is not its value might be changed to the attribution expression ind_level
-    global_variables[global_var_tos].data.ind_level = ind_level;
     global_var_tos++;  
   } while(tok == COMMA);
 

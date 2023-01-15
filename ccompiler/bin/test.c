@@ -1,11 +1,10 @@
 #include "lib/kernel.exp"
 #include "lib/stdio.asm"
 
-char mychar = 'a';
 char *p;
 char *s = "Hello World";
-
-int i1, i2;
+char c = 'a';
+char d;
 
 int main(void) {
 

@@ -191,12 +191,9 @@ typedef enum {
   INCOMPATIBLE_FUNCTION_ARGUMENT,
   CONSTANT_VARIABLE_ASSIGNMENT,
   INVALID_BINARY_OPERANDS,
-  STRUCT_EXPECTED,
-  STRUCT_NAME_EXPECTED,
-  UNDECLARED_STRUCT,
-  INVALID_PRINTF_FORMAT_CODE,
   UNEXPECTED_EOF,
-  INCOMPATIBLE_ARGUMENT_TYPE
+  INCOMPATIBLE_ARGUMENT_TYPE,
+  INVALID_TYPE_IN_VARIABLE
 } _ERROR;
 
 // variable declaration
@@ -246,12 +243,9 @@ char *error_table[] = {
   "incompatible function argument",
   "constant variable assignment",
   "invalid binary operands",
-  "struct expected",
-  "struct name expected but token is not an identifier for any structs",
-  "undeclared struct",
-  "invalid printf format code",
   "unexpected end of file",
-  "incompatible argument type in function"
+  "incompatible argument type in function",
+  "invalid type: void types need to be pointers"
 };
 
 int current_function_var_bp_offset;  // this is used to position local variables correctly relative to BP.
