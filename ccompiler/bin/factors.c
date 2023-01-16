@@ -7,11 +7,11 @@ int num, i;
 
 int main(void) {
 	asm{
-		mov d, s
+		mov d, s_data
 		call puts
 		call scan_u16d
 		mov [num], a
-		mov d, s2
+		mov d, s2_data
 		call puts
 	}
 
@@ -20,7 +20,7 @@ int main(void) {
 			asm{
 				mov a, [i]
 				call print_u16d
-				mov d, nl
+				mov d, nl_data
 				call puts
 			}
         }

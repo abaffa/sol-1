@@ -3,7 +3,7 @@ char *s = "Enter the number of rows: ";
 char *ss = "    ";
 int coef = 1;
 int rows, space, i, j;
-char *nl = "\n";
+char *nl = "\n\r";
 
 int main(void) {
 	asm{
