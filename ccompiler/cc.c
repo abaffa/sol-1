@@ -5,24 +5,28 @@
 #include "def.h"
 
 int main(int argc, char *argv[]){
+  char header[256];
+
   if(argc > 1) load_program(argv[1]);  
   else{
     printf("usage: cc [filename]\n");
     return 0;
   }
- 
+
   prog = pbuf; // resets pointer to the beginning of the program
 
   initial_setup();
   pre_scan();
 
+  sprintf(header, "; --- Filename: %s", argv[1]);
+  emitln(header);
   emitln("\n.include \"lib/kernel.exp\"");
   emitln("\n.org PROC_TEXT_ORG");
 
-  emitln("\n; -----begin text block-----");
+  emitln("\n; --- begin text block");
   parse_main();
   parse_functions();
-  emitln("; -----end text block-----");
+  emitln("; --- end text block");
   
   emit_global_variables();
   emit_libraries();
@@ -50,16 +54,16 @@ void generate_file(char *filename){
 }
 
 void emit_libraries(void){
-  emit("; -----begin include block-----");
+  emit("; --- begin include block");
   emitln(includes_list_ASM);
-  emitln("; -----end include block-----");
+  emitln("; --- end include block");
 }
 
 void emit_global_variables(void){
   int i;
   char s_init[1024];
 
-  emitln("\n; -----begin data block-----");
+  emitln("\n; --- begin data block");
   for(i = 0; i < global_var_tos; i++){
     if(global_variables[i].data.ind_level > 0){
       switch(global_variables[i].data.type){
@@ -101,7 +105,7 @@ void emit_global_variables(void){
       emitln(s_init);
     }
   }
-  emitln("; -----end data block-----");
+  emitln("; --- end data block");
 }
 
 void initial_setup(void){
@@ -384,7 +388,7 @@ int find_total_parameter_bytes(void){
 void parse_asm(void){
   get();
   if(tok == OPENING_BRACE){
-    emit("; -----begin inline asm block-----\n");
+    emitln("; --- begin inline asm block");
     do{
       get_line();
       if(*string_constant != '}'){
@@ -392,10 +396,10 @@ void parse_asm(void){
         emitln(string_constant);
       }
     } while(*string_constant != '}');
-    emitln("; -----end inline asm block-----");
+    emitln("; --- end inline asm block");
   }
   else{
-    emit("; -----inline asm block-----\n");
+    emitln("; --- inline asm block");
     putback();
     get_line();
     emit("  ");
