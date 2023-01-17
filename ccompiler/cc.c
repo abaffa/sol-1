@@ -903,10 +903,7 @@ void parse_relational(void){
         emitln("  cmp a, b");
         emitln("  lodflgs");
         emitln("  and al, %00000011"); 
-        emitln("  cmp al, 0");
-        emitln("  lodflgs");
-        emitln("  and al, %00000001"); 
-        emitln("  mov ah, 0");
+        emitln("  xor al, %00000011");
         break;
     }
     emitln("  mov b, a");
@@ -923,7 +920,8 @@ void parse_terms(void){
     emitln("  push a");
     emitln("  mov a, b");
     parse_factors();
-    if(temp_tok == PLUS) emitln("  add a, b"); else emitln("  sub a, b");
+    if(temp_tok == PLUS) emitln("  add a, b");
+    else emitln("  sub a, b");
     emitln("  mov b, a");
     emitln("  pop a");
   }

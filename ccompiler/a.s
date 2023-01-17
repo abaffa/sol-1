@@ -16,8 +16,8 @@ _for1_cond:
   mov b, [rows]
   cmp a, b
   lodflgs
-  and al, %00000010
-  mov ah, 0
+  and al, %00000011
+  xor al, %00000011
   mov b, a
   pop a
   mov a, b
@@ -40,15 +40,8 @@ _for1_exit:
 ; --- begin data block
 s_data: .db "Enter the number of rows: ", 0
 s: .dw s_data
-ss_data: .db "    ", 0
-ss: .dw ss_data
-coef: .dw 1
-rows: .dw 0
-space: .dw 0
 i: .dw 0
-j: .dw 0
-nl_data: .db "\n\r", 0
-nl: .dw nl_data
+rows: .dw 10
 ; --- end data block
 ; --- begin include block
 .include "lib/stdio.asm"
