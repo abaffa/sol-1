@@ -1,14 +1,14 @@
-#include "lib/kernel.exp"
 #include "lib/stdio.asm"
 
-char *p;
-char *s = "Hello World";
-char c = 'a';
-char d;
+int i;
 
-int main(void) {
+void main(void) {
+  asm{
+    mov al, 12
+    call print_u8d
+      syscall sys_terminate_proc
+    }
 
-  return;
 }
 
 
