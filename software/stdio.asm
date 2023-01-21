@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; stdio.s
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-.include "string.asm"
+.include "lib/string.asm"
 
 s_hex_digits:	.db "0123456789ABCDEF"	
 
@@ -151,6 +151,8 @@ gets_loop:
 	cmp ah, 27
 	je gets_telnet_escape
 	cmp ah, $0A				; LF
+	je gets_end
+	cmp ah, $0D				; CR
 	je gets_end
 	cmp ah, $5C				; '\\'
 	je gets_escape
@@ -406,19 +408,19 @@ print_u16d:
 	push b
 	mov b, 10000
 	div a, b			; get 10000 coeff.
-	call print_zero_or_space
+	call print_number
 	mov a, b
 	mov b, 1000
 	div a, b			; get 10000 coeff.
-	call print_zero_or_space
+	call print_number
 	mov a, b
 	mov b, 100
 	div a, b
-	call print_zero_or_space
+	call print_number
 	mov a, b
 	mov b, 10
 	div a, b
-	call print_zero_or_space
+	call print_number
 	mov a, b
 	add al, $30
 	mov ah, al
@@ -433,12 +435,6 @@ print_u16d:
 ; if A == 0, print space
 ; else print A
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-print_zero_or_space:
-	; cmp a, 0
-	; jne print_number
-	; mov ah, $20
-	; call putchar
-	; ret
 print_number:
 	add al, $30
 	mov ah, al
