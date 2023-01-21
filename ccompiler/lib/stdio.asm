@@ -152,6 +152,8 @@ gets_loop:
 	je gets_telnet_escape
 	cmp ah, $0A				; LF
 	je gets_end
+	cmp ah, $0D				; CR
+	je gets_end
 	cmp ah, $5C				; '\\'
 	je gets_escape
 	

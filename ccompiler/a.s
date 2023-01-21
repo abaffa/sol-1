@@ -7,14 +7,14 @@
 ; --- begin text block
 main:
 ; --- begin inline asm block
-  mov al, 12
-  call print_u8d
+  call scan_u16d
+  syscall sys_bkpt
+  call print_u16d
   syscall sys_terminate_proc
 ; --- end inline asm block
 ; --- end text block
 
 ; --- begin data block
-i: .dw 0
 ; --- end data block
 ; --- begin include block
 .include "lib/stdio.asm"

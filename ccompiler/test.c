@@ -1,11 +1,11 @@
 #include "lib/stdio.asm"
 
-int i;
 
 void main(void) {
   asm{
-    mov al, 12
-    call print_u8d
+    call scan_u16d
+    syscall sys_bkpt
+    call print_u16d
       syscall sys_terminate_proc
     }
 
