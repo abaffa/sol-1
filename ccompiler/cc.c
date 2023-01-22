@@ -24,7 +24,6 @@ int main(int argc, char *argv[]){
   emitln("\n.org PROC_TEXT_ORG");
 
   emitln("\n; --- begin text block");
-  parse_main();
   parse_functions();
   emitln("; --- end text block");
   
@@ -178,7 +177,8 @@ void parse_functions(void){
   register int i;
 
   for(i = 0; *function_table[i].func_name; i++)
-    if(strcmp(function_table[i].func_name, "main") != 0){ // skip 'main'
+    //if(strcmp(function_table[i].func_name, "main") != 0)
+    { // skip 'main'
       current_function_var_bp_offset = 0; // this is used to position local variables correctly relative to BP.
                         // whenever a new function is parsed, this is reset to 0.
                         // then inside the function it can increase according to how any local vars there are.
@@ -582,7 +582,13 @@ void parse_return(void){
     parse_expr();  // return value in register B
   }
   emitln("  leave");
-  emitln("  ret");
+  // check if this is "main"
+  if(!strcmp(function_table[current_func_id].func_name, "main")){
+    emitln("  syscall sys_terminate_proc");
+  }
+  else{
+    emitln("  ret");
+  }
 }
 
 void parse_block(void){
@@ -747,7 +753,9 @@ void parse_attrib(){
           else
             sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
           emit(temp);
-          emitln("], a");
+          emit("], a");
+          emit(" ; ");
+          emitln(var_name);
         }
         else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
           emitln("  mov al, bl");
@@ -758,7 +766,9 @@ void parse_attrib(){
           else
             sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
           emit(temp);
-          emitln("], al");
+          emit("], al");
+          emit(" ; ");
+          emitln(var_name);
         }
         else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
           emitln("  mov a, b");
@@ -771,7 +781,9 @@ void parse_attrib(){
           else
             sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
           emit(temp);
-          emitln("], a");
+          emit("], a");
+          emit(" ; ");
+          emitln(var_name);
         }
       }
       else if(global_var_exists(var_name) != -1){  // is a global variable
@@ -1057,7 +1069,9 @@ void parse_atom(void){
           else
             sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
           emit(temp);
-          emitln("]");
+          emit("]");
+          emit(" ; ");
+          emitln(temp_name);
           emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
                     // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
         }
@@ -1069,7 +1083,9 @@ void parse_atom(void){
           else
             sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
           emit(temp);
-          emitln("]");
+          emit("]");
+          emit(" ; ");
+          emitln(temp_name);
         }
         else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
           emit("  mov b, [bp + ");
@@ -1079,7 +1095,9 @@ void parse_atom(void){
           else
             sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
           emit(temp);
-          emitln("]");
+          emit("]");
+          emit(" ; ");
+          emitln(temp_name);
           emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
                     // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
         }
@@ -1365,11 +1383,15 @@ void declare_local(void){
       switch(new_var.data.type){
         case DT_CHAR:
           emit("  push byte ");
-          emitln(token);
+          emit(token);
+          emit(" ; ");
+          emitln(new_var.var_name);
           break;
         case DT_INT:
           emit("  push word ");
-          emitln(token);
+          emit(token);
+          emit(" ; ");
+          emitln(new_var.var_name);
           break;
       }
       get();
@@ -1377,10 +1399,14 @@ void declare_local(void){
     else{
       switch(new_var.data.type){
         case DT_CHAR:
-          emitln("  push byte 0"); // replace with sub sp, 1
+          emit("  push byte 0"); // replace with sub sp, 1
+          emit(" ; ");
+          emitln(new_var.var_name);
           break;
         case DT_INT:
-          emitln("  push word 0"); // replace with sub sp, 2
+          emit("  push word 0"); // replace with sub sp, 2
+          emit(" ; ");
+          emitln(new_var.var_name);
           break;
       }
     }

@@ -6,12 +6,25 @@
 
 ; --- begin text block
 main:
-; --- begin inline asm block
-  call scan_u16d
-  syscall sys_bkpt
-  call print_u16d
+	push bp
+	mov bp, sp
+  push word 0 ; b
+  push word 0 ; c
+  mov b, 1
+  mov a, b
+  swp a
+  mov [bp + -1], a ; b
+  leave
   syscall sys_terminate_proc
-; --- end inline asm block
+test:
+	push bp
+	mov bp, sp
+  push word 5 ; ii
+  push word 67 ; yy
+  mov b, [bp + 5] ; a
+  swp b
+  leave
+  ret
 ; --- end text block
 
 ; --- begin data block

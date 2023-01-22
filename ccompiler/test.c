@@ -2,16 +2,19 @@
 
 
 void main(void) {
-  asm{
-    call scan_u16d
-    syscall sys_bkpt
-    call print_u16d
-      syscall sys_terminate_proc
-    }
+  int b;
+  int c;
+  b = 1;
+
+  return;
 
 }
 
-
+int test(int a){
+  int ii = 5;
+  int yy = 67;
+  return a;
+}
 /*
 
 ARGUMENTS
