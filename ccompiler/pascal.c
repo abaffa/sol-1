@@ -1,4 +1,5 @@
 #include "lib/stdio.asm"
+
 char *s = "Enter the number of rows: ";
 char *ss = "    ";
 int coef = 1;
@@ -22,10 +23,7 @@ int main(void) {
          else
             coef = coef * (i - j + 1) / j;
 		print();
-		asm{
-			mov a, [coef]
-			call print_u16d
-		}
+		print_nbr(coef);
       }
 		asm{
 			mov d, nl_data
@@ -33,15 +31,21 @@ int main(void) {
 		}
    }
 
-	asm{
-		syscall sys_terminate_proc
-	}
+	return;
 }
+
+void print_nbr(int n){
+  asm{
+	mov a, [bp + 5] ; n
+	call print_u16d
+  }
+  return;
+}
+
 void print(void){
-	
 	asm{
 		mov d, ss_data
 		call puts
-		}
+	}
 	return;
 }

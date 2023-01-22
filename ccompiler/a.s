@@ -161,10 +161,10 @@ _if4_else_block:
   mov [coef], b
 _if4_exit:
   call print
-; --- begin inline asm block
-  mov a, [coef]
-  call print_u16d
-; --- end inline asm block
+  mov b, [coef]
+  push b
+  call print_nbr
+  add sp, 2
 _for3_update:
   mov b, [j]
   push a
@@ -191,9 +191,17 @@ _for1_update:
   mov [i], b
   jmp _for1_cond
 _for1_exit:
-; --- begin inline asm block
+  leave
   syscall sys_terminate_proc
+print_nbr:
+	push bp
+	mov bp, sp
+; --- begin inline asm block
+  mov a, [bp + 5] ; n
+  call print_u16d
 ; --- end inline asm block
+  leave
+  ret
 print:
 	push bp
 	mov bp, sp
