@@ -388,7 +388,7 @@ int find_total_parameter_bytes(void){
 void parse_asm(void){
   get();
   if(tok == OPENING_BRACE){
-    emitln("; --- begin inline asm block");
+    emitln("; --- begin asm block");
     while(*prog != '}'){
       if(*prog == '$'){
         prog++;
@@ -399,7 +399,7 @@ void parse_asm(void){
         *asmp++ = *prog++;
       }
     }
-    emitln("; --- end inline asm block");
+    emitln("; --- end asm block");
   }
 }
 
@@ -440,22 +440,9 @@ void emit_var(char *var_name){
         }
       }
       else if(global_var_exists(var_name) != -1){  // is a global variable
-        var_id = global_var_exists(var_name);
-        if(global_variables[var_id].data.ind_level > 0){ // is a pointer
-          emit("[");
-          emit(global_variables[var_id].var_name);
-          emitln("]");
-        }
-        else if(global_variables[var_id].data.type == DT_CHAR){
-            emit("[");
-            emit(global_variables[var_id].var_name);
-            emitln("]");
-        }
-        else if(global_variables[var_id].data.type == DT_INT){
-            emit("[");
-            emit(global_variables[var_id].var_name);
-            emitln("]");
-        }
+        emit("[");
+        emit(var_name);
+        emit("]");
       }
       else error(UNDECLARED_VARIABLE);
 

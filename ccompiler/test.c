@@ -1,19 +1,25 @@
 #include "lib/stdio.asm"
-
+int g;
 
 void main(void) {
-  int b;
-  int c;
-  b = 1;
+
+  asm{
+    mov $g, a
+    mov a, $g
+  }
 
   return;
 
 }
 
-int test(int a){
-  int ii = 5;
-  int yy = 67;
-  return a;
+int test(int ii){
+
+  asm{
+    mov a, $ii
+    mov $ii, a
+  }
+
+  return ii;
 }
 /*
 
