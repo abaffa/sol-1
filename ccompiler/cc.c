@@ -389,22 +389,75 @@ void parse_asm(void){
   get();
   if(tok == OPENING_BRACE){
     emitln("; --- begin inline asm block");
-    do{
-      get_line();
-      if(*string_constant != '}'){
-        emit("  ");
-        emitln(string_constant);
+    while(*prog != '}'){
+      if(*prog == '$'){
+        prog++;
+	get();
+        emit_var(token);
       }
-    } while(*string_constant != '}');
+      else{
+        *asmp++ = *prog++;
+      }
+    }
     emitln("; --- end inline asm block");
   }
-  else{
-    emitln("; --- inline asm block");
-    putback();
-    get_line();
-    emit("  ");
-    emitln(string_constant);
-  }
+}
+
+void emit_var(char *var_name){
+  int var_id;
+  char temp[256];
+      if(local_var_exists(var_name) != -1){ // is a local variable
+        var_id = local_var_exists(var_name);
+        if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){ // is a pointer
+          emit("[bp + ");
+          if(function_table[current_func_id].local_vars[var_id].is_parameter)
+            // add +4 below to account for BP and PC offsets which were pushed into the stack
+            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          else
+            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          emit(temp);
+          emit("]");
+        }
+        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
+          emit("[bp + ");
+          if(function_table[current_func_id].local_vars[var_id].is_parameter)
+            // add +4 below to account for BP and PC offsets which were pushed into the stack
+            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
+          else
+            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
+          emit(temp);
+          emit("]");
+        }
+        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
+          emit("[bp + ");
+          if(function_table[current_func_id].local_vars[var_id].is_parameter)
+            // add +4 below to account for BP and PC offsets which were pushed into the stack
+            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          else
+            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          emit(temp);
+          emit("]");
+        }
+      }
+      else if(global_var_exists(var_name) != -1){  // is a global variable
+        var_id = global_var_exists(var_name);
+        if(global_variables[var_id].data.ind_level > 0){ // is a pointer
+          emit("[");
+          emit(global_variables[var_id].var_name);
+          emitln("]");
+        }
+        else if(global_variables[var_id].data.type == DT_CHAR){
+            emit("[");
+            emit(global_variables[var_id].var_name);
+            emitln("]");
+        }
+        else if(global_variables[var_id].data.type == DT_INT){
+            emit("[");
+            emit(global_variables[var_id].var_name);
+            emitln("]");
+        }
+      }
+      else error(UNDECLARED_VARIABLE);
 
 }
 

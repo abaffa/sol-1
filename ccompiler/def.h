@@ -292,6 +292,7 @@ void declare_local(void);
 void putback(void);
 void emit(char *p);
 void emitln(char *p);
+void emit_var(char *var_name);
 void find_end_of_BLOCK(void);
 void find_end_of_block(void);
 
