@@ -17,7 +17,6 @@ int main(int argc, char *argv[]){
 
   initial_setup();
   pre_scan();
-
   sprintf(header, "; --- Filename: %s", argv[1]);
   emitln(header);
   emitln("\n.include \"lib/kernel.exp\"");
@@ -388,11 +387,11 @@ int find_total_parameter_bytes(void){
 void parse_asm(void){
   get();
   if(tok == OPENING_BRACE){
-    emitln("; --- begin asm block");
+    emit("; --- begin asm block");
     while(*prog != '}'){
       if(*prog == '$'){
         prog++;
-	get();
+	      get();
         emit_var(token);
       }
       else{
@@ -406,46 +405,46 @@ void parse_asm(void){
 void emit_var(char *var_name){
   int var_id;
   char temp[256];
-      if(local_var_exists(var_name) != -1){ // is a local variable
-        var_id = local_var_exists(var_name);
-        if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){ // is a pointer
-          emit("[bp + ");
-          if(function_table[current_func_id].local_vars[var_id].is_parameter)
-            // add +4 below to account for BP and PC offsets which were pushed into the stack
-            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          else
-            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          emit(temp);
-          emit("]");
-        }
-        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
-          emit("[bp + ");
-          if(function_table[current_func_id].local_vars[var_id].is_parameter)
-            // add +4 below to account for BP and PC offsets which were pushed into the stack
-            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
-          else
-            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
-          emit(temp);
-          emit("]");
-        }
-        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-          emit("[bp + ");
-          if(function_table[current_func_id].local_vars[var_id].is_parameter)
-            // add +4 below to account for BP and PC offsets which were pushed into the stack
-            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          else
-            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          emit(temp);
-          emit("]");
-        }
-      }
-      else if(global_var_exists(var_name) != -1){  // is a global variable
-        emit("[");
-        emit(var_name);
-        emit("]");
-      }
-      else error(UNDECLARED_VARIABLE);
 
+  if(local_var_exists(var_name) != -1){ // is a local variable
+    var_id = local_var_exists(var_name);
+    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){ // is a pointer
+      emit("[bp + ");
+      if(function_table[current_func_id].local_vars[var_id].is_parameter)
+        // add +4 below to account for BP and PC offsets which were pushed into the stack
+        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+      else
+        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+      emit(temp);
+      emit("]");
+    }
+    else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
+      emit("[bp + ");
+      if(function_table[current_func_id].local_vars[var_id].is_parameter)
+        // add +4 below to account for BP and PC offsets which were pushed into the stack
+        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
+      else
+        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
+      emit(temp);
+      emit("]");
+    }
+    else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
+      emit("[bp + ");
+      if(function_table[current_func_id].local_vars[var_id].is_parameter)
+        // add +4 below to account for BP and PC offsets which were pushed into the stack
+        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+      else
+        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+      emit(temp);
+      emit("]");
+    }
+  }
+  else if(global_var_exists(var_name) != -1){  // is a global variable
+    emit("[");
+    emit(var_name);
+    emit("]");
+  }
+  else error(UNDECLARED_VARIABLE);
 }
 
 void parse_break(void){
