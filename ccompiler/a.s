@@ -6,8 +6,8 @@
 
 ; --- begin text block
 main:
-	push bp
-	mov bp, sp
+  push bp
+  mov bp, sp
   push byte 0 ; c
   mov b, s
   mov [pp], b
@@ -19,12 +19,12 @@ main:
   mov al, bl
   mov [bp + 0], al ; c
 ; --- begin asm block
-		mov a, [s]
-		mov d, a
-		call puts
-		call scan_u16d
-		mov [rows], a
-	; --- end asm block
+    mov a, [s]
+    mov d, a
+    call puts
+    call scan_u16d
+    mov [rows], a
+  ; --- end asm block
 _for1_init:
   mov b, 0
   mov [i], b
@@ -188,10 +188,10 @@ _for3_update:
   jmp _for3_cond
 _for3_exit:
 ; --- begin asm block
-			mov a, [nl]
-			mov d, a
-			call puts
-		; --- end asm block
+      mov a, [nl]
+      mov d, a
+      call puts
+    ; --- end asm block
 _for1_update:
   mov b, [i]
   push a
@@ -206,23 +206,23 @@ _for1_exit:
   leave
   syscall sys_terminate_proc
 print_nbr:
-	push bp
-	mov bp, sp
+  push bp
+  mov bp, sp
 ; --- begin asm block
-	mov a, [bp + 5]
-	swp a ; swap to make up for stack weirdness
-	call print_u16d
+  mov a, [bp + 5]
+  swp a ; swap to make up for stack weirdness
+  call print_u16d
   ; --- end asm block
   leave
   ret
 print:
-	push bp
-	mov bp, sp
+  push bp
+  mov bp, sp
 ; --- begin asm block
-		mov a, [s]
-		mov d, a
-		call puts
-	; --- end asm block
+    mov a, [s]
+    mov d, a
+    call puts
+  ; --- end asm block
   leave
   ret
 ; --- end text block

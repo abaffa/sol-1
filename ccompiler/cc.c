@@ -185,8 +185,8 @@ void parse_functions(void){
       prog = function_table[i].code_location;
       emit(function_table[i].func_name);
       emitln(":");
-      emitln("\tpush bp");
-      emitln("\tmov bp, sp");
+      emitln("  push bp");
+      emitln("  mov bp, sp");
       parse_block(); // starts parsing the function block;
     }
 }
@@ -747,17 +747,17 @@ void find_end_of_BLOCK(void){
 }
 
 _BASIC_DATA get_var_type(char *var_name){
-	register int i;
+  register int i;
 
   for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
     if(!strcmp(function_table[current_func_id].local_vars[i].var_name, var_name))
-			return function_table[current_func_id].local_vars[i].data.type;
+      return function_table[current_func_id].local_vars[i].data.type;
 
-	for(i = 0; i < global_var_tos; i++)
-		if(!strcmp(global_variables[i].var_name, var_name)) 
-			return global_variables[i].data.type;
+  for(i = 0; i < global_var_tos; i++)
+    if(!strcmp(global_variables[i].var_name, var_name)) 
+      return global_variables[i].data.type;
 
-	error(UNDECLARED_VARIABLE);
+  error(UNDECLARED_VARIABLE);
 }
 
 void parse_expr(){
@@ -848,17 +848,17 @@ void parse_attrib(){
       return;
     }
   }
-	else if(tok == STAR){ // tests if this is a pointer assignment
-		while(tok != SEMICOLON && tok_type != END){
-			get();
+  else if(tok == STAR){ // tests if this is a pointer assignment
+    while(tok != SEMICOLON && tok_type != END){
+      get();
       if(tok_type == IDENTIFIER) strcpy(var_name, token); // save var name
-			if(tok == ASSIGNMENT){ // is an attribution statement
-				prog = temp_prog; // goes back to the beginning of the expression
-				get(); // gets past the first asterisk
-				parse_atom();
-				emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
-				// after evaluating the address expression, the token will be a "="
-				parse_attrib(); // evaluates the value to be attributed to the address, result in 'b'
+      if(tok == ASSIGNMENT){ // is an attribution statement
+        prog = temp_prog; // goes back to the beginning of the expression
+        get(); // gets past the first asterisk
+        parse_atom();
+        emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
+        // after evaluating the address expression, the token will be a "="
+        parse_attrib(); // evaluates the value to be attributed to the address, result in 'b'
         switch(get_var_type(var_name)){
           case DT_CHAR:
             emitln("  mov [d], bl");
@@ -868,10 +868,10 @@ void parse_attrib(){
             break;
           default: error(INVALID_POINTER);
         }
-				return;
-			}
-		}
-	}
+        return;
+      }
+    }
+  }
   
   prog = temp_prog;
   parse_logical();
