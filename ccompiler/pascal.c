@@ -5,8 +5,13 @@ char *ss = "    ";
 int coef = 1;
 int rows, space, i, j;
 char *nl = "\n\r";
+char **pp;
 
 int main(void) {
+	char c;
+	pp = &s;
+	c = **pp;
+
 	asm{
 		mov a, $s
 		mov d, a
@@ -39,6 +44,7 @@ int main(void) {
 void print_nbr(int n){
   asm{
 	mov a, $n
+	swp a ; swap to make up for stack weirdness
 	call print_u16d
   }
   return;

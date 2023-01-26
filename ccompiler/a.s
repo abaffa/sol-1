@@ -8,6 +8,16 @@
 main:
 	push bp
 	mov bp, sp
+  push byte 0 ; c
+  mov b, s
+  mov [pp], b
+  mov b, [pp]
+  mov d, b
+  mov b, [d]
+  mov d, b
+  mov b, [d]
+  mov al, bl
+  mov [bp + 0], al ; c
 ; --- begin asm block
 		mov a, [s]
 		mov d, a
@@ -200,6 +210,7 @@ print_nbr:
 	mov bp, sp
 ; --- begin asm block
 	mov a, [bp + 5]
+	swp a ; swap to make up for stack weirdness
 	call print_u16d
   ; --- end asm block
   leave
@@ -228,6 +239,7 @@ i: .dw 0
 j: .dw 0
 nl_data: .db "\n\r", 0
 nl: .dw nl_data
+pp: .dw 0
 ; --- end data block
 ; --- begin include block
 .include "lib/stdio.asm"
