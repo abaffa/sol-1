@@ -386,20 +386,20 @@ int find_total_parameter_bytes(void){
 
 void parse_asm(void){
   get();
-  if(tok == OPENING_BRACE){
-    emit("; --- begin asm block");
-    while(*prog != '}'){
-      if(*prog == '$'){
-        prog++;
-	      get();
-        emit_var(token);
-      }
-      else{
-        *asmp++ = *prog++;
-      }
+  if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
+  emit("; --- begin asm block");
+  while(*prog != '}'){
+    if(*prog == '$'){
+      prog++;
+      get();
+      emit_var(token);
     }
-    emitln("; --- end asm block");
+    else{
+      *asmp++ = *prog++;
+    }
   }
+  prog++;
+  emitln("; --- end asm block");
 }
 
 void emit_var(char *var_name){
