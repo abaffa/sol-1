@@ -8,10 +8,11 @@ char *nl = "\n\r";
 
 int main(void) {
 	asm{
-		mov d, s_data
+		mov a, $s
+		mov d, a
 		call puts
 		call scan_u16d
-		mov [rows], a
+		mov $rows, a
 	}
 
    for (i = 0; i < rows; i=i+1) {
@@ -26,7 +27,8 @@ int main(void) {
 		print_nbr(coef);
       }
 		asm{
-			mov d, nl_data
+			mov a, $nl
+			mov d, a
 			call puts
 		}
    }
@@ -36,7 +38,7 @@ int main(void) {
 
 void print_nbr(int n){
   asm{
-	mov a, [bp + 5] ; n
+	mov a, $n
 	call print_u16d
   }
   return;
@@ -44,7 +46,8 @@ void print_nbr(int n){
 
 void print(void){
 	asm{
-		mov d, ss_data
+		mov a, $s
+		mov d, a
 		call puts
 	}
 	return;

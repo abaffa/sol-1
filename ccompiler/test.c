@@ -1,26 +1,25 @@
 #include "lib/stdio.asm"
+
 int g;
 
 void main(void) {
 
-  asm{
-    mov $g, a
-    mov a, $g
-  }
 
   return;
 
 }
 
-int test(int ii){
+int test(char p1, char p2){
+  char i;
 
   asm{
-    mov a, $ii
-    mov $ii, a
+    mov a, $i
+    mov $i, a
+    mov a, $p1
+    mov $p1, a
   }
-
-  return ii;
 }
+
 /*
 
 ARGUMENTS
