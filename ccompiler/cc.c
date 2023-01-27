@@ -569,6 +569,58 @@ void parse_while(void){
   current_label_index_loop = label_stack_loop[label_tos_loop];
 }
 
+void parse_switch(void){
+  char s_label[64];
+  char *temp_p;
+
+  highest_label_index++;
+  label_stack_switch[label_tos_switch] = current_label_index_switch;
+  label_tos_switch++;
+  current_label_index_switch = highest_label_index;
+
+  sprintf(s_label, "_if%d_cond:", current_label_index_if);
+  emitln(s_label);
+  get();
+  if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
+  parse_expr(); // evaluate condition
+  if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
+  emitln("  cmp b, 0");
+  
+  temp_p = prog;
+  find_end_of_block(); // skip main IF block in order to check for ELSE block.
+  get();
+  if(tok == ELSE){
+    sprintf(s_label, "  je _if%d_else_block", current_label_index_if);
+    emitln(s_label);
+  }
+  else{
+    sprintf(s_label, "  je _if%d_exit", current_label_index_if);
+    emitln(s_label);
+  }
+
+  prog = temp_p;
+  sprintf(s_label, "_if%d_block:", current_label_index_if);
+  emitln(s_label);
+  parse_block();  // parse the positive condition block
+  sprintf(s_label, "  jmp _if%d_exit", current_label_index_if);
+  emitln(s_label);
+  get(); // look for 'else'
+  if(tok == ELSE){
+    sprintf(s_label, "_if%d_else_block:", current_label_index_if);
+    emitln(s_label);
+    parse_block();  // parse the positive condition block
+  }
+  else{
+    putback();
+  }
+  
+  sprintf(s_label, "_if%d_exit:", current_label_index_if);
+  emitln(s_label);
+
+  label_tos_if--;
+  current_label_index_if = label_stack_if[label_tos_if];
+}
+
 void parse_if(void){
   char s_label[64];
   char *temp_p;

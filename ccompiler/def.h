@@ -263,11 +263,14 @@ char includes_list_ASM[1024];         // keeps a list of all included files
 int highest_label_index = 0;          // this keeps the next value of the label index for use in new labels.
                                       //label values are never repeating. always increasing.
 int current_label_index_if = 0;       // index of current 'if' label. starts at 0
+int current_label_index_switch = 0;   // index of current 'switch' label. starts at 0
 int current_label_index_loop = 0;     // index of current 'while' label. starts at 0
 int label_stack_loop[64];             // for nested loop labels 
 int label_stack_if[64];               // for nested if labels 
+int label_stack_switch[64];           // for nested switch labels 
 int label_tos_loop = 0;               // label stack pointer
 int label_tos_if = 0;                 // label stack pointer
+int label_tos_switch = 0;             // label stack pointer
 
 // functions
 char isdelim(char c);
@@ -322,6 +325,7 @@ void generate_file(char *filename);
 
 void parse_for(void);
 void parse_if(void);
+void parse_switch(void);
 void parse_while(void);
 void parse_break(void);
 void parse_asm(void);

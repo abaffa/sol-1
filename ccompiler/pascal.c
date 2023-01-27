@@ -11,6 +11,23 @@ int main(void) {
   char c;
   pp = &s;
   c = **pp;
+  cc = **pp;
+
+  switch(c){
+    case 'A':
+      break;
+    case 'B':
+      break;
+
+    default:
+      switch(cc){
+        case 'a':
+
+        case 'b':
+
+        default:
+    }
+  }
 
   asm{
     mov a, $s
