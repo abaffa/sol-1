@@ -394,6 +394,13 @@ void parse_asm(void){
       get();
       emit_var(token);
     }
+    else if(*prog == ' '
+         && *(prog+1) == ' '
+         && *(prog+2) == ' '
+         && *(prog+3) == ' '
+    ){
+      prog += 2;      
+    }
     else{
       *asmp++ = *prog++;
     }

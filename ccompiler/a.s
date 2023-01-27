@@ -19,11 +19,11 @@ main:
   mov al, bl
   mov [bp + 0], al ; c
 ; --- begin asm block
-    mov a, [s]
-    mov d, a
-    call puts
-    call scan_u16d
-    mov [rows], a
+  mov a, [s]
+  mov d, a
+  call puts
+  call scan_u16d
+  mov [rows], a
   ; --- end asm block
 _for1_init:
   mov b, 0
@@ -188,10 +188,10 @@ _for3_update:
   jmp _for3_cond
 _for3_exit:
 ; --- begin asm block
-      mov a, [nl]
-      mov d, a
-      call puts
-    ; --- end asm block
+  mov a, [nl]
+  mov d, a
+  call puts
+  ; --- end asm block
 _for1_update:
   mov b, [i]
   push a
@@ -219,9 +219,9 @@ print:
   push bp
   mov bp, sp
 ; --- begin asm block
-    mov a, [s]
-    mov d, a
-    call puts
+  mov a, [s]
+  mov d, a
+  call puts
   ; --- end asm block
   leave
   ret

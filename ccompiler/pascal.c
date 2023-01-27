@@ -24,28 +24,28 @@ int main(void) {
     for (space = 1; space <= rows - i; space=space+1) print();
     
     for (j = 0; j <= i; j=j+1) {
-       if (j == 0 || i == 0)
-          coef = 1;
+      if (j == 0 || i == 0)
+        coef = 1;
        else
-          coef = coef * (i - j + 1) / j;
-    print();
-    print_nbr(coef);
-      }
+        coef = coef * (i - j + 1) / j;
+      print();
+      print_nbr(coef);
+    }
+
     asm{
       mov a, $nl
       mov d, a
       call puts
     }
    }
-
    return;
 }
 
 void print_nbr(int n){
   asm{
-  mov a, $n
-  swp a ; swap to make up for stack weirdness
-  call print_u16d
+    mov a, $n
+    swp a ; swap to make up for stack weirdness
+    call print_u16d
   }
   return;
 }
