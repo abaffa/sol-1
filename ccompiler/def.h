@@ -34,7 +34,7 @@ typedef enum {
   OPENING_BRACE, CLOSING_BRACE,
   OPENING_BRACKET, CLOSING_BRACKET,
   
-  SEMICOLON, COMMA,
+  COLON, SEMICOLON, COMMA,
 
   ASM
 } _TOKEN; // internal token representation
@@ -193,7 +193,10 @@ typedef enum {
   INVALID_BINARY_OPERANDS,
   UNEXPECTED_EOF,
   INCOMPATIBLE_ARGUMENT_TYPE,
-  INVALID_TYPE_IN_VARIABLE
+  INVALID_TYPE_IN_VARIABLE,
+  CASE_OR_DEFAULT_EXPECTED,
+  CONSTANT_EXPECTED,
+  COLON_EXPECTED
 } _ERROR;
 
 // variable declaration
@@ -245,7 +248,10 @@ char *error_table[] = {
   "invalid binary operands",
   "unexpected end of file",
   "incompatible argument type in function",
-  "invalid type: void types need to be pointers"
+  "invalid type: void types need to be pointers",
+  "case or default keyword expected",
+  "constant expected",
+  "colon expected"
 };
 
 int current_function_var_bp_offset;  // this is used to position local variables correctly relative to BP.
@@ -298,6 +304,7 @@ void emitln(char *p);
 void emit_var(char *var_name);
 void find_end_of_BLOCK(void);
 void find_end_of_block(void);
+void find_end_of_case(void);
 
 void parse_expr();
 void parse_attrib();

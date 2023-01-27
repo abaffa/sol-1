@@ -19,14 +19,6 @@ int main(void) {
     case 'B':
       break;
 
-    default:
-      switch(cc){
-        case 'a':
-
-        case 'b':
-
-        default:
-    }
   }
 
   asm{

@@ -1,24 +1,20 @@
 #include "lib/stdio.asm"
 
-int g;
 
+int i = 55;
 void main(void) {
-
+  
+  switch(i){
+    case 124:
+      break;
+    case 55:
+      break;
+  }
 
   return;
 
 }
 
-int test(char p1, char p2){
-  char i;
-
-  asm{
-    mov a, $i
-    mov $i, a
-    mov a, $p1
-    mov $p1, a
-  }
-}
 
 /*
 
