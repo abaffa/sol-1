@@ -1,22 +1,40 @@
 #include "lib/stdio.asm"
 
+int i = 54;
+int j = 33;
 
-int i = 55;
 void main(void) {
-  
+  asm{
+    call scan_u16d
+    mov $i, a
+  }
+
   switch(i){
-    case 124:
+    case 1:
+      i = 1;
+      print();
       break;
-    case 55:
+    case 2:
+      i = 2;
+      print();
       break;
-    case 54:
-      break;
+
     default:
-      break;
+      i = 3;
+      print();
   }
 
   return;
 
+}
+char *ss = "Hello World";
+
+void print(void){
+  asm{
+    mov a, $i
+    call print_u16d
+  }
+  return;
 }
 
 

@@ -40,6 +40,10 @@ typedef enum {
 } _TOKEN; // internal token representation
 _TOKEN tok;
 
+typedef enum{
+  FOR_BREAK, WHILE_BREAK, SWITCH_BREAK
+} t_break_type;
+
 typedef enum {
   DELIMITER = 1,
   CHAR_CONST, STRING_CONST, INTEGER_CONST, FLOAT_CONST, DOUBLE_CONST,
@@ -194,7 +198,7 @@ typedef enum {
   UNEXPECTED_EOF,
   INCOMPATIBLE_ARGUMENT_TYPE,
   INVALID_TYPE_IN_VARIABLE,
-  CASE_OR_DEFAULT_EXPECTED,
+  CASE_EXPECTED,
   CONSTANT_EXPECTED,
   COLON_EXPECTED
 } _ERROR;
@@ -249,7 +253,7 @@ char *error_table[] = {
   "unexpected end of file",
   "incompatible argument type in function",
   "invalid type: void types need to be pointers",
-  "case or default keyword expected",
+  "case keyword expected",
   "constant expected",
   "colon expected"
 };
@@ -270,13 +274,17 @@ int highest_label_index = 0;          // this keeps the next value of the label 
                                       //label values are never repeating. always increasing.
 int current_label_index_if = 0;       // index of current 'if' label. starts at 0
 int current_label_index_switch = 0;   // index of current 'switch' label. starts at 0
-int current_label_index_loop = 0;     // index of current 'while' label. starts at 0
-int label_stack_loop[64];             // for nested loop labels 
+int current_label_index_for = 0;      // index of current 'for' label. starts at 0
+int current_label_index_while = 0;    // index of current 'while' label. starts at 0
+int label_stack_for[64];              // for nested for labels 
+int label_stack_while[64];            // for nested while labels 
 int label_stack_if[64];               // for nested if labels 
 int label_stack_switch[64];           // for nested switch labels 
-int label_tos_loop = 0;               // label stack pointer
-int label_tos_if = 0;                 // label stack pointer
-int label_tos_switch = 0;             // label stack pointer
+int label_tos_for = 0;
+int label_tos_while = 0;
+int label_tos_if = 0;
+int label_tos_switch = 0;
+t_break_type current_break_type;      // is it a for, while, or switch?
 
 // functions
 char isdelim(char c);
@@ -337,6 +345,11 @@ void parse_if(void);
 void parse_switch(void);
 void parse_while(void);
 void parse_break(void);
+void parse_switch_break(void);
+int switch_has_default(void);
+void goto_default(void);
+void parse_while_break(void);
+void parse_for_break(void);
 void parse_asm(void);
 
 

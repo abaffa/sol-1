@@ -113,20 +113,12 @@ void initial_setup(void){
 }
 
 void emitln(char *p){
-  while(*p){
-    *asmp = *p;
-    asmp++;
-    p++;
-  }
+  while(*p) *asmp++ = *p++;
   *asmp++ = '\n';
 }
 
 void emit(char *p){
-  while(*p){
-    *asmp = *p;
-    asmp++;
-    p++;
-  }
+  while(*p) *asmp++ = *p++;
 }
 
 void load_program(char *filename){
@@ -394,13 +386,6 @@ void parse_asm(void){
       get();
       emit_var(token);
     }
-    else if(*prog == ' '
-         && *(prog+1) == ' '
-         && *(prog+2) == ' '
-         && *(prog+3) == ' '
-    ){
-      prog += 2;      
-    }
     else{
       *asmp++ = *prog++;
     }
@@ -455,9 +440,30 @@ void emit_var(char *var_name){
 }
 
 void parse_break(void){
+  if(current_break_type == FOR_BREAK) parse_for_break();
+  else if(current_break_type == WHILE_BREAK) parse_while_break();
+  else if(current_break_type == SWITCH_BREAK) parse_switch_break();
+  get();
+}
+
+void parse_switch_break(void){
   char s_label[64];
   
-  sprintf(s_label, "  jmp _while%d_exit", current_label_index_loop);
+  sprintf(s_label, "  jmp _switch%d_exit", current_label_index_switch);
+  emitln(s_label);
+}
+
+void parse_while_break(void){
+  char s_label[64];
+  
+  sprintf(s_label, "  jmp _while%d_exit", current_label_index_while);
+  emitln(s_label);
+}
+
+void parse_for_break(void){
+  char s_label[64];
+  
+  sprintf(s_label, "  jmp _for%d_exit", current_label_index_for);
   emitln(s_label);
 }
 
@@ -466,12 +472,13 @@ void parse_for(void){
   char s_label[64];
   char *update_loc;
   
+  current_break_type = FOR_BREAK;
   highest_label_index++;
-  label_stack_loop[label_tos_loop] = current_label_index_loop;
-  label_tos_loop++;
-  current_label_index_loop = highest_label_index;
+  label_stack_for[label_tos_for] = current_label_index_for;
+  label_tos_for++;
+  current_label_index_for = highest_label_index;
 
-  sprintf(s_label, "_for%d_init:", current_label_index_loop);
+  sprintf(s_label, "_for%d_init:", current_label_index_for);
   emitln(s_label);
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
@@ -482,7 +489,7 @@ void parse_for(void){
   }
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
 
-  sprintf(s_label, "_for%d_cond:", current_label_index_loop);
+  sprintf(s_label, "_for%d_cond:", current_label_index_for);
   emitln(s_label);
   
   // checks for an empty condition, which means always true
@@ -498,9 +505,9 @@ void parse_for(void){
 
   emitln("  mov a, b");
   emitln("  cmp a, 0");
-  sprintf(s_label, "  je _for%d_exit", current_label_index_loop);
+  sprintf(s_label, "  je _for%d_exit", current_label_index_for);
   emitln(s_label);
-  sprintf(s_label, "_for%d_block:", current_label_index_loop);
+  sprintf(s_label, "_for%d_block:", current_label_index_for);
   emitln(s_label);
 
   update_loc = prog; // holds the location of incrementation part
@@ -516,7 +523,7 @@ void parse_for(void){
 
   parse_block();
   
-  sprintf(s_label, "_for%d_update:", current_label_index_loop);
+  sprintf(s_label, "_for%d_update:", current_label_index_for);
   emitln(s_label);
   
   prog = update_loc;
@@ -527,27 +534,28 @@ void parse_for(void){
     parse_expr();
   }
     
-  sprintf(s_label, "  jmp _for%d_cond", current_label_index_loop);
+  sprintf(s_label, "  jmp _for%d_cond", current_label_index_for);
   emitln(s_label);
 
   find_end_of_block();
 
-  sprintf(s_label, "_for%d_exit:", current_label_index_loop);
+  sprintf(s_label, "_for%d_exit:", current_label_index_for);
   emitln(s_label);
 
-  label_tos_loop--;
-  current_label_index_loop = label_stack_loop[label_tos_loop];
+  label_tos_for--;
+  current_label_index_for = label_stack_for[label_tos_for];
 }
 
 void parse_while(void){
   char s_label[64];
 
+  current_break_type = WHILE_BREAK;
   highest_label_index++;
-  label_stack_loop[label_tos_loop] = current_label_index_loop;
-  label_tos_loop++;
-  current_label_index_loop = highest_label_index;
+  label_stack_while[label_tos_while] = current_label_index_while;
+  label_tos_while++;
+  current_label_index_while = highest_label_index;
 
-  sprintf(s_label, "_while%d_cond:", current_label_index_loop);
+  sprintf(s_label, "_while%d_cond:", current_label_index_while);
   emitln(s_label);
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
@@ -555,18 +563,18 @@ void parse_while(void){
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   emitln("  mov a, b");
   emitln("  cmp a, 0");
-  sprintf(s_label, "  je _while%d_exit", current_label_index_loop);
+  sprintf(s_label, "  je _while%d_exit", current_label_index_while);
   emitln(s_label);
-  sprintf(s_label, "_while%d_block:", current_label_index_loop);
+  sprintf(s_label, "_while%d_block:", current_label_index_while);
   emitln(s_label);
   parse_block();  // parse while block
-  sprintf(s_label, "  jmp _while%d_cond", current_label_index_loop);
+  sprintf(s_label, "  jmp _while%d_cond", current_label_index_while);
   emitln(s_label);
-  sprintf(s_label, "_while%d_exit:", current_label_index_loop);
+  sprintf(s_label, "_while%d_exit:", current_label_index_while);
   emitln(s_label);
 
-  label_tos_loop--;
-  current_label_index_loop = label_stack_loop[label_tos_loop];
+  label_tos_while--;
+  current_label_index_while = label_stack_while[label_tos_while];
 }
 
 /*
@@ -594,19 +602,71 @@ int count_cases(void){
       putback();
       find_end_of_BLOCK();
     }
-    else if(tok == SWITCH){ // skip nested switches so we don't count extra 'cases' from inside them
+    else if(tok == CASE) nbr_cases++;
+    else if(tok == CLOSING_BRACE || tok == DEFAULT) return nbr_cases;
+  } while(1);
+}
+
+void find_end_of_case(void){
+  do{
+    get();
+    if(tok == OPENING_BRACE){
+      putback();
+      find_end_of_BLOCK();
+      get();
+    }
+  } while(tok != CASE && tok != DEFAULT && tok != CLOSING_BRACE);
+}
+
+void goto_next_case(void){
+  int nbr_cases = 0;
+  do{
+    get();
+    if(tok == OPENING_BRACE){
+      putback();
       find_end_of_BLOCK();
     }
     else if(tok == CASE) nbr_cases++;
-    else if(tok == CLOSING_BRACE || tok == DEFAULT) return nbr_cases;
+    else if(tok == CLOSING_BRACE || tok == DEFAULT) return;
+  } while(1);
+}
+
+void goto_default(void){
+  do{
+    get();
+    if(tok == OPENING_BRACE){
+      putback();
+      find_end_of_BLOCK();
+    }
+    else if(tok == DEFAULT){
+      get();
+      return;
+    }
+  } while(1);
+}
+
+int switch_has_default(void){
+  do{
+    get();
+    if(tok == OPENING_BRACE){
+      putback();
+      find_end_of_BLOCK();
+    }
+    else if(tok == DEFAULT) return 1;
+    else if(tok == CLOSING_BRACE) return 0;
   } while(1);
 }
 
 void parse_switch(void){
   char s_label[64];
   char s_nextcase[64];
+  char asm_line[256];
   char *temp_p;
+  int nbr_cases;
+  int current_case_nbr;
+  int has_default;
 
+  current_break_type = SWITCH_BREAK;
   highest_label_index++;
   label_stack_switch[label_tos_switch] = current_label_index_switch;
   label_tos_switch++;
@@ -618,54 +678,87 @@ void parse_switch(void){
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
-  //emitln("  cmp b, 0");
-  
-  //find_end_of_block(); // skip main IF block in order to check for ELSE block.
 
   get();
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
 
   temp_p = prog;
-  printf("cases: %d", count_cases());
+  nbr_cases = count_cases();
   prog = temp_p;
+  has_default = switch_has_default();
+  prog = temp_p;
+  current_case_nbr = 0;
 
+  // emit compares and jumps
   do{
     get();
-    if(tok != CASE && tok != DEFAULT) error(CASE_OR_DEFAULT_EXPECTED);
+    if(tok != CASE) error(CASE_EXPECTED);
     get();
     if(tok_type == INTEGER_CONST){
       emit("  cmp b, ");
       emitln(token);
+      sprintf(s_label, "_switch%d_case%d", current_label_index_switch, current_case_nbr);
+      strcpy(asm_line, "  je ");
+      strcat(asm_line, s_label);
+      emitln(asm_line);
       get();
       if(tok != COLON) error(COLON_EXPECTED);
       find_end_of_case();
+      putback();
     }
     else if(tok_type == CHAR_CONST){
       emit("  cmp bl, '");
       emit(string_constant);
       emitln("'");
+      sprintf(s_label, "_switch%d_case%d", current_label_index_switch, current_case_nbr);
+      strcpy(asm_line, "  je ");
+      strcat(asm_line, s_label);
+      emitln(asm_line);
       get();
-      puts(token);
       if(tok != COLON) error(COLON_EXPECTED);
       find_end_of_case();
+      putback();
     }
     else error(CONSTANT_EXPECTED);
-  } while(tok == CASE || tok == DEFAULT);
+    current_case_nbr++;
+  } while(tok == CASE);
 
-  if(tok != CLOSING_BRACE) error(CLOSING_BRACE_EXPECTED);
+  // generate default if it exists
+  if(tok == DEFAULT){
+    get(); // get default
+    get(); // get ':'
+    sprintf(s_label, "_switch%d_default:", current_label_index_switch);
+    emitln(s_label);
+    parse_case();
+    sprintf(s_label, "  jmp _switch%d_exit", current_label_index_switch);
+    emitln(s_label);
+  }
+
+  // emit code for each case block
+  prog = temp_p;
+  current_case_nbr = 0;
+  do{
+    get(); // get 'case'
+    get(); // get constant
+    get(); // get ':'
+
+    sprintf(s_label, "_switch%d_case%d:", current_label_index_switch, current_case_nbr);
+    emitln(s_label);
+    parse_case();
+    current_case_nbr++;
+  } while(tok == CASE);
 
   sprintf(s_label, "_switch%d_exit:", current_label_index_switch);
   emitln(s_label);
 
   label_tos_switch--;
   current_label_index_switch = label_stack_switch[label_tos_switch];
-}
-
-void find_end_of_case(void){
-  do{
-    get();
-  } while(tok != CASE && tok != DEFAULT && tok != CLOSING_BRACE);
-  if(tok != CLOSING_BRACE) putback(); // put the 'case' or 'default' keyword back
+  get();
+  if(tok == DEFAULT){
+    get(); // get ':'
+    find_end_of_case();
+  }
+  if(tok != CLOSING_BRACE) error(CLOSING_BRACE_EXPECTED);
 }
 
 void parse_if(void){
@@ -765,15 +858,16 @@ void parse_case(void){
       case BREAK:
         parse_break();
         break;
+      case CASE:
+      case DEFAULT:
+      case CLOSING_BRACE:
+        putback();
+        return;
       case DO:
         break;
       case RETURN:
         parse_return();
         break;
-      case CASE:
-      case DEFAULT:
-        putback();
-        return;
       default:
         putback();
         parse_expr();
