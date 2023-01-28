@@ -9,6 +9,10 @@ void main(void) {
       break;
     case 55:
       break;
+    case 54:
+      break;
+    default:
+      break;
   }
 
   return;

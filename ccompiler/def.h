@@ -315,6 +315,8 @@ void parse_factors();
 void parse_atom();
 void parse_return(void);
 
+int count_cases(void);
+void parse_case(void);
 void parse_block(void);
 void parse_functions(void);
 void parse_main(void);

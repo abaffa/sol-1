@@ -585,8 +585,26 @@ void parse_while(void){
   
 */
 
+int count_cases(void){
+  int nbr_cases = 0;
+
+  do{
+    get();
+    if(tok == OPENING_BRACE){
+      putback();
+      find_end_of_BLOCK();
+    }
+    else if(tok == SWITCH){ // skip nested switches so we don't count extra 'cases' from inside them
+      find_end_of_BLOCK();
+    }
+    else if(tok == CASE) nbr_cases++;
+    else if(tok == CLOSING_BRACE || tok == DEFAULT) return nbr_cases;
+  } while(1);
+}
+
 void parse_switch(void){
   char s_label[64];
+  char s_nextcase[64];
   char *temp_p;
 
   highest_label_index++;
@@ -602,11 +620,14 @@ void parse_switch(void){
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   //emitln("  cmp b, 0");
   
-  //temp_p = prog;
   //find_end_of_block(); // skip main IF block in order to check for ELSE block.
 
   get();
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
+
+  temp_p = prog;
+  printf("cases: %d", count_cases());
+  prog = temp_p;
 
   do{
     get();
@@ -715,8 +736,54 @@ void parse_return(void){
   }
 }
 
+void parse_case(void){
+  do{
+    get();
+    switch(tok){
+      case INT:
+      case CHAR:
+      case FLOAT:
+      case DOUBLE:
+        putback();
+        declare_local();
+        break;
+      case ASM:
+        parse_asm();
+        break;
+      case IF:
+        parse_if();
+        break;
+      case SWITCH:
+        parse_switch();
+        break;
+      case FOR:
+        parse_for();
+        break;
+      case WHILE:
+        parse_while();
+        break;
+      case BREAK:
+        parse_break();
+        break;
+      case DO:
+        break;
+      case RETURN:
+        parse_return();
+        break;
+      case CASE:
+      case DEFAULT:
+        putback();
+        return;
+      default:
+        putback();
+        parse_expr();
+        if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
+    }    
+  } while(1); 
+}
+
 void parse_block(void){
-  int brace = 0;
+  int braces = 0;
   
   do{
     get();
@@ -749,12 +816,10 @@ void parse_block(void){
       case DO:
         break;
       case OPENING_BRACE:
-        brace++;
+        braces++;
         break;
       case CLOSING_BRACE:
-        brace--;
-        break;
-      case SEMICOLON:
+        braces--;
         break;
       case RETURN:
         parse_return();
@@ -765,7 +830,7 @@ void parse_block(void){
         parse_expr();
         if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
     }    
-  } while(brace); // exits when it finds the last closing brace
+  } while(braces); // exits when it finds the last closing brace
 }
 
 void find_end_of_block(void){
