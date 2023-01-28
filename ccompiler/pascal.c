@@ -1,25 +1,13 @@
 #include "lib/stdio.asm"
 
 char *s = "Enter the number of rows: ";
-char *ss = "    ";
+char *ss = "     ";
 int coef = 1;
 int rows, space, i, j;
 char *nl = "\n\r";
 char **pp;
 
-int main(void) {
-  char c;
-  pp = &s;
-  c = **pp;
-  cc = **pp;
-
-  switch(c){
-    case 'A':
-      break;
-    case 'B':
-      break;
-
-  }
+void main(void){
 
   asm{
     mov a, $s
@@ -32,7 +20,7 @@ int main(void) {
   for (i = 0; i < rows; i=i+1) {
     for (space = 1; space <= rows - i; space=space+1) print();
     
-    for (j = 0; j <= i; j=j+1) {
+    for (j = 0; j <= i; j=j+1){
       if (j == 0 || i == 0)
         coef = 1;
        else
@@ -61,7 +49,7 @@ void print_nbr(int n){
 
 void print(void){
   asm{
-    mov a, $s
+    mov a, $ss
     mov d, a
     call puts
   }

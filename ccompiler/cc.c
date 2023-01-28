@@ -568,6 +568,7 @@ void parse_while(void){
   label_tos_loop--;
   current_label_index_loop = label_stack_loop[label_tos_loop];
 }
+
 /*
   switch(expr){
     case const1:
@@ -583,6 +584,7 @@ void parse_while(void){
   else jmp to next block
   
 */
+
 void parse_switch(void){
   char s_label[64];
   char *temp_p;
