@@ -1,7 +1,7 @@
 #include "lib/stdio.asm"
 
 int i = 54;
-int j = 33;
+int j = 99;
 
 void main(void) {
   asm{
@@ -20,14 +20,25 @@ void main(void) {
       break;
 
     default:
-      i = 3;
-      print();
+      switch(j){
+        case 33:
+          i = 33;
+          print();
+          break;
+        case 22:
+          i = 22;
+          print();
+          break;
+        default:
+          i = 88;
+          print();
+          break;
+      }
   }
 
   return;
 
 }
-char *ss = "Hello World";
 
 void print(void){
   asm{

@@ -678,6 +678,8 @@ void parse_switch(void){
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
+  sprintf(s_label, "_switch%d_comparisons:", current_label_index_switch);
+  emitln(s_label);
 
   get();
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
