@@ -7,7 +7,9 @@ void main(void) {
   int i;
 
   i = haha;
-
+  do{
+    i = i + 1;
+  } while(i < 10);
 
   return;
 
