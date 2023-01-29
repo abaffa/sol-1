@@ -229,8 +229,8 @@ void pre_scan(void){
 }
 
 void declare_func(void){
-  _USER_FUNC *func; // variable to hold a pointer to the user function top of stack
-  _BASIC_DATA param_data_type; // function data type
+  t_user_func *func; // variable to hold a pointer to the user function top of stack
+  t_basic_data param_data_type; // function data type
   int bp_offset; // for each parameter, keep the running offset of that parameter.
   char *temp_prog;
   int total_parameter_bytes;
@@ -631,20 +631,6 @@ void goto_next_case(void){
   } while(1);
 }
 
-void goto_default(void){
-  do{
-    get();
-    if(tok == OPENING_BRACE){
-      putback();
-      find_end_of_BLOCK();
-    }
-    else if(tok == DEFAULT){
-      get();
-      return;
-    }
-  } while(1);
-}
-
 int switch_has_default(void){
   do{
     get();
@@ -995,7 +981,7 @@ void find_end_of_BLOCK(void){
   if(brace && !*prog) error(CLOSING_BRACE_EXPECTED);
 }
 
-_BASIC_DATA get_var_type(char *var_name){
+t_basic_data get_var_type(char *var_name){
   register int i;
 
   for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
@@ -1419,7 +1405,7 @@ void parse_atom(void){
 }
 
 void parse_function_arguments(int func_id){
-  _USER_FUNC *func; // variable to hold a pointer to the user function
+  t_user_func *func; // variable to hold a pointer to the user function
   int param_index;
 
   func = &function_table[func_id];
@@ -1461,7 +1447,7 @@ void putback(void){
 }
 
 void declare_global(void){
-  _BASIC_DATA dt;
+  t_basic_data dt;
   int ind_level;
   char constant = 0;
 
@@ -1489,7 +1475,7 @@ void declare_global(void){
   }
 
   do{
-    if(global_var_tos == MAX_GLOBAL_VARS) error(EXCEEDED_GLOBAL_VAR_LIMIT);
+    if(global_var_tos == MAX_GLOBAL_VARS) error(EXCEEDEDt_global_var_LIMIT);
 
     global_variables[global_var_tos].constant = constant;
 
@@ -1513,7 +1499,7 @@ void declare_global(void){
     if(dt == DT_VOID && ind_level == 0) error(INVALID_TYPE_IN_VARIABLE);
 
     // checks if there is another global variable with the same name
-    if(find_global_var(token) != -1) error(DUPLICATE_GLOBAL_VARIABLE);
+    if(find_global_var(token) != -1) error(DUPLICATEt_global_varIABLE);
     
     global_variables[global_var_tos].data.type = dt;
     global_variables[global_var_tos].data.ind_level = ind_level;
@@ -1586,8 +1572,8 @@ int local_var_exists(char *var_name){
 }
 
 void declare_local(void){                        
-  _BASIC_DATA dt;
-  _LOCAL_VAR new_var;
+  t_basic_data dt;
+  t_local_var new_var;
   char ind_level;
   char constant = 0;
   
@@ -1658,7 +1644,7 @@ void declare_local(void){
     }
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
 
-    if(local_var_exists(token) != -1) error(DUPLICATE_LOCAL_VARIABLE);
+    if(local_var_exists(token) != -1) error(DUPLICATEt_local_varIABLE);
 
     new_var.data.type = dt;
     new_var.data.ind_level = ind_level;
@@ -1709,7 +1695,7 @@ void declare_local(void){
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
 }
 
-_LOCAL_VAR *get_local_var(char *var_name){
+t_local_var *get_local_var(char *var_name){
   register int i;
 
   //check local variables whose function id is the id of current function being parsed
@@ -1720,7 +1706,7 @@ _LOCAL_VAR *get_local_var(char *var_name){
   return NULL;
 }
 
-_GLOBAL_VAR *get_global_var(char *var_name){
+t_global_var *get_global_var(char *var_name){
   register int i;
 
   for(i = 0; (i < global_var_tos) && (*global_variables[i].var_name); i++)

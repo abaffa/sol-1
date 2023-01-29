@@ -1,52 +1,25 @@
 #include "lib/stdio.asm"
 
-int i = 54;
-int j = 99;
+enum e1 {E1, E2, E3};
+
+char* s1 = "Hello World";
+char** p;
+char* s2;
 
 void main(void) {
+  p = &s1;
+  s2 = *p;
+
   asm{
-    call scan_u16d
-    mov $i, a
-  }
-
-  switch(i){
-    case 1:
-      i = 1;
-      print();
-      break;
-    case 2:
-      i = 2;
-      print();
-      break;
-
-    default:
-      switch(j){
-        case 33:
-          i = 33;
-          print();
-          break;
-        case 22:
-          i = 22;
-          print();
-          break;
-        default:
-          i = 88;
-          print();
-          break;
-      }
+    mov a, $s2
+    mov d, a
+    call puts
   }
 
   return;
 
 }
 
-void print(void){
-  asm{
-    mov a, $i
-    call print_u16d
-  }
-  return;
-}
 
 
 /*

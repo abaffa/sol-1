@@ -37,8 +37,8 @@ typedef enum {
   COLON, SEMICOLON, COMMA,
 
   ASM
-} _TOKEN; // internal token representation
-_TOKEN tok;
+} t_token; // internal token representation
+t_token tok;
 
 typedef enum{
   FOR_BREAK, WHILE_BREAK, SWITCH_BREAK
@@ -48,15 +48,15 @@ typedef enum {
   DELIMITER = 1,
   CHAR_CONST, STRING_CONST, INTEGER_CONST, FLOAT_CONST, DOUBLE_CONST,
   IDENTIFIER, RESERVED, END
-} _TOKEN_TYPE;
-_TOKEN_TYPE tok_type;
+} t_token_type;
+t_token_type tok_type;
 
 typedef enum {
   JF_NULL, 
   JF_BREAK, 
   JF_CONTINUE, 
   JF_RETURN
-} _JUMP_FLAG;
+} t_jump_flag;
 
 typedef union {
   char c;
@@ -68,61 +68,66 @@ typedef union {
   float f;
   double d;
   long double longdouble;
-} _VALUE;
+} t_value;
+
+typedef struct{
+  char name[ID_LEN];
+
+} t_enum;
 
 // basic data types
 typedef enum {
   DT_VOID = 1, DT_CHAR, DT_INT, DT_FLOAT, DT_DOUBLE, DT_STRUCT
-} _BASIC_DATA;
+} t_basic_data;
 
 typedef enum {
   mSIGNED = 1, mUNSIGNED, mSHORT, mLONG
-} _MODIFIER;
+} t_modifier;
 
 typedef struct {
-  _BASIC_DATA type;
-  _MODIFIER smodf, lmodf, modf3;
-  _VALUE value;
+  t_basic_data type;
+  t_modifier smodf, lmodf, modf3;
+  t_value value;
   int ind_level; // holds the pointer indirection level
-} _DATA;
+} t_data;
 
 typedef struct {
   char *str;
-  _DATA data;
-} _CONST;
+  t_data data;
+} t_const;
 
 typedef struct {
   char var_name[ID_LEN];
-  _DATA data; // holds the type of data and the value itself
+  t_data data; // holds the type of data and the value itself
   int dims[MAX_MATRIX_DIMS + 1];
   char constant;
   char is_parameter; // is this a parameter variable or a normal local variable?
   int bp_offset; // if var is local, this holds the offset of the var from BP.
   int function_id; // the function does this local var belong to
-} _LOCAL_VAR;
+} t_local_var;
 
 typedef struct {
   char var_name[ID_LEN];
-  _DATA data; // holds the type of data and the value itself
+  t_data data; // holds the type of data and the value itself
   int dims[MAX_MATRIX_DIMS + 1];
   char constant;
   char as_string[1024]; // this just saves the initialization string in case the var is a string. it makes it easier for the compiler
   // but is a poor solution that needs fixing later
-} _GLOBAL_VAR;
-_GLOBAL_VAR global_variables[MAX_GLOBAL_VARS];
+} t_global_var;
+t_global_var global_variables[MAX_GLOBAL_VARS];
 
 typedef struct {
   char func_name[ID_LEN];
-  _BASIC_DATA return_type;
+  t_basic_data return_type;
   char *code_location;
-  _LOCAL_VAR local_vars[MAX_LOCAL_VARS + 1];
+  t_local_var local_vars[MAX_LOCAL_VARS + 1];
   int local_var_tos;
-} _USER_FUNC;
-_USER_FUNC function_table[MAX_USER_FUNC];
+} t_user_func;
+t_user_func function_table[MAX_USER_FUNC];
 
 struct _keyword_table{
   char *keyword;
-  _TOKEN key;
+  t_token key;
 } keyword_table[] = {
   "void", VOID,
   "char", CHAR,
@@ -161,7 +166,7 @@ typedef enum {
   SEMICOLON_EXPECTED,
   VAR_TYPE_EXPECTED,
   IDENTIFIER_EXPECTED,
-  EXCEEDED_GLOBAL_VAR_LIMIT,
+  EXCEEDEDt_global_var_LIMIT,
   EXCEEDED_FUNC_DECL_LIMIT,
   NOT_VAR_OR_FUNC_OUTSIDE,
   NO_MAIN_FOUND,
@@ -172,12 +177,12 @@ typedef enum {
   MAX_PARAMS_LIMIT_REACHED,
   USER_FUNC_CALLS_LIMIT_REACHED,
   LOCAL_VAR_LIMIT_REACHED,
-  RETURNING_VALUE_FROM_VOID_FUNCTION,
+  RETURNINGt_value_FROM_VOID_FUNCTION,
   INVALID_EXPRESSION,
   INVALID_ARGUMENT_FOR_BITWISE_NOT,
   WHILE_KEYWORD_EXPECTED,
-  DUPLICATE_GLOBAL_VARIABLE,
-  DUPLICATE_LOCAL_VARIABLE,
+  DUPLICATEt_global_varIABLE,
+  DUPLICATEt_local_varIABLE,
   STRING_CONSTANT_EXPECTED,
   POINTER_EXPECTED,
   INVALID_POINTER,
@@ -292,8 +297,8 @@ char is_idchar(char c);
 int find_keyword(char *keyword);
 int local_var_exists(char *var_name);
 int global_var_exists(char *var_name);
-_LOCAL_VAR *get_local_var(char *var_name);
-_GLOBAL_VAR *get_global_var(char *var_name);
+t_local_var *get_local_var(char *var_name);
+t_global_var *get_global_var(char *var_name);
 int find_function(char *func_name);
 void load_program(char *filename);
 
@@ -329,9 +334,9 @@ void parse_block(void);
 void parse_functions(void);
 void parse_main(void);
 
-void convert_data(_DATA *data_to_convert, _BASIC_DATA into_type);
+void convert_data(t_data *data_to_convert, t_basic_data into_type);
 
-_BASIC_DATA get_var_type(char *var_name);
+t_basic_data get_var_type(char *var_name);
 
 void parse_directive(void);
 void emit_global_variables(void);
@@ -347,7 +352,6 @@ void parse_while(void);
 void parse_break(void);
 void parse_switch_break(void);
 int switch_has_default(void);
-void goto_default(void);
 void parse_while_break(void);
 void parse_for_break(void);
 void parse_asm(void);
