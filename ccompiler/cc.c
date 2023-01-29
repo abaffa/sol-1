@@ -205,6 +205,10 @@ void pre_scan(void){
       include_lib(token);
       continue;
     }
+    else if(tok == ENUM){
+      declare_enum();
+      continue;
+    }
     
     if(tok == CONST) get();
     if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) error(NOT_VAR_OR_FUNC_OUTSIDE);
@@ -1394,7 +1398,15 @@ void parse_atom(void){
           emitln("]");
         }
       }
-      else error(UNDECLARED_VARIABLE);
+      else if(enum_element_exists(temp_name)){
+        char enum_value_str[32];
+        sprintf(enum_value_str, "%d", get_enum_val(temp_name));
+        emit("  mov b, ");
+        emit(enum_value_str);
+        emit(" ; ");
+        emitln(temp_name);
+      }
+      else error(UNDECLARED_IDENTIFIER);
       putback();
     }
   }
@@ -1446,6 +1458,61 @@ void putback(void){
   while(*t++) prog--;
 }
 
+// enum my_enum {item1, item2, item3};
+void declare_enum(void){
+  int element_tos;
+  int value;
+
+  if(enum_table_tos == MAX_ENUM_DECLARATIONS) error(EXCEEDED_MAX_ENUM_DECL);
+
+  get(); // get enum name
+  strcpy(enum_table[enum_table_tos].name, token);
+  get(); // '{'
+  if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
+  element_tos = 0;
+  value = 0;
+
+  do{
+    get();
+    if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
+    strcpy(enum_table[enum_table_tos].elements[element_tos].element_name, token);
+    enum_table[enum_table_tos].elements[element_tos].value = value;
+    value++;
+    element_tos++;  
+    get();
+  } while(tok == COMMA);
+  
+  enum_table_tos++;
+
+  if(tok != CLOSING_BRACE) error(CLOSING_BRACE_EXPECTED);
+  get();
+  if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
+}
+
+int enum_element_exists(char *element_name){
+  int i, j;
+  
+  for(i = 0; i < enum_table_tos; i++){
+    for(j = 0; *enum_table[i].elements[j].element_name; j++){
+      if(!strcmp(enum_table[i].elements[j].element_name, element_name))
+        return 1;
+    }
+  }
+  return -1;
+}
+
+int get_enum_val(char *element_name){
+  int i, j;
+  
+  for(i = 0; i < enum_table_tos; i++){
+    for(j = 0; *enum_table[i].elements[j].element_name; j++){
+      if(!strcmp(enum_table[i].elements[j].element_name, element_name))
+        return enum_table[i].elements[j].value;
+    }
+  }
+  error(UNDECLARED_ENUM_ELEMENT);
+}
+
 void declare_global(void){
   t_basic_data dt;
   int ind_level;
@@ -1475,7 +1542,7 @@ void declare_global(void){
   }
 
   do{
-    if(global_var_tos == MAX_GLOBAL_VARS) error(EXCEEDEDt_global_var_LIMIT);
+    if(global_var_tos == MAX_GLOBAL_VARS) error(EXCEEDED_GLOBAL_VAR_LIMIT);
 
     global_variables[global_var_tos].constant = constant;
 

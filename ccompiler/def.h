@@ -5,10 +5,9 @@
 #define ID_LEN                 50
 #define CONST_LEN              500
 #define PROG_SIZE              99999
-#define MAX_MATRIX_DIMS           10
-
-#define TRUE      1
-#define FALSE     0
+#define MAX_MATRIX_DIMS        10
+#define MAX_ENUM_ELEMENTS      64
+#define MAX_ENUM_DECLARATIONS  64
 
 typedef enum {
   DIRECTIVE = 1, INCLUDE,
@@ -71,9 +70,13 @@ typedef union {
 } t_value;
 
 typedef struct{
-  char name[ID_LEN];
-
+  char name[ID_LEN]; // enum name
+  struct{
+    char element_name[ID_LEN];
+    int value;
+  } elements[MAX_ENUM_ELEMENTS];
 } t_enum;
+t_enum enum_table[MAX_ENUM_DECLARATIONS];
 
 // basic data types
 typedef enum {
@@ -166,7 +169,7 @@ typedef enum {
   SEMICOLON_EXPECTED,
   VAR_TYPE_EXPECTED,
   IDENTIFIER_EXPECTED,
-  EXCEEDEDt_global_var_LIMIT,
+  EXCEEDED_GLOBAL_VAR_LIMIT,
   EXCEEDED_FUNC_DECL_LIMIT,
   NOT_VAR_OR_FUNC_OUTSIDE,
   NO_MAIN_FOUND,
@@ -177,7 +180,7 @@ typedef enum {
   MAX_PARAMS_LIMIT_REACHED,
   USER_FUNC_CALLS_LIMIT_REACHED,
   LOCAL_VAR_LIMIT_REACHED,
-  RETURNINGt_value_FROM_VOID_FUNCTION,
+  RETURNING_VALUE_FROM_VOID_FUNCTION,
   INVALID_EXPRESSION,
   INVALID_ARGUMENT_FOR_BITWISE_NOT,
   WHILE_KEYWORD_EXPECTED,
@@ -205,7 +208,10 @@ typedef enum {
   INVALID_TYPE_IN_VARIABLE,
   CASE_EXPECTED,
   CONSTANT_EXPECTED,
-  COLON_EXPECTED
+  COLON_EXPECTED,
+  EXCEEDED_MAX_ENUM_DECL,
+  UNDECLARED_ENUM_ELEMENT,
+  UNDECLARED_IDENTIFIER
 } _ERROR;
 
 // variable declaration
@@ -260,13 +266,17 @@ char *error_table[] = {
   "invalid type: void types need to be pointers",
   "case keyword expected",
   "constant expected",
-  "colon expected"
+  "colon expected",
+  "maximum enum declaration limit reached",
+  "undeclared enum element",
+  "undeclared identifier"
 };
 
 int current_function_var_bp_offset;  // this is used to position local variables correctly relative to BP.
 int current_func_id;
 int function_table_tos;
 int global_var_tos;
+int enum_table_tos;
 
 char token[CONST_LEN + 2];            // string token representation
 char string_constant[CONST_LEN + 2];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
@@ -308,6 +318,7 @@ void pre_scan(void);
 void get_line(void);
 void get(void);
 void error(_ERROR e);
+void declare_enum(void);
 void declare_func(void);
 void declare_global(void);
 void declare_local(void);
@@ -362,3 +373,6 @@ void call_func(int func_index);
 
 
 int find_total_parameter_bytes(void);
+
+int get_enum_val(char *element_name);
+int enum_element_exists(char *element_name);
