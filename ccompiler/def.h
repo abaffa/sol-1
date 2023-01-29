@@ -312,7 +312,6 @@ t_global_var *get_global_var(char *var_name);
 int find_function(char *func_name);
 void load_program(char *filename);
 
-void initial_setup(void);
 void pre_scan(void);
 
 void get_line(void);
@@ -350,8 +349,8 @@ void convert_data(t_data *data_to_convert, t_basic_data into_type);
 t_basic_data get_var_type(char *var_name);
 
 void parse_directive(void);
-void emit_global_variables(void);
-void emit_libraries(void);
+void emit_data(void);
+void emit_includes(void);
 
 
 void generate_file(char *filename);
