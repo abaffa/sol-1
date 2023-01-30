@@ -325,9 +325,9 @@ void declare_func(void);
 void declare_global(void);
 void declare_local(void);
 void putback(void);
-void emit(char *p);
-void emitln(char *p);
-void emit_var(char *var_name);
+void emerge(char *p);
+void emergeln(char *p);
+void emerge_var(char *var_name);
 void find_end_of_BLOCK(void);
 void find_end_of_block(void);
 void find_end_of_case(void);
@@ -352,8 +352,8 @@ void convert_data(t_data *data_to_convert, t_basic_data into_type);
 t_basic_data get_var_type(char *var_name);
 
 void parse_directive(void);
-void emit_data(void);
-void emit_includes(void);
+void emerge_data(void);
+void emerge_includes(void);
 
 
 void generate_file(char *filename);

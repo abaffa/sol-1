@@ -1,7 +1,5 @@
 ; --- Filename: test.c
-
 .include "lib/kernel.exp"
-
 .org PROC_TEXT_ORG
 
 ; --- begin text block
@@ -9,22 +7,14 @@ main:
   push bp
   mov bp, sp
 _do1_block:
-  mov b, [i]
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  mov [i], b
-; --- begin asm block
+; --- begin inline asm block
       mov a, [i]
       call print_u16d
 
       mov a, [nl]
       mov d, a
       call puts
-    ; --- end asm block
+    ; --- end inline asm block
 _do1_cond:
   mov b, [i]
   push a

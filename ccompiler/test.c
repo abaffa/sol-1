@@ -5,12 +5,10 @@ enum e2 {hello, world, haha};
 
 char *nl = "\n\r";
 int i;
-//char array[5][5][5];
 
 void main(void) {
 
   do{
-    i = i + 1;
     asm{
       mov a, $i
       call print_u16d
