@@ -36,6 +36,7 @@ _do1_exit:
 ; --- begin data block
 nl_data: .db "\n\r", 0
 nl: .dw nl_data
+matrix: .db 0
 i: .dw 0
 ; --- end data block
 ; --- begin include block

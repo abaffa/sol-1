@@ -104,26 +104,19 @@ typedef struct {
   t_data data; // holds the type of data and the value itself
   int dims[MAX_MATRIX_DIMS + 1];
   char constant;
+  char as_string[1024]; // this just saves the initialization string in case the var is a string. it makes it easier for the compiler
+  // but is a poor solution that needs fixing later
   char is_parameter; // is this a parameter variable or a normal local variable?
   int bp_offset; // if var is local, this holds the offset of the var from BP.
   int function_id; // the function does this local var belong to
-} t_local_var;
-
-typedef struct {
-  char var_name[ID_LEN];
-  t_data data; // holds the type of data and the value itself
-  int dims[MAX_MATRIX_DIMS + 1];
-  char constant;
-  char as_string[1024]; // this just saves the initialization string in case the var is a string. it makes it easier for the compiler
-  // but is a poor solution that needs fixing later
-} t_global_var;
-t_global_var global_variables[MAX_GLOBAL_VARS];
+} t_var;
+t_var global_variables[MAX_GLOBAL_VARS];
 
 typedef struct {
   char func_name[ID_LEN];
   t_basic_data return_type;
   char *code_location;
-  t_local_var local_vars[MAX_LOCAL_VARS + 1];
+  t_var local_vars[MAX_LOCAL_VARS + 1];
   int local_var_tos;
 } t_user_func;
 t_user_func function_table[MAX_USER_FUNC];
@@ -184,8 +177,8 @@ typedef enum {
   INVALID_EXPRESSION,
   INVALID_ARGUMENT_FOR_BITWISE_NOT,
   WHILE_KEYWORD_EXPECTED,
-  DUPLICATEt_global_varIABLE,
-  DUPLICATEt_local_varIABLE,
+  DUPLICATE_LOCAL_VARIABLE,
+  DUPLICATE_GLOBAL_VARIABLE,
   STRING_CONSTANT_EXPECTED,
   POINTER_EXPECTED,
   INVALID_POINTER,
@@ -310,8 +303,8 @@ char is_idchar(char c);
 int find_keyword(char *keyword);
 int local_var_exists(char *var_name);
 int global_var_exists(char *var_name);
-t_local_var *get_local_var(char *var_name);
-t_global_var *get_global_var(char *var_name);
+t_var *get_var(char *var_name);
+t_var *get_var(char *var_name);
 int find_function(char *func_name);
 void load_program(char *filename);
 
@@ -380,3 +373,10 @@ int find_total_parameter_bytes(void);
 
 int get_enum_val(char *element_name);
 int enum_element_exists(char *element_name);
+
+
+int is_matrix(char *var_name);
+int get_data_size(t_data *data);
+int matrix_dim_count(t_var *var);
+int get_matrix_offset(char dim, t_var *matrix);
+t_var *get_var_pointer(char *var_name);

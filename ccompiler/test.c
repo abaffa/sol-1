@@ -4,6 +4,7 @@ enum e1 {E1, E2, E3};
 enum e2 {hello, world, haha};
 
 char *nl = "\n\r";
+char matrix[10][10];
 int i;
 
 void main(void) {

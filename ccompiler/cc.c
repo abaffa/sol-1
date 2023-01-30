@@ -1510,6 +1510,61 @@ void parse_atom(void){
       }
       else error(UNDECLARED_FUNC);
     }
+    else if(tok == OPENING_BRACKET){ // matrix operations
+			t_var *matrix; // pointer to the matrix variable
+			int i;
+      int data_size; // matrix data size
+			t_data index;
+			int dims;
+      t_data *v;
+      char asm_line[256];
+
+			// if the variable is not a matrix, then it must be a pointer.
+			if(!is_matrix(temp_name)){ 
+				//*v = get_var_value(temp_name);
+				return;
+			}
+			// otherwise, it is a matrix
+			matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
+			data_size = get_data_size(&matrix -> data);
+			v->value.p = matrix->data.value.p; // sets v to the beginning of the memory block 
+			v->type = matrix->data.type; 
+			v->ind_level = 1;
+			
+			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
+			
+      emergeln("  push a");
+      emergeln("  mov a, 0");
+			for(i = 0; i < dims; i++){
+        parse_expr();
+				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+				// if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
+				if(i < dims - 1){
+          sprintf(asm_line, "  add a, %d", get_matrix_offset(i, matrix) * data_size);
+          emergeln(asm_line);
+        }
+        //v -> value.p = v -> value.p + ( index.value.i * get_matrix_offset(i, matrix) * data_size );
+				get();
+				if(tok != OPENING_BRACKET) break;
+			}
+      emergeln("  mov b, a");
+			// if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
+			if(i == dims - 1){
+				switch(matrix -> data.type){
+					case DT_CHAR:
+            sprintf(asm_line, "  mov a, [a + %s]", temp_name);
+            emergeln(asm_line);
+						break;
+					case DT_INT:
+            sprintf(asm_line, "  mov a, [a + %s]", temp_name);
+            emergeln(asm_line);
+						break;
+				}
+			}
+      emergeln("  mov b, a");
+      emergeln("  pop a");
+			putback(); // puts back the ";" token
+		}
     else{
       if(local_var_exists(temp_name) != -1){ // is a local variable
         var_id = local_var_exists(temp_name);
@@ -1593,6 +1648,68 @@ void parse_atom(void){
 // ################################################################################################
 // ################################################################################################
 // ################################################################################################
+
+t_var *get_var_pointer(char *var_name){
+	register int i;
+
+  for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
+    if(!strcmp(function_table[current_func_id].local_vars[i].var_name, var_name))
+      return &function_table[current_func_id].local_vars[i];
+
+	for(i = 0; i < global_var_tos; i++)
+		if(!strcmp(global_variables[i].var_name, var_name)) 
+			return &global_variables[i];
+
+	error(UNDECLARED_VARIABLE);
+}
+
+int get_matrix_offset(char dim, t_var *matrix){
+	int i;
+	int offset = 1;
+	
+	for(i = dim + 1; i < matrix_dim_count(matrix); i++)
+		offset = offset * matrix -> dims[i];
+	
+	return offset;
+}
+
+int is_matrix(char *var_name){
+	register int i;
+
+  //check local variables whose function id is the id of current function being parsed
+  for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
+    if(!strcmp(function_table[current_func_id].local_vars[i].var_name, var_name))
+      return function_table[current_func_id].local_vars[i].dims[0];
+
+	for(i = 0; i < global_var_tos; i++)
+		if(!strcmp(global_variables[i].var_name, var_name)) 
+			return global_variables[i].dims[0];
+  
+	error(UNDECLARED_VARIABLE);
+}
+
+// ################################################################################################
+// ################################################################################################
+// ################################################################################################
+
+int matrix_dim_count(t_var *var){
+	int i;
+	
+	for(i = 0; var -> dims[i]; i++);
+	
+	return i;
+}
+
+int get_data_size(t_data *data){
+	if(data -> ind_level > 0) return 2;
+	else
+		switch(data -> type){
+			case DT_CHAR:
+				return 1;
+			case DT_INT:
+				return 2;
+		}
+}
 
 void parse_function_arguments(int func_id){
   t_user_func *func; // variable to hold a pointer to the user function
@@ -1760,13 +1877,29 @@ void declare_global(void){
     if(dt == DT_VOID && ind_level == 0) error(INVALID_TYPE_IN_VARIABLE);
 
     // checks if there is another global variable with the same name
-    if(find_global_var(token) != -1) error(DUPLICATEt_global_varIABLE);
+    if(find_global_var(token) != -1) error(DUPLICATE_GLOBAL_VARIABLE);
     
     global_variables[global_var_tos].data.type = dt;
     global_variables[global_var_tos].data.ind_level = ind_level;
     strcpy(global_variables[global_var_tos].var_name, token);
 
     get();
+		// checks if this is a matrix declaration
+		int i = 0;
+    int expr;
+		if(tok == OPENING_BRACKET){
+			while(tok == OPENING_BRACKET){
+        get();
+        expr = atoi(token);
+        get();
+				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+				global_variables[global_var_tos].dims[i] = expr;
+				get();
+				i++;
+			}
+      global_variables[global_var_tos].dims[i] = 0; // sets the last variable dimention to 0, to mark the end of the list
+		}
+
     // checks for variable initialization
     if(tok == ASSIGNMENT){
       switch(dt){
@@ -1850,7 +1983,7 @@ int local_var_exists(char *var_name){
 
 void declare_local(void){                        
   t_basic_data dt;
-  t_local_var new_var;
+  t_var new_var;
   char ind_level;
   char constant = 0;
   
@@ -1921,12 +2054,29 @@ void declare_local(void){
     }
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
 
-    if(local_var_exists(token) != -1) error(DUPLICATEt_local_varIABLE);
+    if(local_var_exists(token) != -1) error(DUPLICATE_LOCAL_VARIABLE);
 
     new_var.data.type = dt;
     new_var.data.ind_level = ind_level;
     strcpy(new_var.var_name, token);
     get();
+
+		// checks if this is a matrix declaration
+		int i = 0;
+    int expr;
+		if(tok == OPENING_BRACKET){
+      puts("OK");
+			while(tok == OPENING_BRACKET){
+        get();
+        expr = atoi(token);
+        get();
+				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+				new_var.dims[i] = expr;
+				get();
+				i++;
+			}
+      new_var.dims[i] = 0; // sets the last variable dimention to 0, to mark the end of the list
+		}
 
     if(tok == ASSIGNMENT){
       get();
@@ -1976,23 +2126,13 @@ void declare_local(void){
 // ################################################################################################
 // ################################################################################################
 
-t_local_var *get_local_var(char *var_name){
+t_var *get__var(char *var_name){
   register int i;
 
   //check local variables whose function id is the id of current function being parsed
   for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
     if(!strcmp(function_table[current_func_id].local_vars[i].var_name, var_name))
       return &function_table[current_func_id].local_vars[i];
-  
-  return NULL;
-}
-
-// ################################################################################################
-// ################################################################################################
-// ################################################################################################
-
-t_global_var *get_global_var(char *var_name){
-  register int i;
 
   for(i = 0; (i < global_var_tos) && (*global_variables[i].var_name); i++)
     if(!strcmp(global_variables[i].var_name, var_name)) return &global_variables[i];
@@ -2170,6 +2310,14 @@ void get(void){
     else if(*prog == '}'){
       *t++ = *prog++;
       tok = CLOSING_BRACE;
+    }
+    else if(*prog == '['){
+      *t++ = *prog++;
+      tok = OPENING_BRACKET;
+    }
+    else if(*prog == ']'){
+      *t++ = *prog++;
+      tok = CLOSING_BRACKET;
     }
     else if(*prog == '='){
       *t++ = *prog++;
