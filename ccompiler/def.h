@@ -380,3 +380,4 @@ int get_data_size(t_data *data);
 int matrix_dim_count(t_var *var);
 int get_matrix_offset(char dim, t_var *matrix);
 t_var *get_var_pointer(char *var_name);
+int get_matrix_size(t_var *matrix);

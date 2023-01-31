@@ -1,27 +1,13 @@
 #include "lib/stdio.asm"
 
-enum e1 {E1, E2, E3};
-enum e2 {hello, world, haha};
 
-char *nl = "\n\r";
-char matrix[10][10];
-int i;
+char matrix[2][2][2];
+char c;
 
 void main(void) {
-
-  do{
-    asm{
-      mov a, $i
-      call print_u16d
-
-      mov a, $nl
-      mov d, a
-      call puts
-    }
-  } while(i < 10);
+  c = matrix[0][0][0];
 
   return;
-
 }
 
 

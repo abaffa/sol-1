@@ -6,38 +6,42 @@
 main:
   push bp
   mov bp, sp
-_do1_block:
-; --- begin inline asm block
-      mov a, [i]
-      call print_u16d
-
-      mov a, [nl]
-      mov d, a
-      call puts
-    ; --- end inline asm block
-_do1_cond:
-  mov b, [i]
   push a
-  mov a, b
-  mov b, 10
-  cmp a, b
-  lodflgs
-  and al, %00000010
-  mov ah, 0
+  mov a, 0
+  mov b, 0
+  push a
+  mov a, 4
+  mul a, b
+  pop a
+  add a, b
+  mov b, 0
+  push a
+  mov a, 2
+  mul a, b
+  pop a
+  add a, b
+  mov b, 0
+  add a, b
+  mov a, [a + matrix]
   mov b, a
   pop a
-  cmp b, 1
-  je _do1_block
-_do1_exit:
+  mov [c], bl
   leave
   syscall sys_terminate_proc
 ; --- end text block
 
 ; --- begin data block
-nl_data: .db "\n\r", 0
-nl: .dw nl_data
-matrix: .db 0
-i: .dw 0
+matrix:
+.db 0
+.db 0
+.db 0
+.db 0
+.db 0
+.db 0
+.db 0
+.db 0
+c:
+.db 0
 ; --- end data block
 ; --- begin include block
 .include "lib/stdio.asm"

@@ -103,10 +103,14 @@ void emerge_data(void){
     }
     else if(global_variables[i].data.type == DT_CHAR){
       emerge(global_variables[i].var_name); // var name
-      emerge(": .db ");
+      emergeln(":");
       if(global_variables[i].data.value.c != 0) sprintf(s_init, "'%c'", global_variables[i].data.value.c);
-      else sprintf(s_init, "%d", 0);
-      emergeln(s_init);
+      else{
+        sprintf(s_init, ".db %d", 0);
+        int j;
+        for(j = 0; j < get_matrix_size(&global_variables[i]); j++)
+          emergeln(s_init);
+      }
     }
     else if(global_variables[i].data.type == DT_INT){
       emerge(global_variables[i].var_name); // var name
@@ -1516,7 +1520,6 @@ void parse_atom(void){
       int data_size; // matrix data size
 			t_data index;
 			int dims;
-      t_data *v;
       char asm_line[256];
 
 			// if the variable is not a matrix, then it must be a pointer.
@@ -1526,44 +1529,46 @@ void parse_atom(void){
 			}
 			// otherwise, it is a matrix
 			matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
-			data_size = get_data_size(&matrix -> data);
-			v->value.p = matrix->data.value.p; // sets v to the beginning of the memory block 
-			v->type = matrix->data.type; 
-			v->ind_level = 1;
+			data_size = get_data_size(&matrix->data);
 			
 			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
 			
       emergeln("  push a");
       emergeln("  mov a, 0");
 			for(i = 0; i < dims; i++){
-        parse_expr();
+        parse_expr(); // result in 'b'
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
 				// if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
 				if(i < dims - 1){
-          sprintf(asm_line, "  add a, %d", get_matrix_offset(i, matrix) * data_size);
+          emergeln("  push a");
+          sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix) * data_size);
           emergeln(asm_line);
+          emergeln("  mul a, b");
+          emergeln("  pop a");
+          emergeln("  add a, b");
         }
-        //v -> value.p = v -> value.p + ( index.value.i * get_matrix_offset(i, matrix) * data_size );
+        // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
+        else if(i == dims - 1){
+          emergeln("  add a, b");
+          switch(matrix -> data.type){
+            case DT_CHAR:
+              sprintf(asm_line, "  mov a, [a + %s]", temp_name);
+              emergeln(asm_line);
+              break;
+            case DT_INT:
+              sprintf(asm_line, "  mov a, [a + %s]", temp_name);
+              emergeln(asm_line);
+              break;
+          }
+			  }
 				get();
-				if(tok != OPENING_BRACKET) break;
-			}
-      emergeln("  mov b, a");
-			// if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
-			if(i == dims - 1){
-				switch(matrix -> data.type){
-					case DT_CHAR:
-            sprintf(asm_line, "  mov a, [a + %s]", temp_name);
-            emergeln(asm_line);
-						break;
-					case DT_INT:
-            sprintf(asm_line, "  mov a, [a + %s]", temp_name);
-            emergeln(asm_line);
-						break;
-				}
+				if(tok != OPENING_BRACKET){
+          putback();
+          break;
+        }
 			}
       emergeln("  mov b, a");
       emergeln("  pop a");
-			putback(); // puts back the ";" token
 		}
     else{
       if(local_var_exists(temp_name) != -1){ // is a local variable
@@ -1671,6 +1676,16 @@ int get_matrix_offset(char dim, t_var *matrix){
 		offset = offset * matrix -> dims[i];
 	
 	return offset;
+}
+
+int get_matrix_size(t_var *matrix){
+	int i;
+	int size = 1;
+	
+	for(i = 0; i < matrix_dim_count(matrix); i++)
+		size = size * matrix->dims[i];
+	
+	return size * get_data_size(&matrix->data);
 }
 
 int is_matrix(char *var_name){
