@@ -1,7 +1,7 @@
 #include "lib/stdio.asm"
 
 
-char matrix[2][2][2] = 'A';
+char matrix[5][5][5] = 'A';
 char c = 'Z';
 int i1 = 2;
 int i2 = 1;

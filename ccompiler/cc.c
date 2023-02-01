@@ -110,8 +110,12 @@ void emerge_data(void){
     else if(global_variables[i].data.type == DT_INT){
       emerge(global_variables[i].var_name); // var name
       emerge(": ");
-      sprintf(s_init, ".fill %d, %d", get_total_var_size(&global_variables[i]), global_variables[i].data.value.shortint);
-      emergeln(s_init);
+      // bad code, needs rewriting
+      int j;
+      for(j = 0; j < get_total_var_size(&global_variables[i]) / 2; j++){
+        sprintf(s_init, ".dw %d", global_variables[i].data.value.shortint);
+        emergeln(s_init);
+      }
     }
   }
   emergeln("; --- end data block");
@@ -1516,7 +1520,6 @@ void parse_atom(void){
 			t_data index;
 			int dims;
       char asm_line[256];
-
 			// if the variable is not a matrix, then it must be a pointer.
 			if(!is_matrix(temp_name)){ 
 				//*v = get_var_value(temp_name);
@@ -1525,33 +1528,29 @@ void parse_atom(void){
 			// otherwise, it is a matrix
 			matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
 			data_size = get_data_size(&matrix->data);
-			
 			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-			
-      emergeln("  push a");
-      emergeln("  mov a, 0");
+      emergeln("  mov c, 0");
 			for(i = 0; i < dims; i++){
         parse_expr(); // result in 'b'
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
 				// if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
 				if(i < dims - 1){
-          emergeln("  push a");
           sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix) * data_size);
           emergeln(asm_line);
           emergeln("  mul a, b");
-          emergeln("  pop a");
-          emergeln("  add a, b");
+          emergeln("  add c, b");
         }
         // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
         else if(i == dims - 1){
-          emergeln("  add a, b");
+          emergeln("  add c, b");
+          emergeln("  mov a, c");
           switch(matrix -> data.type){
             case DT_CHAR:
-              sprintf(asm_line, "  mov a, [a + %s]", temp_name);
+              sprintf(asm_line, "  mov a, [%s + a]", temp_name);
               emergeln(asm_line);
               break;
             case DT_INT:
-              sprintf(asm_line, "  mov a, [a + %s]", temp_name);
+              sprintf(asm_line, "  mov a, [%s + a]", temp_name);
               emergeln(asm_line);
               break;
           }
@@ -1563,7 +1562,6 @@ void parse_atom(void){
         }
 			}
       emergeln("  mov b, a");
-      emergeln("  pop a");
 		}
     else{
       if(local_var_exists(temp_name) != -1){ // is a local variable

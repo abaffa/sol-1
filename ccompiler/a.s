@@ -6,25 +6,20 @@
 main:
   push bp
   mov bp, sp
-  push a
-  mov a, 0
+  mov c, 0
   mov b, [i3]
-  push a
-  mov a, 4
+  mov a, 25
   mul a, b
-  pop a
-  add a, b
+  add c, b
   mov b, [i2]
-  push a
-  mov a, 2
+  mov a, 5
   mul a, b
-  pop a
-  add a, b
+  add c, b
   mov b, [i1]
-  add a, b
-  mov a, [a + matrix]
+  add c, b
+  mov a, c
+  mov a, [matrix + a]
   mov b, a
-  pop a
   mov [c], bl
 ; --- begin inline asm block
     mov a, [c]
@@ -37,11 +32,11 @@ main:
 ; --- end text block
 
 ; --- begin data block
-matrix: .fill 8, 65
+matrix: .fill 125, 65
 c: .fill 1, 90
-i1: .fill 2, 2
-i2: .fill 2, 1
-i3: .fill 2, 0
+i1: .dw 2
+i2: .dw 1
+i3: .dw 0
 ; --- end data block
 ; --- begin include block
 .include "lib/stdio.asm"
