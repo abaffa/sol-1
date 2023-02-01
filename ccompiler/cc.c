@@ -103,19 +103,14 @@ void emerge_data(void){
     }
     else if(global_variables[i].data.type == DT_CHAR){
       emerge(global_variables[i].var_name); // var name
-      emergeln(":");
-      if(global_variables[i].data.value.c != 0) sprintf(s_init, "'%c'", global_variables[i].data.value.c);
-      else{
-        sprintf(s_init, ".db %d", 0);
-        int j;
-        for(j = 0; j < get_matrix_size(&global_variables[i]); j++)
-          emergeln(s_init);
-      }
+      emerge(": ");
+      sprintf(s_init, ".fill %d, %d", get_total_var_size(&global_variables[i]), global_variables[i].data.value.c);
+      emergeln(s_init);
     }
     else if(global_variables[i].data.type == DT_INT){
       emerge(global_variables[i].var_name); // var name
-      emerge(": .dw ");  
-      sprintf(s_init, "%d", global_variables[i].data.value.shortint);
+      emerge(": ");
+      sprintf(s_init, ".fill %d, %d", get_total_var_size(&global_variables[i]), global_variables[i].data.value.shortint);
       emergeln(s_init);
     }
   }
@@ -1678,14 +1673,16 @@ int get_matrix_offset(char dim, t_var *matrix){
 	return offset;
 }
 
-int get_matrix_size(t_var *matrix){
+int get_total_var_size(t_var *var){
 	int i;
 	int size = 1;
+
+  // if it is a matrix, return its number of dimensions
+	for(i = 0; i < matrix_dim_count(var); i++)
+		size = size * var->dims[i];
 	
-	for(i = 0; i < matrix_dim_count(matrix); i++)
-		size = size * matrix->dims[i];
-	
-	return size * get_data_size(&matrix->data);
+  // if it is not a mtrix, it will return 1 * the data size
+	return size * get_data_size(&var->data);
 }
 
 int is_matrix(char *var_name){
