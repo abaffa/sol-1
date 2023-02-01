@@ -3,10 +3,12 @@
 
 char matrix[2][2][2] = 'A';
 char c = 'Z';
-int i = 222;
+int i1 = 2;
+int i2 = 1;
+int i3 = 0;
 
 void main(void) {
-  c = matrix[1][1][1];
+  c = matrix[i3][i2][i1];
 
   asm{
     mov a, $c
