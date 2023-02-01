@@ -6,33 +6,39 @@
 main:
   push bp
   mov bp, sp
-  mov c, 0
+  mov d, 0
   mov b, [i3]
   mov a, 25
   mul a, b
-  add c, b
+  add d, b
   mov b, [i2]
   mov a, 5
   mul a, b
-  add c, b
+  add d, b
   mov b, [i1]
-  add c, b
-  mov a, c
-  mov a, [matrix + a]
+  add d, b
+  mov a, [d + matrix]
   mov b, a
-  mov [c], bl
-; --- begin inline asm block
-    mov a, [c]
-    swp a
-    call putchar
-
-  ; --- end inline asm block
+  push bl
+  call print
+  add sp, 1
   leave
   syscall sys_terminate_proc
+print:
+  push bp
+  mov bp, sp
+; --- begin inline asm block
+    mov a, [bp + 5]
+    swp a
+    add a, 0100h
+    call putchar
+  ; --- end inline asm block
+  leave
+  ret
 ; --- end text block
 
 ; --- begin data block
-matrix: .fill 125, 65
+matrix: .fill 125, 97
 c: .fill 1, 90
 i1: .dw 2
 i2: .dw 1

@@ -1529,7 +1529,7 @@ void parse_atom(void){
 			matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
 			data_size = get_data_size(&matrix->data);
 			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      emergeln("  mov c, 0");
+      emergeln("  mov d, 0");
 			for(i = 0; i < dims; i++){
         parse_expr(); // result in 'b'
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
@@ -1538,19 +1538,18 @@ void parse_atom(void){
           sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix) * data_size);
           emergeln(asm_line);
           emergeln("  mul a, b");
-          emergeln("  add c, b");
+          emergeln("  add d, b");
         }
         // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
         else if(i == dims - 1){
-          emergeln("  add c, b");
-          emergeln("  mov a, c");
+          emergeln("  add d, b");
           switch(matrix -> data.type){
             case DT_CHAR:
-              sprintf(asm_line, "  mov a, [%s + a]", temp_name);
+              sprintf(asm_line, "  mov a, [d + %s]", temp_name);
               emergeln(asm_line);
               break;
             case DT_INT:
-              sprintf(asm_line, "  mov a, [%s + a]", temp_name);
+              sprintf(asm_line, "  mov a, [d + %s]", temp_name);
               emergeln(asm_line);
               break;
           }
