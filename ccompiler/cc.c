@@ -426,7 +426,7 @@ void parse_asm(void){
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
   emerge("; --- begin inline asm block");
   while(*prog != '}'){
-    if(*prog == '$'){
+    if(*prog == '#'){
       prog++;
       get();
       emerge_var(token);
@@ -2396,6 +2396,18 @@ void get(void){
       }
       else tok = MINUS;
     }
+    else if(*prog == '$'){
+      *t++ = *prog++;
+      tok = DOLLAR;
+    }
+    else if(*prog == '^'){
+      *t++ = *prog++;
+      tok = CARET;
+    }
+    else if(*prog == '#'){
+      *t++ = *prog++;
+      tok = HASH;
+    }
     else if(*prog == '*'){
       *t++ = *prog++;
       tok = STAR;
@@ -2492,7 +2504,7 @@ int find_keyword(char *keyword){
 // ################################################################################################
 
 char isdelim(char c){
-  if(strchr("#+-*/%[](){}:;,<>=!&|~.", c)) return 1;
+  if(strchr("$#+-*/%[](){}:;,<>=!&|~.", c)) return 1;
   else return 0;
 }
 

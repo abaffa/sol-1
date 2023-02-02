@@ -15,9 +15,9 @@ void main(void) {
 
 void print(char c){
   asm{
-    mov a, $c
+    mov a, ^c
     swp a
-    add a, 0100h
+    add a, $0100
     call putchar
   }
   return;

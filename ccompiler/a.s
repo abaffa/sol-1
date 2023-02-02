@@ -28,9 +28,9 @@ print:
   push bp
   mov bp, sp
 ; --- begin inline asm block
-    mov a, [bp + 5]
+    mov a, ^c
     swp a
-    add a, 0100h
+    add a, $0100
     call putchar
   ; --- end inline asm block
   leave
