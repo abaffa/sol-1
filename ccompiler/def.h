@@ -374,7 +374,7 @@ void parse_function_arguments(int func_index);
 void call_func(int func_index);
 
 
-int find_total_parameter_bytes(void);
+int get_total_func_param_size(void);
 
 int get_enum_val(char *element_name);
 int enum_element_exists(char *element_name);
@@ -391,4 +391,4 @@ void get_var_address(char *dest, char *var_name);
 void try_emitting_var(char *var_name);
 t_var_scope get_var_scope(char *var_name);
 t_var *get_var_by_name(char *var_name);
-int find_parameter_size(void);
+int get_param_size(void);

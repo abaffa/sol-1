@@ -269,8 +269,9 @@ void declare_func(void){
   t_user_func *func; // variable to hold a pointer to the user function top of stack
   t_basic_data param_data_type; // function data type
   int bp_offset; // for each parameter, keep the running offset of that parameter.
-  char *temp_prog;
+  char *temp_prog, *temp_prog2;
   int total_parameter_bytes;
+  char param_name[ID_LEN];
 
   if(function_table_tos == MAX_USER_FUNC - 1) error(EXCEEDED_FUNC_DECL_LIMIT);
 
@@ -308,13 +309,13 @@ void declare_func(void){
   else{
     putback();
     temp_prog = prog;
-    total_parameter_bytes = find_total_parameter_bytes();
-    bp_offset = total_parameter_bytes;
+    bp_offset = get_total_func_param_size();
     prog = temp_prog;
 
     do{
       func->local_vars[func->local_var_tos].is_parameter = 1;
 
+      temp_prog = prog;
       get();
       if(tok == CONST){
         func->local_vars[func->local_var_tos].constant = 1;
@@ -329,47 +330,31 @@ void declare_func(void){
       switch(tok){
         case CHAR:
           func->local_vars[func->local_var_tos].data.type = DT_CHAR;
-          get();
-          if(tok == STAR){
-            while(tok == STAR){
-              func->local_vars[func->local_var_tos].data.ind_level++;
-              get();
-            }
-            bp_offset -= 2; 
-          }
-          else{
-            putback();
-            bp_offset -= 1;  need to find correct matrix offsets here
-          }
           break;
         case INT:
           func->local_vars[func->local_var_tos].data.type = DT_INT;
-          bp_offset -= 2; 
           break;
         case FLOAT:
           func->local_vars[func->local_var_tos].data.type = DT_FLOAT;
-          bp_offset -= 2; 
           break;
         case DOUBLE:
           func->local_vars[func->local_var_tos].data.type = DT_DOUBLE;
-          get();
-          if(tok == STAR){
-            while(tok == STAR){
-              func->local_vars[func->local_var_tos].data.ind_level++;
-              get();
-            }
-            bp_offset -= 2;
-          }
-          else{
-            putback();
-            bp_offset -= 4;
-          }
+          break;
       }
+      get();
+      if(tok == STAR){
+        while(tok == STAR){
+          func->local_vars[func->local_var_tos].data.ind_level++;
+          get();
+        }
+      }
+      if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
+      strcpy(param_name, token); // copy parameter name
+      prog = temp_prog;
+      bp_offset -= get_param_size();
 
       get();
-      if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
-      strcpy(func->local_vars[func->local_var_tos].var_name, token);
-        
+      strcpy(func->local_vars[func->local_var_tos].var_name, param_name);
       get();
       func->local_var_tos++;
     } while(tok == COMMA);
@@ -422,34 +407,53 @@ int find_parameter_size(void){
   return total_bytes;
 }
 
-int find_total_parameter_bytes(void){
+int get_param_size(void){
+  int data_size;
+
+  get();
+  switch(tok){
+    case CHAR:
+      data_size = 1;
+      break;
+    case INT:
+      data_size = 2;
+      break;
+    case FLOAT:
+      data_size = 2;
+      break;
+    case DOUBLE:
+      data_size = 4;
+  }
+
+  get(); // check for '*'
+  if(tok == STAR){
+    data_size = 2;
+    while(tok == STAR) get();
+  }
+  get(); // get past parameter name
+
+  if(tok == OPENING_BRACKET){
+    while(tok == OPENING_BRACKET){
+      get();
+      data_size *= atoi(token);
+      get(); // ']'
+      get();
+    }
+    putback();
+  }
+  else putback();
+  
+  return data_size;
+}
+
+int get_total_func_param_size(void){
   int total_bytes;
   int data_size;
 
   total_bytes = 0;
   do{
+    total_bytes += get_param_size();
     get();
-    switch(tok){
-      case CHAR:
-        data_size += 1;
-        break;
-      case INT:
-        data_size += 2;
-        break;
-      case FLOAT:
-        data_size += 2;
-        break;
-      case DOUBLE:
-        data_size += 4;
-    }
-    get(); // get past parameter name
-    get();
-    while(tok == OPENING_BRACKET){
-      get();
-      total_bytes += data_size * atoi(token);
-      get(); // ']'
-      get();
-    }
   } while(tok == COMMA);
 
   return total_bytes;
