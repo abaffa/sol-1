@@ -1,13 +1,14 @@
 #include "lib/stdio.asm"
 
 
-char matrix[5][5][5] = 'a';
 char c = 'Z';
 int i1 = 2;
 int i2 = 1;
 int i3 = 0;
 
 void main(void) {
+  char matrix[2][2][2];
+
   print(matrix[i3][i2][i1]);
 
   return;
@@ -17,7 +18,6 @@ void print(char c){
   asm{
     mov a, ^c
     swp a
-    add a, $0100
     call putchar
   }
   return;
@@ -27,10 +27,13 @@ void print(char c){
 
 ARGUMENTS
   char
-  int
-  int
+  char
+  char
   pc
   bp
-  locals <<< BP
+  int <<< BP (local variables go here)
+  int
+  int
+  char
 
 */

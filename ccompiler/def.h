@@ -40,6 +40,10 @@ typedef enum {
 t_token tok;
 
 typedef enum{
+  LOCAL = 0, GLOBAL
+} t_var_scope;
+
+typedef enum{
   FOR_BREAK, WHILE_BREAK, DO_BREAK, SWITCH_BREAK
 } t_break_type;
 
@@ -277,6 +281,7 @@ char *prog;                           // pointer to the current program position
 char pbuf[PROG_SIZE];                 // pointer to the beginning of the source code
 char ASM_output[64*1024];             // ASM output 
 char *asmp;
+char asm_line[256];
 char includes_list_ASM[1024];         // keeps a list of all included files
 int highest_label_index = 0;          // this keeps the next value of the label index for use in new labels.
                                       //label values are never repeating. always increasing.
@@ -318,9 +323,9 @@ void declare_func(void);
 void declare_global(void);
 void declare_local(void);
 void putback(void);
-void emerge(char *p);
-void emergeln(char *p);
-void emerge_var(char *var_name);
+void emit(char *p);
+void emitln(char *p);
+void emit_var(char *var_name);
 void find_end_of_BLOCK(void);
 void find_end_of_block(void);
 void find_end_of_case(void);
@@ -345,8 +350,8 @@ void convert_data(t_data *data_to_convert, t_basic_data into_type);
 t_basic_data get_var_type(char *var_name);
 
 void parse_directive(void);
-void emerge_data(void);
-void emerge_includes(void);
+void emit_data(void);
+void emit_includes(void);
 
 
 void generate_file(char *filename);
@@ -381,3 +386,8 @@ int matrix_dim_count(t_var *var);
 int get_matrix_offset(char dim, t_var *matrix);
 t_var *get_var_pointer(char *var_name);
 int get_total_var_size(t_var *var);
+
+void get_var_address(char *dest, char *var_name);
+void try_emitting_var(char *var_name);
+t_var_scope get_var_scope(char *var_name);
+t_var *get_var_by_name(char *var_name);

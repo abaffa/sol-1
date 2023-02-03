@@ -18,19 +18,19 @@ int main(int argc, char *argv[]){
 
   pre_scan();
   sprintf(header, "; --- Filename: %s", argv[1]);
-  emergeln(header);
-  emergeln(".include \"lib/kernel.exp\"");
+  emitln(header);
+  emitln(".include \"lib/kernel.exp\"");
 
-  emergeln(".org PROC_TEXT_ORG");
+  emitln(".org PROC_TEXT_ORG");
 
-  emergeln("\n; --- begin text block");
+  emitln("\n; --- begin text block");
   parse_functions();
-  emergeln("; --- end text block");
+  emitln("; --- end text block");
   
-  emerge_data();
-  emerge_includes();
+  emit_data();
+  emit_includes();
 
-  emergeln("\n.end");
+  emitln("\n.end");
 
   *asmp = '\0';
   generate_file("a.s"); // generate a.s assembly file
@@ -59,78 +59,78 @@ void generate_file(char *filename){
 // ################################################################################################
 // ################################################################################################
 
-void emerge_includes(void){
-  emerge("; --- begin include block");
-  emergeln(includes_list_ASM);
-  emergeln("; --- end include block");
+void emit_includes(void){
+  emit("; --- begin include block");
+  emitln(includes_list_ASM);
+  emitln("; --- end include block");
 }
 
 // ################################################################################################
 // ################################################################################################
 // ################################################################################################
 
-void emerge_data(void){
+void emit_data(void){
   int i;
   char s_init[1024];
 
-  emergeln("\n; --- begin data block");
+  emitln("\n; --- begin data block");
   for(i = 0; i < global_var_tos; i++){
     if(global_variables[i].data.ind_level > 0){
       switch(global_variables[i].data.type){
         case DT_CHAR:
           if(global_variables[i].as_string[0] != '\0'){ // if var was initialized, then instantiate its data in assembly data block
-            emerge(global_variables[i].var_name); // var name
-            emerge("_data");
-            emerge(": .db \"");
-            emerge(global_variables[i].as_string);
-            emergeln("\", 0");
-            emerge(global_variables[i].var_name); // var name
-            emerge(": .dw ");
-            emerge(global_variables[i].var_name); // var name
-            emergeln("_data");
+            emit(global_variables[i].var_name); // var name
+            emit("_data");
+            emit(": .db \"");
+            emit(global_variables[i].as_string);
+            emitln("\", 0");
+            emit(global_variables[i].var_name); // var name
+            emit(": .dw ");
+            emit(global_variables[i].var_name); // var name
+            emitln("_data");
           }
           else{
-            emerge(global_variables[i].var_name); // var name
-            emergeln(": .dw 0");
+            emit(global_variables[i].var_name); // var name
+            emitln(": .dw 0");
           }
           break;
         case DT_INT:
-          emerge(global_variables[i].var_name); // var name
-          emerge(": .dw ");
+          emit(global_variables[i].var_name); // var name
+          emit(": .dw ");
           sprintf(s_init, "%d", global_variables[i].data.value.p);
-          emergeln(s_init);
+          emitln(s_init);
       }
     }
     else if(global_variables[i].data.type == DT_CHAR){
-      emerge(global_variables[i].var_name); // var name
-      emerge(": ");
+      emit(global_variables[i].var_name); // var name
+      emit(": ");
       sprintf(s_init, ".fill %d, %d", get_total_var_size(&global_variables[i]), global_variables[i].data.value.c);
-      emergeln(s_init);
+      emitln(s_init);
     }
     else if(global_variables[i].data.type == DT_INT){
-      emerge(global_variables[i].var_name); // var name
-      emerge(": ");
+      emit(global_variables[i].var_name); // var name
+      emit(": ");
       // bad code, needs rewriting
       int j;
       for(j = 0; j < get_total_var_size(&global_variables[i]) / 2; j++){
         sprintf(s_init, ".dw %d", global_variables[i].data.value.shortint);
-        emergeln(s_init);
+        emitln(s_init);
       }
     }
   }
-  emergeln("; --- end data block");
+  emitln("; --- end data block");
 }
 
 // ################################################################################################
 // ################################################################################################
 // ################################################################################################
 
-void emergeln(char *p){
+void emitln(char *p){
   while(*p) *asmp++ = *p++;
   *asmp++ = '\n';
 }
 
-void emerge(char *p){
+void emit(char *p){
   while(*p) *asmp++ = *p++;
 }
 
@@ -169,7 +169,7 @@ void load_program(char *filename){
 void parse_main(void){
   register int i;
 
-  emergeln("main:");
+  emitln("main:");
   for(i = 0; *function_table[i].func_name; i++)
     if(!strcmp(function_table[i].func_name, "main")){
       current_func_id = i;
@@ -196,10 +196,10 @@ void parse_functions(void){
                         // then inside the function it can increase according to how any local vars there are.
       current_func_id = i;
       prog = function_table[i].code_location;
-      emerge(function_table[i].func_name);
-      emergeln(":");
-      emergeln("  push bp");
-      emergeln("  mov bp, sp");
+      emit(function_table[i].func_name);
+      emitln(":");
+      emitln("  push bp");
+      emitln("  mov bp, sp");
       parse_block(); // starts parsing the function block;
     }
 }
@@ -339,7 +339,7 @@ void declare_func(void){
           }
           else{
             putback();
-            bp_offset -= 1; 
+            bp_offset -= 1;  need to find correct matrix offsets here
           }
           break;
         case INT:
@@ -393,25 +393,32 @@ void declare_func(void){
 
 int find_total_parameter_bytes(void){
   int total_bytes;
+  int data_size;
 
   total_bytes = 0;
   do{
     get();
     switch(tok){
       case CHAR:
-        total_bytes += 1;
+        data_size += 1;
         break;
       case INT:
-        total_bytes += 2;
+        data_size += 2;
         break;
       case FLOAT:
-        total_bytes += 2;
+        data_size += 2;
         break;
       case DOUBLE:
-        total_bytes += 4;
+        data_size += 4;
     }
     get(); // get past parameter name
-    get(); // get possible comma
+    get();
+    while(tok == OPENING_BRACKET){
+      get();
+      total_bytes += data_size * atoi(token);
+      get(); // ']'
+      get();
+    }
   } while(tok == COMMA);
 
   return total_bytes;
@@ -424,66 +431,66 @@ int find_total_parameter_bytes(void){
 void parse_asm(void){
   get();
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
-  emerge("; --- begin inline asm block");
+  emit("; --- begin inline asm block");
   while(*prog != '}'){
-    if(*prog == '#'){
+    if(*prog == '^'){
       prog++;
       get();
-      emerge_var(token);
+      emit_var(token);
     }
     else{
       *asmp++ = *prog++;
     }
   }
   prog++;
-  emergeln("; --- end inline asm block");
+  emitln("; --- end inline asm block");
 }
 
 // ################################################################################################
 // ################################################################################################
 // ################################################################################################
 
-void emerge_var(char *var_name){
+void emit_var(char *var_name){
   int var_id;
   char temp[256];
 
   if(local_var_exists(var_name) != -1){ // is a local variable
     var_id = local_var_exists(var_name);
     if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){ // is a pointer
-      emerge("[bp + ");
+      emit("[bp + ");
       if(function_table[current_func_id].local_vars[var_id].is_parameter)
         // add +4 below to account for BP and PC offsets which were pushed into the stack
         sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
       else
         sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-      emerge(temp);
-      emerge("]");
+      emit(temp);
+      emit("]");
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
-      emerge("[bp + ");
+      emit("[bp + ");
       if(function_table[current_func_id].local_vars[var_id].is_parameter)
         // add +4 below to account for BP and PC offsets which were pushed into the stack
         sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
       else
         sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
-      emerge(temp);
-      emerge("]");
+      emit(temp);
+      emit("]");
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-      emerge("[bp + ");
+      emit("[bp + ");
       if(function_table[current_func_id].local_vars[var_id].is_parameter)
         // add +4 below to account for BP and PC offsets which were pushed into the stack
         sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
       else
         sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-      emerge(temp);
-      emerge("]");
+      emit(temp);
+      emit("]");
     }
   }
   else if(global_var_exists(var_name) != -1){  // is a global variable
-    emerge("[");
-    emerge(var_name);
-    emerge("]");
+    emit("[");
+    emit(var_name);
+    emit("]");
   }
   else error(UNDECLARED_VARIABLE);
 }
@@ -504,28 +511,28 @@ void parse_switch_break(void){
   char s_label[64];
   
   sprintf(s_label, "  jmp _switch%d_exit", current_label_index_switch);
-  emergeln(s_label);
+  emitln(s_label);
 }
 
 void parse_while_break(void){
   char s_label[64];
   
   sprintf(s_label, "  jmp _while%d_exit", current_label_index_while);
-  emergeln(s_label);
+  emitln(s_label);
 }
 
 void parse_do_break(void){
   char s_label[64];
   
   sprintf(s_label, "  jmp _do%d_exit", current_label_index_do);
-  emergeln(s_label);
+  emitln(s_label);
 }
 
 void parse_for_break(void){
   char s_label[64];
   
   sprintf(s_label, "  jmp _for%d_exit", current_label_index_for);
-  emergeln(s_label);
+  emitln(s_label);
 }
 
 // ################################################################################################
@@ -543,7 +550,7 @@ void parse_for(void){
   current_label_index_for = highest_label_index;
 
   sprintf(s_label, "_for%d_init:", current_label_index_for);
-  emergeln(s_label);
+  emitln(s_label);
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   get();
@@ -554,7 +561,7 @@ void parse_for(void){
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
 
   sprintf(s_label, "_for%d_cond:", current_label_index_for);
-  emergeln(s_label);
+  emitln(s_label);
   
   // checks for an empty condition, which means always true
   get();
@@ -564,14 +571,14 @@ void parse_for(void){
     if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
   }
   else{
-    emergeln("  mov b, 1"); // emerge a TRUE condition
+    emitln("  mov b, 1"); // emit a TRUE condition
   }
 
-  emergeln("  cmp b, 0");
+  emitln("  cmp b, 0");
   sprintf(s_label, "  je _for%d_exit", current_label_index_for);
-  emergeln(s_label);
+  emitln(s_label);
   sprintf(s_label, "_for%d_block:", current_label_index_for);
-  emergeln(s_label);
+  emitln(s_label);
 
   update_loc = prog; // holds the location of incrementation part
 
@@ -587,7 +594,7 @@ void parse_for(void){
   parse_block();
   
   sprintf(s_label, "_for%d_update:", current_label_index_for);
-  emergeln(s_label);
+  emitln(s_label);
   
   prog = update_loc;
   // checks for an empty update expression
@@ -598,12 +605,12 @@ void parse_for(void){
   }
     
   sprintf(s_label, "  jmp _for%d_cond", current_label_index_for);
-  emergeln(s_label);
+  emitln(s_label);
 
   find_end_of_block();
 
   sprintf(s_label, "_for%d_exit:", current_label_index_for);
-  emergeln(s_label);
+  emitln(s_label);
 
   label_tos_for--;
   current_label_index_for = label_stack_for[label_tos_for];
@@ -623,21 +630,21 @@ void parse_while(void){
   current_label_index_while = highest_label_index;
 
   sprintf(s_label, "_while%d_cond:", current_label_index_while);
-  emergeln(s_label);
+  emitln(s_label);
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
-  emergeln("  cmp b, 0");
+  emitln("  cmp b, 0");
   sprintf(s_label, "  je _while%d_exit", current_label_index_while);
-  emergeln(s_label);
+  emitln(s_label);
   sprintf(s_label, "_while%d_block:", current_label_index_while);
-  emergeln(s_label);
+  emitln(s_label);
   parse_block();  // parse while block
   sprintf(s_label, "  jmp _while%d_cond", current_label_index_while);
-  emergeln(s_label);
+  emitln(s_label);
   sprintf(s_label, "_while%d_exit:", current_label_index_while);
-  emergeln(s_label);
+  emitln(s_label);
 
   label_tos_while--;
   current_label_index_while = label_stack_while[label_tos_while];
@@ -657,22 +664,22 @@ void parse_do(void){
   current_label_index_do = highest_label_index;
 
   sprintf(s_label, "_do%d_block:", current_label_index_do);
-  emergeln(s_label);
+  emitln(s_label);
   parse_block();  // parse block
 
   sprintf(s_label, "_do%d_cond:", current_label_index_do);
-  emergeln(s_label);
+  emitln(s_label);
   get(); // get 'while'
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
-  emergeln("  cmp b, 1");
+  emitln("  cmp b, 1");
   sprintf(s_label, "  je _do%d_block", current_label_index_do);
-  emergeln(s_label);
+  emitln(s_label);
 
   sprintf(s_label, "_do%d_exit:", current_label_index_do);
-  emergeln(s_label);
+  emitln(s_label);
 
   label_tos_do--;
   current_label_index_do = label_stack_do[label_tos_do];
@@ -768,7 +775,6 @@ int switch_has_default(void){
 void parse_switch(void){
   char s_label[64];
   char s_nextcase[64];
-  char asm_line[256];
   char *temp_p;
   int nbr_cases;
   int current_case_nbr;
@@ -781,13 +787,13 @@ void parse_switch(void){
   current_label_index_switch = highest_label_index;
 
   sprintf(s_label, "_switch%d_expr:", current_label_index_switch);
-  emergeln(s_label);
+  emitln(s_label);
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   sprintf(s_label, "_switch%d_comparisons:", current_label_index_switch);
-  emergeln(s_label);
+  emitln(s_label);
 
   get();
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
@@ -799,31 +805,31 @@ void parse_switch(void){
   prog = temp_p;
   current_case_nbr = 0;
 
-  // emerge compares and jumps
+  // emit compares and jumps
   do{
     get();
     if(tok != CASE) error(CASE_EXPECTED);
     get();
     if(tok_type == INTEGER_CONST){
-      emerge("  cmp b, ");
-      emergeln(token);
+      emit("  cmp b, ");
+      emitln(token);
       sprintf(s_label, "_switch%d_case%d", current_label_index_switch, current_case_nbr);
       strcpy(asm_line, "  je ");
       strcat(asm_line, s_label);
-      emergeln(asm_line);
+      emitln(asm_line);
       get();
       if(tok != COLON) error(COLON_EXPECTED);
       find_end_of_case();
       putback();
     }
     else if(tok_type == CHAR_CONST){
-      emerge("  cmp bl, '");
-      emerge(string_constant);
-      emergeln("'");
+      emit("  cmp bl, '");
+      emit(string_constant);
+      emitln("'");
       sprintf(s_label, "_switch%d_case%d", current_label_index_switch, current_case_nbr);
       strcpy(asm_line, "  je ");
       strcat(asm_line, s_label);
-      emergeln(asm_line);
+      emitln(asm_line);
       get();
       if(tok != COLON) error(COLON_EXPECTED);
       find_end_of_case();
@@ -838,14 +844,14 @@ void parse_switch(void){
     get(); // get default
     get(); // get ':'
     sprintf(s_label, "_switch%d_default:", current_label_index_switch);
-    emergeln(s_label);
+    emitln(s_label);
     parse_case();
   }
 
   sprintf(s_label, "  jmp _switch%d_exit", current_label_index_switch);
-  emergeln(s_label);
+  emitln(s_label);
 
-  // emerge code for each case block
+  // emit code for each case block
   prog = temp_p;
   current_case_nbr = 0;
   do{
@@ -854,13 +860,13 @@ void parse_switch(void){
     get(); // get ':'
 
     sprintf(s_label, "_switch%d_case%d:", current_label_index_switch, current_case_nbr);
-    emergeln(s_label);
+    emitln(s_label);
     parse_case();
     current_case_nbr++;
   } while(tok == CASE);
 
   sprintf(s_label, "_switch%d_exit:", current_label_index_switch);
-  emergeln(s_label);
+  emitln(s_label);
 
   label_tos_switch--;
   current_label_index_switch = label_stack_switch[label_tos_switch];
@@ -886,35 +892,35 @@ void parse_if(void){
   current_label_index_if = highest_label_index;
 
   sprintf(s_label, "_if%d_cond:", current_label_index_if);
-  emergeln(s_label);
+  emitln(s_label);
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
-  emergeln("  cmp b, 0");
+  emitln("  cmp b, 0");
   
   temp_p = prog;
   find_end_of_block(); // skip main IF block in order to check for ELSE block.
   get();
   if(tok == ELSE){
     sprintf(s_label, "  je _if%d_else_block", current_label_index_if);
-    emergeln(s_label);
+    emitln(s_label);
   }
   else{
     sprintf(s_label, "  je _if%d_exit", current_label_index_if);
-    emergeln(s_label);
+    emitln(s_label);
   }
 
   prog = temp_p;
   sprintf(s_label, "_if%d_block:", current_label_index_if);
-  emergeln(s_label);
+  emitln(s_label);
   parse_block();  // parse the positive condition block
   sprintf(s_label, "  jmp _if%d_exit", current_label_index_if);
-  emergeln(s_label);
+  emitln(s_label);
   get(); // look for 'else'
   if(tok == ELSE){
     sprintf(s_label, "_if%d_else_block:", current_label_index_if);
-    emergeln(s_label);
+    emitln(s_label);
     parse_block();  // parse the positive condition block
   }
   else{
@@ -922,7 +928,7 @@ void parse_if(void){
   }
   
   sprintf(s_label, "_if%d_exit:", current_label_index_if);
-  emergeln(s_label);
+  emitln(s_label);
 
   label_tos_if--;
   current_label_index_if = label_stack_if[label_tos_if];
@@ -938,13 +944,13 @@ void parse_return(void){
     putback();
     parse_expr();  // return value in register B
   }
-  emergeln("  leave");
+  emitln("  leave");
   // check if this is "main"
   if(!strcmp(function_table[current_func_id].func_name, "main")){
-    emergeln("  syscall sys_terminate_proc");
+    emitln("  syscall sys_terminate_proc");
   }
   else{
-    emergeln("  ret");
+    emitln("  ret");
   }
 }
 
@@ -1173,70 +1179,70 @@ void parse_attrib(){
     strcpy(var_name, token);
     get();
     if(tok == ASSIGNMENT){
-      //emergeln("  mov a, 0");
+      //emitln("  mov a, 0");
       parse_attrib();
       if(local_var_exists(var_name) != -1){ // is a local variable
         var_id = local_var_exists(var_name);
         if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){ // is a pointer
-          emergeln("  mov a, b");
-          emergeln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+          emitln("  mov a, b");
+          emitln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
                     // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
-          emerge("  mov [bp + ");
+          emit("  mov [bp + ");
           if(function_table[current_func_id].local_vars[var_id].is_parameter)
             // add +4 below to account for BP and PC offsets which were pushed into the stack
             sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
           else
             sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          emerge(temp);
-          emerge("], a");
-          emerge(" ; ");
-          emergeln(var_name);
+          emit(temp);
+          emit("], a");
+          emit(" ; ");
+          emitln(var_name);
         }
         else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
-          emergeln("  mov al, bl");
-          emerge("  mov [bp + ");
+          emitln("  mov al, bl");
+          emit("  mov [bp + ");
           if(function_table[current_func_id].local_vars[var_id].is_parameter)
             // add +4 below to account for BP and PC offsets which were pushed into the stack
             sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
           else
             sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
-          emerge(temp);
-          emerge("], al");
-          emerge(" ; ");
-          emergeln(var_name);
+          emit(temp);
+          emit("], al");
+          emit(" ; ");
+          emitln(var_name);
         }
         else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-          emergeln("  mov a, b");
-          emergeln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+          emitln("  mov a, b");
+          emitln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
                     // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
-          emerge("  mov [bp + ");
+          emit("  mov [bp + ");
           if(function_table[current_func_id].local_vars[var_id].is_parameter)
             // add +4 below to account for BP and PC offsets which were pushed into the stack
             sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
           else
             sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          emerge(temp);
-          emerge("], a");
-          emerge(" ; ");
-          emergeln(var_name);
+          emit(temp);
+          emit("], a");
+          emit(" ; ");
+          emitln(var_name);
         }
       }
       else if(global_var_exists(var_name) != -1){  // is a global variable
         var_id = global_var_exists(var_name);
         if(global_variables[var_id].data.ind_level > 0){ // is a pointer
-          emerge("  mov [");
-          emerge(global_variables[var_id].var_name);
-          emergeln("], b");
+          emit("  mov [");
+          emit(global_variables[var_id].var_name);
+          emitln("], b");
         }
         else if(global_variables[var_id].data.type == DT_CHAR){
-            emerge("  mov [");
-            emerge(global_variables[var_id].var_name);
-            emergeln("], bl");
+            emit("  mov [");
+            emit(global_variables[var_id].var_name);
+            emitln("], bl");
         }
         else if(global_variables[var_id].data.type == DT_INT){
-            emerge("  mov [");
-            emerge(global_variables[var_id].var_name);
-            emergeln("], b");
+            emit("  mov [");
+            emit(global_variables[var_id].var_name);
+            emitln("], b");
         }
       }
       else error(UNDECLARED_VARIABLE);
@@ -1252,15 +1258,15 @@ void parse_attrib(){
         prog = temp_prog; // goes back to the beginning of the expression
         get(); // gets past the first asterisk
         parse_atom();
-        emergeln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
+        emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
         // after evaluating the address expression, the token will be a "="
         parse_attrib(); // evaluates the value to be attributed to the address, result in 'b'
         switch(get_var_type(var_name)){
           case DT_CHAR:
-            emergeln("  mov [d], bl");
+            emitln("  mov [d], bl");
             break;
           case DT_INT:
-            emergeln("  mov [d], b");
+            emitln("  mov [d], b");
             break;
           default: error(INVALID_POINTER);
         }
@@ -1283,26 +1289,26 @@ void parse_logical(void){
   parse_relational();
   while(tok == LOGICAL_AND || tok == LOGICAL_OR){
     temp_tok = tok;
-    emergeln("  push a");
-    emergeln("  mov a, b");
+    emitln("  push a");
+    emitln("  mov a, b");
     parse_relational();
-    emergeln("  cmp b, 0");
-    emergeln("  push a");
-    emergeln("  lodflgs");
-    emergeln("  mov b, a");
-    emergeln("  pop a");
-    emergeln("  not bl");  
-    emergeln("  and bl, %00000001"); // isolate ZF only. 
-    emergeln("  mov bh, 0");
-    emergeln("  cmp a, 0");
-    emergeln("  lodflgs");
-    emergeln("  not al");  
-    emergeln("  and al, %00000001"); // isolate ZF only. 
-    emergeln("  mov ah, 0");
-    if(temp_tok == LOGICAL_AND) emergeln("  and a, b");
-    else emergeln("  or a, b");
-    emergeln("  mov b, a");
-    emergeln("  pop a");
+    emitln("  cmp b, 0");
+    emitln("  push a");
+    emitln("  lodflgs");
+    emitln("  mov b, a");
+    emitln("  pop a");
+    emitln("  not bl");  
+    emitln("  and bl, %00000001"); // isolate ZF only. 
+    emitln("  mov bh, 0");
+    emitln("  cmp a, 0");
+    emitln("  lodflgs");
+    emitln("  not al");  
+    emitln("  and al, %00000001"); // isolate ZF only. 
+    emitln("  mov ah, 0");
+    if(temp_tok == LOGICAL_AND) emitln("  and a, b");
+    else emitln("  or a, b");
+    emitln("  mov b, a");
+    emitln("  pop a");
   }
 }
 
@@ -1318,51 +1324,51 @@ void parse_relational(void){
   while(tok == EQUAL || tok == NOT_EQUAL || tok == LESS_THAN || tok == LESS_THAN_OR_EQUAL
     || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
     temp_tok = tok;
-    emergeln("  push a");
-    emergeln("  mov a, b");
+    emitln("  push a");
+    emitln("  mov a, b");
     parse_terms();
     switch(temp_tok){
       case EQUAL:
-        emergeln("  cmp a, b");
-        emergeln("  lodflgs");
-        emergeln("  and al, %00000001"); // isolate ZF only. therefore if ZF==1 then A == B
-        emergeln("  mov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000001"); // isolate ZF only. therefore if ZF==1 then A == B
+        emitln("  mov ah, 0");
         break;
       case NOT_EQUAL:
-        emergeln("  cmp a, b");
-        emergeln("  lodflgs");
-        emergeln("  and al, %00000001"); // isolate ZF only.
-        emergeln("  xor al, %00000001"); // invert the condition
-        emergeln("  mov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000001"); // isolate ZF only.
+        emitln("  xor al, %00000001"); // invert the condition
+        emitln("  mov ah, 0");
         break;
       case LESS_THAN:
-        emergeln("  cmp a, b");
-        emergeln("  lodflgs");
-        emergeln("  and al, %00000010"); // isolate CF only. therefore if CF==1 then A < B
-        emergeln("  mov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000010"); // isolate CF only. therefore if CF==1 then A < B
+        emitln("  mov ah, 0");
         break;
       case LESS_THAN_OR_EQUAL:
-        emergeln("  cmp a, b");
-        emergeln("  lodflgs");
-        emergeln("  and al, %00000011"); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
-        emergeln("  mov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000011"); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
+        emitln("  mov ah, 0");
         break;
       case GREATER_THAN_OR_EQUAL:
-        emergeln("  cmp a, b");
-        emergeln("  lodflgs");
-        emergeln("  and al, %00000010"); 
-        emergeln("  xor al, %00000010"); 
-        emergeln("  mov ah, 0");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000010"); 
+        emitln("  xor al, %00000010"); 
+        emitln("  mov ah, 0");
         break;
       case GREATER_THAN:
-        emergeln("  cmp a, b");
-        emergeln("  lodflgs");
-        emergeln("  and al, %00000011"); 
-        emergeln("  xor al, %00000011");
+        emitln("  cmp a, b");
+        emitln("  lodflgs");
+        emitln("  and al, %00000011"); 
+        emitln("  xor al, %00000011");
         break;
     }
-    emergeln("  mov b, a");
-    emergeln("  pop a");
+    emitln("  mov b, a");
+    emitln("  pop a");
   }
 }
 
@@ -1376,13 +1382,13 @@ void parse_terms(void){
   parse_factors();
   while(tok == PLUS || tok == MINUS){
     temp_tok = tok;
-    emergeln("  push a");
-    emergeln("  mov a, b");
+    emitln("  push a");
+    emitln("  mov a, b");
     parse_factors();
-    if(temp_tok == PLUS) emergeln("  add a, b");
-    else emergeln("  sub a, b");
-    emergeln("  mov b, a");
-    emergeln("  pop a");
+    if(temp_tok == PLUS) emitln("  add a, b");
+    else emitln("  sub a, b");
+    emitln("  mov b, a");
+    emitln("  pop a");
   }
 }
 
@@ -1396,22 +1402,22 @@ void parse_factors(void){
   parse_atom();
   while(tok == STAR || tok == FSLASH || tok == MOD){
     temp_tok = tok;
-    emergeln("  push a");
-    emergeln("  mov a, b");
+    emitln("  push a");
+    emitln("  mov a, b");
     parse_atom();
     if(temp_tok == STAR){
-      emergeln("  mul a, b");
+      emitln("  mul a, b");
     }
     else if(temp_tok == FSLASH){
-      emergeln("  div a, b");
-      emergeln("  mov g, a");
-      emergeln("  mov a, b");
-      emergeln("  mov b, g");
+      emitln("  div a, b");
+      emitln("  mov g, a");
+      emitln("  mov a, b");
+      emitln("  mov b, g");
     }
     else if(temp_tok == MOD){
-      emergeln("  div a, b");
+      emitln("  div a, b");
     }
-    emergeln("  pop a");
+    emitln("  pop a");
   }
 }
 
@@ -1424,16 +1430,14 @@ void parse_atom(void){
   int func_id;
   char temp_name[ID_LEN];
   char temp[64];
+  char var_address_str[32];
+  char enum_value_str[32];
 
   get();
-
-/*   a = *(p+1);
-  a = *p;
- */
   if(tok == STAR){ // is a pointer operator
     parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
-    emergeln("  mov d, b");// now we have the pointer value. we then get the data at the address.
-    emergeln("  mov b, [d]"); // data fetched as an int. need to improve this to allow any types later.
+    emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
+    emitln("  mov b, [d]"); // data fetched as an int. need to improve this to allow any types later.
     putback();
   }
   else if(tok == AMPERSAND){
@@ -1446,32 +1450,32 @@ void parse_atom(void){
         sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
       else
         sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
-      emerge("  mov b, ");
-      emergeln(temp);
+      emit("  mov b, ");
+      emitln(temp);
     }
     else if(global_var_exists(token) != -1){  // is a global variable
       var_id = global_var_exists(token);
-      emerge("  mov b, ");
-      emergeln(global_variables[var_id].var_name);
+      emit("  mov b, ");
+      emitln(global_variables[var_id].var_name);
     }
   }
   else if(tok_type == INTEGER_CONST){
-    emerge("  mov b, ");
-    emergeln(token);
+    emit("  mov b, ");
+    emitln(token);
   }
   else if(tok_type == CHAR_CONST){
-    emerge("  mov bl, ");
-    emergeln(token);
-    //emergeln("  mov bh, 0"); // not sure why i set bh to 0 here, but removing as doesnt seem to be needed
+    emit("  mov bl, ");
+    emitln(token);
+    //emitln("  mov bh, 0"); // not sure why i set bh to 0 here, but removing as doesnt seem to be needed
   }
   else if(tok == MINUS){
     parse_atom();
-    emergeln("  neg b");
+    emitln("  neg b");
     putback();
   }
   else if(tok == BITWISE_NOT){
     parse_atom();
-    emergeln("  not b");
+    emitln("  not b");
     putback();
   }
   else if(tok == OPENING_PAREN){
@@ -1485,8 +1489,8 @@ void parse_atom(void){
       func_id = find_function(temp_name);
       if(func_id != -1){
         parse_function_arguments(func_id);
-        emerge("  call ");
-        emergeln(temp_name);
+        emit("  call ");
+        emitln(temp_name);
         if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
         // the function's return value is in register B
 
@@ -1507,8 +1511,8 @@ void parse_atom(void){
             }
           }
           sprintf(bp_offset_string, "%i", bp_offsetclean);
-          emerge("  add sp, ");
-          emergeln(bp_offset_string);
+          emit("  add sp, ");
+          emitln(bp_offset_string);
         }
       }
       else error(UNDECLARED_FUNC);
@@ -1519,7 +1523,6 @@ void parse_atom(void){
       int data_size; // matrix data size
 			t_data index;
 			int dims;
-      char asm_line[256];
 			// if the variable is not a matrix, then it must be a pointer.
 			if(!is_matrix(temp_name)){ 
 				//*v = get_var_value(temp_name);
@@ -1529,28 +1532,47 @@ void parse_atom(void){
 			matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
 			data_size = get_data_size(&matrix->data);
 			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      emergeln("  mov d, 0");
+      emitln("  mov d, 0");
 			for(i = 0; i < dims; i++){
         parse_expr(); // result in 'b'
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
 				// if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
 				if(i < dims - 1){
           sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix) * data_size);
-          emergeln(asm_line);
-          emergeln("  mul a, b");
-          emergeln("  add d, b");
+          emitln(asm_line);
+          emitln("  mul a, b");
+          emitln("  add d, b");
         }
         // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
         else if(i == dims - 1){
-          emergeln("  add d, b");
+          emitln("  add d, b");
+          get_var_address(var_address_str, temp_name);
           switch(matrix -> data.type){
             case DT_CHAR:
-              sprintf(asm_line, "  mov a, [d + %s]", temp_name);
-              emergeln(asm_line);
+              if(get_var_scope(temp_name) == LOCAL){
+                emitln("  mov b, d");
+                sprintf(asm_line, "  lea d, [%s]", var_address_str);
+                emitln(asm_line);
+                emitln("  add d, b");
+              }
+              else if(get_var_scope(temp_name) == GLOBAL){
+                sprintf(asm_line, "  add d, %s", var_address_str);
+                emitln(asm_line);
+              }
+              emitln("  mov bl, [d]");
               break;
             case DT_INT:
-              sprintf(asm_line, "  mov a, [d + %s]", temp_name);
-              emergeln(asm_line);
+              if(get_var_scope(temp_name) == LOCAL){
+                emitln("  mov b, d");
+                sprintf(asm_line, "  lea d, [%s]", var_address_str);
+                emitln(asm_line);
+                emitln("  add d, b");
+              }
+              else if(get_var_scope(temp_name) == GLOBAL){
+                sprintf(asm_line, "  add d, %s", var_address_str);
+                emitln(asm_line);
+              }
+              emitln("  mov b, [d]");
               break;
           }
 			  }
@@ -1560,86 +1582,124 @@ void parse_atom(void){
           break;
         }
 			}
-      emergeln("  mov b, a");
 		}
-    else{
-      if(local_var_exists(temp_name) != -1){ // is a local variable
-        var_id = local_var_exists(temp_name);
-        if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){ // is a pointer
-          emerge("  mov b, [bp + ");
-          if(function_table[current_func_id].local_vars[var_id].is_parameter)
-            // add +4 below to account for BP and PC offsets which were pushed into the stack
-            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          else
-            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          emerge(temp);
-          emerge("]");
-          emerge(" ; ");
-          emergeln(temp_name);
-          emergeln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
-                    // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
-        }
-        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
-          emerge("  mov bl, [bp + ");
-          if(function_table[current_func_id].local_vars[var_id].is_parameter)
-            // add +4 below to account for BP and PC offsets which were pushed into the stack
-            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
-          else
-            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
-          emerge(temp);
-          emerge("]");
-          emerge(" ; ");
-          emergeln(temp_name);
-        }
-        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-          emerge("  mov b, [bp + ");
-          if(function_table[current_func_id].local_vars[var_id].is_parameter)
-            // add +4 below to account for BP and PC offsets which were pushed into the stack
-            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          else
-            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          emerge(temp);
-          emerge("]");
-          emerge(" ; ");
-          emergeln(temp_name);
-          emergeln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
-                    // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
-        }
-      }
-      else if(global_var_exists(temp_name) != -1){  // is a global variable
-        var_id = global_var_exists(temp_name);
-        if(global_variables[var_id].data.ind_level > 0){ // is a pointer
-          emerge("  mov b, [");
-          emerge(global_variables[var_id].var_name);
-          emergeln("]");
-        }
-        else if(global_variables[var_id].data.type == DT_CHAR){
-          emerge("  mov bl, [");
-          emerge(global_variables[var_id].var_name);
-          emergeln("]");
-        }
-        else if(global_variables[var_id].data.type == DT_INT){
-          emerge("  mov b, [");
-          emerge(global_variables[var_id].var_name);
-          emergeln("]");
-        }
-      }
-      else if(enum_element_exists(temp_name)){
-        char enum_value_str[32];
-        sprintf(enum_value_str, "%d", get_enum_val(temp_name));
-        emerge("  mov b, ");
-        emerge(enum_value_str);
-        emerge(" ; ");
-        emergeln(temp_name);
-      }
-      else error(UNDECLARED_IDENTIFIER);
+    else if(enum_element_exists(temp_name) != -1){
       putback();
+      sprintf(asm_line, "  mov b, %d; %s", get_enum_val(temp_name), temp_name);
+      emit(asm_line);
+    }
+    else{
+      putback();
+      try_emitting_var(temp_name);
     }
   }
-  else
-    error(INVALID_EXPRESSION);
+  else error(INVALID_EXPRESSION);
 
   get(); // gets the next token (it must be a delimiter)
+}
+
+t_var_scope get_var_scope(char *var_name){
+  int var_id;
+
+  if(local_var_exists(var_name) != -1){ // is a local variable
+    return LOCAL;
+  }
+  else if(global_var_exists(var_name) != -1){  // is a global variable
+    return GLOBAL;
+  }
+
+  return -1;
+}
+
+void get_var_address(char *dest, char *var_name){
+  int var_id;
+
+  if(local_var_exists(var_name) != -1){ // is a local variable
+    var_id = local_var_exists(var_name);
+    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
+    || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
+      if(function_table[current_func_id].local_vars[var_id].is_parameter)
+        // add +4 below to account for BP and PC offsets which were pushed into the stack
+        sprintf(dest, "bp + %d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+      else
+        sprintf(dest, "bp + %d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+    }
+    else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
+      if(function_table[current_func_id].local_vars[var_id].is_parameter)
+        // add +4 below to account for BP and PC offsets which were pushed into the stack
+        sprintf(dest, "bp + %d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
+      else
+        sprintf(dest, "bp + %d", -function_table[current_func_id].local_vars[var_id].bp_offset - get_total_var_size(get_var_by_name(var_name)) + 1);
+    }
+  }
+  else if(global_var_exists(var_name) != -1){  // is a global variable
+    strcpy(dest, var_name);
+  }
+  else error(UNDECLARED_IDENTIFIER);
+}
+
+t_var *get_var_by_name(char *var_name){
+  int var_id;
+
+  if(local_var_exists(var_name) != -1){ // is a local variable
+    var_id = local_var_exists(var_name);
+    return &function_table[current_func_id].local_vars[var_id];
+  }
+  else if(global_var_exists(var_name) != -1){  // is a global variable
+    var_id = global_var_exists(var_name);
+    return &global_variables[var_id];
+  }
+}
+
+void try_emitting_var(char *var_name){
+  int var_id;
+  char temp[64];
+
+  if(local_var_exists(var_name) != -1){ // is a local variable
+    var_id = local_var_exists(var_name);
+    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
+    || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
+      emit("  mov b, [bp + ");
+      if(function_table[current_func_id].local_vars[var_id].is_parameter)
+        // add +4 below to account for BP and PC offsets which were pushed into the stack
+        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+      else
+        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+      emit(temp);
+      emit("]");
+      emit(" ; ");
+      emitln(var_name);
+      emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+                // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
+    }
+    else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
+      emit("  mov bl, [bp + ");
+      if(function_table[current_func_id].local_vars[var_id].is_parameter)
+        // add +4 below to account for BP and PC offsets which were pushed into the stack
+        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
+      else
+        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
+      emit(temp);
+      emit("]");
+      emit(" ; ");
+      emitln(var_name);
+    }
+  }
+  else if(global_var_exists(var_name) != -1){  // is a global variable
+    var_id = global_var_exists(var_name);
+    if(global_variables[var_id].data.ind_level > 0
+    || global_variables[var_id].data.type == DT_INT){
+      emit("  mov b, [");
+      emit(global_variables[var_id].var_name);
+      emitln("]");
+    }
+    else if(global_variables[var_id].data.type == DT_CHAR){
+      emit("  mov bl, [");
+      emit(global_variables[var_id].var_name);
+      emitln("]");
+    }
+  }
+  else error(UNDECLARED_IDENTIFIER);
 }
 
 // ################################################################################################
@@ -1736,10 +1796,10 @@ void parse_function_arguments(int func_id){
     parse_expr();
     switch(func->local_vars[param_index].data.type){
       case DT_CHAR:
-        emergeln("  push bl");
+        emitln("  push bl");
         break;
       case DT_INT:
-        emergeln("  push b");
+        emitln("  push b");
         break;
     }
     param_index++;
@@ -1826,7 +1886,8 @@ int get_enum_val(char *element_name){
         return enum_table[i].elements[j].value;
     }
   }
-  error(UNDECLARED_ENUM_ELEMENT);
+
+  return -1;
 }
 
 // ################################################################################################
@@ -2073,8 +2134,8 @@ void declare_local(void){
 		// checks if this is a matrix declaration
 		int i = 0;
     int expr;
+    new_var.dims[0] = 0; // in case its not a matrix, this signals that fact
 		if(tok == OPENING_BRACKET){
-      puts("OK");
 			while(tok == OPENING_BRACKET){
         get();
         expr = atoi(token);
@@ -2088,37 +2149,16 @@ void declare_local(void){
 		}
 
     if(tok == ASSIGNMENT){
-      get();
-    // emerge ASM for variables
-      switch(new_var.data.type){
-        case DT_CHAR:
-          emerge("  push byte ");
-          emerge(token);
-          emerge(" ; ");
-          emergeln(new_var.var_name);
-          break;
-        case DT_INT:
-          emerge("  push word ");
-          emerge(token);
-          emerge(" ; ");
-          emergeln(new_var.var_name);
-          break;
-      }
-      get();
+      puts("Assignment of local matrices is not possible yet.");
+      exit(0);
     }
     else{
-      switch(new_var.data.type){
-        case DT_CHAR:
-          emerge("  push byte 0"); // replace with sub sp, 1
-          emerge(" ; ");
-          emergeln(new_var.var_name);
-          break;
-        case DT_INT:
-          emerge("  push word 0"); // replace with sub sp, 2
-          emerge(" ; ");
-          emergeln(new_var.var_name);
-          break;
+      int ii;
+      for(ii=0;ii<get_total_var_size(&new_var);ii++){
+          emitln("  push byte 'A'");
       }
+     // sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
+      //emitln(asm_line);
     }
 
     // the indirection level needs to be reset now, because if it not, its value might be changed to the expression ind_level    
@@ -2165,7 +2205,7 @@ void error(_ERROR e){
   }
   
   printf("line number: %d\n", line);
-  printf("near: %s", token);
+  printf("last token: %s\n\n", token);
 
   exit(0);
 }

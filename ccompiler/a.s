@@ -6,19 +6,29 @@
 main:
   push bp
   mov bp, sp
+  push byte 'A'
+  push byte 'A'
+  push byte 'A'
+  push byte 'A'
+  push byte 'A'
+  push byte 'A'
+  push byte 'A'
+  push byte 'A'
   mov d, 0
   mov b, [i3]
-  mov a, 25
+  mov a, 4
   mul a, b
   add d, b
   mov b, [i2]
-  mov a, 5
+  mov a, 2
   mul a, b
   add d, b
   mov b, [i1]
   add d, b
-  mov a, [d + matrix]
-  mov b, a
+  mov b, d
+  lea d, [bp + -7]
+  add d, b
+  mov bl, [d]
   push bl
   call print
   add sp, 1
@@ -28,9 +38,8 @@ print:
   push bp
   mov bp, sp
 ; --- begin inline asm block
-    mov a, ^c
+    mov a, [bp + 4]
     swp a
-    add a, $0100
     call putchar
   ; --- end inline asm block
   leave
@@ -38,7 +47,6 @@ print:
 ; --- end text block
 
 ; --- begin data block
-matrix: .fill 125, 97
 c: .fill 1, 90
 i1: .dw 2
 i2: .dw 1
