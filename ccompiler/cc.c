@@ -391,6 +391,37 @@ void declare_func(void){
 // ################################################################################################
 // ################################################################################################
 
+int find_parameter_size(void){
+  int total_bytes;
+  int data_size;
+
+  total_bytes = 0;
+  get();
+  switch(tok){
+    case CHAR:
+      data_size += 1;
+      break;
+    case INT:
+      data_size += 2;
+      break;
+    case FLOAT:
+      data_size += 2;
+      break;
+    case DOUBLE:
+      data_size += 4;
+  }
+  get(); // get past parameter name
+  get();
+  while(tok == OPENING_BRACKET){
+    get();
+    total_bytes += data_size * atoi(token);
+    get(); // ']'
+    get();
+  }
+
+  return total_bytes;
+}
+
 int find_total_parameter_bytes(void){
   int total_bytes;
   int data_size;

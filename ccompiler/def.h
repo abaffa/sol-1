@@ -391,3 +391,4 @@ void get_var_address(char *dest, char *var_name);
 void try_emitting_var(char *var_name);
 t_var_scope get_var_scope(char *var_name);
 t_var *get_var_by_name(char *var_name);
+int find_parameter_size(void);
