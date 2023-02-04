@@ -6,13 +6,10 @@
 main:
   push bp
   mov bp, sp
-  push byte 'A'
-  push byte 'A'
-  push byte 'A'
-  mov bl, [bp + -2] ; c1
-  push bl
+  mov b, c1
+  push b
   call f1
-  add sp, 3
+  add sp, 2
   leave
   syscall sys_terminate_proc
 f1:
@@ -37,6 +34,7 @@ f1:
 
 ; --- begin data block
 cc: .fill 1, 0
+c1: .fill 3, 0
 ; --- end data block
 ; --- begin include block
 .include "lib/stdio.asm"

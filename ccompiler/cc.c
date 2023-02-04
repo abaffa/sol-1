@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
   }
 
   prog = pbuf; // resets pointer to the beginning of the program
-  asmp = ASM_output;  // set ASM output pointer to the ASM array beginning
+  asmp = ASM_outback;  // set ASM outback pointer to the ASM array beginning
 
   pre_scan();
   sprintf(header, "; --- Filename: %s", argv[1]);
@@ -50,7 +50,7 @@ void generate_file(char *filename){
     exit(0);
   }
   
-  fprintf(fp, "%s", ASM_output);
+  fprintf(fp, "%s", ASM_outback);
 
   fclose(fp);
 }
@@ -278,24 +278,7 @@ void declare_func(void){
   func = &function_table[function_table_tos];
 
   get();
-
-  switch(tok){
-    case VOID:
-      func->return_type = DT_VOID;
-      break;
-    case CHAR:
-      func->return_type = DT_CHAR;
-      break;
-    case INT:
-      func->return_type = DT_INT;
-      break;
-    case FLOAT:
-      func->return_type = DT_FLOAT;
-      break;
-    case DOUBLE:
-      func->return_type = DT_DOUBLE;
-  }
-
+  func->return_type = get_data_type_from_tok(tok);
   get(); // gets the function name
   strcpy(func->func_name, token);
   get(); // gets past "("
@@ -307,7 +290,7 @@ void declare_func(void){
     if(tok == VOID) get();
   }
   else{
-    put();
+    back();
     temp_prog = prog;
     total_parameter_bytes = get_total_func_param_size();
     func->total_parameter_size = total_parameter_bytes;
@@ -322,8 +305,6 @@ void declare_func(void){
         get();
       }
       if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) error(VAR_TYPE_EXPECTED);
-      
-
       // gets the parameter type
       switch(tok){
         case CHAR:
@@ -380,7 +361,7 @@ void declare_func(void){
   
   get(); // gets to the "{" token
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
-  put(); // puts the "{" back so that it can be found by skip_block()
+  back(); // puts the "{" back so that it can be found by skip_block()
 
   //*func->local_vars[func->local_var_tos].var_name = '\0'; // marks the end of the variable list with a null character
   function_table_tos++;
@@ -447,15 +428,17 @@ int get_param_size(void){
 
   get(); // check for brackets
   if(tok == OPENING_BRACKET){
+    data_size = 2; // parameter is a pointer if it is an array
     while(tok == OPENING_BRACKET){
       get();
-      data_size *= atoi(token);
+      // line below commented out because parameter variables are passed as pointers instead
+      //data_size *= atoi(token);
       get(); // ']'
       get();
     }
-    put();
+    back();
   }
-  else put();
+  else back();
   
   return data_size;
 }
@@ -587,7 +570,7 @@ void parse_for(void){
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   get();
   if(tok != SEMICOLON){
-    put();
+    back();
     parse_expr();
   }
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
@@ -598,7 +581,7 @@ void parse_for(void){
   // checks for an empty condition, which means always true
   get();
   if(tok != SEMICOLON){
-    put();
+    back();
     parse_expr();
     if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
   }
@@ -632,7 +615,7 @@ void parse_for(void){
   // checks for an empty update expression
   get();
   if(tok != CLOSING_PAREN){
-    put();
+    back();
     parse_expr();
   }
     
@@ -744,7 +727,7 @@ int count_cases(void){
   do{
     get();
     if(tok == OPENING_BRACE){
-      put();
+      back();
       skip_block();
     }
     else if(tok == CASE) nbr_cases++;
@@ -760,7 +743,7 @@ void skip_case(void){
   do{
     get();
     if(tok == OPENING_BRACE){
-      put();
+      back();
       skip_block();
       get();
     }
@@ -776,7 +759,7 @@ void goto_next_case(void){
   do{
     get();
     if(tok == OPENING_BRACE){
-      put();
+      back();
       skip_block();
     }
     else if(tok == CASE) nbr_cases++;
@@ -792,7 +775,7 @@ int switch_has_default(void){
   do{
     get();
     if(tok == OPENING_BRACE){
-      put();
+      back();
       skip_block();
     }
     else if(tok == DEFAULT) return 1;
@@ -852,7 +835,7 @@ void parse_switch(void){
       get();
       if(tok != COLON) error(COLON_EXPECTED);
       skip_case();
-      put();
+      back();
     }
     else if(tok_type == CHAR_CONST){
       emit("  cmp bl, '");
@@ -865,7 +848,7 @@ void parse_switch(void){
       get();
       if(tok != COLON) error(COLON_EXPECTED);
       skip_case();
-      put();
+      back();
     }
     else error(CONSTANT_EXPECTED);
     current_case_nbr++;
@@ -956,7 +939,7 @@ void parse_if(void){
     parse_block();  // parse the positive condition block
   }
   else{
-    put();
+    back();
   }
   
   sprintf(s_label, "_if%d_exit:", current_label_index_if);
@@ -973,7 +956,7 @@ void parse_if(void){
 void parse_return(void){
   get();
   if(tok != SEMICOLON){
-    put();
+    back();
     parse_expr();  // return value in register B
   }
   emitln("  leave");
@@ -998,7 +981,7 @@ void parse_case(void){
       case CHAR:
       case FLOAT:
       case DOUBLE:
-        put();
+        back();
         declare_local();
         break;
       case ASM:
@@ -1025,13 +1008,13 @@ void parse_case(void){
       case CASE:
       case DEFAULT:
       case CLOSING_BRACE:
-        put();
+        back();
         return;
       case RETURN:
         parse_return();
         break;
       default:
-        put();
+        back();
         parse_expr();
         if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
     }    
@@ -1052,7 +1035,7 @@ void parse_block(void){
       case CHAR:
       case FLOAT:
       case DOUBLE:
-        put();
+        back();
         declare_local();
         break;
       case ASM:
@@ -1087,7 +1070,7 @@ void parse_block(void){
         break;
       default:
         if(tok_type == END) error(CLOSING_BRACE_EXPECTED);
-        put();
+        back();
         parse_expr();
         if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
     }    
@@ -1122,10 +1105,10 @@ void skip_statements(void){
       get();
       if(tok == ELSE) skip_statements();
       else
-        put();
+        back();
       break;
     case OPENING_BRACE: // if it's a block, then the block is skipped
-      put();
+      back();
       skip_block();
       break;
     case FOR:
@@ -1140,13 +1123,13 @@ void skip_statements(void){
       if(!*prog) error(CLOSING_PAREN_EXPECTED);
       get();
       if(tok != SEMICOLON){
-        put();
+        back();
         skip_statements();
       }
       break;
       
     default: // if it's not a keyword, then it must be an expression
-      put(); // puts the last token back, which might be a ";" token
+      back(); // puts the last token back, which might be a ";" token
       while(*prog++ != ';' && *prog);
       if(!*prog) error(SEMICOLON_EXPECTED);
   }
@@ -1447,7 +1430,7 @@ void parse_atom(void){
     parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
     emitln("  mov b, [d]"); // data fetched as an int. need to improve this to allow any types later.
-    put();
+    back();
   }
   else if(tok == AMPERSAND){
     get(); // get variable name
@@ -1478,12 +1461,12 @@ void parse_atom(void){
   else if(tok == MINUS){
     parse_atom();
     emitln("  neg b");
-    put();
+    back();
   }
   else if(tok == BITWISE_NOT){
     parse_atom();
     emitln("  not b");
-    put();
+    back();
   }
   else if(tok == OPENING_PAREN){
     parse_expr();  // parses expression between parenthesis and result will be in B
@@ -1568,18 +1551,18 @@ void parse_atom(void){
 			  }
 				get();
 				if(tok != OPENING_BRACKET){
-          put();
+          back();
           break;
         }
 			}
 		}
     else if(enum_element_exists(temp_name) != -1){
-      put();
+      back();
       sprintf(asm_line, "  mov b, %d; %s", get_enum_val(temp_name), temp_name);
       emit(asm_line);
     }
     else{
-      put();
+      back();
       try_emitting_var(temp_name);
     }
   }
@@ -1640,7 +1623,15 @@ void try_emitting_var(char *var_name){
   if(local_var_exists(var_name) != -1){ // is a local variable
     var_id = local_var_exists(var_name);
     if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
-    || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
+    || is_matrix(&function_table[current_func_id].local_vars[var_id])){
+      emit("  lea d, [");
+      get_var_address(temp, var_name);
+      emit(temp);
+      emit("]");
+      emit(" ; ");
+      emitln(var_name);
+    }
+    else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emit("  mov b, [");
       get_var_address(temp, var_name);
       emit(temp);
@@ -1662,7 +1653,11 @@ void try_emitting_var(char *var_name){
   else if(global_var_exists(var_name) != -1){  // is a global variable
     var_id = global_var_exists(var_name);
     if(global_variables[var_id].data.ind_level > 0
-    || global_variables[var_id].data.type == DT_INT){
+    || is_matrix(&global_variables[var_id])){
+      emit("  mov b, ");
+      emitln(global_variables[var_id].var_name);
+    }
+    else if(global_variables[var_id].data.type == DT_INT){
       emit("  mov b, [");
       emit(global_variables[var_id].var_name);
       emitln("]");
@@ -1716,19 +1711,27 @@ int get_total_var_size(t_var *var){
 	return size * get_data_size(&var->data);
 }
 
-int is_matrix(char *var_name){
+int is_matrix(t_var *var){
+
+  if(var->dims > 0) return 1;
+  else return -1;
+
+/*
 	register int i;
 
   //check local variables whose function id is the id of current function being parsed
   for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
     if(!strcmp(function_table[current_func_id].local_vars[i].var_name, var_name))
-      return function_table[current_func_id].local_vars[i].dims[0];
+      if(function_table[current_func_id].local_vars[i].dims[0] > 0) return 1;
+      else return -1;
 
 	for(i = 0; i < global_var_tos; i++)
 		if(!strcmp(global_variables[i].var_name, var_name)) 
-			return global_variables[i].dims[0];
-  
+			if(global_variables[i].dims[0] > 0) return 1;
+      else return -1;
+
 	error(UNDECLARED_VARIABLE);
+*/
 }
 
 // ################################################################################################
@@ -1755,30 +1758,28 @@ int get_data_size(t_data *data){
 }
 
 void parse_function_arguments(int func_id){
-  t_user_func *func; // variable to hold a pointer to the user function
-  int param_index;
-
-  func = &function_table[func_id];
-  param_index = 0;
+  int param_index = 0;
 
   get();
   if(tok == CLOSING_PAREN) return;
-
-  put();
-
+  back();
   do{
     parse_expr();
-    switch(func->local_vars[param_index].data.type){
-      case DT_CHAR:
-        emitln("  push bl");
-        break;
-      case DT_INT:
-        emitln("  push b");
-        break;
+    if(function_table[func_id].local_vars[param_index].data.ind_level > 0
+    || is_matrix(&function_table[func_id].local_vars[param_index])){
+      emitln("  push b");
     }
+    else
+      switch(function_table[func_id].local_vars[param_index].data.type){
+        case DT_CHAR:
+          emitln("  push bl");
+          break;
+        case DT_INT:
+          emitln("  push b");
+          break;
+      }
     param_index++;
   } while(tok == COMMA);
-  
 }
 
 // #########################V#######################################################################
@@ -2020,60 +2021,48 @@ int local_var_exists(char *var_name){
 // ################################################################################################
 // ################################################################################################
 
+t_basic_data get_data_type_from_tok(t_token t){
+  switch(t){
+    case VOID:
+      return DT_VOID;
+    case CHAR:
+      return DT_CHAR;
+    case INT:
+      return DT_INT;
+    case FLOAT:
+      return DT_FLOAT;
+    case DOUBLE:
+      return DT_DOUBLE;
+  }
+}
+
 void declare_local(void){                        
   t_basic_data dt;
   t_var new_var;
-  char ind_level;
-  char constant = 0;
   char *temp_prog;
   
   temp_prog = prog;
   get(); // gets past the data type
-
   if(tok == CONST){
-    constant = 1;
+    new_var.constant = 1;
     get();
   }
-  
-  switch(tok){
-    case VOID:
-      dt = DT_VOID;
-      break;
-    case CHAR:
-      dt = DT_CHAR;
-      break;
-    case INT:
-      dt = DT_INT;
-      break;
-    case FLOAT:
-      dt = DT_FLOAT;
-      break;
-    case DOUBLE:
-      dt = DT_DOUBLE;
-  }
-
+  else new_var.constant = 0;
+  dt = get_data_type_from_tok(tok);
   do{
     if(function_table[current_func_id].local_var_tos == MAX_LOCAL_VARS) error(LOCAL_VAR_LIMIT_REACHED);
-    
     new_var.function_id = current_func_id; // set variable owner function
-
-    // this is used to position local variables correctly relative to BP.
-    // whenever a new function is parsed, this is reset to 0.
-    // then inside the function it can increase according to how many local vars there are.
-    new_var.constant = constant;
-
+    new_var.data.type = dt;
 // **************** checks whether this is a pointer declaration *******************************
-    ind_level = 0;
+    new_var.data.ind_level = 0;
     get();
     while(tok == STAR){
-      ind_level++;
+      new_var.data.ind_level++;
       get();
     }    
 // *********************************************************************************************
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
     if(local_var_exists(token) != -1) error(DUPLICATE_LOCAL_VARIABLE);
-    new_var.data.type = dt;
-    new_var.data.ind_level = ind_level;
     strcpy(new_var.var_name, token);
     get();
 
@@ -2091,28 +2080,22 @@ void declare_local(void){
 			}
       new_var.dims[i] = 0; // sets the last variable dimention to 0, to mark the end of the list
 		}
-
+    // this is used to position local variables correctly relative to BP.
+    // whenever a new function is parsed, this is reset to 0.
+    // then inside the function it can increase according to how many local vars there are.
     prog = temp_prog;
     current_function_var_bp_offset -= get_param_size();
     new_var.bp_offset = current_function_var_bp_offset + 1;
 
     get(); // get '=' or ';'
-
     if(tok == ASSIGNMENT){
       puts("Assignment of local matrices is not possible yet.");
       exit(0);
     }
     else{
-      int ii;
-      for(ii=0;ii<get_total_var_size(&new_var);ii++){
-          emitln("  push byte 'A'");
-      }
-     // sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
-      //emitln(asm_line);
+      sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
+      emitln(asm_line);
     }
-
-    // the indirection level needs to be reset now, because if it not, its value might be changed to the expression ind_level    
-    new_var.data.ind_level = ind_level;
     // assigns the new variable to the local stack
     function_table[current_func_id].local_vars[function_table[current_func_id].local_var_tos] = new_var;    
     function_table[current_func_id].local_var_tos++;
@@ -2439,7 +2422,7 @@ void get(void){
   *t = '\0';
 }
 
-void put(void){
+void back(void){
   char *t = token;
 
   while(*t++) prog--;

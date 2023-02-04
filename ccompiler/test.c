@@ -3,8 +3,9 @@
 
 char cc;
 
+char c1[3];
+
 void main(void) {
-  char c1[3];
 
   f1(c1);
   return;

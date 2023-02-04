@@ -279,7 +279,7 @@ char token[CONST_LEN + 2];            // string token representation
 char string_constant[CONST_LEN + 2];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
 char *prog;                           // pointer to the current program position
 char pbuf[PROG_SIZE];                 // pointer to the beginning of the source code
-char ASM_output[64*1024];             // ASM output 
+char ASM_outback[64*1024];             // ASM outback 
 char *asmp;
 char asm_line[256];
 char includes_list_ASM[1024];         // keeps a list of all included files
@@ -322,7 +322,7 @@ void declare_enum(void);
 void declare_func(void);
 void declare_global(void);
 void declare_local(void);
-void put(void);
+void back(void);
 void emit(char *p);
 void emitln(char *p);
 void emit_var(char *var_name);
@@ -380,7 +380,7 @@ int get_enum_val(char *element_name);
 int enum_element_exists(char *element_name);
 
 
-int is_matrix(char *var_name);
+int is_matrix(t_var *var);
 int get_data_size(t_data *data);
 int matrix_dim_count(t_var *var);
 int get_matrix_offset(char dim, t_var *matrix);
@@ -392,3 +392,4 @@ void try_emitting_var(char *var_name);
 t_var_scope get_var_scope(char *var_name);
 t_var *get_var_by_name(char *var_name);
 int get_param_size(void);
+t_basic_data get_data_type_from_tok(t_token t);
