@@ -1,22 +1,18 @@
 #include "lib/stdio.asm"
 
 
-char c = 'Z';
-int i1 = 2;
-int i2 = 1;
-int i3 = 0;
+char cc;
 
 void main(void) {
-  char matrix[2][2][2];
+  char c1[3];
 
-  print(matrix[i3][i2][i1]);
-
+  f1(c1);
   return;
 }
-
-void print(char c){
+void f1(char c[3]){
+  cc = c[2];
   asm{
-    mov a, ^c
+    mov a, ^cc;
     swp a
     call putchar
   }

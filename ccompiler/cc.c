@@ -309,12 +309,12 @@ void declare_func(void){
   else{
     putback();
     temp_prog = prog;
-    bp_offset = get_total_func_param_size();
+    total_parameter_bytes = get_total_func_param_size();
+    func->total_parameter_size = total_parameter_bytes;
+    bp_offset = 4 + total_parameter_bytes; // +4 to account for pc and bp in the stack
     prog = temp_prog;
 
     do{
-      func->local_vars[func->local_var_tos].is_parameter = 1;
-
       temp_prog = prog;
       get();
       if(tok == CONST){
@@ -323,8 +323,6 @@ void declare_func(void){
       }
       if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) error(VAR_TYPE_EXPECTED);
       
-      // assign the bp offset of this parameter
-      func->local_vars[func->local_var_tos].bp_offset = bp_offset;
 
       // gets the parameter type
       switch(tok){
@@ -350,10 +348,26 @@ void declare_func(void){
       }
       if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
       strcpy(param_name, token); // copy parameter name
+      // checks if this is a matrix declaration
+      get();
+      int i = 0;
+      func->local_vars[func->local_var_tos].dims[0] = 0; // in case its not a matrix, this signals that fact
+      if(tok == OPENING_BRACKET){
+        while(tok == OPENING_BRACKET){
+          get();
+          func->local_vars[func->local_var_tos].dims[i] = atoi(token);
+          get();
+          if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+          get();
+          i++;
+        }
+        func->local_vars[func->local_var_tos].dims[i] = 0; // sets the last variable dimention to 0, to mark the end of the list
+      }
       prog = temp_prog;
       bp_offset -= get_param_size();
+      // assign the bp offset of this parameter
+      func->local_vars[func->local_var_tos].bp_offset = bp_offset + 1;
 
-      get();
       strcpy(func->local_vars[func->local_var_tos].var_name, param_name);
       get();
       func->local_var_tos++;
@@ -430,8 +444,8 @@ int get_param_size(void){
     data_size = 2;
     while(tok == STAR) get();
   }
-  get(); // get past parameter name
 
+  get(); // check for brackets
   if(tok == OPENING_BRACKET){
     while(tok == OPENING_BRACKET){
       get();
@@ -491,33 +505,16 @@ void emit_var(char *var_name){
 
   if(local_var_exists(var_name) != -1){ // is a local variable
     var_id = local_var_exists(var_name);
-    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){ // is a pointer
-      emit("[bp + ");
-      if(function_table[current_func_id].local_vars[var_id].is_parameter)
-        // add +4 below to account for BP and PC offsets which were pushed into the stack
-        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-      else
-        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
+    || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
+      emit("[");
+      get_var_address(temp, var_name);
       emit(temp);
       emit("]");
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
-      emit("[bp + ");
-      if(function_table[current_func_id].local_vars[var_id].is_parameter)
-        // add +4 below to account for BP and PC offsets which were pushed into the stack
-        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
-      else
-        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
-      emit(temp);
-      emit("]");
-    }
-    else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-      emit("[bp + ");
-      if(function_table[current_func_id].local_vars[var_id].is_parameter)
-        // add +4 below to account for BP and PC offsets which were pushed into the stack
-        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-      else
-        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+      emit("[");
+      get_var_address(temp, var_name);
       emit(temp);
       emit("]");
     }
@@ -1194,14 +1191,14 @@ t_basic_data get_var_type(char *var_name){
 // ################################################################################################
 
 void parse_expr(){
-  parse_attrib();
+  parse_assign();
 }
 
 // ################################################################################################
 // ################################################################################################
 // ################################################################################################
 
-void parse_attrib(){
+void parse_assign(){
   char var_name[ID_LEN];
   char temp[ID_LEN];
   char *temp_prog;
@@ -1215,19 +1212,16 @@ void parse_attrib(){
     get();
     if(tok == ASSIGNMENT){
       //emitln("  mov a, 0");
-      parse_attrib();
+      parse_assign();
       if(local_var_exists(var_name) != -1){ // is a local variable
         var_id = local_var_exists(var_name);
-        if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){ // is a pointer
+        if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
+        || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
           emitln("  mov a, b");
           emitln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
                     // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
-          emit("  mov [bp + ");
-          if(function_table[current_func_id].local_vars[var_id].is_parameter)
-            // add +4 below to account for BP and PC offsets which were pushed into the stack
-            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          else
-            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+          emit("  mov [");
+          get_var_address(temp, var_name);
           emit(temp);
           emit("], a");
           emit(" ; ");
@@ -1235,29 +1229,10 @@ void parse_attrib(){
         }
         else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
           emitln("  mov al, bl");
-          emit("  mov [bp + ");
-          if(function_table[current_func_id].local_vars[var_id].is_parameter)
-            // add +4 below to account for BP and PC offsets which were pushed into the stack
-            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
-          else
-            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
+          emit("  mov [");
+          get_var_address(temp, var_name);
           emit(temp);
           emit("], al");
-          emit(" ; ");
-          emitln(var_name);
-        }
-        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-          emitln("  mov a, b");
-          emitln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
-                    // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
-          emit("  mov [bp + ");
-          if(function_table[current_func_id].local_vars[var_id].is_parameter)
-            // add +4 below to account for BP and PC offsets which were pushed into the stack
-            sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          else
-            sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-          emit(temp);
-          emit("], a");
           emit(" ; ");
           emitln(var_name);
         }
@@ -1281,7 +1256,6 @@ void parse_attrib(){
         }
       }
       else error(UNDECLARED_VARIABLE);
-
       return;
     }
   }
@@ -1289,13 +1263,13 @@ void parse_attrib(){
     while(tok != SEMICOLON && tok_type != END){
       get();
       if(tok_type == IDENTIFIER) strcpy(var_name, token); // save var name
-      if(tok == ASSIGNMENT){ // is an attribution statement
+      if(tok == ASSIGNMENT){ // is an assignution statement
         prog = temp_prog; // goes back to the beginning of the expression
         get(); // gets past the first asterisk
         parse_atom();
         emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
         // after evaluating the address expression, the token will be a "="
-        parse_attrib(); // evaluates the value to be attributed to the address, result in 'b'
+        parse_assign(); // evaluates the value to be assignuted to the address, result in 'b'
         switch(get_var_type(var_name)){
           case DT_CHAR:
             emitln("  mov [d], bl");
@@ -1480,13 +1454,11 @@ void parse_atom(void){
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
     if(local_var_exists(token) != -1){ // is a local variable
       var_id = local_var_exists(token);
-      if(function_table[current_func_id].local_vars[var_id].is_parameter)
-        // add +4 below to account for BP and PC offsets which were pushed into the stack
-        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
-      else
-        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
-      emit("  mov b, ");
-      emitln(temp);
+      get_var_address(temp, token);
+      emit("  lea d, [");
+      emit(temp);
+      emitln("]");
+      emitln("  mov b, d");
     }
     else if(global_var_exists(token) != -1){  // is a global variable
       var_id = global_var_exists(token);
@@ -1529,23 +1501,10 @@ void parse_atom(void){
         if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
         // the function's return value is in register B
 
-        // if the first local var is a parameter then the function has defined parameters
-        if(function_table[func_id].local_vars[0].is_parameter){
+        if(function_table[func_id].total_parameter_size > 0){
           // clean stack of the arguments added to it
-          int i, bp_offsetclean = 0;
           char bp_offset_string[10];
-          for(i = 0; function_table[func_id].local_vars[i].is_parameter; i++){
-            if(function_table[func_id].local_vars[i].data.ind_level > 0) bp_offsetclean += 2;
-            else switch(function_table[func_id].local_vars[i].data.type){
-              case DT_CHAR:
-                bp_offsetclean += 1;
-                break;
-              case DT_INT:
-                bp_offsetclean += 2;
-                break;
-            }
-          }
-          sprintf(bp_offset_string, "%i", bp_offsetclean);
+          sprintf(bp_offset_string, "%i", function_table[func_id].total_parameter_size);
           emit("  add sp, ");
           emitln(bp_offset_string);
         }
@@ -1559,10 +1518,6 @@ void parse_atom(void){
 			t_data index;
 			int dims;
 			// if the variable is not a matrix, then it must be a pointer.
-			if(!is_matrix(temp_name)){ 
-				//*v = get_var_value(temp_name);
-				return;
-			}
 			// otherwise, it is a matrix
 			matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
 			data_size = get_data_size(&matrix->data);
@@ -1653,18 +1608,10 @@ void get_var_address(char *dest, char *var_name){
     var_id = local_var_exists(var_name);
     if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
     || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-      if(function_table[current_func_id].local_vars[var_id].is_parameter)
-        // add +4 below to account for BP and PC offsets which were pushed into the stack
-        sprintf(dest, "bp + %d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-      else
-        sprintf(dest, "bp + %d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+      sprintf(dest, "bp + %d", function_table[current_func_id].local_vars[var_id].bp_offset);
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
-      if(function_table[current_func_id].local_vars[var_id].is_parameter)
-        // add +4 below to account for BP and PC offsets which were pushed into the stack
-        sprintf(dest, "bp + %d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
-      else
-        sprintf(dest, "bp + %d", -function_table[current_func_id].local_vars[var_id].bp_offset - get_total_var_size(get_var_by_name(var_name)) + 1);
+      sprintf(dest, "bp + %d", function_table[current_func_id].local_vars[var_id].bp_offset);
     }
   }
   else if(global_var_exists(var_name) != -1){  // is a global variable
@@ -1694,12 +1641,8 @@ void try_emitting_var(char *var_name){
     var_id = local_var_exists(var_name);
     if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
     || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-      emit("  mov b, [bp + ");
-      if(function_table[current_func_id].local_vars[var_id].is_parameter)
-        // add +4 below to account for BP and PC offsets which were pushed into the stack
-        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset - 1);
-      else
-        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset - 1);
+      emit("  mov b, [");
+      get_var_address(temp, var_name);
       emit(temp);
       emit("]");
       emit(" ; ");
@@ -1708,12 +1651,8 @@ void try_emitting_var(char *var_name){
                 // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
-      emit("  mov bl, [bp + ");
-      if(function_table[current_func_id].local_vars[var_id].is_parameter)
-        // add +4 below to account for BP and PC offsets which were pushed into the stack
-        sprintf(temp, "%d", 4 + function_table[current_func_id].local_vars[var_id].bp_offset);
-      else
-        sprintf(temp, "%d", -function_table[current_func_id].local_vars[var_id].bp_offset);
+      emit("  mov bl, [");
+      get_var_address(temp, var_name);
       emit(temp);
       emit("]");
       emit(" ; ");
@@ -2091,7 +2030,9 @@ void declare_local(void){
   t_var new_var;
   char ind_level;
   char constant = 0;
+  char *temp_prog;
   
+  temp_prog = prog;
   get(); // gets past the data type
 
   if(tok == CONST){
@@ -2123,44 +2064,19 @@ void declare_local(void){
 
     // this is used to position local variables correctly relative to BP.
     // whenever a new function is parsed, this is reset to 0.
-    // then inside the function it can increase according to how any local vars there are.
-    new_var.bp_offset = current_function_var_bp_offset;
-    new_var.is_parameter = 0;
+    // then inside the function it can increase according to how many local vars there are.
     new_var.constant = constant;
 
-    // initializes the variable to 0
-    new_var.data.value.c = 0;
-    new_var.data.value.shortint = 0;
-    new_var.data.value.f = 0.0;
-    new_var.data.value.d = 0.0;
-    new_var.data.value.p = 0;
-
-    // gets the variable name
-    get();
 // **************** checks whether this is a pointer declaration *******************************
     ind_level = 0;
+    get();
     while(tok == STAR){
       ind_level++;
       get();
     }    
 // *********************************************************************************************
-    if(ind_level > 0){
-      current_function_var_bp_offset += 2;
-    }
-    else switch(dt){
-      case DT_CHAR:
-        current_function_var_bp_offset += 1;
-        break;
-      case DT_INT:
-        current_function_var_bp_offset += 2;
-        break;
-      default: 
-        current_function_var_bp_offset += 2;
-    }
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
-
     if(local_var_exists(token) != -1) error(DUPLICATE_LOCAL_VARIABLE);
-
     new_var.data.type = dt;
     new_var.data.ind_level = ind_level;
     strcpy(new_var.var_name, token);
@@ -2168,20 +2084,24 @@ void declare_local(void){
 
 		// checks if this is a matrix declaration
 		int i = 0;
-    int expr;
     new_var.dims[0] = 0; // in case its not a matrix, this signals that fact
 		if(tok == OPENING_BRACKET){
 			while(tok == OPENING_BRACKET){
         get();
-        expr = atoi(token);
+				new_var.dims[i] = atoi(token);
         get();
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
-				new_var.dims[i] = expr;
 				get();
 				i++;
 			}
       new_var.dims[i] = 0; // sets the last variable dimention to 0, to mark the end of the list
 		}
+
+    prog = temp_prog;
+    current_function_var_bp_offset -= get_param_size();
+    new_var.bp_offset = current_function_var_bp_offset + 1;
+
+    get(); // get '=' or ';'
 
     if(tok == ASSIGNMENT){
       puts("Assignment of local matrices is not possible yet.");

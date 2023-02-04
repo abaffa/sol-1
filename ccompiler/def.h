@@ -110,7 +110,6 @@ typedef struct {
   char constant;
   char as_string[1024]; // this just saves the initialization string in case the var is a string. it makes it easier for the compiler
   // but is a poor solution that needs fixing later
-  char is_parameter; // is this a parameter variable or a normal local variable?
   int bp_offset; // if var is local, this holds the offset of the var from BP.
   int function_id; // the function does this local var belong to
 } t_var;
@@ -122,6 +121,7 @@ typedef struct {
   char *code_location;
   t_var local_vars[MAX_LOCAL_VARS + 1];
   int local_var_tos;
+  int total_parameter_size;
 } t_user_func;
 t_user_func function_table[MAX_USER_FUNC];
 
@@ -250,7 +250,7 @@ char *error_table[] = {
   "invalid matrix dimension",
   "memory allocation failure",
   "matrix index outside bounds",
-  "invalid matrix attribution",
+  "invalid matrix assignution",
   "matrix expected",
   "unkown library",
   "unknown directive",
@@ -331,7 +331,7 @@ void find_end_of_block(void);
 void find_end_of_case(void);
 
 void parse_expr();
-void parse_attrib();
+void parse_assign();
 void parse_logical();
 void parse_relational(void);
 void parse_terms();
