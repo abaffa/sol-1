@@ -2083,11 +2083,9 @@ void declare_local(void){
     // this is used to position local variables correctly relative to BP.
     // whenever a new function is parsed, this is reset to 0.
     // then inside the function it can increase according to how many local vars there are.
-    prog = temp_prog;
-    current_function_var_bp_offset -= get_param_size();
+    current_function_var_bp_offset -= get_total_var_size(&new_var);
     new_var.bp_offset = current_function_var_bp_offset + 1;
 
-    get(); // get '=' or ';'
     if(tok == ASSIGNMENT){
       puts("Assignment of local matrices is not possible yet.");
       exit(0);

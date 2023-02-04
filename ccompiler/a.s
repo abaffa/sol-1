@@ -6,7 +6,8 @@
 main:
   push bp
   mov bp, sp
-  mov b, c1
+  sub sp, 3 ; c1
+  lea d, [bp + -2] ; c1
   push b
   call f1
   add sp, 2
@@ -34,7 +35,6 @@ f1:
 
 ; --- begin data block
 cc: .fill 1, 0
-c1: .fill 3, 0
 ; --- end data block
 ; --- begin include block
 .include "lib/stdio.asm"
