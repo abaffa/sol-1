@@ -31,6 +31,8 @@ f1:
     swp a
     call putchar
   ; --- end inline asm block
+  leave
+  ret
 ; --- end text block
 
 ; --- begin data block

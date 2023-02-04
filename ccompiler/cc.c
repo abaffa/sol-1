@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
   parse_functions();
   emitln("; --- end text block");
   
-  emit_data();
+  emit_data_section();
   emit_includes();
 
   emitln("\n.end");
@@ -69,7 +69,7 @@ void emit_includes(void){
 // ################################################################################################
 // ################################################################################################
 
-void emit_data(void){
+void emit_data_section(void){
   int i;
   char s_init[1024];
 
@@ -307,7 +307,7 @@ void declare_func(void){
     if(tok == VOID) get();
   }
   else{
-    putback();
+    put();
     temp_prog = prog;
     total_parameter_bytes = get_total_func_param_size();
     func->total_parameter_size = total_parameter_bytes;
@@ -380,7 +380,7 @@ void declare_func(void){
   
   get(); // gets to the "{" token
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
-  putback(); // puts the "{" back so that it can be found by skip_block()
+  put(); // puts the "{" back so that it can be found by skip_block()
 
   //*func->local_vars[func->local_var_tos].var_name = '\0'; // marks the end of the variable list with a null character
   function_table_tos++;
@@ -453,9 +453,9 @@ int get_param_size(void){
       get(); // ']'
       get();
     }
-    putback();
+    put();
   }
-  else putback();
+  else put();
   
   return data_size;
 }
@@ -587,7 +587,7 @@ void parse_for(void){
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   get();
   if(tok != SEMICOLON){
-    putback();
+    put();
     parse_expr();
   }
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
@@ -598,7 +598,7 @@ void parse_for(void){
   // checks for an empty condition, which means always true
   get();
   if(tok != SEMICOLON){
-    putback();
+    put();
     parse_expr();
     if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
   }
@@ -632,7 +632,7 @@ void parse_for(void){
   // checks for an empty update expression
   get();
   if(tok != CLOSING_PAREN){
-    putback();
+    put();
     parse_expr();
   }
     
@@ -744,7 +744,7 @@ int count_cases(void){
   do{
     get();
     if(tok == OPENING_BRACE){
-      putback();
+      put();
       skip_block();
     }
     else if(tok == CASE) nbr_cases++;
@@ -756,11 +756,11 @@ int count_cases(void){
 // ################################################################################################
 // ################################################################################################
 
-void find_end_of_case(void){
+void skip_case(void){
   do{
     get();
     if(tok == OPENING_BRACE){
-      putback();
+      put();
       skip_block();
       get();
     }
@@ -776,7 +776,7 @@ void goto_next_case(void){
   do{
     get();
     if(tok == OPENING_BRACE){
-      putback();
+      put();
       skip_block();
     }
     else if(tok == CASE) nbr_cases++;
@@ -792,7 +792,7 @@ int switch_has_default(void){
   do{
     get();
     if(tok == OPENING_BRACE){
-      putback();
+      put();
       skip_block();
     }
     else if(tok == DEFAULT) return 1;
@@ -851,8 +851,8 @@ void parse_switch(void){
       emitln(asm_line);
       get();
       if(tok != COLON) error(COLON_EXPECTED);
-      find_end_of_case();
-      putback();
+      skip_case();
+      put();
     }
     else if(tok_type == CHAR_CONST){
       emit("  cmp bl, '");
@@ -864,8 +864,8 @@ void parse_switch(void){
       emitln(asm_line);
       get();
       if(tok != COLON) error(COLON_EXPECTED);
-      find_end_of_case();
-      putback();
+      skip_case();
+      put();
     }
     else error(CONSTANT_EXPECTED);
     current_case_nbr++;
@@ -905,7 +905,7 @@ void parse_switch(void){
   get();
   if(tok == DEFAULT){
     get(); // get ':'
-    find_end_of_case();
+    skip_case();
   }
   if(tok != CLOSING_BRACE) error(CLOSING_BRACE_EXPECTED);
 }
@@ -956,7 +956,7 @@ void parse_if(void){
     parse_block();  // parse the positive condition block
   }
   else{
-    putback();
+    put();
   }
   
   sprintf(s_label, "_if%d_exit:", current_label_index_if);
@@ -973,7 +973,7 @@ void parse_if(void){
 void parse_return(void){
   get();
   if(tok != SEMICOLON){
-    putback();
+    put();
     parse_expr();  // return value in register B
   }
   emitln("  leave");
@@ -998,7 +998,7 @@ void parse_case(void){
       case CHAR:
       case FLOAT:
       case DOUBLE:
-        putback();
+        put();
         declare_local();
         break;
       case ASM:
@@ -1025,13 +1025,13 @@ void parse_case(void){
       case CASE:
       case DEFAULT:
       case CLOSING_BRACE:
-        putback();
+        put();
         return;
       case RETURN:
         parse_return();
         break;
       default:
-        putback();
+        put();
         parse_expr();
         if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
     }    
@@ -1052,7 +1052,7 @@ void parse_block(void){
       case CHAR:
       case FLOAT:
       case DOUBLE:
-        putback();
+        put();
         declare_local();
         break;
       case ASM:
@@ -1087,7 +1087,7 @@ void parse_block(void){
         break;
       default:
         if(tok_type == END) error(CLOSING_BRACE_EXPECTED);
-        putback();
+        put();
         parse_expr();
         if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
     }    
@@ -1122,10 +1122,10 @@ void skip_statements(void){
       get();
       if(tok == ELSE) skip_statements();
       else
-        putback();
+        put();
       break;
     case OPENING_BRACE: // if it's a block, then the block is skipped
-      putback();
+      put();
       skip_block();
       break;
     case FOR:
@@ -1140,13 +1140,13 @@ void skip_statements(void){
       if(!*prog) error(CLOSING_PAREN_EXPECTED);
       get();
       if(tok != SEMICOLON){
-        putback();
+        put();
         skip_statements();
       }
       break;
       
     default: // if it's not a keyword, then it must be an expression
-      putback(); // puts the last token back, which might be a ";" token
+      put(); // puts the last token back, which might be a ";" token
       while(*prog++ != ';' && *prog);
       if(!*prog) error(SEMICOLON_EXPECTED);
   }
@@ -1447,7 +1447,7 @@ void parse_atom(void){
     parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
     emitln("  mov b, [d]"); // data fetched as an int. need to improve this to allow any types later.
-    putback();
+    put();
   }
   else if(tok == AMPERSAND){
     get(); // get variable name
@@ -1478,12 +1478,12 @@ void parse_atom(void){
   else if(tok == MINUS){
     parse_atom();
     emitln("  neg b");
-    putback();
+    put();
   }
   else if(tok == BITWISE_NOT){
     parse_atom();
     emitln("  not b");
-    putback();
+    put();
   }
   else if(tok == OPENING_PAREN){
     parse_expr();  // parses expression between parenthesis and result will be in B
@@ -1568,18 +1568,18 @@ void parse_atom(void){
 			  }
 				get();
 				if(tok != OPENING_BRACKET){
-          putback();
+          put();
           break;
         }
 			}
 		}
     else if(enum_element_exists(temp_name) != -1){
-      putback();
+      put();
       sprintf(asm_line, "  mov b, %d; %s", get_enum_val(temp_name), temp_name);
       emit(asm_line);
     }
     else{
-      putback();
+      put();
       try_emitting_var(temp_name);
     }
   }
@@ -1764,7 +1764,7 @@ void parse_function_arguments(int func_id){
   get();
   if(tok == CLOSING_PAREN) return;
 
-  putback();
+  put();
 
   do{
     parse_expr();
@@ -2287,15 +2287,15 @@ void get(void){
     while(isdigit(*prog)) *t++ = *prog++;
     tok_type = INTEGER_CONST;
   }
-  else if(is_idchar(*prog)){
-    while(is_idchar(*prog) || isdigit(*prog))
+  else if(is_id_char(*prog)){
+    while(is_id_char(*prog) || isdigit(*prog))
       *t++ = *prog++;
     *t = '\0';
 
     if((tok = find_keyword(token)) != -1) tok_type = RESERVED;
     else tok_type = IDENTIFIER;
   }
-  else if(isdelim(*prog)){
+  else if(is_delimiter(*prog)){
     tok_type = DELIMITER;  
     
     if(*prog == '#'){
@@ -2439,7 +2439,7 @@ void get(void){
   *t = '\0';
 }
 
-void putback(void){
+void put(void){
   char *t = token;
 
   while(*t++) prog--;
@@ -2499,12 +2499,12 @@ int find_keyword(char *keyword){
 // ################################################################################################
 // ################################################################################################
 
-char isdelim(char c){
+char is_delimiter(char c){
   if(strchr("$#+-*/%[](){}:;,<>=!&|~.", c)) return 1;
   else return 0;
 }
 
-char is_idchar(char c){
+char is_id_char(char c){
   return(isalpha(c) || c == '_');
 }
 

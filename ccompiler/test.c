@@ -9,6 +9,7 @@ void main(void) {
   f1(c1);
   return;
 }
+
 void f1(char c[3]){
   cc = c[2];
   asm{

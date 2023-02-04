@@ -303,8 +303,8 @@ int label_tos_switch = 0;
 t_break_type current_break_type;      // is it a for, while, or switch?
 
 // functions
-char isdelim(char c);
-char is_idchar(char c);
+char is_delimiter(char c);
+char is_id_char(char c);
 int find_keyword(char *keyword);
 int local_var_exists(char *var_name);
 int global_var_exists(char *var_name);
@@ -322,13 +322,13 @@ void declare_enum(void);
 void declare_func(void);
 void declare_global(void);
 void declare_local(void);
-void putback(void);
+void put(void);
 void emit(char *p);
 void emitln(char *p);
 void emit_var(char *var_name);
 void skip_statements(void);
 void skip_block(void);
-void find_end_of_case(void);
+void skip_case(void);
 
 void parse_expr();
 void parse_assign();
@@ -350,7 +350,7 @@ void convert_data(t_data *data_to_convert, t_basic_data into_type);
 t_basic_data get_var_type(char *var_name);
 
 void parse_directive(void);
-void emit_data(void);
+void emit_data_section(void);
 void emit_includes(void);
 
 
