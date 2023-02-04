@@ -251,7 +251,7 @@ void pre_scan(void){
     if(tok == OPENING_PAREN){ //it must be a function declaration
       prog = tp;
       declare_func();
-      find_end_of_BLOCK();
+      skip_block();
     }
     else { //it must be variable declarations
       prog = tp;
@@ -380,7 +380,7 @@ void declare_func(void){
   
   get(); // gets to the "{" token
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
-  putback(); // puts the "{" back so that it can be found by find_end_of_BLOCK()
+  putback(); // puts the "{" back so that it can be found by skip_block()
 
   //*func->local_vars[func->local_var_tos].var_name = '\0'; // marks the end of the variable list with a null character
   function_table_tos++;
@@ -639,7 +639,7 @@ void parse_for(void){
   sprintf(s_label, "  jmp _for%d_cond", current_label_index_for);
   emitln(s_label);
 
-  find_end_of_block();
+  skip_statements();
 
   sprintf(s_label, "_for%d_exit:", current_label_index_for);
   emitln(s_label);
@@ -745,7 +745,7 @@ int count_cases(void){
     get();
     if(tok == OPENING_BRACE){
       putback();
-      find_end_of_BLOCK();
+      skip_block();
     }
     else if(tok == CASE) nbr_cases++;
     else if(tok == CLOSING_BRACE || tok == DEFAULT) return nbr_cases;
@@ -761,7 +761,7 @@ void find_end_of_case(void){
     get();
     if(tok == OPENING_BRACE){
       putback();
-      find_end_of_BLOCK();
+      skip_block();
       get();
     }
   } while(tok != CASE && tok != DEFAULT && tok != CLOSING_BRACE);
@@ -777,7 +777,7 @@ void goto_next_case(void){
     get();
     if(tok == OPENING_BRACE){
       putback();
-      find_end_of_BLOCK();
+      skip_block();
     }
     else if(tok == CASE) nbr_cases++;
     else if(tok == CLOSING_BRACE || tok == DEFAULT) return;
@@ -793,7 +793,7 @@ int switch_has_default(void){
     get();
     if(tok == OPENING_BRACE){
       putback();
-      find_end_of_BLOCK();
+      skip_block();
     }
     else if(tok == DEFAULT) return 1;
     else if(tok == CLOSING_BRACE) return 0;
@@ -932,7 +932,7 @@ void parse_if(void){
   emitln("  cmp b, 0");
   
   temp_p = prog;
-  find_end_of_block(); // skip main IF block in order to check for ELSE block.
+  skip_statements(); // skip main IF block in order to check for ELSE block.
   get();
   if(tok == ELSE){
     sprintf(s_label, "  je _if%d_else_block", current_label_index_if);
@@ -1098,13 +1098,13 @@ void parse_block(void){
 // ################################################################################################
 // ################################################################################################
 
-void find_end_of_block(void){
+void skip_statements(void){
   int paren = 0;
 
   get();
   switch(tok){
     case ASM:
-      find_end_of_block();
+      skip_statements();
       break;
     case IF:
       // skips the conditional expression between parenthesis
@@ -1118,15 +1118,15 @@ void find_end_of_block(void){
       } while(paren && *prog);
       if(!*prog) error(CLOSING_PAREN_EXPECTED);
 
-      find_end_of_block();
+      skip_statements();
       get();
-      if(tok == ELSE) find_end_of_block();
+      if(tok == ELSE) skip_statements();
       else
         putback();
       break;
     case OPENING_BRACE: // if it's a block, then the block is skipped
       putback();
-      find_end_of_BLOCK();
+      skip_block();
       break;
     case FOR:
       get();
@@ -1141,7 +1141,7 @@ void find_end_of_block(void){
       get();
       if(tok != SEMICOLON){
         putback();
-        find_end_of_block();
+        skip_statements();
       }
       break;
       
@@ -1156,7 +1156,7 @@ void find_end_of_block(void){
 // ################################################################################################
 // ################################################################################################
 
-void find_end_of_BLOCK(void){
+void skip_block(void){
   int brace = 0;
   
   do{
@@ -1794,11 +1794,6 @@ int find_global_var(char *var_name){
   return -1;
 }
 
-void putback(void){
-  char *t = token;
-
-  while(*t++) prog--;
-}
 
 // enum my_enum {item1, item2, item3};
 void declare_enum(void){
@@ -2130,7 +2125,7 @@ void declare_local(void){
 // ################################################################################################
 // ################################################################################################
 
-t_var *get__var(char *var_name){
+t_var *get_var(char *var_name){
   register int i;
 
   //check local variables whose function id is the id of current function being parsed
@@ -2442,6 +2437,12 @@ void get(void){
   }
 
   *t = '\0';
+}
+
+void putback(void){
+  char *t = token;
+
+  while(*t++) prog--;
 }
 
 // ################################################################################################
