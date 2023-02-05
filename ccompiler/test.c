@@ -1,7 +1,7 @@
 #include "lib/stdio.asm"
 
-void main(void){
   int i;
+void main(void){
 
   for(i = 0; i < 10; i = i + 1){
     print(i);
