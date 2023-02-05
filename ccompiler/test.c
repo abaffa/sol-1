@@ -2,6 +2,7 @@
 
 void main(void) {
   char c1[2];
+
   f1(c1);
 
   return;
@@ -10,6 +11,7 @@ void main(void) {
 void f1(char c[2]){
   char cc;
   cc = c[0];
+
   asm{
     mov a, ^cc;
     swp a

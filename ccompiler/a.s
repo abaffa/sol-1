@@ -10,6 +10,7 @@ main:
   push byte 'A'
   lea d, [bp + -1] ; c1
   mov b, d
+  swp b
   push b
   call f1
   add sp, 2
@@ -19,11 +20,10 @@ f1:
   push bp
   mov bp, sp
   push byte 'A'
-  mov d, 0
-  mov b, 0
-  add d, b
-  mov b, d
   lea d, [bp + 5]
+  mov a, [d]
+  mov d, a
+  mov b, 0
   add d, b
   mov bl, [d]
   mov al, bl

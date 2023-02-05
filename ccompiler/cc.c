@@ -1503,12 +1503,41 @@ void parse_atom(void){
       int data_size; // matrix data size
 			t_data index;
 			int dims;
-			// if the variable is not a matrix, then it must be a pointer.
-			// otherwise, it is a matrix
 			matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
 			data_size = get_data_size(&matrix->data);
 			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      emitln("  mov d, 0");
+      //emitln("  mov d, 0");
+      get_var_address(var_address_str, temp_name);
+      switch(matrix->data.type){
+        case DT_CHAR:
+          if(get_var_scope(temp_name) == LOCAL){
+            sprintf(asm_line, "  lea d, [%s]", var_address_str);
+            emitln(asm_line);
+            if(matrix->is_parameter){
+              emitln("  mov a, [d]");
+              emitln("  mov d, a");
+            }
+          }
+          else if(get_var_scope(temp_name) == GLOBAL){
+            sprintf(asm_line, "  mov d, %s", var_address_str);
+            emitln(asm_line);
+          }
+          break;
+        case DT_INT:
+          if(get_var_scope(temp_name) == LOCAL){
+            sprintf(asm_line, "  lea d, [%s]", var_address_str);
+            emitln(asm_line);
+            if(matrix->is_parameter){
+              emitln("  mov a, [d]");
+              emitln("  mov d, a");
+            }
+          }
+          else if(get_var_scope(temp_name) == GLOBAL){
+            sprintf(asm_line, "  mov d, %s", var_address_str);
+            emitln(asm_line);
+          }
+          break;
+      }
 			for(i = 0; i < dims; i++){
         parse_expr(); // result in 'b'
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
@@ -1522,32 +1551,11 @@ void parse_atom(void){
         // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
         else if(i == dims - 1){
           emitln("  add d, b");
-          get_var_address(var_address_str, temp_name);
-          switch(matrix -> data.type){
+          switch(matrix->data.type){
             case DT_CHAR:
-              if(get_var_scope(temp_name) == LOCAL){
-                emitln("  mov b, d");
-                sprintf(asm_line, "  lea d, [%s]", var_address_str);
-                emitln(asm_line);
-                emitln("  add d, b");
-              }
-              else if(get_var_scope(temp_name) == GLOBAL){
-                sprintf(asm_line, "  add d, %s", var_address_str);
-                emitln(asm_line);
-              }
               emitln("  mov bl, [d]");
               break;
             case DT_INT:
-              if(get_var_scope(temp_name) == LOCAL){
-                emitln("  mov b, d");
-                sprintf(asm_line, "  lea d, [%s]", var_address_str);
-                emitln(asm_line);
-                emitln("  add d, b");
-              }
-              else if(get_var_scope(temp_name) == GLOBAL){
-                sprintf(asm_line, "  add d, %s", var_address_str);
-                emitln(asm_line);
-              }
               emitln("  mov b, [d]");
               break;
           }
@@ -1771,6 +1779,7 @@ void parse_function_arguments(int func_id){
     parse_expr();
     if(function_table[func_id].local_vars[param_index].data.ind_level > 0
     || is_matrix(&function_table[func_id].local_vars[param_index])){
+      emitln("  swp b");
       emitln("  push b");
     }
     else
@@ -1779,6 +1788,7 @@ void parse_function_arguments(int func_id){
           emitln("  push bl");
           break;
         case DT_INT:
+          emitln("  swp b");
           emitln("  push b");
           break;
       }
