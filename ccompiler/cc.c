@@ -1507,37 +1507,8 @@ void parse_atom(void){
 			data_size = get_data_size(&matrix->data);
 			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
       //emitln("  mov d, 0");
-      get_var_address(var_address_str, temp_name);
-      switch(matrix->data.type){
-        case DT_CHAR:
-          if(get_var_scope(temp_name) == LOCAL){
-            sprintf(asm_line, "  lea d, [%s]", var_address_str);
-            emitln(asm_line);
-            if(matrix->is_parameter){
-              emitln("  mov a, [d]");
-              emitln("  mov d, a");
-            }
-          }
-          else if(get_var_scope(temp_name) == GLOBAL){
-            sprintf(asm_line, "  mov d, %s", var_address_str);
-            emitln(asm_line);
-          }
-          break;
-        case DT_INT:
-          if(get_var_scope(temp_name) == LOCAL){
-            sprintf(asm_line, "  lea d, [%s]", var_address_str);
-            emitln(asm_line);
-            if(matrix->is_parameter){
-              emitln("  mov a, [d]");
-              emitln("  mov d, a");
-            }
-          }
-          else if(get_var_scope(temp_name) == GLOBAL){
-            sprintf(asm_line, "  mov d, %s", var_address_str);
-            emitln(asm_line);
-          }
-          break;
-      }
+      try_emitting_var(temp_name); // emit the base address of the matrix or pointer
+      emitln("  mov d, b");
 			for(i = 0; i < dims; i++){
         parse_expr(); // result in 'b'
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
@@ -1664,6 +1635,7 @@ void try_emitting_var(char *var_name){
         emit(" ; ");
         emitln(var_name);
         emitln("  mov b, d");
+        emitln("  swp b");
       }
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
@@ -1747,9 +1719,8 @@ int get_total_var_size(t_var *var){
 }
 
 int is_matrix(t_var *var){
-
-  if(var->dims > 0) return 1;
-  else return -1;
+  if(var->dims[0]) return 1;
+  else return 0;
 
 /*
 	register int i;

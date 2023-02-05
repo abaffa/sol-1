@@ -1,11 +1,24 @@
 #include "lib/stdio.asm"
 
 void main(void) {
-  char c1[2];
+  int j;
+  j = 55;
+  f2(j);
 
+  asm{
+
+    ; division
+  }
+
+  char c1[2];
   f1(c1);
 
   return;
+}
+
+void f2(int i){
+
+
 }
 
 void f1(char c[2]){

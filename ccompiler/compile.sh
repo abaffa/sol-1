@@ -1,8 +1,5 @@
 #! /usr/bin/bash
 
-echo "Rebuilding: gcc cc.c -o c"
-gcc cc.c -o c
-
 echo "compiling $1 ..."
 
 ./cc $1
