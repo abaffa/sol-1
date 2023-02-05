@@ -6,7 +6,9 @@ gcc cc.c -o c
 echo "compiling $1 ..."
 
 ./cc $1
-echo "assembling a.s ...\n"
+echo "assembling a.s ..."
+echo ""
+
 wine tasm -1 -b a.s
 
 #if [ $# -gt 1 ]; then

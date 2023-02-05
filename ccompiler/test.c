@@ -10,7 +10,7 @@ void main(void) {
 
 void f1(char c[2]){
   char cc;
-  cc = c[0];
+  cc = c[1];
 
   asm{
     mov a, ^cc;

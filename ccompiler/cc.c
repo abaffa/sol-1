@@ -1633,15 +1633,38 @@ void try_emitting_var(char *var_name){
 
   if(local_var_exists(var_name) != -1){ // is a local variable
     var_id = local_var_exists(var_name);
-    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
-    || is_matrix(&function_table[current_func_id].local_vars[var_id])){
+    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){
       emit("  lea d, [");
       get_var_address(temp, var_name);
       emit(temp);
       emit("]");
       emit(" ; ");
       emitln(var_name);
-      emitln("  mov b, d");
+      emitln("  mov b, [d]");
+      emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+                // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
+    }
+    else if(is_matrix(&function_table[current_func_id].local_vars[var_id])){
+      if(function_table[current_func_id].local_vars[var_id].is_parameter){
+        emit("  lea d, [");
+        get_var_address(temp, var_name);
+        emit(temp);
+        emit("]");
+        emit(" ; ");
+        emitln(var_name);
+        emitln("  mov b, [d]");
+        emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+                  // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
+      }
+      else{
+        emit("  lea d, [");
+        get_var_address(temp, var_name);
+        emit(temp);
+        emit("]");
+        emit(" ; ");
+        emitln(var_name);
+        emitln("  mov b, d");
+      }
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emit("  mov b, [");

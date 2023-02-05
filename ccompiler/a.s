@@ -23,7 +23,7 @@ f1:
   lea d, [bp + 5]
   mov a, [d]
   mov d, a
-  mov b, 0
+  mov b, 1
   add d, b
   mov bl, [d]
   mov al, bl
