@@ -9,9 +9,16 @@ main:
   sub sp, 100 ; m
   lea d, [bp + -99] ; m
   mov b, d
-  push b
-  call f1
-  add sp, 2
+  mov d, b
+  mov b, 0
+  mov a, 10
+  mul a, b
+  add d, b
+  mov b, 1
+  add d, b
+  mov bl, 'A'
+  mov bl, al
+  mov [d], al
   leave
   syscall sys_terminate_proc
 f1:

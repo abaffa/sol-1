@@ -468,7 +468,7 @@ void parse_asm(void){
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
   emit("; --- begin inline asm block");
   while(*prog != '}'){
-    if(*prog == '^'){
+    if(*prog == '@'){
       prog++;
       get();
       emit_var(token);
@@ -1237,9 +1237,9 @@ char is_assignment(void){
   do{
     get();
     if(tok == ASSIGNMENT) return 1;
-  } while(tok != END && tok != SEMICOLON);
+  } while(tok_type != END && tok != SEMICOLON);
 
-  if(tok == END) error(SEMICOLON_EXPECTED);
+  if(tok_type == END) error(SEMICOLON_EXPECTED);
   else return 0;
 }
 
@@ -1276,7 +1276,7 @@ void parse_assignment(){
       try_emitting_var(var_name); // emit the base address of the matrix or pointer
       emitln("  mov d, b");
 			for(i = 0; i < dims; i++){
-        parse_expr(); // result in 'b'
+        parse_logical(); // result in 'b'
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
 				// if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
 				if(i < dims - 1){
@@ -1294,19 +1294,24 @@ void parse_assignment(){
           // since we only need the address and not the value at this matrix position.
 			  }
 				get();
-				if(tok != OPENING_BRACKET){
-          back();
-          break;
-        }
+				if(tok != OPENING_BRACKET) break;
 			}
-      // token here should be '='
-      parse_assignment(); // evaluate expression, result in 'b'
-      assign_var(var_name);
+      // we are past the '=' sign here
+      parse_logical(); // evaluate expression, result in 'b'
+      if(matrix->data.ind_level > 0
+      || matrix->data.type == DT_INT){
+        emitln("  mov b, a");
+        emitln("  mov [d], a");
+      }
+      else if(matrix->data.type == DT_CHAR){
+        emitln("  mov bl, al");
+        emitln("  mov [d], al");
+      }
       return;
 		}
     else if(tok == ASSIGNMENT){
       //emitln("  mov a, 0");
-      parse_assignment(); // evaluate expression, result in 'b'
+      parse_logical(); // evaluate expression, result in 'b'
       assign_var(var_name);
       return;
     }
@@ -1321,7 +1326,7 @@ void parse_assignment(){
         parse_atom();
         emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
         // after evaluating the address expression, the token will be a "="
-        parse_assignment(); // evaluates the value to be assigned to the address, result in 'b'
+        parse_logical(); // evaluates the value to be assigned to the address, result in 'b'
         switch(get_var_type(var_name)){
           case DT_CHAR:
             emitln("  mov al, bl");
@@ -2461,6 +2466,10 @@ void get(void){
       *t++ = *prog++;
       tok = CARET;
     }
+    else if(*prog == '@'){
+      *t++ = *prog++;
+      tok = AT;
+    }
     else if(*prog == '#'){
       *t++ = *prog++;
       tok = HASH;
@@ -2567,7 +2576,7 @@ int find_keyword(char *keyword){
 // ################################################################################################
 
 char is_delimiter(char c){
-  if(strchr("$#+-*/%[](){}:;,<>=!&|~.", c)) return 1;
+  if(strchr("@$#+-*/%[](){}:;,<>=!&|~.", c)) return 1;
   else return 0;
 }
 
