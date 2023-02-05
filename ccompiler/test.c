@@ -1,18 +1,15 @@
 #include "lib/stdio.asm"
 
-
-char cc;
-
-
 void main(void) {
-  char c1[3];
+  char c1[2];
   f1(c1);
 
   return;
 }
 
-void f1(char c[3]){
-  cc = c[2];
+void f1(char c[2]){
+  char cc;
+  cc = c[0];
   asm{
     mov a, ^cc;
     swp a
@@ -26,12 +23,9 @@ void f1(char c[3]){
 ARGUMENTS
   char
   char
-  char
+  ptr
   pc
   bp
-  int <<< BP (local variables go here)
-  int
-  int
-  char
+  char << BP (local variables go here)
 
 */

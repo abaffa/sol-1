@@ -298,6 +298,9 @@ void declare_func(void){
     prog = temp_prog;
 
     do{
+      // set as parameter so that we can tell that if a matrix is declared, the argument is also a pointer
+      // even though it may not be declared with any '*' tokens;
+      func->local_vars[func->local_var_tos].is_parameter = 1;
       temp_prog = prog;
       get();
       if(tok == CONST){
@@ -1630,6 +1633,7 @@ void try_emitting_var(char *var_name){
       emit("]");
       emit(" ; ");
       emitln(var_name);
+      emitln("  mov b, d");
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emit("  mov b, [");
@@ -2051,6 +2055,7 @@ void declare_local(void){
   dt = get_data_type_from_tok(tok);
   do{
     if(function_table[current_func_id].local_var_tos == MAX_LOCAL_VARS) error(LOCAL_VAR_LIMIT_REACHED);
+    new_var.is_parameter = 0;
     new_var.function_id = current_func_id; // set variable owner function
     new_var.data.type = dt;
 // **************** checks whether this is a pointer declaration *******************************
@@ -2091,8 +2096,12 @@ void declare_local(void){
       exit(0);
     }
     else{
-      sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
-      emitln(asm_line);
+      int ii;
+      for(ii=0;ii<get_total_var_size(&new_var);ii++){
+          emitln("  push byte 'A'");
+      }
+      //sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
+      //emitln(asm_line);
     }
     // assigns the new variable to the local stack
     function_table[current_func_id].local_vars[function_table[current_func_id].local_var_tos] = new_var;    
@@ -2100,7 +2109,7 @@ void declare_local(void){
   } while(tok == COMMA);
 
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
-}
+} // declare_local
 
 // ################################################################################################
 // ################################################################################################

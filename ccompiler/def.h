@@ -106,6 +106,7 @@ typedef struct {
 typedef struct {
   char var_name[ID_LEN];
   t_data data; // holds the type of data and the value itself
+  char is_parameter;
   int dims[MAX_MATRIX_DIMS + 1];
   char constant;
   char as_string[1024]; // this just saves the initialization string in case the var is a string. it makes it easier for the compiler

@@ -6,8 +6,10 @@
 main:
   push bp
   mov bp, sp
-  sub sp, 3 ; c1
-  lea d, [bp + -2] ; c1
+  push byte 'A'
+  push byte 'A'
+  lea d, [bp + -1] ; c1
+  mov b, d
   push b
   call f1
   add sp, 2
@@ -16,16 +18,18 @@ main:
 f1:
   push bp
   mov bp, sp
+  push byte 'A'
   mov d, 0
-  mov b, 2
+  mov b, 0
   add d, b
   mov b, d
   lea d, [bp + 5]
   add d, b
   mov bl, [d]
-  mov [cc], bl
+  mov al, bl
+  mov [bp + 0], al ; cc
 ; --- begin inline asm block
-    mov a, [cc];
+    mov a, [bp + 0];
     swp a
     call putchar
   ; --- end inline asm block
@@ -34,7 +38,6 @@ f1:
 ; --- end text block
 
 ; --- begin data block
-cc: .fill 1, 0
 ; --- end data block
 ; --- begin include block
 .include "lib/stdio.asm"

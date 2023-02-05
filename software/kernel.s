@@ -2499,8 +2499,8 @@ s_hash:				.db " # ", 0
 file_attrib:		.db "-rw x"			; chars at multiples of 2
 file_type:			.db "-dc"
 s_ps_header:		.db "PID COMMAND\n", 0
-s_host: 			.db "Sol-1:", 0
-s_uname:			.db "Sol-OS\n", 0
+s_host: 			.db "root@Solarium: ", 0
+s_uname:			.db "Solarium\n", 0
 
 s_root:				.db "root\n", 0
 
