@@ -108,14 +108,14 @@ void emit_data_section(void){
       emitln(s_init);
     }
     else if(global_variables[i].data.type == DT_INT){
-      emit(global_variables[i].var_name); // var name
-      emit(": ");
-      // bad code, needs rewriting
-      int j;
+        sprintf(s_init, "%s: .fill %d, 00", global_variables[i].var_name, get_total_var_size(&global_variables[i]));
+        emitln(s_init);
+      // bad code below, needs rewriting
+      /*int j;
       for(j = 0; j < get_total_var_size(&global_variables[i]) / 2; j++){
         sprintf(s_init, ".dw %d", global_variables[i].data.value.shortint);
         emitln(s_init);
-      }
+      }*/
     }
   }
   emitln("; --- end data block");

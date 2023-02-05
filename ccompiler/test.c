@@ -2,10 +2,14 @@
 
 void main(void){
   char m[10][10];
+  int i, j;
 
-  m[0][1] = 'A';
-  int i;
-  if(i<=255){}
+  for(i = 0; i < 10; i++){
+    for(j = 0; j < 10; j++){
+      m[i][j] = 'A';
+    }
+
+  }
 
   return;
 }
