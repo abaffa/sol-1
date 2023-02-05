@@ -394,3 +394,4 @@ t_var_scope get_var_scope(char *var_name);
 t_var *get_var_by_name(char *var_name);
 int get_param_size(void);
 t_basic_data get_data_type_from_tok(t_token t);
+void assign_var(char *var_name);

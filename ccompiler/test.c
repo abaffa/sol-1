@@ -1,17 +1,20 @@
 #include "lib/stdio.asm"
 
 void main(void){
-  char c1[10];
-  char *p;
-  p = c1;
   int i;
 
   for(i = 0; i < 10; i = i + 1){
-    *p = 'A'+i;
+    print(i);
   }
-  
-  
-  f1(p);
+
+  return;
+}
+
+void print(int i){
+  asm{
+    mov a, ^i
+    call print_u16d
+  }
 
   return;
 }

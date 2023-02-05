@@ -6,21 +6,14 @@
 main:
   push bp
   mov bp, sp
-  sub sp, 10 ; c1
-  sub sp, 2 ; p
-  lea d, [bp + -9] ; c1
-  mov b, d
-  mov a, b
-  swp a
-  mov [bp + -11], a ; p
   sub sp, 2 ; i
 _for1_init:
   mov b, 0
   mov a, b
   swp a
-  mov [bp + -13], a ; i
+  mov [bp + -1], a ; i
 _for1_cond:
-  mov b, [bp + -13] ; i
+  mov b, [bp + -1] ; i
   swp b
   push a
   mov a, b
@@ -34,22 +27,13 @@ _for1_cond:
   cmp b, 0
   je _for1_exit
 _for1_block:
-  lea d, [bp + -11] ; p
-  mov b, [d]
+  mov b, [bp + -1] ; i
   swp b
-  mov d, b
-  mov bl, 'A'
-  push a
-  mov a, b
-  mov b, [bp + -13] ; i
-  swp b
-  add a, b
-  mov b, a
-  pop a
-  mov al, bl
-  mov [d], al
+  push b
+  call print
+  add sp, 2
 _for1_update:
-  mov b, [bp + -13] ; i
+  mov b, [bp + -1] ; i
   swp b
   push a
   mov a, b
@@ -59,17 +43,20 @@ _for1_update:
   pop a
   mov a, b
   swp a
-  mov [bp + -13], a ; i
+  mov [bp + -1], a ; i
   jmp _for1_cond
 _for1_exit:
-  lea d, [bp + -11] ; p
-  mov b, [d]
-  swp b
-  push b
-  call f1
-  add sp, 2
   leave
   syscall sys_terminate_proc
+print:
+  push bp
+  mov bp, sp
+; --- begin inline asm block
+    mov a, [bp + 5]
+    call print_u16d
+  ; --- end inline asm block
+  leave
+  ret
 f1:
   push bp
   mov bp, sp

@@ -1184,6 +1184,55 @@ void parse_expr(){
 // ################################################################################################
 // ################################################################################################
 
+void assign_var(char *var_name){
+  int var_id;
+  char temp[ID_LEN];
+
+  if(local_var_exists(var_name) != -1){ // is a local variable
+    var_id = local_var_exists(var_name);
+    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
+    || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
+      emitln("  mov a, b");
+      emitln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+                // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
+      emit("  mov [");
+      get_var_address(temp, var_name);
+      emit(temp);
+      emit("], a");
+      emit(" ; ");
+      emitln(var_name);
+    }
+    else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
+      emitln("  mov al, bl");
+      emit("  mov [");
+      get_var_address(temp, var_name);
+      emit(temp);
+      emit("], al");
+      emit(" ; ");
+      emitln(var_name);
+    }
+  }
+  else if(global_var_exists(var_name) != -1){  // is a global variable
+    var_id = global_var_exists(var_name);
+    if(global_variables[var_id].data.ind_level > 0){ // is a pointer
+      emit("  mov [");
+      emit(global_variables[var_id].var_name);
+      emitln("], b");
+    }
+    else if(global_variables[var_id].data.type == DT_CHAR){
+        emit("  mov [");
+        emit(global_variables[var_id].var_name);
+        emitln("], bl");
+    }
+    else if(global_variables[var_id].data.type == DT_INT){
+        emit("  mov [");
+        emit(global_variables[var_id].var_name);
+        emitln("], b");
+    }
+  }
+  else error(UNDECLARED_VARIABLE);
+}
+
 void parse_assign(){
   char var_name[ID_LEN];
   char temp[ID_LEN];
@@ -1198,50 +1247,8 @@ void parse_assign(){
     get();
     if(tok == ASSIGNMENT){
       //emitln("  mov a, 0");
-      parse_assign();
-      if(local_var_exists(var_name) != -1){ // is a local variable
-        var_id = local_var_exists(var_name);
-        if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
-        || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
-          emitln("  mov a, b");
-          emitln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
-                    // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
-          emit("  mov [");
-          get_var_address(temp, var_name);
-          emit(temp);
-          emit("], a");
-          emit(" ; ");
-          emitln(var_name);
-        }
-        else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
-          emitln("  mov al, bl");
-          emit("  mov [");
-          get_var_address(temp, var_name);
-          emit(temp);
-          emit("], al");
-          emit(" ; ");
-          emitln(var_name);
-        }
-      }
-      else if(global_var_exists(var_name) != -1){  // is a global variable
-        var_id = global_var_exists(var_name);
-        if(global_variables[var_id].data.ind_level > 0){ // is a pointer
-          emit("  mov [");
-          emit(global_variables[var_id].var_name);
-          emitln("], b");
-        }
-        else if(global_variables[var_id].data.type == DT_CHAR){
-            emit("  mov [");
-            emit(global_variables[var_id].var_name);
-            emitln("], bl");
-        }
-        else if(global_variables[var_id].data.type == DT_INT){
-            emit("  mov [");
-            emit(global_variables[var_id].var_name);
-            emitln("], b");
-        }
-      }
-      else error(UNDECLARED_VARIABLE);
+      parse_assign(); // evaluate expression, result in 'b'
+      assign_var(var_name);
       return;
     }
   }
@@ -1249,7 +1256,7 @@ void parse_assign(){
     while(tok != SEMICOLON && tok_type != END){
       get();
       if(tok_type == IDENTIFIER) strcpy(var_name, token); // save var name
-      if(tok == ASSIGNMENT){ // is an assignution statement
+      if(tok == ASSIGNMENT){ // is an assignemnt
         prog = temp_prog; // goes back to the beginning of the expression
         get(); // gets past the first asterisk
         parse_atom();
@@ -1480,7 +1487,17 @@ void parse_atom(void){
   else if(tok_type == IDENTIFIER){
     strcpy(temp_name, token);
     get();
-    if(tok == OPENING_PAREN){ // function call      
+    if(tok == INCREMENT){ 
+      try_emitting_var(temp_name);
+      emitln("  inc b");
+      assign_var(temp_name);
+    }    
+    else if(tok == DECREMENT){ 
+      try_emitting_var(temp_name);
+      emitln("  dec b");
+      assign_var(temp_name);
+    }    
+    else if(tok == OPENING_PAREN){ // function call      
       func_id = find_function(temp_name);
       if(func_id != -1){
         parse_function_arguments(func_id);
