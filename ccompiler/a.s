@@ -3493,6 +3493,7 @@ p: .dw 0
 runlimit: .dw 0
 ; --- end data block
 ; --- begin include block
+.include "lib/stdio.asm"
 ; --- end include block
 
 .end

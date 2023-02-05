@@ -1,5 +1,7 @@
-/*
 #include "lib/stdio.asm"
+
+/*
+
 
 int readint() {
   int n;
