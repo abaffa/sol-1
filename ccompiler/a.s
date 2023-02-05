@@ -35,12 +35,7 @@ _for1_block:
 _for1_update:
   mov b, [bp + -1] ; i
   swp b
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
+  inc b
   mov a, b
   swp a
   mov [bp + -1], a ; i
