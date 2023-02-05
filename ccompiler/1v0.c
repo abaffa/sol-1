@@ -7,7 +7,7 @@ int readint() {
   int n;
   asm{
        call scan_u16d
-       mov ^n, a
+       mov @n, a
   }
   return n;
 }
@@ -15,7 +15,7 @@ int readint() {
 
 void displaynumber(int nmbr) {
   asm{
-    mov a, ^n
+    mov a, @n
     swp a ; swap to make up for stack weirdness
     call print_u16d
 
