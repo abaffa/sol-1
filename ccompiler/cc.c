@@ -1255,13 +1255,15 @@ void parse_assign(){
         parse_atom();
         emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
         // after evaluating the address expression, the token will be a "="
-        parse_assign(); // evaluates the value to be assignuted to the address, result in 'b'
+        parse_assign(); // evaluates the value to be assigned to the address, result in 'b'
         switch(get_var_type(var_name)){
           case DT_CHAR:
-            emitln("  mov [d], bl");
+            emitln("  mov al, bl");
+            emitln("  mov [d], al");
             break;
           case DT_INT:
-            emitln("  mov [d], b");
+            emitln("  mov a, b");
+            emitln("  mov [d], a");
             break;
           default: error(INVALID_POINTER);
         }
@@ -1746,7 +1748,7 @@ int is_matrix(t_var *var){
 int matrix_dim_count(t_var *var){
 	int i;
 	
-	for(i = 0; var -> dims[i]; i++);
+	for(i = 0; var->dims[i]; i++);
 	
 	return i;
 }
@@ -2097,12 +2099,13 @@ void declare_local(void){
       exit(0);
     }
     else{
+      /*
       int ii;
       for(ii=0;ii<get_total_var_size(&new_var);ii++){
           emitln("  push byte 'A'");
-      }
-      //sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
-      //emitln(asm_line);
+      }*/
+      sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
+      emitln(asm_line);
     }
     // assigns the new variable to the local stack
     function_table[current_func_id].local_vars[function_table[current_func_id].local_var_tos] = new_var;    

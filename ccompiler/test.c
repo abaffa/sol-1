@@ -1,15 +1,22 @@
 #include "lib/stdio.asm"
 
-void main(void) {
-  char c1[2];
+void main(void){
+  char c1[10];
   char *p;
   p = c1;
+  int i;
+
+  for(i = 0; i < 10; i = i + 1){
+    *p = 'A'+i;
+  }
+  
+  
   f1(p);
 
   return;
 }
 
-void f1(char c[2]){
+void f1(char c[10]){
   char cc;
 
   cc = c[1];

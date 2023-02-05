@@ -6,16 +6,63 @@
 main:
   push bp
   mov bp, sp
-  push byte 'A'
-  push byte 'A'
-  push byte 'A'
-  push byte 'A'
-  lea d, [bp + -1] ; c1
+  sub sp, 10 ; c1
+  sub sp, 2 ; p
+  lea d, [bp + -9] ; c1
   mov b, d
   mov a, b
   swp a
-  mov [bp + -3], a ; p
-  lea d, [bp + -3] ; p
+  mov [bp + -11], a ; p
+  sub sp, 2 ; i
+_for1_init:
+  mov b, 0
+  mov a, b
+  swp a
+  mov [bp + -13], a ; i
+_for1_cond:
+  mov b, [bp + -13] ; i
+  swp b
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000010
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for1_exit
+_for1_block:
+  lea d, [bp + -11] ; p
+  mov b, [d]
+  swp b
+  mov d, b
+  mov bl, 'A'
+  push a
+  mov a, b
+  mov b, [bp + -13] ; i
+  swp b
+  add a, b
+  mov b, a
+  pop a
+  mov al, bl
+  mov [d], al
+_for1_update:
+  mov b, [bp + -13] ; i
+  swp b
+  push a
+  mov a, b
+  mov b, 1
+  add a, b
+  mov b, a
+  pop a
+  mov a, b
+  swp a
+  mov [bp + -13], a ; i
+  jmp _for1_cond
+_for1_exit:
+  lea d, [bp + -11] ; p
   mov b, [d]
   swp b
   push b
@@ -26,7 +73,7 @@ main:
 f1:
   push bp
   mov bp, sp
-  push byte 'A'
+  sub sp, 1 ; cc
   lea d, [bp + 5] ; c
   mov b, [d]
   swp b
