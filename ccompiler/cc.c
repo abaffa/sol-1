@@ -1143,17 +1143,28 @@ void skip_statements(void){
 // ################################################################################################
 
 void skip_block(void){
-  int brace = 0;
+  int braces = 0;
   
   do{
-    if(*prog == '{') brace++;
-    else if(*prog == '}') brace--;
-    prog++;
-  } while(brace && *prog);
+    get();
+    if(tok == OPENING_BRACE) braces++;
+    else if(tok == CLOSING_BRACE) braces--;
+  } while(braces && tok_type != END);
 
-  if(brace && !*prog) error(CLOSING_BRACE_EXPECTED);
+  if(braces && tok_type == END) error(CLOSING_BRACE_EXPECTED);
 }
 
+void skip_matrix_bracket(void){
+  int brackets = 0;
+  
+  do{
+    get();
+    if(tok == OPENING_BRACKET) brackets++;
+    else if(tok == CLOSING_BRACKET) brackets--;
+  } while(brackets && tok_type != END);
+
+  if(brackets && tok_type == END) error(CLOSING_BRACKET_EXPECTED);
+}
 // ################################################################################################
 // ################################################################################################
 // ################################################################################################
@@ -1234,10 +1245,19 @@ void assign_var(char *var_name){
 }
 
 char is_assignment(void){
+  get();
+  if(tok_type != IDENTIFIER){
+    return 0;
+  }
+
   do{
     get();
     if(tok == ASSIGNMENT) return 1;
-  } while(tok_type != END && tok != SEMICOLON);
+    if(tok == OPENING_BRACKET){
+      back();
+      skip_matrix_bracket();
+    }
+  } while(tok_type != END && tok != SEMICOLON && tok != CLOSING_PAREN);
 
   if(tok_type == END) error(SEMICOLON_EXPECTED);
   else return 0;
@@ -1256,7 +1276,6 @@ void parse_assignment(){
     parse_logical();
     return;
   }
-
   // is assignment
   prog = temp_prog;
   get();

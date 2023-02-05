@@ -396,3 +396,4 @@ int get_param_size(void);
 t_basic_data get_data_type_from_tok(t_token t);
 void assign_var(char *var_name);
 char is_assignment(void);
+void skip_matrix_bracket(void);

@@ -4,6 +4,8 @@ void main(void){
   char m[10][10];
 
   m[0][1] = 'A';
+  int i;
+  if(i<=255){}
 
   return;
 }
