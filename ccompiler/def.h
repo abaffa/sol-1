@@ -332,7 +332,7 @@ void skip_block(void);
 void skip_case(void);
 
 void parse_expr();
-void parse_assign();
+void parse_assignment();
 void parse_logical();
 void parse_relational(void);
 void parse_terms();
@@ -388,10 +388,11 @@ int get_matrix_offset(char dim, t_var *matrix);
 t_var *get_var_pointer(char *var_name);
 int get_total_var_size(t_var *var);
 
-void get_var_address(char *dest, char *var_name);
+void get_var_base_addr(char *dest, char *var_name);
 void try_emitting_var(char *var_name);
 t_var_scope get_var_scope(char *var_name);
 t_var *get_var_by_name(char *var_name);
 int get_param_size(void);
 t_basic_data get_data_type_from_tok(t_token t);
 void assign_var(char *var_name);
+char is_assignment(void);

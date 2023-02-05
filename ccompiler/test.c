@@ -1,28 +1,17 @@
 #include "lib/stdio.asm"
 
 void main(void){
-  int i;
+  char m[10][10];
 
-  for(i = 0; i < 10; i++){
-    print(i);
-  }
+  m[0][0] = 'A';
 
   return;
 }
 
-void print(int i){
-  asm{
-    mov a, ^i
-    call print_u16d
-  }
-
-  return;
-}
-
-void f1(char c[10]){
+void f1(char c[10][10]){
   char cc;
 
-  cc = c[1];
+  cc = c[1][0];
   asm{
     mov a, ^cc;
     swp a

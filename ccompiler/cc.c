@@ -494,13 +494,13 @@ void emit_var(char *var_name){
     if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
     || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emit("[");
-      get_var_address(temp, var_name);
+      get_var_base_addr(temp, var_name);
       emit(temp);
       emit("]");
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
       emit("[");
-      get_var_address(temp, var_name);
+      get_var_base_addr(temp, var_name);
       emit(temp);
       emit("]");
     }
@@ -1177,7 +1177,7 @@ t_basic_data get_var_type(char *var_name){
 // ################################################################################################
 
 void parse_expr(){
-  parse_assign();
+  parse_assignment();
 }
 
 // ################################################################################################
@@ -1196,7 +1196,7 @@ void assign_var(char *var_name){
       emitln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
                 // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
       emit("  mov [");
-      get_var_address(temp, var_name);
+      get_var_base_addr(temp, var_name);
       emit(temp);
       emit("], a");
       emit(" ; ");
@@ -1205,7 +1205,7 @@ void assign_var(char *var_name){
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
       emitln("  mov al, bl");
       emit("  mov [");
-      get_var_address(temp, var_name);
+      get_var_base_addr(temp, var_name);
       emit(temp);
       emit("], al");
       emit(" ; ");
@@ -1233,7 +1233,17 @@ void assign_var(char *var_name){
   else error(UNDECLARED_VARIABLE);
 }
 
-void parse_assign(){
+char is_assignment(void){
+  do{
+    get();
+    if(tok == ASSIGNMENT) return 1;
+  } while(tok != END && tok != SEMICOLON);
+
+  if(tok == END) error(SEMICOLON_EXPECTED);
+  else return 0;
+}
+
+void parse_assignment(){
   char var_name[ID_LEN];
   char temp[ID_LEN];
   char *temp_prog;
@@ -1241,13 +1251,62 @@ void parse_assign(){
 
   temp_prog = prog;
 
+  if(!is_assignment()){ 
+    prog = temp_prog;
+    parse_logical();
+    return;
+  }
+
+  // is assignment
+  prog = temp_prog;
   get();
   if(tok_type == IDENTIFIER){
     strcpy(var_name, token);
     get();
-    if(tok == ASSIGNMENT){
+    if(tok == OPENING_BRACKET){ // matrix operations
+			t_var *matrix; // pointer to the matrix variable
+			int i;
+      int data_size; // matrix data size
+			t_data index;
+			int dims;
+			matrix = get_var_pointer(var_name); // gets a pointer to the variable holding the matrix address
+			data_size = get_data_size(&matrix->data);
+			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
+      //emitln("  mov d, 0");
+      try_emitting_var(var_name); // emit the base address of the matrix or pointer
+      emitln("  mov d, b");
+			for(i = 0; i < dims; i++){
+        parse_expr(); // result in 'b'
+				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+				// if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
+				if(i < dims - 1){
+          sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix) * data_size);
+          emitln(asm_line);
+          emitln("  mul a, b");
+          emitln("  add d, b");
+        }
+        // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
+        else if(i == dims - 1){
+          emitln("  add d, b");
+          // here we have the final address of the referenced matrix item.
+          // the code is similar to the matrix handling code in parse_atom,
+          // except that the corresponding section which would be hereis deleted
+          // since we only need the address and not the value at this matrix position.
+			  }
+				get();
+				if(tok != OPENING_BRACKET){
+          back();
+          break;
+        }
+			}
+      // token here should be '='
+      parse_assignment(); // evaluate expression, result in 'b'
+      assign_var(var_name);
+      return;
+		}
+    else if(tok == ASSIGNMENT){
       //emitln("  mov a, 0");
-      parse_assign(); // evaluate expression, result in 'b'
+      parse_assignment(); // evaluate expression, result in 'b'
       assign_var(var_name);
       return;
     }
@@ -1262,7 +1321,7 @@ void parse_assign(){
         parse_atom();
         emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
         // after evaluating the address expression, the token will be a "="
-        parse_assign(); // evaluates the value to be assigned to the address, result in 'b'
+        parse_assignment(); // evaluates the value to be assigned to the address, result in 'b'
         switch(get_var_type(var_name)){
           case DT_CHAR:
             emitln("  mov al, bl");
@@ -1278,9 +1337,6 @@ void parse_assign(){
       }
     }
   }
-  
-  prog = temp_prog;
-  parse_logical();
 }
 
 // ################################################################################################
@@ -1449,7 +1505,7 @@ void parse_atom(void){
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
     if(local_var_exists(token) != -1){ // is a local variable
       var_id = local_var_exists(token);
-      get_var_address(temp, token);
+      get_var_base_addr(temp, token);
       emit("  lea d, [");
       emit(temp);
       emitln("]");
@@ -1585,7 +1641,7 @@ t_var_scope get_var_scope(char *var_name){
   return -1;
 }
 
-void get_var_address(char *dest, char *var_name){
+void get_var_base_addr(char *dest, char *var_name){
   int var_id;
 
   if(local_var_exists(var_name) != -1){ // is a local variable
@@ -1625,7 +1681,7 @@ void try_emitting_var(char *var_name){
     var_id = local_var_exists(var_name);
     if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){
       emit("  lea d, [");
-      get_var_address(temp, var_name);
+      get_var_base_addr(temp, var_name);
       emit(temp);
       emit("]");
       emit(" ; ");
@@ -1637,7 +1693,7 @@ void try_emitting_var(char *var_name){
     else if(is_matrix(&function_table[current_func_id].local_vars[var_id])){
       if(function_table[current_func_id].local_vars[var_id].is_parameter){
         emit("  lea d, [");
-        get_var_address(temp, var_name);
+        get_var_base_addr(temp, var_name);
         emit(temp);
         emit("]");
         emit(" ; ");
@@ -1648,7 +1704,7 @@ void try_emitting_var(char *var_name){
       }
       else{
         emit("  lea d, [");
-        get_var_address(temp, var_name);
+        get_var_base_addr(temp, var_name);
         emit(temp);
         emit("]");
         emit(" ; ");
@@ -1658,7 +1714,7 @@ void try_emitting_var(char *var_name){
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emit("  mov b, [");
-      get_var_address(temp, var_name);
+      get_var_base_addr(temp, var_name);
       emit(temp);
       emit("]");
       emit(" ; ");
@@ -1668,7 +1724,7 @@ void try_emitting_var(char *var_name){
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
       emit("  mov bl, [");
-      get_var_address(temp, var_name);
+      get_var_base_addr(temp, var_name);
       emit(temp);
       emit("]");
       emit(" ; ");
