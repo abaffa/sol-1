@@ -1635,7 +1635,6 @@ void try_emitting_var(char *var_name){
         emit(" ; ");
         emitln(var_name);
         emitln("  mov b, d");
-        emitln("  swp b");
       }
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
@@ -1773,7 +1772,6 @@ void parse_function_arguments(int func_id){
     parse_expr();
     if(function_table[func_id].local_vars[param_index].data.ind_level > 0
     || is_matrix(&function_table[func_id].local_vars[param_index])){
-      emitln("  swp b");
       emitln("  push b");
     }
     else
@@ -1782,7 +1780,6 @@ void parse_function_arguments(int func_id){
           emitln("  push bl");
           break;
         case DT_INT:
-          emitln("  swp b");
           emitln("  push b");
           break;
       }
