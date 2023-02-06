@@ -1251,7 +1251,7 @@ void assign_var(char *var_name){
 
 char is_assignment(void){
   get();
-  if(tok_type != IDENTIFIER){
+  if(tok_type != IDENTIFIER || tok != STAR){
     return 0;
   }
 
