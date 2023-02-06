@@ -1251,7 +1251,7 @@ void assign_var(char *var_name){
 
 char is_assignment(void){
   get();
-  if(tok_type != IDENTIFIER || tok != STAR){
+  if(tok_type != IDENTIFIER){
     return 0;
   }
 
@@ -1328,7 +1328,7 @@ void parse_assignment(){
         emitln("  mov [d], a");
       }
       else if(matrix->data.type == DT_CHAR){
-        emitln("  mov bl, al");
+        emitln("  mov al, bl");
         emitln("  mov [d], al");
       }
       return;
