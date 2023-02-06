@@ -326,7 +326,7 @@ void declare_local(void);
 void back(void);
 void emit(char *p);
 void emitln(char *p);
-void emit_var(char *var_name);
+void emit_c_var(char *var_name);
 void skip_statements(void);
 void skip_block(void);
 void skip_case(void);

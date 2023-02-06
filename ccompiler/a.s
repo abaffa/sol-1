@@ -83,6 +83,15 @@ _for1_update:
 _for1_exit:
   leave
   syscall sys_terminate_proc
+_puts:
+  push bp
+  mov bp, sp
+; --- begin inline asm block
+    mov a, [bp + 5]
+    mov d, a
+    swp a
+    call puts
+  ; --- end inline asm block
 f1:
   push bp
   mov bp, sp

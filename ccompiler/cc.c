@@ -471,7 +471,7 @@ void parse_asm(void){
     if(*prog == '@'){
       prog++;
       get();
-      emit_var(token);
+      emit_c_var(token);
     }
     else{
       *asmp++ = *prog++;
@@ -485,14 +485,19 @@ void parse_asm(void){
 // ################################################################################################
 // ################################################################################################
 
-void emit_var(char *var_name){
+void emit_c_var(char *var_name){
   int var_id;
   char temp[256];
 
   if(local_var_exists(var_name) != -1){ // is a local variable
     var_id = local_var_exists(var_name);
-    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
-    || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
+    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){
+      emit("[");
+      get_var_base_addr(temp, var_name);
+      emit(temp);
+      emit("]");
+    }
+    else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emit("[");
       get_var_base_addr(temp, var_name);
       emit(temp);

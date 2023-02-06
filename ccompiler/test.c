@@ -5,13 +5,22 @@ void main(void){
   int i, j;
 
   for(i = 0; i < 10; i++){
-    for(j = 0; j < 10; j++){
+    for(j = 1; j < 10; j++){
       m[i][j] = 'A';
     }
 
   }
 
   return;
+}
+
+void _puts(char *string){
+  asm{
+    mov a, @string
+    mov d, a
+    swp a
+    call puts
+  }
 }
 
 void f1(char c[10][10]){

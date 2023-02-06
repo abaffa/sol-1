@@ -1,5 +1,6 @@
 #! /usr/bin/bash
 
+gcc ./cc.c -o cc
 echo "compiling $1 ..."
 
 ./cc $1
