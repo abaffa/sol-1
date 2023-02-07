@@ -1296,7 +1296,6 @@ void parse_assignment(){
 			matrix = get_var_pointer(var_name); // gets a pointer to the variable holding the matrix address
 			data_size = get_data_size(&matrix->data);
 			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      //emitln("  mov d, 0");
       try_emitting_var(var_name); // emit the base address of the matrix or pointer
       emitln("  mov d, b");
 			for(i = 0; i < dims; i++){
@@ -1311,6 +1310,11 @@ void parse_assignment(){
         }
         // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
         else if(i == dims - 1){
+          // need to do this to get the correct data size in the last index
+          // not ideal, but ok for now
+          sprintf(asm_line, "  mov a, %d", data_size);
+          emitln(asm_line);
+          emitln("  mul a, b");           
           emitln("  add d, b");
           // here we have the final address of the referenced matrix item.
           // the code is similar to the matrix handling code in parse_atom,
@@ -1322,9 +1326,9 @@ void parse_assignment(){
 			}
       // we are past the '=' sign here
       parse_logical(); // evaluate expression, result in 'b'
-      if(matrix->data.ind_level > 0
-      || matrix->data.type == DT_INT){
-        emitln("  mov b, a");
+      if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
+        emitln("  mov a, b");
+        if(get_var_scope(var_name) == LOCAL) emitln("  swp a");
         emitln("  mov [d], a");
       }
       else if(matrix->data.type == DT_CHAR){
@@ -1616,11 +1620,19 @@ void parse_atom(void){
   if(tok == SIZEOF){
     get();
     expect(OPENING_PAREN, OPENING_PAREN_EXPECTED);
-    parse_atom();
-    emitln("  neg b");
-    back();
+    get();
+    switch(tok){
+      case CHAR:
+        emitln("  mov b, 1");
+        break;
+      case INT:
+        emitln("  mov b, 2");
+        break;
+    }
+    get();
+    expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
   }
-  if(tok == STAR){ // is a pointer operator
+  else if(tok == STAR){ // is a pointer operator
     parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
     emitln("  mov b, [d]"); // data fetched as an int. need to improve this to allow any types later.
@@ -1722,13 +1734,20 @@ void parse_atom(void){
         }
         // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
         else if(i == dims - 1){
+          sprintf(asm_line, "  mov a, %d", data_size);
+          emitln(asm_line);
+          emitln("  mul a, b");           
           emitln("  add d, b");
           switch(matrix->data.type){
             case DT_CHAR:
               emitln("  mov bl, [d]");
               break;
             case DT_INT:
-              emitln("  mov b, [d]");
+              if(get_var_scope(temp_name) == LOCAL){
+                emitln("  mov b, [d]");
+                emitln("  swp b");
+              }
+              else emitln("  mov b, [d]");
               break;
           }
 			  }

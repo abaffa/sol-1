@@ -6,46 +6,36 @@
 main:
   push bp
   mov bp, sp
-  sub sp, 2 ; i
-  mov b, 1
-  push a
-  mov a, b
-  mov b, 3
-  mov c, b
-  mov b, a
-  shl b, cl
-  pop a
+  sub sp, 4 ; i
+  lea d, [bp + -3] ; i
+  mov b, d
+  mov d, b
+  mov b, 0
+  mov a, 2
+  mul a, b
+  add d, b
+  mov b, 2
   mov a, b
   swp a
-  mov [bp + -1], a ; i
+  mov [d], a
+  lea d, [bp + -3] ; i
+  mov b, d
+  mov d, b
+  mov b, 1
+  mov a, 2
+  mul a, b
+  add d, b
+  mov b, 1
+  mov a, b
+  swp a
+  mov [d], a
 ; --- begin inline asm block
-    mov a, [bp + -1]
+    mov a, [bp + -3]
     swp a
     call print_u16d
   ; --- end inline asm block
   leave
   syscall sys_terminate_proc
-_puts:
-  push bp
-  mov bp, sp
-; --- begin inline asm block
-    mov a, [bp + 5]
-    mov d, a
-    swp a
-    call puts
-  ; --- end inline asm block
-  leave
-  ret
-f1:
-  push bp
-  mov bp, sp
-; --- begin inline asm block
-    mov al, [bp + 5];
-    mov ah, al
-    call putchar
-  ; --- end inline asm block
-  leave
-  ret
 ; --- end text block
 
 ; --- begin data block

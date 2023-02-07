@@ -1,9 +1,10 @@
 #include "lib/stdio.asm"
 
 void main(void){
-  int i;
+  int i[2];
 
-  i = 1 << 3;
+  i[0] = sizeof(int);
+  i[1] = sizeof(char);
 
   asm{
     mov a, @i
@@ -14,26 +15,6 @@ void main(void){
   return;
 }
 
-void _puts(char *string){
-  asm{
-    mov a, @string
-    mov d, a
-    swp a
-    call puts
-  }
-
-  return;
-}
-
-void f1(char c){
-  asm{
-    mov al, @c;
-    mov ah, al
-    call putchar
-  }
-
-  return;
-}
 
 /*
 
