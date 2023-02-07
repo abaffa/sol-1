@@ -1613,6 +1613,13 @@ void parse_atom(void){
   char enum_value_str[32];
 
   get();
+  if(tok == SIZEOF){
+    get();
+    expect(OPENING_PAREN, OPENING_PAREN_EXPECTED);
+    parse_atom();
+    emitln("  neg b");
+    back();
+  }
   if(tok == STAR){ // is a pointer operator
     parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
@@ -2329,7 +2336,11 @@ t_var *get_var(char *var_name){
 // ################################################################################################
 // ################################################################################################
 
-void error(_ERROR e){
+void expect(t_token _tok, t_errorCode errorCode){
+  if(tok != _tok) error(errorCode);
+}
+
+void error(t_errorCode e){
   int line = 1;
   char *t = pbuf;
 

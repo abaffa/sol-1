@@ -210,7 +210,7 @@ typedef enum {
   EXCEEDED_MAX_ENUM_DECL,
   UNDECLARED_ENUM_ELEMENT,
   UNDECLARED_IDENTIFIER
-} _ERROR;
+} t_errorCode;
 
 // variable declaration
 char *error_table[] = {
@@ -318,7 +318,7 @@ void pre_scan(void);
 
 void get_line(void);
 void get(void);
-void error(_ERROR e);
+void error(t_errorCode e);
 void declare_enum(void);
 void declare_func(void);
 void declare_global(void);
@@ -403,3 +403,6 @@ t_basic_data get_data_type_from_tok(t_token t);
 void assign_var(char *var_name);
 char is_assignment(void);
 void skip_matrix_bracket(void);
+
+
+void expect(t_token _tok, t_errorCode errorCode);
