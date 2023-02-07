@@ -6,104 +6,23 @@
 main:
   push bp
   mov bp, sp
-  sub sp, 100 ; m
   sub sp, 2 ; i
-  sub sp, 2 ; j
-_for1_init:
-  mov b, 0
-  mov a, b
-  swp a
-  mov [bp + -101], a ; i
-_for1_cond:
-  mov b, [bp + -101] ; i
-  swp b
+  mov b, 1
   push a
   mov a, b
-  mov b, 10
-  cmp a, b
-  lodflgs
-  and al, %00000010
-  mov ah, 0
+  mov b, 3
+  mov c, b
   mov b, a
+  shl b, cl
   pop a
-  cmp b, 0
-  je _for1_exit
-_for1_block:
-_for2_init:
-  mov b, 0
   mov a, b
   swp a
-  mov [bp + -103], a ; j
-_for2_cond:
-  mov b, [bp + -103] ; j
-  swp b
-  push a
-  mov a, b
-  mov b, 10
-  cmp a, b
-  lodflgs
-  and al, %00000010
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for2_exit
-_for2_block:
-  lea d, [bp + -99] ; m
-  mov b, d
-  mov d, b
-  mov b, [bp + -101] ; i
-  swp b
-  mov a, 10
-  mul a, b
-  add d, b
-  mov b, [bp + -103] ; j
-  swp b
-  add d, b
-  mov bl, 'A'
-  push a
-  mov a, b
-  mov b, [bp + -103] ; j
-  swp b
-  add a, b
-  mov b, a
-  pop a
-  mov al, bl
-  mov [d], al
-; --- begin inline asm block; --- end inline asm block
-  lea d, [bp + -99] ; m
-  mov b, d
-  mov d, b
-  mov b, [bp + -101] ; i
-  swp b
-  mov a, 10
-  mul a, b
-  add d, b
-  mov b, [bp + -103] ; j
-  swp b
-  add d, b
-  mov bl, [d]
-  push bl
-  call f1
-  add sp, 1
-_for2_update:
-  mov b, [bp + -103] ; j
-  swp b
-  inc b
-  mov a, b
-  swp a
-  mov [bp + -103], a ; j
-  jmp _for2_cond
-_for2_exit:
-_for1_update:
-  mov b, [bp + -101] ; i
-  swp b
-  inc b
-  mov a, b
-  swp a
-  mov [bp + -101], a ; i
-  jmp _for1_cond
-_for1_exit:
+  mov [bp + -1], a ; i
+; --- begin inline asm block
+    mov a, [bp + -1]
+    swp a
+    call print_u16d
+  ; --- end inline asm block
   leave
   syscall sys_terminate_proc
 _puts:

@@ -1,17 +1,15 @@
 #include "lib/stdio.asm"
 
 void main(void){
-  char m[10][10];
-  int i, j;
+  int i;
 
-  for(i = 0; i < 10; i++){
-    for(j = 0; j < 10; j++){
-      m[i][j] = 'A' + j;
-      asm{}
-      f1(m[i][j]);
-    }
+  i = 1 << 3;
+
+  asm{
+    mov a, @i
+    swp a
+    call print_u16d
   }
-
 
   return;
 }
@@ -23,11 +21,11 @@ void _puts(char *string){
     swp a
     call puts
   }
+
   return;
 }
 
 void f1(char c){
-
   asm{
     mov al, @c;
     mov ah, al

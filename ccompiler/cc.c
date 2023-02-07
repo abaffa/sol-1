@@ -1373,10 +1373,42 @@ void parse_assignment(){
 // ################################################################################################
 
 void parse_logical(void){
+  parse_logical_or();
+}
+
+void parse_logical_or(void){
+  char temp_tok;
+
+  parse_logical_and();
+  while(tok == LOGICAL_OR){
+    temp_tok = tok;
+    emitln("  push a");
+    emitln("  mov a, b");
+    parse_logical_and();
+    emitln("  cmp b, 0");
+    emitln("  push a");
+    emitln("  lodflgs");
+    emitln("  mov b, a");
+    emitln("  pop a");
+    emitln("  not bl");  
+    emitln("  and bl, %00000001"); // isolate ZF only. 
+    emitln("  mov bh, 0");
+    emitln("  cmp a, 0");
+    emitln("  lodflgs");
+    emitln("  not al");  
+    emitln("  and al, %00000001"); // isolate ZF only. 
+    emitln("  mov ah, 0");
+    emitln("  and a, b");
+    emitln("  mov b, a");
+    emitln("  pop a");
+  }
+}
+
+void parse_logical_and(void){
   char temp_tok;
 
   parse_relational();
-  while(tok == LOGICAL_AND || tok == LOGICAL_OR){
+  while(tok == LOGICAL_AND){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
@@ -1394,9 +1426,50 @@ void parse_logical(void){
     emitln("  not al");  
     emitln("  and al, %00000001"); // isolate ZF only. 
     emitln("  mov ah, 0");
-    if(temp_tok == LOGICAL_AND) emitln("  and a, b");
-    else emitln("  or a, b");
+    emitln("  or a, b");
     emitln("  mov b, a");
+    emitln("  pop a");
+  }
+}
+
+void parse_bitwise_or(void){
+  char temp_tok;
+
+  parse_bitwise_xor();
+  while(tok == BITWISE_OR){
+    temp_tok = tok;
+    emitln("  push a");
+    emitln("  mov a, b");
+    parse_bitwise_xor();
+    emitln("  or b, a");
+    emitln("  pop a");
+  }
+}
+
+void parse_bitwise_xor(void){
+  char temp_tok;
+
+  parse_bitwise_and();
+  while(tok == BITWISE_XOR){
+    temp_tok = tok;
+    emitln("  push a");
+    emitln("  mov a, b");
+    parse_bitwise_and();
+    emitln("  xor b, a");
+    emitln("  pop a");
+  }
+}
+
+void parse_bitwise_and(void){
+  char temp_tok;
+
+  parse_relational();
+  while(tok == BITWISE_AND){
+    temp_tok = tok;
+    emitln("  push a");
+    emitln("  mov a, b");
+    parse_relational();
+    emitln("  and b, a");
     emitln("  pop a");
   }
 }
@@ -1409,13 +1482,13 @@ void parse_relational(void){
   char temp_tok;
 
 /* x = y > 1 && z<4 && y == 2 */
-  parse_terms();
+  parse_bitwise_shift();
   while(tok == EQUAL || tok == NOT_EQUAL || tok == LESS_THAN || tok == LESS_THAN_OR_EQUAL
     || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
-    parse_terms();
+    parse_bitwise_shift();
     switch(temp_tok){
       case EQUAL:
         emitln("  cmp a, b");
@@ -1457,6 +1530,23 @@ void parse_relational(void){
         break;
     }
     emitln("  mov b, a");
+    emitln("  pop a");
+  }
+}
+
+void parse_bitwise_shift(void){
+  char temp_tok;
+
+  parse_terms();
+  while(tok == BITWISE_SHL || tok == BITWISE_SHR){
+    temp_tok = tok;
+    emitln("  push a");
+    emitln("  mov a, b");
+    parse_terms();
+    emitln("  mov c, b");
+    emitln("  mov b, a");
+    if(temp_tok == BITWISE_SHL) emitln("  shl b, cl");
+    else if(temp_tok == BITWISE_SHR) emitln("  shr b, cl");
     emitln("  pop a");
   }
 }
@@ -2448,6 +2538,10 @@ void get(void){
         *t++ = *prog++;
         tok = LESS_THAN_OR_EQUAL;
       }
+      else if (*prog == '<'){
+        *t++ = *prog++;
+        tok = BITWISE_SHL;
+      }
       else tok = LESS_THAN;
     }
     else if(*prog == '>'){
@@ -2455,6 +2549,10 @@ void get(void){
       if (*prog == '='){
         *t++ = *prog++;
         tok = GREATER_THAN_OR_EQUAL;
+      }
+      else if (*prog == '>'){
+        *t++ = *prog++;
+        tok = BITWISE_SHR;
       }
       else tok = GREATER_THAN;
     }

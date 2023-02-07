@@ -27,7 +27,7 @@ typedef enum {
   LOGICAL_AND, LOGICAL_OR, LOGICAL_NOT,
   ASSIGNMENT, DOLLAR, HASH, CARET, AT,
   
-  BITWISE_AND, AMPERSAND = BITWISE_AND, BITWISE_OR, BITWISE_NOT, BITWISE_SL, BITWISE_SR,
+  BITWISE_AND, AMPERSAND = BITWISE_AND, BITWISE_XOR, BITWISE_OR, BITWISE_NOT, BITWISE_SHL, BITWISE_SHR,
   
   OPENING_PAREN, CLOSING_PAREN,
   OPENING_BRACE, CLOSING_BRACE,
@@ -333,8 +333,14 @@ void skip_case(void);
 
 void parse_expr();
 void parse_assignment();
-void parse_logical();
+void parse_logical(void);
+void parse_logical_and(void);
+void parse_logical_or(void);
+void parse_bitwise_and(void);
+void parse_bitwise_or(void);
+void parse_bitwise_xor(void);
 void parse_relational(void);
+void parse_bitwise_shift(void);
 void parse_terms();
 void parse_factors();
 void parse_atom();
