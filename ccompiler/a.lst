@@ -21,854 +21,903 @@
 0006   0400             main:
 0007   0400 D2            push bp
 0008   0401 9B            mov bp, sp
-0009   0402             _for1_init:
-0010   0402 26 00 00      mov b, 0
-0011   0405 FD 42 5A 04   mov [i], b
-0012   0409             _for1_cond:
-0013   0409 26 01 00      mov b, 1
-0014   040C C0 00 00      cmp b, 0
-0015   040F C6 32 04      je _for1_exit
-0016   0412             _for1_block:
-0017   0412             ; --- begin inline asm block
-0018   0412 14 58 04          mov a, [s]
-0019   0415 3C                mov d, a
-0020   0416 07 A4 06          call puts
-0021   0419             
-0022   0419 14 5A 04          mov a, [i]
-0023   041C 07 CD 06          call print_u16d
-0024   041F             
-0025   041F 14 5E 04          mov a, [NL]
-0026   0422 3C                mov d, a
-0027   0423 07 A4 06          call puts
-0028   0426                 ; --- end inline asm block
-0029   0426             _for1_update:
-0030   0426 29 5A 04      mov b, [i]
-0031   0429 FD 77         inc b
-0032   042B FD 42 5A 04   mov [i], b
-0033   042F 0A 09 04      jmp _for1_cond
-0034   0432             _for1_exit:
-0035   0432 F9            leave
-0036   0433 05 0B         syscall sys_terminate_proc
-0037   0435             ; --- end text block
-0038   0435             
-0039   0435             ; --- begin data block
-0040   0435 42 61 66 66 s_data: .db "Baffa Emulator is the best!!! >>> ", 0
-0040   0439 61 20 45 6D 
-0040   043D 75 6C 61 74 
-0040   0441 6F 72 20 69 
-0040   0445 73 20 74 68 
-0040   0449 65 20 62 65 
-0040   044D 73 74 21 21 
-0040   0451 21 20 3E 3E 
-0040   0455 3E 20 00 
-0041   0458 35 04       s: .dw s_data
-0042   045A 00 00       i: .fill 2, 00
-0043   045C 0A 00       NL_data: .db "\n", 0
-0044   045E 5C 04       NL: .dw NL_data
-0045   0460             ; --- end data block
-0046   0460             ; --- begin include block
-0047   0460             .include "lib/stdio.asm"
-0001+  0460             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0002+  0460             ; stdio.s
-0003+  0460             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0004+  0460             .include "lib/string.asm"
-0001++ 0460             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0002++ 0460             ; string.s
-0003++ 0460             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0004++ 0460             
-0005++ 0460             
-0006++ 0460             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0007++ 0460             ; strrev
-0008++ 0460             ; reverse a string
-0009++ 0460             ; D = string address
-0010++ 0460             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0011++ 0460             ; 01234
-0012++ 0460             strrev:
-0013++ 0460 4B          	pusha
-0014++ 0461 07 A7 04    	call strlen	; length in C
-0015++ 0464 12          	mov a, c
-0016++ 0465 AF 01 00    	cmp a, 1
-0017++ 0468 D0 82 04    	jleu strrev_end	; check string length. string len must be > 1
-0018++ 046B 7D          	dec a
-0019++ 046C FD 4E       	mov si, d	; beginning of string
-0020++ 046E FD 50       	mov di, d	; beginning of string (for destinations)
-0021++ 0470 59          	add d, a	; end of string
-0022++ 0471 12          	mov a, c
-0023++ 0472 FD 9B       	shr a		; divide by 2
-0024++ 0474 39          	mov c, a	; C now counts the steps
-0025++ 0475             strrev_L0:
-0026++ 0475 32          	mov bl, [d]	; save load right-side char into BL
-0027++ 0476 F6          	lodsb		; load left-side char into AL; increase SI
-0028++ 0477 3E          	mov [d], al	; store left char into right side
-0029++ 0478 1B          	mov al, bl
-0030++ 0479 F7          	stosb		; store right-side char into left-side; increase DI
-0031++ 047A 7E          	dec c
-0032++ 047B 7F          	dec d
-0033++ 047C C2 00 00    	cmp c, 0
-0034++ 047F C7 75 04    	jne strrev_L0
-0035++ 0482             strrev_end:
-0036++ 0482 4C          	popa
-0037++ 0483 09          	ret
-0038++ 0484             	
-0039++ 0484             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0040++ 0484             ; strchr
-0041++ 0484             ; search string in D for char in AL
-0042++ 0484             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0043++ 0484             strchr:
-0044++ 0484             strchr_L0:
-0045++ 0484 32          	mov bl, [d]
-0046++ 0485 C1 00       	cmp bl, 0
-0047++ 0487 C6 92 04    	je strchr_end
-0048++ 048A BA          	cmp al, bl
-0049++ 048B C6 92 04    	je strchr_end
-0050++ 048E 79          	inc d
-0051++ 048F 0A 84 04    	jmp strchr_L0
-0052++ 0492             strchr_end:
-0053++ 0492 1B          	mov al, bl
-0054++ 0493 09          	ret
-0055++ 0494             
-0056++ 0494             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0057++ 0494             ; strstr
-0058++ 0494             ; find sub-string
-0059++ 0494             ; str1 in SI
-0060++ 0494             ; str2 in DI
-0061++ 0494             ; SI points to end of source string
-0062++ 0494             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0063++ 0494             strstr:
-0064++ 0494 DB          	push al
-0065++ 0495 DA          	push d
-0066++ 0496 E3          	push di
-0067++ 0497             strstr_loop:
-0068++ 0497 F3          	cmpsb					; compare a byte of the strings
-0069++ 0498 C7 A3 04    	jne strstr_ret
-0070++ 049B FC 00 00    	lea d, [di + 0]
-0071++ 049E BD 00       	cmp byte[d], 0				; check if at end of string (null)
-0072++ 04A0 C7 97 04    	jne strstr_loop				; equal chars but not at end
-0073++ 04A3             strstr_ret:
-0074++ 04A3 F0          	pop di
-0075++ 04A4 E7          	pop d
-0076++ 04A5 E8          	pop al
-0077++ 04A6 09          	ret
-0078++ 04A7             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0079++ 04A7             ; length of null terminated string
-0080++ 04A7             ; result in C
-0081++ 04A7             ; pointer in D
-0082++ 04A7             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0083++ 04A7             strlen:
-0084++ 04A7 DA          	push d
-0085++ 04A8 38 00 00    	mov c, 0
-0086++ 04AB             strlen_L1:
-0087++ 04AB BD 00       	cmp byte [d], 0
-0088++ 04AD C6 B5 04    	je strlen_ret
-0089++ 04B0 79          	inc d
-0090++ 04B1 78          	inc c
-0091++ 04B2 0A AB 04    	jmp strlen_L1
-0092++ 04B5             strlen_ret:
-0093++ 04B5 E7          	pop d
-0094++ 04B6 09          	ret
-0095++ 04B7             
-0096++ 04B7             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0097++ 04B7             ; STRCMP
-0098++ 04B7             ; compare two strings
-0099++ 04B7             ; str1 in SI
-0100++ 04B7             ; str2 in DI
-0101++ 04B7             ; CREATE A STRING COMPAIRON INSTRUCION ?????
-0102++ 04B7             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0103++ 04B7             strcmp:
-0104++ 04B7 DB          	push al
-0105++ 04B8 DA          	push d
-0106++ 04B9 E3          	push di
-0107++ 04BA E2          	push si
-0108++ 04BB             strcmp_loop:
-0109++ 04BB F3          	cmpsb					; compare a byte of the strings
-0110++ 04BC C7 C7 04    	jne strcmp_ret
-0111++ 04BF FB FF FF    	lea d, [si +- 1]
-0112++ 04C2 BD 00       	cmp byte[d], 0				; check if at end of string (null)
-0113++ 04C4 C7 BB 04    	jne strcmp_loop				; equal chars but not at end
-0114++ 04C7             strcmp_ret:
-0115++ 04C7 EF          	pop si
-0116++ 04C8 F0          	pop di
-0117++ 04C9 E7          	pop d
-0118++ 04CA E8          	pop al
-0119++ 04CB 09          	ret
-0120++ 04CC             
-0121++ 04CC             
-0122++ 04CC             ; STRCPY
-0123++ 04CC             ; copy null terminated string from SI to DI
-0124++ 04CC             ; source in SI
-0125++ 04CC             ; destination in DI
-0126++ 04CC             strcpy:
-0127++ 04CC E2          	push si
-0128++ 04CD E3          	push di
-0129++ 04CE DB          	push al
-0130++ 04CF             strcpy_L1:
-0131++ 04CF F6          	lodsb
-0132++ 04D0 F7          	stosb
-0133++ 04D1 B9 00       	cmp al, 0
-0134++ 04D3 C7 CF 04    	jne strcpy_L1
-0135++ 04D6             strcpy_end:
-0136++ 04D6 E8          	pop al
-0137++ 04D7 F0          	pop di
-0138++ 04D8 EF          	pop si
-0139++ 04D9 09          	ret
-0140++ 04DA             
-0141++ 04DA             ; STRCAT
-0142++ 04DA             ; concatenate a NULL terminated string into string at DI, from string at SI
-0143++ 04DA             ; source in SI
-0144++ 04DA             ; destination in DI
-0145++ 04DA             strcat:
-0146++ 04DA E2          	push si
-0147++ 04DB E3          	push di
-0148++ 04DC D7          	push a
-0149++ 04DD DA          	push d
-0150++ 04DE 50          	mov a, di
-0151++ 04DF 3C          	mov d, a
-0152++ 04E0             strcat_goto_end_L1:
-0153++ 04E0 BD 00       	cmp byte[d], 0
-0154++ 04E2 C6 E9 04    	je strcat_start
-0155++ 04E5 79          	inc d
-0156++ 04E6 0A E0 04    	jmp strcat_goto_end_L1
-0157++ 04E9             strcat_start:
-0158++ 04E9 FD 50       	mov di, d
-0159++ 04EB             strcat_L1:
-0160++ 04EB F6          	lodsb
-0161++ 04EC F7          	stosb
-0162++ 04ED B9 00       	cmp al, 0
-0163++ 04EF C7 EB 04    	jne strcat_L1
-0164++ 04F2             strcat_end:
-0165++ 04F2 E7          	pop d
-0166++ 04F3 E4          	pop a
-0167++ 04F4 F0          	pop di
-0168++ 04F5 EF          	pop si
-0169++ 04F6 09          	ret
-0005+  04F7             
-0006+  04F7 30 31 32 33 s_hex_digits:	.db "0123456789ABCDEF"	
-0006+  04FB 34 35 36 37 
-0006+  04FF 38 39 41 42 
-0006+  0503 43 44 45 46 
-0007+  0507             
-0008+  0507 01 00       table_power:.dw 1
-0009+  0509 0A 00       			.dw 10
-0010+  050B 64 00       			.dw 100
-0011+  050D E8 03       			.dw 1000
-0012+  050F 10 27       			.dw 10000
-0013+  0511             
-0014+  0511             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0015+  0511             ; CONVERT ASCII 'O'..'F' TO INTEGER 0..15
-0016+  0511             ; ASCII in BL
-0017+  0511             ; result in AL
-0018+  0511             ; ascii for F = 0100 0110
-0019+  0511             ; ascii for 9 = 0011 1001
-0020+  0511             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0021+  0511             hex_ascii_encode:
-0022+  0511 1B          	mov al, bl
-0023+  0512 93 40       	test al, $40				; test if letter or number
-0024+  0514 C7 1A 05    	jnz hex_letter
-0025+  0517 87 0F       	and al, $0F				; get number
-0026+  0519 09          	ret
-0027+  051A             hex_letter:
-0028+  051A 87 0F       	and al, $0F				; get letter
-0029+  051C 6A 09       	add al, 9
-0030+  051E 09          	ret
-0031+  051F             
-0032+  051F             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0033+  051F             ; ATOI
-0034+  051F             ; 2 letter hex string in B
-0035+  051F             ; 8bit integer returned in AL
-0036+  051F             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0037+  051F             atoi:
-0038+  051F D8          	push b
-0039+  0520 07 11 05    	call hex_ascii_encode			; convert BL to 4bit code in AL
-0040+  0523 30          	mov bl, bh
-0041+  0524 DB          	push al					; save a
-0042+  0525 07 11 05    	call hex_ascii_encode
-0043+  0528 EA          	pop bl	
-0044+  0529 FD 9E 04    	shl al, 4
-0045+  052C 8C          	or al, bl
-0046+  052D E5          	pop b
-0047+  052E 09          	ret	
-0048+  052F             
-0049+  052F             
-0050+  052F             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0051+  052F             ; printf
-0052+  052F             ; no need for explanations!
-0053+  052F             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0054+  052F             printf:
-0055+  052F 09          	ret
-0056+  0530             
-0057+  0530             
-0058+  0530             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0059+  0530             ; scanf
-0060+  0530             ; no need for explanations!
-0061+  0530             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0062+  0530             scanf:
-0063+  0530 09          	ret
-0064+  0531             
-0065+  0531             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0066+  0531             ; ITOA
-0067+  0531             ; 8bit value in BL
-0068+  0531             ; 2 byte ASCII result in A
-0069+  0531             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0070+  0531             itoa:
-0071+  0531 DA          	push d
-0072+  0532 D8          	push b
-0073+  0533 A7 00       	mov bh, 0
-0074+  0535 FD A4 04    	shr bl, 4	
-0075+  0538 74          	mov d, b
-0076+  0539 1F F7 04    	mov al, [d + s_hex_digits]
-0077+  053C 23          	mov ah, al
-0078+  053D             	
-0079+  053D E5          	pop b
-0080+  053E D8          	push b
-0081+  053F A7 00       	mov bh, 0
-0082+  0541 FD 87 0F    	and bl, $0F
-0083+  0544 74          	mov d, b
-0084+  0545 1F F7 04    	mov al, [d + s_hex_digits]
-0085+  0548 E5          	pop b
-0086+  0549 E7          	pop d
-0087+  054A 09          	ret
-0088+  054B             
-0089+  054B             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0090+  054B             ; HEX STRING TO BINARY
-0091+  054B             ; di = destination address
-0092+  054B             ; si = source
-0093+  054B             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0094+  054B             hex_to_int:
-0095+  054B             hex_to_int_L1:
-0096+  054B F6          	lodsb					; load from [SI] to AL
-0097+  054C B9 00       	cmp al, 0				; check if ASCII 0
-0098+  054E C6 5B 05    	jz hex_to_int_ret
-0099+  0551 36          	mov bh, al
-0100+  0552 F6          	lodsb
-0101+  0553 2F          	mov bl, al
-0102+  0554 07 1F 05    	call atoi				; convert ASCII byte in B to int (to AL)
-0103+  0557 F7          	stosb					; store AL to [DI]
-0104+  0558 0A 4B 05    	jmp hex_to_int_L1
-0105+  055B             hex_to_int_ret:
-0106+  055B 09          	ret		
-0107+  055C             
-0108+  055C             
-0109+  055C             
-0110+  055C             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0111+  055C             ; GETCHAR
-0112+  055C             ; char in ah
-0113+  055C             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0114+  055C             getchar:
-0115+  055C DB          	push al
-0116+  055D             getchar_retry:
-0117+  055D FD 0C       	sti
-0118+  055F 19 01       	mov al, 1
-0119+  0561 05 03       	syscall sys_io			; receive in AH
-0120+  0563 B9 00       	cmp al, 0			; check if any char was receive
-0121+  0565 C6 5D 05    	je getchar_retry
-0122+  0568 E8          	pop al
-0123+  0569 09          	ret
-0124+  056A             
-0125+  056A             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0126+  056A             ; PUTCHAR
-0127+  056A             ; char in ah
-0128+  056A             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0129+  056A             putchar:
-0130+  056A D7          	push a
-0131+  056B 19 00       	mov al, 0
-0132+  056D 05 03       	syscall sys_io			; char in AH
-0133+  056F E4          	pop a
-0134+  0570 09          	ret
-0135+  0571             
-0136+  0571             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0137+  0571             ;; INPUT A STRING
-0138+  0571             ;; terminates with null
-0139+  0571             ;; pointer in D
-0140+  0571             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0141+  0571             gets:
-0142+  0571 D7          	push a
-0143+  0572 DA          	push d
-0144+  0573             gets_loop:
-0145+  0573 FD 0C       	sti
-0146+  0575 19 01       	mov al, 1
-0147+  0577 05 03       	syscall sys_io			; receive in AH
-0148+  0579 B9 00       	cmp al, 0				; check error code (AL)
-0149+  057B C6 73 05    	je gets_loop			; if no char received, retry
-0150+  057E             
-0151+  057E 76 1B       	cmp ah, 27
-0152+  0580 C6 A1 05    	je gets_telnet_escape
-0153+  0583 76 0A       	cmp ah, $0A				; LF
-0154+  0585 C6 FA 05    	je gets_end
-0155+  0588 76 0D       	cmp ah, $0D				; CR
-0156+  058A C6 FA 05    	je gets_end
-0157+  058D 76 5C       	cmp ah, $5C				; '\\'
-0158+  058F C6 D1 05    	je gets_escape
-0159+  0592             	
-0160+  0592 76 08       	cmp ah, $08			; check for backspace
-0161+  0594 C6 9D 05    	je gets_backspace
-0162+  0597             
-0163+  0597 1A          	mov al, ah
-0164+  0598 3E          	mov [d], al
-0165+  0599 79          	inc d
-0166+  059A 0A 73 05    	jmp gets_loop
-0167+  059D             gets_backspace:
-0168+  059D 7F          	dec d
-0169+  059E 0A 73 05    	jmp gets_loop
-0170+  05A1             gets_telnet_escape:
-0171+  05A1 FD 0C       	sti
-0172+  05A3 19 01       	mov al, 1
-0173+  05A5 05 03       	syscall sys_io				; receive in AH without echo
-0174+  05A7 B9 00       	cmp al, 0					; check error code (AL)
-0175+  05A9 C6 A1 05    	je gets_telnet_escape		; if no char received, retry
-0176+  05AC 76 5B       	cmp ah, '['
-0177+  05AE C7 73 05    	jne gets_loop
-0178+  05B1             gets_telnet_escape_phase2:
-0179+  05B1 FD 0C       	sti
-0180+  05B3 19 01       	mov al, 1
-0181+  05B5 05 03       	syscall sys_io					; receive in AH without echo
-0182+  05B7 B9 00       	cmp al, 0						; check error code (AL)
-0183+  05B9 C6 B1 05    	je gets_telnet_escape_phase2	; if no char received, retry
-0184+  05BC 76 44       	cmp ah, 'D'
-0185+  05BE C6 C9 05    	je gets_left_arrow
-0186+  05C1 76 43       	cmp ah, 'C'
-0187+  05C3 C6 CD 05    	je gets_right_arrow
-0188+  05C6 0A 73 05    	jmp gets_loop
-0189+  05C9             gets_left_arrow:
-0190+  05C9 7F          	dec d
-0191+  05CA 0A 73 05    	jmp gets_loop
-0192+  05CD             gets_right_arrow:
-0193+  05CD 79          	inc d
-0194+  05CE 0A 73 05    	jmp gets_loop
-0195+  05D1             gets_escape:
-0196+  05D1 FD 0C       	sti
-0197+  05D3 19 01       	mov al, 1
-0198+  05D5 05 03       	syscall sys_io			; receive in AH
-0199+  05D7 B9 00       	cmp al, 0				; check error code (AL)
-0200+  05D9 C6 D1 05    	je gets_escape			; if no char received, retry
-0201+  05DC 76 6E       	cmp ah, 'n'
-0202+  05DE C6 EC 05    	je gets_LF
-0203+  05E1 76 72       	cmp ah, 'r'
-0204+  05E3 C6 F3 05    	je gets_CR
-0205+  05E6 1A          	mov al, ah				; if not a known escape, it is just a normal letter
-0206+  05E7 3E          	mov [d], al
-0207+  05E8 79          	inc d
-0208+  05E9 0A 73 05    	jmp gets_loop
-0209+  05EC             gets_LF:
-0210+  05EC 19 0A       	mov al, $0A
-0211+  05EE 3E          	mov [d], al
-0212+  05EF 79          	inc d
-0213+  05F0 0A 73 05    	jmp gets_loop
-0214+  05F3             gets_CR:
-0215+  05F3 19 0D       	mov al, $0D
-0216+  05F5 3E          	mov [d], al
-0217+  05F6 79          	inc d
-0218+  05F7 0A 73 05    	jmp gets_loop
-0219+  05FA             gets_end:
-0220+  05FA 19 00       	mov al, 0
-0221+  05FC 3E          	mov [d], al				; terminate string
-0222+  05FD E7          	pop d
-0223+  05FE E4          	pop a
-0224+  05FF 09          	ret
-0225+  0600             
-0226+  0600             
-0227+  0600             
-0228+  0600             
-0229+  0600             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0230+  0600             ;; INPUT TEXT
-0231+  0600             ;; terminated with CTRL+D
-0232+  0600             ;; pointer in D
-0233+  0600             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0234+  0600             gettxt:
-0235+  0600 D7          	push a
-0236+  0601 DA          	push d
-0237+  0602             gettxt_loop:
-0238+  0602 19 01       	mov al, 1
-0239+  0604 05 03       	syscall sys_io			; receive in AH
-0240+  0606 B9 00       	cmp al, 0				; check error code (AL)
-0241+  0608 C6 02 06    	je gettxt_loop		; if no char received, retry
-0242+  060B 76 04       	cmp ah, 4			; EOT
-0243+  060D C6 4B 06    	je gettxt_end
-0244+  0610 76 08       	cmp ah, $08			; check for backspace
-0245+  0612 C6 47 06    	je gettxt_backspace
-0246+  0615 76 5C       	cmp ah, $5C				; '\\'
-0247+  0617 C6 20 06    	je gettxt_escape
-0248+  061A 1A          	mov al, ah
-0249+  061B 3E          	mov [d], al
-0250+  061C 79          	inc d
-0251+  061D 0A 02 06    	jmp gettxt_loop
-0252+  0620             gettxt_escape:
-0253+  0620 19 01       	mov al, 1
-0254+  0622 05 03       	syscall sys_io			; receive in AH
-0255+  0624 B9 00       	cmp al, 0				; check error code (AL)
-0256+  0626 C6 20 06    	je gettxt_escape		; if no char received, retry
-0257+  0629 76 6E       	cmp ah, 'n'
-0258+  062B C6 39 06    	je gettxt_LF
-0259+  062E 76 72       	cmp ah, 'r'
-0260+  0630 C6 40 06    	je gettxt_CR
-0261+  0633 1A          	mov al, ah				; if not a known escape, it is just a normal letter
-0262+  0634 3E          	mov [d], al
-0263+  0635 79          	inc d
-0264+  0636 0A 02 06    	jmp gettxt_loop
-0265+  0639             gettxt_LF:
-0266+  0639 19 0A       	mov al, $0A
-0267+  063B 3E          	mov [d], al
-0268+  063C 79          	inc d
-0269+  063D 0A 02 06    	jmp gettxt_loop
-0270+  0640             gettxt_CR:
-0271+  0640 19 0D       	mov al, $0D
-0272+  0642 3E          	mov [d], al
-0273+  0643 79          	inc d
-0274+  0644 0A 02 06    	jmp gettxt_loop
-0275+  0647             gettxt_backspace:
-0276+  0647 7F          	dec d
-0277+  0648 0A 02 06    	jmp gettxt_loop
-0278+  064B             gettxt_end:
-0279+  064B 19 00       	mov al, 0
-0280+  064D 3E          	mov [d], al				; terminate string
-0281+  064E E7          	pop d
-0282+  064F E4          	pop a
-0283+  0650 09          	ret
-0284+  0651             
-0285+  0651             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0286+  0651             ; PRINT NEW LINE
-0287+  0651             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0288+  0651             printnl:
-0289+  0651 D7          	push a
-0290+  0652 10 00 0A    	mov a, $0A00
-0291+  0655 05 03       	syscall sys_io
-0292+  0657 10 00 0D    	mov a, $0D00
-0293+  065A 05 03       	syscall sys_io
-0294+  065C E4          	pop a
-0295+  065D 09          	ret
-0296+  065E             
-0297+  065E             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0298+  065E             ; strtoint
-0299+  065E             ; 4 digit hex string number in d
-0300+  065E             ; integer returned in A
-0301+  065E             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0302+  065E             strtointx:
-0303+  065E D8          	push b
-0304+  065F 32          	mov bl, [d]
-0305+  0660 37          	mov bh, bl
-0306+  0661 33 01 00    	mov bl, [d + 1]
-0307+  0664 07 1F 05    	call atoi				; convert to int in AL
-0308+  0667 23          	mov ah, al				; move to AH
-0309+  0668 33 02 00    	mov bl, [d + 2]
-0310+  066B 37          	mov bh, bl
-0311+  066C 33 03 00    	mov bl, [d + 3]
-0312+  066F 07 1F 05    	call atoi				; convert to int in AL
-0313+  0672 E5          	pop b
-0314+  0673 09          	ret
-0315+  0674             
-0316+  0674             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0317+  0674             ; strtoint
-0318+  0674             ; 5 digit base10 string number in d
-0319+  0674             ; integer returned in A
-0320+  0674             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0321+  0674             strtoint:
-0322+  0674 E2          	push si
-0323+  0675 D8          	push b
-0324+  0676 D9          	push c
-0325+  0677 DA          	push d
-0326+  0678 07 A7 04    	call strlen			; get string length in C
-0327+  067B 7E          	dec c
-0328+  067C FD 4E       	mov si, d
-0329+  067E 12          	mov a, c
-0330+  067F FD 99       	shl a
-0331+  0681 3B 07 05    	mov d, table_power
-0332+  0684 59          	add d, a
-0333+  0685 38 00 00    	mov c, 0
-0334+  0688             strtoint_L0:
-0335+  0688 F6          	lodsb			; load ASCII to al
-0336+  0689 B9 00       	cmp al, 0
-0337+  068B C6 9E 06    	je strtoint_end
-0338+  068E 6F 30       	sub al, $30		; make into integer
-0339+  0690 22 00       	mov ah, 0
-0340+  0692 2A          	mov b, [d]
-0341+  0693 AC          	mul a, b			; result in B since it fits in 16bits
-0342+  0694 11          	mov a, b
-0343+  0695 28          	mov b, c
-0344+  0696 54          	add a, b
-0345+  0697 39          	mov c, a
-0346+  0698 63 02 00    	sub d, 2
-0347+  069B 0A 88 06    	jmp strtoint_L0
-0348+  069E             strtoint_end:
-0349+  069E 12          	mov a, c
-0350+  069F E7          	pop d
-0351+  06A0 E6          	pop c
-0352+  06A1 E5          	pop b
-0353+  06A2 EF          	pop si
-0354+  06A3 09          	ret
-0355+  06A4             
-0356+  06A4             
-0357+  06A4             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0358+  06A4             ; PRINT NULL TERMINATED STRING
-0359+  06A4             ; pointer in D
-0360+  06A4             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0361+  06A4             puts:
-0362+  06A4 D7          	push a
-0363+  06A5 DA          	push d
-0364+  06A6             puts_L1:
-0365+  06A6 1E          	mov al, [d]
-0366+  06A7 B9 00       	cmp al, 0
-0367+  06A9 C6 B5 06    	jz puts_END
-0368+  06AC 23          	mov ah, al
-0369+  06AD 19 00       	mov al, 0
-0370+  06AF 05 03       	syscall sys_io
-0371+  06B1 79          	inc d
-0372+  06B2 0A A6 06    	jmp puts_L1
-0373+  06B5             puts_END:
-0374+  06B5 E7          	pop d
-0375+  06B6 E4          	pop a
-0376+  06B7 09          	ret
-0377+  06B8             
-0378+  06B8             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0379+  06B8             ; PRINT N SIZE STRING
-0380+  06B8             ; pointer in D
-0381+  06B8             ; size in C
-0382+  06B8             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0383+  06B8             putsn:
-0384+  06B8 DB          	push al
-0385+  06B9 DA          	push d
-0386+  06BA D9          	push c
-0387+  06BB             putsn_L0:
-0388+  06BB 1E          	mov al, [d]
-0389+  06BC 23          	mov ah, al
-0390+  06BD 19 00       	mov al, 0
-0391+  06BF 05 03       	syscall sys_io
-0392+  06C1 79          	inc d
-0393+  06C2 7E          	dec c	
-0394+  06C3 C2 00 00    	cmp c, 0
-0395+  06C6 C7 BB 06    	jne putsn_L0
-0396+  06C9             putsn_end:
-0397+  06C9 E6          	pop c
-0398+  06CA E7          	pop d
-0399+  06CB E8          	pop al
-0400+  06CC 09          	ret
-0401+  06CD             
-0402+  06CD             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0403+  06CD             ; print 16bit decimal number
-0404+  06CD             ; input number in A
-0405+  06CD             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0406+  06CD             print_u16d:
-0407+  06CD D7          	push a
-0408+  06CE D8          	push b
-0409+  06CF 26 10 27    	mov b, 10000
-0410+  06D2 AE          	div a, b			; get 10000 coeff.
-0411+  06D3 07 F9 06    	call print_number
-0412+  06D6 11          	mov a, b
-0413+  06D7 26 E8 03    	mov b, 1000
-0414+  06DA AE          	div a, b			; get 10000 coeff.
-0415+  06DB 07 F9 06    	call print_number
-0416+  06DE 11          	mov a, b
-0417+  06DF 26 64 00    	mov b, 100
-0418+  06E2 AE          	div a, b
-0419+  06E3 07 F9 06    	call print_number
-0420+  06E6 11          	mov a, b
-0421+  06E7 26 0A 00    	mov b, 10
-0422+  06EA AE          	div a, b
-0423+  06EB 07 F9 06    	call print_number
-0424+  06EE 11          	mov a, b
-0425+  06EF 6A 30       	add al, $30
-0426+  06F1 23          	mov ah, al
-0427+  06F2 19 00       	mov al, 0
-0428+  06F4 05 03       	syscall sys_io	; print coeff
-0429+  06F6 E5          	pop b
-0430+  06F7 E4          	pop a
-0431+  06F8 09          	ret
-0432+  06F9             
-0433+  06F9             
-0434+  06F9             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0435+  06F9             ; if A == 0, print space
-0436+  06F9             ; else print A
-0437+  06F9             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0438+  06F9             print_number:
-0439+  06F9 6A 30       	add al, $30
-0440+  06FB 23          	mov ah, al
-0441+  06FC 07 6A 05    	call putchar
-0442+  06FF 09          	ret
-0443+  0700             
-0444+  0700             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0445+  0700             ; PRINT 16BIT HEX INTEGER
-0446+  0700             ; integer value in reg B
-0447+  0700             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0448+  0700             print_u16x:
-0449+  0700 D7          	push a
-0450+  0701 D8          	push b
-0451+  0702 DD          	push bl
-0452+  0703 30          	mov bl, bh
-0453+  0704 07 31 05    	call itoa				; convert bh to char in A
-0454+  0707 2F          	mov bl, al				; save al
-0455+  0708 19 00       	mov al, 0
-0456+  070A 05 03       	syscall sys_io				; display AH
-0457+  070C 24          	mov ah, bl				; retrieve al
-0458+  070D 19 00       	mov al, 0
-0459+  070F 05 03       	syscall sys_io				; display AL
-0460+  0711             
-0461+  0711 EA          	pop bl
-0462+  0712 07 31 05    	call itoa				; convert bh to char in A
-0463+  0715 2F          	mov bl, al				; save al
-0464+  0716 19 00       	mov al, 0
-0465+  0718 05 03       	syscall sys_io				; display AH
-0466+  071A 24          	mov ah, bl				; retrieve al
-0467+  071B 19 00       	mov al, 0
-0468+  071D 05 03       	syscall sys_io				; display AL
-0469+  071F             
-0470+  071F E5          	pop b
-0471+  0720 E4          	pop a
-0472+  0721 09          	ret
-0473+  0722             
-0474+  0722             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0475+  0722             ; INPUT 16BIT HEX INTEGER
-0476+  0722             ; read 16bit integer into A
-0477+  0722             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0478+  0722             scan_u16x:
-0479+  0722 F8 10 00    	enter 16
-0480+  0725 D8          	push b
-0481+  0726 DA          	push d
-0482+  0727             
-0483+  0727 FA F1 FF    	lea d, [bp + -15]
-0484+  072A 07 71 05    	call gets				; get number
-0485+  072D             
-0486+  072D 32          	mov bl, [d]
-0487+  072E 37          	mov bh, bl
-0488+  072F 33 01 00    	mov bl, [d + 1]
-0489+  0732 07 1F 05    	call atoi				; convert to int in AL
-0490+  0735 23          	mov ah, al				; move to AH
-0491+  0736             
-0492+  0736 33 02 00    	mov bl, [d + 2]
-0493+  0739 37          	mov bh, bl
-0494+  073A 33 03 00    	mov bl, [d + 3]
-0495+  073D 07 1F 05    	call atoi				; convert to int in AL
-0496+  0740             
-0497+  0740 E7          	pop d
-0498+  0741 E5          	pop b
-0499+  0742 F9          	leave
-0500+  0743 09          	ret
-0501+  0744             
-0502+  0744             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0503+  0744             ; PRINT 8bit HEX INTEGER
-0504+  0744             ; integer value in reg bl
-0505+  0744             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0506+  0744             print_u8x:
-0507+  0744 D7          	push a
-0508+  0745 DD          	push bl
-0509+  0746             
-0510+  0746 07 31 05    	call itoa				; convert bl to char in A
-0511+  0749 2F          	mov bl, al				; save al
-0512+  074A 19 00       	mov al, 0
-0513+  074C 05 03       	syscall sys_io				; display AH
-0514+  074E 24          	mov ah, bl				; retrieve al
-0515+  074F 19 00       	mov al, 0
-0516+  0751 05 03       	syscall sys_io				; display AL
-0517+  0753             
-0518+  0753 EA          	pop bl
-0519+  0754 E4          	pop a
-0520+  0755 09          	ret
-0521+  0756             
-0522+  0756             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0523+  0756             ; print 8bit decimal unsigned number
-0524+  0756             ; input number in AL
-0525+  0756             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0526+  0756             print_u8d:
-0527+  0756 D7          	push a
-0528+  0757 D8          	push b
-0529+  0758             
-0530+  0758 22 00       	mov ah, 0
-0531+  075A 26 64 00    	mov b, 100
-0532+  075D AE          	div a, b
-0533+  075E D8          	push b			; save remainder
-0534+  075F B9 00       	cmp al, 0
-0535+  0761 C6 6B 07    	je skip100
-0536+  0764 6A 30       	add al, $30
-0537+  0766 23          	mov ah, al
-0538+  0767 19 00       	mov al, 0
-0539+  0769 05 03       	syscall sys_io	; print coeff
-0540+  076B             skip100:
-0541+  076B E4          	pop a
-0542+  076C 22 00       	mov ah, 0
-0543+  076E 26 0A 00    	mov b, 10
-0544+  0771 AE          	div a, b
-0545+  0772 D8          	push b			; save remainder
-0546+  0773 B9 00       	cmp al, 0
-0547+  0775 C6 7F 07    	je skip10
-0548+  0778 6A 30       	add al, $30
-0549+  077A 23          	mov ah, al
-0550+  077B 19 00       	mov al, 0
-0551+  077D 05 03       	syscall sys_io	; print coeff
-0552+  077F             skip10:
-0553+  077F E4          	pop a
-0554+  0780 1B          	mov al, bl
-0555+  0781 6A 30       	add al, $30
-0556+  0783 23          	mov ah, al
-0557+  0784 19 00       	mov al, 0
-0558+  0786 05 03       	syscall sys_io	; print coeff
-0559+  0788 E5          	pop b
-0560+  0789 E4          	pop a
-0561+  078A 09          	ret
-0562+  078B             
-0563+  078B             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0564+  078B             ; INPUT 8BIT HEX INTEGER
-0565+  078B             ; read 8bit integer into AL
-0566+  078B             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0567+  078B             scan_u8x:
-0568+  078B F8 04 00    	enter 4
-0569+  078E D8          	push b
-0570+  078F DA          	push d
-0571+  0790             
-0572+  0790 FA FD FF    	lea d, [bp + -3]
-0573+  0793 07 71 05    	call gets				; get number
-0574+  0796             
-0575+  0796 32          	mov bl, [d]
-0576+  0797 37          	mov bh, bl
-0577+  0798 33 01 00    	mov bl, [d + 1]
-0578+  079B 07 1F 05    	call atoi				; convert to int in AL
-0579+  079E             
-0580+  079E E7          	pop d
-0581+  079F E5          	pop b
-0582+  07A0 F9          	leave
-0583+  07A1 09          	ret
-0584+  07A2             
-0585+  07A2             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0586+  07A2             ; input decimal number
-0587+  07A2             ; result in A
-0588+  07A2             ; 655'\0'
-0589+  07A2             ; low--------high
-0590+  07A2             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0591+  07A2             scan_u16d:
-0592+  07A2 F8 08 00    	enter 8
-0593+  07A5 E2          	push si
-0594+  07A6 D8          	push b
-0595+  07A7 D9          	push c
-0596+  07A8 DA          	push d
-0597+  07A9 FA F9 FF    	lea d, [bp +- 7]
-0598+  07AC 07 71 05    	call gets
-0599+  07AF 07 A7 04    	call strlen			; get string length in C
-0600+  07B2 7E          	dec c
-0601+  07B3 FD 4E       	mov si, d
-0602+  07B5 12          	mov a, c
-0603+  07B6 FD 99       	shl a
-0604+  07B8 3B 07 05    	mov d, table_power
-0605+  07BB 59          	add d, a
-0606+  07BC 38 00 00    	mov c, 0
-0607+  07BF             mul_loop:
-0608+  07BF F6          	lodsb			; load ASCII to al
-0609+  07C0 B9 00       	cmp al, 0
-0610+  07C2 C6 D5 07    	je mul_exit
-0611+  07C5 6F 30       	sub al, $30		; make into integer
-0612+  07C7 22 00       	mov ah, 0
-0613+  07C9 2A          	mov b, [d]
-0614+  07CA AC          	mul a, b			; result in B since it fits in 16bits
-0615+  07CB 11          	mov a, b
-0616+  07CC 28          	mov b, c
-0617+  07CD 54          	add a, b
-0618+  07CE 39          	mov c, a
-0619+  07CF 63 02 00    	sub d, 2
-0620+  07D2 0A BF 07    	jmp mul_loop
-0621+  07D5             mul_exit:
-0622+  07D5 12          	mov a, c
-0623+  07D6 E7          	pop d
-0624+  07D7 E6          	pop c
-0625+  07D8 E5          	pop b
-0626+  07D9 EF          	pop si
-0627+  07DA F9          	leave
-0628+  07DB 09          	ret
-0048   07DC             ; --- end include block
-0049   07DC             
-0050   07DC             .end
+0009   0402 52 02 00      sub sp, 2 ; i
+0010   0405 52 02 00      sub sp, 2 ; j
+0011   0408             _for1_init:
+0012   0408 26 02 00      mov b, 2
+0013   040B D7            push a
+0014   040C 11            mov a, b
+0015   040D 45 FF FF      mov [bp + -1], a ; i
+0016   0410 E4            pop a
+0017   0411             _for1_cond:
+0018   0411 26 01 00      mov b, 1
+0019   0414 C0 00 00      cmp b, 0
+0020   0417 C6 47 04      je _for1_exit
+0021   041A             _for1_block:
+0022   041A 2C FF FF      mov b, [bp + -1] ; i
+0023   041D FD AB         swp b
+0024   041F D8            push b
+0025   0420 07 4A 04      call fact
+0026   0423 51 02 00      add sp, 2
+0027   0426 D7            push a
+0028   0427 11            mov a, b
+0029   0428 45 FD FF      mov [bp + -3], a ; j
+0030   042B E4            pop a
+0031   042C             ; --- begin inline asm block
+0032   042C 17 FD FF          mov a, [bp + -3]
+0033   042F 07 04 07          call print_u16d
+0034   0432             
+0035   0432 14 95 04          mov a, [s]
+0036   0435 3C                mov d, a
+0037   0436 07 DB 06          call puts
+0038   0439                 ; --- end inline asm block
+0039   0439             _for1_update:
+0040   0439 2C FF FF      mov b, [bp + -1] ; i
+0041   043C FD 77         inc b
+0042   043E D7            push a
+0043   043F 11            mov a, b
+0044   0440 45 FF FF      mov [bp + -1], a ; i
+0045   0443 E4            pop a
+0046   0444 0A 11 04      jmp _for1_cond
+0047   0447             _for1_exit:
+0048   0447 F9            leave
+0049   0448 05 0B         syscall sys_terminate_proc
+0050   044A             fact:
+0051   044A D2            push bp
+0052   044B 9B            mov bp, sp
+0053   044C 52 02 00      sub sp, 2 ; nn
+0054   044F             _if2_cond:
+0055   044F 2C 05 00      mov b, [bp + 5] ; n
+0056   0452 D7            push a
+0057   0453 11            mov a, b
+0058   0454 26 01 00      mov b, 1
+0059   0457 B0            cmp a, b
+0060   0458 0E            lodflgs
+0061   0459 87 01         and al, %00000001
+0062   045B 22 00         mov ah, 0
+0063   045D 27            mov b, a
+0064   045E E4            pop a
+0065   045F C0 00 00      cmp b, 0
+0066   0462 C6 6D 04      je _if2_else_block
+0067   0465             _if2_block:
+0068   0465 26 01 00      mov b, 1
+0069   0468 F9            leave
+0070   0469 09            ret
+0071   046A 0A 93 04      jmp _if2_exit
+0072   046D             _if2_else_block:
+0073   046D 2C 05 00      mov b, [bp + 5] ; n
+0074   0470 D7            push a
+0075   0471 11            mov a, b
+0076   0472 2C 05 00      mov b, [bp + 5] ; n
+0077   0475 D7            push a
+0078   0476 11            mov a, b
+0079   0477 26 01 00      mov b, 1
+0080   047A 60            sub a, b
+0081   047B 27            mov b, a
+0082   047C E4            pop a
+0083   047D FD AB         swp b
+0084   047F D8            push b
+0085   0480 07 4A 04      call fact
+0086   0483 51 02 00      add sp, 2
+0087   0486 AC            mul a, b
+0088   0487 E4            pop a
+0089   0488 D7            push a
+0090   0489 11            mov a, b
+0091   048A 45 FF FF      mov [bp + -1], a ; nn
+0092   048D E4            pop a
+0093   048E 2C FF FF      mov b, [bp + -1] ; nn
+0094   0491 F9            leave
+0095   0492 09            ret
+0096   0493             _if2_exit:
+0097   0493             ; --- end text block
+0098   0493             
+0099   0493             ; --- begin data block
+0100   0493 0A 00       s_data: .db "\n", 0
+0101   0495 93 04       s: .dw s_data
+0102   0497             ; --- end data block
+0103   0497             ; --- begin include block
+0104   0497             .include "lib/stdio.asm"
+0001+  0497             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0002+  0497             ; stdio.s
+0003+  0497             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0004+  0497             .include "lib/string.asm"
+0001++ 0497             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0002++ 0497             ; string.s
+0003++ 0497             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0004++ 0497             
+0005++ 0497             
+0006++ 0497             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0007++ 0497             ; strrev
+0008++ 0497             ; reverse a string
+0009++ 0497             ; D = string address
+0010++ 0497             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0011++ 0497             ; 01234
+0012++ 0497             strrev:
+0013++ 0497 4B          	pusha
+0014++ 0498 07 DE 04    	call strlen	; length in C
+0015++ 049B 12          	mov a, c
+0016++ 049C AF 01 00    	cmp a, 1
+0017++ 049F D0 B9 04    	jleu strrev_end	; check string length. string len must be > 1
+0018++ 04A2 7D          	dec a
+0019++ 04A3 FD 4E       	mov si, d	; beginning of string
+0020++ 04A5 FD 50       	mov di, d	; beginning of string (for destinations)
+0021++ 04A7 59          	add d, a	; end of string
+0022++ 04A8 12          	mov a, c
+0023++ 04A9 FD 9B       	shr a		; divide by 2
+0024++ 04AB 39          	mov c, a	; C now counts the steps
+0025++ 04AC             strrev_L0:
+0026++ 04AC 32          	mov bl, [d]	; save load right-side char into BL
+0027++ 04AD F6          	lodsb		; load left-side char into AL; increase SI
+0028++ 04AE 3E          	mov [d], al	; store left char into right side
+0029++ 04AF 1B          	mov al, bl
+0030++ 04B0 F7          	stosb		; store right-side char into left-side; increase DI
+0031++ 04B1 7E          	dec c
+0032++ 04B2 7F          	dec d
+0033++ 04B3 C2 00 00    	cmp c, 0
+0034++ 04B6 C7 AC 04    	jne strrev_L0
+0035++ 04B9             strrev_end:
+0036++ 04B9 4C          	popa
+0037++ 04BA 09          	ret
+0038++ 04BB             	
+0039++ 04BB             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0040++ 04BB             ; strchr
+0041++ 04BB             ; search string in D for char in AL
+0042++ 04BB             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0043++ 04BB             strchr:
+0044++ 04BB             strchr_L0:
+0045++ 04BB 32          	mov bl, [d]
+0046++ 04BC C1 00       	cmp bl, 0
+0047++ 04BE C6 C9 04    	je strchr_end
+0048++ 04C1 BA          	cmp al, bl
+0049++ 04C2 C6 C9 04    	je strchr_end
+0050++ 04C5 79          	inc d
+0051++ 04C6 0A BB 04    	jmp strchr_L0
+0052++ 04C9             strchr_end:
+0053++ 04C9 1B          	mov al, bl
+0054++ 04CA 09          	ret
+0055++ 04CB             
+0056++ 04CB             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0057++ 04CB             ; strstr
+0058++ 04CB             ; find sub-string
+0059++ 04CB             ; str1 in SI
+0060++ 04CB             ; str2 in DI
+0061++ 04CB             ; SI points to end of source string
+0062++ 04CB             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0063++ 04CB             strstr:
+0064++ 04CB DB          	push al
+0065++ 04CC DA          	push d
+0066++ 04CD E3          	push di
+0067++ 04CE             strstr_loop:
+0068++ 04CE F3          	cmpsb					; compare a byte of the strings
+0069++ 04CF C7 DA 04    	jne strstr_ret
+0070++ 04D2 FC 00 00    	lea d, [di + 0]
+0071++ 04D5 BD 00       	cmp byte[d], 0				; check if at end of string (null)
+0072++ 04D7 C7 CE 04    	jne strstr_loop				; equal chars but not at end
+0073++ 04DA             strstr_ret:
+0074++ 04DA F0          	pop di
+0075++ 04DB E7          	pop d
+0076++ 04DC E8          	pop al
+0077++ 04DD 09          	ret
+0078++ 04DE             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0079++ 04DE             ; length of null terminated string
+0080++ 04DE             ; result in C
+0081++ 04DE             ; pointer in D
+0082++ 04DE             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0083++ 04DE             strlen:
+0084++ 04DE DA          	push d
+0085++ 04DF 38 00 00    	mov c, 0
+0086++ 04E2             strlen_L1:
+0087++ 04E2 BD 00       	cmp byte [d], 0
+0088++ 04E4 C6 EC 04    	je strlen_ret
+0089++ 04E7 79          	inc d
+0090++ 04E8 78          	inc c
+0091++ 04E9 0A E2 04    	jmp strlen_L1
+0092++ 04EC             strlen_ret:
+0093++ 04EC E7          	pop d
+0094++ 04ED 09          	ret
+0095++ 04EE             
+0096++ 04EE             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0097++ 04EE             ; STRCMP
+0098++ 04EE             ; compare two strings
+0099++ 04EE             ; str1 in SI
+0100++ 04EE             ; str2 in DI
+0101++ 04EE             ; CREATE A STRING COMPAIRON INSTRUCION ?????
+0102++ 04EE             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0103++ 04EE             strcmp:
+0104++ 04EE DB          	push al
+0105++ 04EF DA          	push d
+0106++ 04F0 E3          	push di
+0107++ 04F1 E2          	push si
+0108++ 04F2             strcmp_loop:
+0109++ 04F2 F3          	cmpsb					; compare a byte of the strings
+0110++ 04F3 C7 FE 04    	jne strcmp_ret
+0111++ 04F6 FB FF FF    	lea d, [si +- 1]
+0112++ 04F9 BD 00       	cmp byte[d], 0				; check if at end of string (null)
+0113++ 04FB C7 F2 04    	jne strcmp_loop				; equal chars but not at end
+0114++ 04FE             strcmp_ret:
+0115++ 04FE EF          	pop si
+0116++ 04FF F0          	pop di
+0117++ 0500 E7          	pop d
+0118++ 0501 E8          	pop al
+0119++ 0502 09          	ret
+0120++ 0503             
+0121++ 0503             
+0122++ 0503             ; STRCPY
+0123++ 0503             ; copy null terminated string from SI to DI
+0124++ 0503             ; source in SI
+0125++ 0503             ; destination in DI
+0126++ 0503             strcpy:
+0127++ 0503 E2          	push si
+0128++ 0504 E3          	push di
+0129++ 0505 DB          	push al
+0130++ 0506             strcpy_L1:
+0131++ 0506 F6          	lodsb
+0132++ 0507 F7          	stosb
+0133++ 0508 B9 00       	cmp al, 0
+0134++ 050A C7 06 05    	jne strcpy_L1
+0135++ 050D             strcpy_end:
+0136++ 050D E8          	pop al
+0137++ 050E F0          	pop di
+0138++ 050F EF          	pop si
+0139++ 0510 09          	ret
+0140++ 0511             
+0141++ 0511             ; STRCAT
+0142++ 0511             ; concatenate a NULL terminated string into string at DI, from string at SI
+0143++ 0511             ; source in SI
+0144++ 0511             ; destination in DI
+0145++ 0511             strcat:
+0146++ 0511 E2          	push si
+0147++ 0512 E3          	push di
+0148++ 0513 D7          	push a
+0149++ 0514 DA          	push d
+0150++ 0515 50          	mov a, di
+0151++ 0516 3C          	mov d, a
+0152++ 0517             strcat_goto_end_L1:
+0153++ 0517 BD 00       	cmp byte[d], 0
+0154++ 0519 C6 20 05    	je strcat_start
+0155++ 051C 79          	inc d
+0156++ 051D 0A 17 05    	jmp strcat_goto_end_L1
+0157++ 0520             strcat_start:
+0158++ 0520 FD 50       	mov di, d
+0159++ 0522             strcat_L1:
+0160++ 0522 F6          	lodsb
+0161++ 0523 F7          	stosb
+0162++ 0524 B9 00       	cmp al, 0
+0163++ 0526 C7 22 05    	jne strcat_L1
+0164++ 0529             strcat_end:
+0165++ 0529 E7          	pop d
+0166++ 052A E4          	pop a
+0167++ 052B F0          	pop di
+0168++ 052C EF          	pop si
+0169++ 052D 09          	ret
+0005+  052E             
+0006+  052E 30 31 32 33 s_hex_digits:	.db "0123456789ABCDEF"	
+0006+  0532 34 35 36 37 
+0006+  0536 38 39 41 42 
+0006+  053A 43 44 45 46 
+0007+  053E             
+0008+  053E 01 00       table_power:.dw 1
+0009+  0540 0A 00       			.dw 10
+0010+  0542 64 00       			.dw 100
+0011+  0544 E8 03       			.dw 1000
+0012+  0546 10 27       			.dw 10000
+0013+  0548             
+0014+  0548             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0015+  0548             ; CONVERT ASCII 'O'..'F' TO INTEGER 0..15
+0016+  0548             ; ASCII in BL
+0017+  0548             ; result in AL
+0018+  0548             ; ascii for F = 0100 0110
+0019+  0548             ; ascii for 9 = 0011 1001
+0020+  0548             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0021+  0548             hex_ascii_encode:
+0022+  0548 1B          	mov al, bl
+0023+  0549 93 40       	test al, $40				; test if letter or number
+0024+  054B C7 51 05    	jnz hex_letter
+0025+  054E 87 0F       	and al, $0F				; get number
+0026+  0550 09          	ret
+0027+  0551             hex_letter:
+0028+  0551 87 0F       	and al, $0F				; get letter
+0029+  0553 6A 09       	add al, 9
+0030+  0555 09          	ret
+0031+  0556             
+0032+  0556             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0033+  0556             ; ATOI
+0034+  0556             ; 2 letter hex string in B
+0035+  0556             ; 8bit integer returned in AL
+0036+  0556             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0037+  0556             atoi:
+0038+  0556 D8          	push b
+0039+  0557 07 48 05    	call hex_ascii_encode			; convert BL to 4bit code in AL
+0040+  055A 30          	mov bl, bh
+0041+  055B DB          	push al					; save a
+0042+  055C 07 48 05    	call hex_ascii_encode
+0043+  055F EA          	pop bl	
+0044+  0560 FD 9E 04    	shl al, 4
+0045+  0563 8C          	or al, bl
+0046+  0564 E5          	pop b
+0047+  0565 09          	ret	
+0048+  0566             
+0049+  0566             
+0050+  0566             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0051+  0566             ; printf
+0052+  0566             ; no need for explanations!
+0053+  0566             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0054+  0566             printf:
+0055+  0566 09          	ret
+0056+  0567             
+0057+  0567             
+0058+  0567             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0059+  0567             ; scanf
+0060+  0567             ; no need for explanations!
+0061+  0567             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0062+  0567             scanf:
+0063+  0567 09          	ret
+0064+  0568             
+0065+  0568             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0066+  0568             ; ITOA
+0067+  0568             ; 8bit value in BL
+0068+  0568             ; 2 byte ASCII result in A
+0069+  0568             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0070+  0568             itoa:
+0071+  0568 DA          	push d
+0072+  0569 D8          	push b
+0073+  056A A7 00       	mov bh, 0
+0074+  056C FD A4 04    	shr bl, 4	
+0075+  056F 74          	mov d, b
+0076+  0570 1F 2E 05    	mov al, [d + s_hex_digits]
+0077+  0573 23          	mov ah, al
+0078+  0574             	
+0079+  0574 E5          	pop b
+0080+  0575 D8          	push b
+0081+  0576 A7 00       	mov bh, 0
+0082+  0578 FD 87 0F    	and bl, $0F
+0083+  057B 74          	mov d, b
+0084+  057C 1F 2E 05    	mov al, [d + s_hex_digits]
+0085+  057F E5          	pop b
+0086+  0580 E7          	pop d
+0087+  0581 09          	ret
+0088+  0582             
+0089+  0582             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0090+  0582             ; HEX STRING TO BINARY
+0091+  0582             ; di = destination address
+0092+  0582             ; si = source
+0093+  0582             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0094+  0582             hex_to_int:
+0095+  0582             hex_to_int_L1:
+0096+  0582 F6          	lodsb					; load from [SI] to AL
+0097+  0583 B9 00       	cmp al, 0				; check if ASCII 0
+0098+  0585 C6 92 05    	jz hex_to_int_ret
+0099+  0588 36          	mov bh, al
+0100+  0589 F6          	lodsb
+0101+  058A 2F          	mov bl, al
+0102+  058B 07 56 05    	call atoi				; convert ASCII byte in B to int (to AL)
+0103+  058E F7          	stosb					; store AL to [DI]
+0104+  058F 0A 82 05    	jmp hex_to_int_L1
+0105+  0592             hex_to_int_ret:
+0106+  0592 09          	ret		
+0107+  0593             
+0108+  0593             
+0109+  0593             
+0110+  0593             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0111+  0593             ; GETCHAR
+0112+  0593             ; char in ah
+0113+  0593             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0114+  0593             getchar:
+0115+  0593 DB          	push al
+0116+  0594             getchar_retry:
+0117+  0594 FD 0C       	sti
+0118+  0596 19 01       	mov al, 1
+0119+  0598 05 03       	syscall sys_io			; receive in AH
+0120+  059A B9 00       	cmp al, 0			; check if any char was receive
+0121+  059C C6 94 05    	je getchar_retry
+0122+  059F E8          	pop al
+0123+  05A0 09          	ret
+0124+  05A1             
+0125+  05A1             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0126+  05A1             ; PUTCHAR
+0127+  05A1             ; char in ah
+0128+  05A1             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0129+  05A1             putchar:
+0130+  05A1 D7          	push a
+0131+  05A2 19 00       	mov al, 0
+0132+  05A4 05 03       	syscall sys_io			; char in AH
+0133+  05A6 E4          	pop a
+0134+  05A7 09          	ret
+0135+  05A8             
+0136+  05A8             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0137+  05A8             ;; INPUT A STRING
+0138+  05A8             ;; terminates with null
+0139+  05A8             ;; pointer in D
+0140+  05A8             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0141+  05A8             gets:
+0142+  05A8 D7          	push a
+0143+  05A9 DA          	push d
+0144+  05AA             gets_loop:
+0145+  05AA FD 0C       	sti
+0146+  05AC 19 01       	mov al, 1
+0147+  05AE 05 03       	syscall sys_io			; receive in AH
+0148+  05B0 B9 00       	cmp al, 0				; check error code (AL)
+0149+  05B2 C6 AA 05    	je gets_loop			; if no char received, retry
+0150+  05B5             
+0151+  05B5 76 1B       	cmp ah, 27
+0152+  05B7 C6 D8 05    	je gets_telnet_escape
+0153+  05BA 76 0A       	cmp ah, $0A				; LF
+0154+  05BC C6 31 06    	je gets_end
+0155+  05BF 76 0D       	cmp ah, $0D				; CR
+0156+  05C1 C6 31 06    	je gets_end
+0157+  05C4 76 5C       	cmp ah, $5C				; '\\'
+0158+  05C6 C6 08 06    	je gets_escape
+0159+  05C9             	
+0160+  05C9 76 08       	cmp ah, $08			; check for backspace
+0161+  05CB C6 D4 05    	je gets_backspace
+0162+  05CE             
+0163+  05CE 1A          	mov al, ah
+0164+  05CF 3E          	mov [d], al
+0165+  05D0 79          	inc d
+0166+  05D1 0A AA 05    	jmp gets_loop
+0167+  05D4             gets_backspace:
+0168+  05D4 7F          	dec d
+0169+  05D5 0A AA 05    	jmp gets_loop
+0170+  05D8             gets_telnet_escape:
+0171+  05D8 FD 0C       	sti
+0172+  05DA 19 01       	mov al, 1
+0173+  05DC 05 03       	syscall sys_io				; receive in AH without echo
+0174+  05DE B9 00       	cmp al, 0					; check error code (AL)
+0175+  05E0 C6 D8 05    	je gets_telnet_escape		; if no char received, retry
+0176+  05E3 76 5B       	cmp ah, '['
+0177+  05E5 C7 AA 05    	jne gets_loop
+0178+  05E8             gets_telnet_escape_phase2:
+0179+  05E8 FD 0C       	sti
+0180+  05EA 19 01       	mov al, 1
+0181+  05EC 05 03       	syscall sys_io					; receive in AH without echo
+0182+  05EE B9 00       	cmp al, 0						; check error code (AL)
+0183+  05F0 C6 E8 05    	je gets_telnet_escape_phase2	; if no char received, retry
+0184+  05F3 76 44       	cmp ah, 'D'
+0185+  05F5 C6 00 06    	je gets_left_arrow
+0186+  05F8 76 43       	cmp ah, 'C'
+0187+  05FA C6 04 06    	je gets_right_arrow
+0188+  05FD 0A AA 05    	jmp gets_loop
+0189+  0600             gets_left_arrow:
+0190+  0600 7F          	dec d
+0191+  0601 0A AA 05    	jmp gets_loop
+0192+  0604             gets_right_arrow:
+0193+  0604 79          	inc d
+0194+  0605 0A AA 05    	jmp gets_loop
+0195+  0608             gets_escape:
+0196+  0608 FD 0C       	sti
+0197+  060A 19 01       	mov al, 1
+0198+  060C 05 03       	syscall sys_io			; receive in AH
+0199+  060E B9 00       	cmp al, 0				; check error code (AL)
+0200+  0610 C6 08 06    	je gets_escape			; if no char received, retry
+0201+  0613 76 6E       	cmp ah, 'n'
+0202+  0615 C6 23 06    	je gets_LF
+0203+  0618 76 72       	cmp ah, 'r'
+0204+  061A C6 2A 06    	je gets_CR
+0205+  061D 1A          	mov al, ah				; if not a known escape, it is just a normal letter
+0206+  061E 3E          	mov [d], al
+0207+  061F 79          	inc d
+0208+  0620 0A AA 05    	jmp gets_loop
+0209+  0623             gets_LF:
+0210+  0623 19 0A       	mov al, $0A
+0211+  0625 3E          	mov [d], al
+0212+  0626 79          	inc d
+0213+  0627 0A AA 05    	jmp gets_loop
+0214+  062A             gets_CR:
+0215+  062A 19 0D       	mov al, $0D
+0216+  062C 3E          	mov [d], al
+0217+  062D 79          	inc d
+0218+  062E 0A AA 05    	jmp gets_loop
+0219+  0631             gets_end:
+0220+  0631 19 00       	mov al, 0
+0221+  0633 3E          	mov [d], al				; terminate string
+0222+  0634 E7          	pop d
+0223+  0635 E4          	pop a
+0224+  0636 09          	ret
+0225+  0637             
+0226+  0637             
+0227+  0637             
+0228+  0637             
+0229+  0637             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0230+  0637             ;; INPUT TEXT
+0231+  0637             ;; terminated with CTRL+D
+0232+  0637             ;; pointer in D
+0233+  0637             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0234+  0637             gettxt:
+0235+  0637 D7          	push a
+0236+  0638 DA          	push d
+0237+  0639             gettxt_loop:
+0238+  0639 19 01       	mov al, 1
+0239+  063B 05 03       	syscall sys_io			; receive in AH
+0240+  063D B9 00       	cmp al, 0				; check error code (AL)
+0241+  063F C6 39 06    	je gettxt_loop		; if no char received, retry
+0242+  0642 76 04       	cmp ah, 4			; EOT
+0243+  0644 C6 82 06    	je gettxt_end
+0244+  0647 76 08       	cmp ah, $08			; check for backspace
+0245+  0649 C6 7E 06    	je gettxt_backspace
+0246+  064C 76 5C       	cmp ah, $5C				; '\\'
+0247+  064E C6 57 06    	je gettxt_escape
+0248+  0651 1A          	mov al, ah
+0249+  0652 3E          	mov [d], al
+0250+  0653 79          	inc d
+0251+  0654 0A 39 06    	jmp gettxt_loop
+0252+  0657             gettxt_escape:
+0253+  0657 19 01       	mov al, 1
+0254+  0659 05 03       	syscall sys_io			; receive in AH
+0255+  065B B9 00       	cmp al, 0				; check error code (AL)
+0256+  065D C6 57 06    	je gettxt_escape		; if no char received, retry
+0257+  0660 76 6E       	cmp ah, 'n'
+0258+  0662 C6 70 06    	je gettxt_LF
+0259+  0665 76 72       	cmp ah, 'r'
+0260+  0667 C6 77 06    	je gettxt_CR
+0261+  066A 1A          	mov al, ah				; if not a known escape, it is just a normal letter
+0262+  066B 3E          	mov [d], al
+0263+  066C 79          	inc d
+0264+  066D 0A 39 06    	jmp gettxt_loop
+0265+  0670             gettxt_LF:
+0266+  0670 19 0A       	mov al, $0A
+0267+  0672 3E          	mov [d], al
+0268+  0673 79          	inc d
+0269+  0674 0A 39 06    	jmp gettxt_loop
+0270+  0677             gettxt_CR:
+0271+  0677 19 0D       	mov al, $0D
+0272+  0679 3E          	mov [d], al
+0273+  067A 79          	inc d
+0274+  067B 0A 39 06    	jmp gettxt_loop
+0275+  067E             gettxt_backspace:
+0276+  067E 7F          	dec d
+0277+  067F 0A 39 06    	jmp gettxt_loop
+0278+  0682             gettxt_end:
+0279+  0682 19 00       	mov al, 0
+0280+  0684 3E          	mov [d], al				; terminate string
+0281+  0685 E7          	pop d
+0282+  0686 E4          	pop a
+0283+  0687 09          	ret
+0284+  0688             
+0285+  0688             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0286+  0688             ; PRINT NEW LINE
+0287+  0688             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0288+  0688             printnl:
+0289+  0688 D7          	push a
+0290+  0689 10 00 0A    	mov a, $0A00
+0291+  068C 05 03       	syscall sys_io
+0292+  068E 10 00 0D    	mov a, $0D00
+0293+  0691 05 03       	syscall sys_io
+0294+  0693 E4          	pop a
+0295+  0694 09          	ret
+0296+  0695             
+0297+  0695             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0298+  0695             ; strtoint
+0299+  0695             ; 4 digit hex string number in d
+0300+  0695             ; integer returned in A
+0301+  0695             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0302+  0695             strtointx:
+0303+  0695 D8          	push b
+0304+  0696 32          	mov bl, [d]
+0305+  0697 37          	mov bh, bl
+0306+  0698 33 01 00    	mov bl, [d + 1]
+0307+  069B 07 56 05    	call atoi				; convert to int in AL
+0308+  069E 23          	mov ah, al				; move to AH
+0309+  069F 33 02 00    	mov bl, [d + 2]
+0310+  06A2 37          	mov bh, bl
+0311+  06A3 33 03 00    	mov bl, [d + 3]
+0312+  06A6 07 56 05    	call atoi				; convert to int in AL
+0313+  06A9 E5          	pop b
+0314+  06AA 09          	ret
+0315+  06AB             
+0316+  06AB             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0317+  06AB             ; strtoint
+0318+  06AB             ; 5 digit base10 string number in d
+0319+  06AB             ; integer returned in A
+0320+  06AB             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0321+  06AB             strtoint:
+0322+  06AB E2          	push si
+0323+  06AC D8          	push b
+0324+  06AD D9          	push c
+0325+  06AE DA          	push d
+0326+  06AF 07 DE 04    	call strlen			; get string length in C
+0327+  06B2 7E          	dec c
+0328+  06B3 FD 4E       	mov si, d
+0329+  06B5 12          	mov a, c
+0330+  06B6 FD 99       	shl a
+0331+  06B8 3B 3E 05    	mov d, table_power
+0332+  06BB 59          	add d, a
+0333+  06BC 38 00 00    	mov c, 0
+0334+  06BF             strtoint_L0:
+0335+  06BF F6          	lodsb			; load ASCII to al
+0336+  06C0 B9 00       	cmp al, 0
+0337+  06C2 C6 D5 06    	je strtoint_end
+0338+  06C5 6F 30       	sub al, $30		; make into integer
+0339+  06C7 22 00       	mov ah, 0
+0340+  06C9 2A          	mov b, [d]
+0341+  06CA AC          	mul a, b			; result in B since it fits in 16bits
+0342+  06CB 11          	mov a, b
+0343+  06CC 28          	mov b, c
+0344+  06CD 54          	add a, b
+0345+  06CE 39          	mov c, a
+0346+  06CF 63 02 00    	sub d, 2
+0347+  06D2 0A BF 06    	jmp strtoint_L0
+0348+  06D5             strtoint_end:
+0349+  06D5 12          	mov a, c
+0350+  06D6 E7          	pop d
+0351+  06D7 E6          	pop c
+0352+  06D8 E5          	pop b
+0353+  06D9 EF          	pop si
+0354+  06DA 09          	ret
+0355+  06DB             
+0356+  06DB             
+0357+  06DB             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0358+  06DB             ; PRINT NULL TERMINATED STRING
+0359+  06DB             ; pointer in D
+0360+  06DB             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0361+  06DB             puts:
+0362+  06DB D7          	push a
+0363+  06DC DA          	push d
+0364+  06DD             puts_L1:
+0365+  06DD 1E          	mov al, [d]
+0366+  06DE B9 00       	cmp al, 0
+0367+  06E0 C6 EC 06    	jz puts_END
+0368+  06E3 23          	mov ah, al
+0369+  06E4 19 00       	mov al, 0
+0370+  06E6 05 03       	syscall sys_io
+0371+  06E8 79          	inc d
+0372+  06E9 0A DD 06    	jmp puts_L1
+0373+  06EC             puts_END:
+0374+  06EC E7          	pop d
+0375+  06ED E4          	pop a
+0376+  06EE 09          	ret
+0377+  06EF             
+0378+  06EF             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0379+  06EF             ; PRINT N SIZE STRING
+0380+  06EF             ; pointer in D
+0381+  06EF             ; size in C
+0382+  06EF             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0383+  06EF             putsn:
+0384+  06EF DB          	push al
+0385+  06F0 DA          	push d
+0386+  06F1 D9          	push c
+0387+  06F2             putsn_L0:
+0388+  06F2 1E          	mov al, [d]
+0389+  06F3 23          	mov ah, al
+0390+  06F4 19 00       	mov al, 0
+0391+  06F6 05 03       	syscall sys_io
+0392+  06F8 79          	inc d
+0393+  06F9 7E          	dec c	
+0394+  06FA C2 00 00    	cmp c, 0
+0395+  06FD C7 F2 06    	jne putsn_L0
+0396+  0700             putsn_end:
+0397+  0700 E6          	pop c
+0398+  0701 E7          	pop d
+0399+  0702 E8          	pop al
+0400+  0703 09          	ret
+0401+  0704             
+0402+  0704             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0403+  0704             ; print 16bit decimal number
+0404+  0704             ; input number in A
+0405+  0704             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0406+  0704             print_u16d:
+0407+  0704 D7          	push a
+0408+  0705 D8          	push b
+0409+  0706 26 10 27    	mov b, 10000
+0410+  0709 AE          	div a, b			; get 10000 coeff.
+0411+  070A 07 30 07    	call print_number
+0412+  070D 11          	mov a, b
+0413+  070E 26 E8 03    	mov b, 1000
+0414+  0711 AE          	div a, b			; get 10000 coeff.
+0415+  0712 07 30 07    	call print_number
+0416+  0715 11          	mov a, b
+0417+  0716 26 64 00    	mov b, 100
+0418+  0719 AE          	div a, b
+0419+  071A 07 30 07    	call print_number
+0420+  071D 11          	mov a, b
+0421+  071E 26 0A 00    	mov b, 10
+0422+  0721 AE          	div a, b
+0423+  0722 07 30 07    	call print_number
+0424+  0725 11          	mov a, b
+0425+  0726 6A 30       	add al, $30
+0426+  0728 23          	mov ah, al
+0427+  0729 19 00       	mov al, 0
+0428+  072B 05 03       	syscall sys_io	; print coeff
+0429+  072D E5          	pop b
+0430+  072E E4          	pop a
+0431+  072F 09          	ret
+0432+  0730             
+0433+  0730             
+0434+  0730             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0435+  0730             ; if A == 0, print space
+0436+  0730             ; else print A
+0437+  0730             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0438+  0730             print_number:
+0439+  0730 6A 30       	add al, $30
+0440+  0732 23          	mov ah, al
+0441+  0733 07 A1 05    	call putchar
+0442+  0736 09          	ret
+0443+  0737             
+0444+  0737             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0445+  0737             ; PRINT 16BIT HEX INTEGER
+0446+  0737             ; integer value in reg B
+0447+  0737             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0448+  0737             print_u16x:
+0449+  0737 D7          	push a
+0450+  0738 D8          	push b
+0451+  0739 DD          	push bl
+0452+  073A 30          	mov bl, bh
+0453+  073B 07 68 05    	call itoa				; convert bh to char in A
+0454+  073E 2F          	mov bl, al				; save al
+0455+  073F 19 00       	mov al, 0
+0456+  0741 05 03       	syscall sys_io				; display AH
+0457+  0743 24          	mov ah, bl				; retrieve al
+0458+  0744 19 00       	mov al, 0
+0459+  0746 05 03       	syscall sys_io				; display AL
+0460+  0748             
+0461+  0748 EA          	pop bl
+0462+  0749 07 68 05    	call itoa				; convert bh to char in A
+0463+  074C 2F          	mov bl, al				; save al
+0464+  074D 19 00       	mov al, 0
+0465+  074F 05 03       	syscall sys_io				; display AH
+0466+  0751 24          	mov ah, bl				; retrieve al
+0467+  0752 19 00       	mov al, 0
+0468+  0754 05 03       	syscall sys_io				; display AL
+0469+  0756             
+0470+  0756 E5          	pop b
+0471+  0757 E4          	pop a
+0472+  0758 09          	ret
+0473+  0759             
+0474+  0759             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0475+  0759             ; INPUT 16BIT HEX INTEGER
+0476+  0759             ; read 16bit integer into A
+0477+  0759             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0478+  0759             scan_u16x:
+0479+  0759 F8 10 00    	enter 16
+0480+  075C D8          	push b
+0481+  075D DA          	push d
+0482+  075E             
+0483+  075E FA F1 FF    	lea d, [bp + -15]
+0484+  0761 07 A8 05    	call gets				; get number
+0485+  0764             
+0486+  0764 32          	mov bl, [d]
+0487+  0765 37          	mov bh, bl
+0488+  0766 33 01 00    	mov bl, [d + 1]
+0489+  0769 07 56 05    	call atoi				; convert to int in AL
+0490+  076C 23          	mov ah, al				; move to AH
+0491+  076D             
+0492+  076D 33 02 00    	mov bl, [d + 2]
+0493+  0770 37          	mov bh, bl
+0494+  0771 33 03 00    	mov bl, [d + 3]
+0495+  0774 07 56 05    	call atoi				; convert to int in AL
+0496+  0777             
+0497+  0777 E7          	pop d
+0498+  0778 E5          	pop b
+0499+  0779 F9          	leave
+0500+  077A 09          	ret
+0501+  077B             
+0502+  077B             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0503+  077B             ; PRINT 8bit HEX INTEGER
+0504+  077B             ; integer value in reg bl
+0505+  077B             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0506+  077B             print_u8x:
+0507+  077B D7          	push a
+0508+  077C DD          	push bl
+0509+  077D             
+0510+  077D 07 68 05    	call itoa				; convert bl to char in A
+0511+  0780 2F          	mov bl, al				; save al
+0512+  0781 19 00       	mov al, 0
+0513+  0783 05 03       	syscall sys_io				; display AH
+0514+  0785 24          	mov ah, bl				; retrieve al
+0515+  0786 19 00       	mov al, 0
+0516+  0788 05 03       	syscall sys_io				; display AL
+0517+  078A             
+0518+  078A EA          	pop bl
+0519+  078B E4          	pop a
+0520+  078C 09          	ret
+0521+  078D             
+0522+  078D             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0523+  078D             ; print 8bit decimal unsigned number
+0524+  078D             ; input number in AL
+0525+  078D             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0526+  078D             print_u8d:
+0527+  078D D7          	push a
+0528+  078E D8          	push b
+0529+  078F             
+0530+  078F 22 00       	mov ah, 0
+0531+  0791 26 64 00    	mov b, 100
+0532+  0794 AE          	div a, b
+0533+  0795 D8          	push b			; save remainder
+0534+  0796 B9 00       	cmp al, 0
+0535+  0798 C6 A2 07    	je skip100
+0536+  079B 6A 30       	add al, $30
+0537+  079D 23          	mov ah, al
+0538+  079E 19 00       	mov al, 0
+0539+  07A0 05 03       	syscall sys_io	; print coeff
+0540+  07A2             skip100:
+0541+  07A2 E4          	pop a
+0542+  07A3 22 00       	mov ah, 0
+0543+  07A5 26 0A 00    	mov b, 10
+0544+  07A8 AE          	div a, b
+0545+  07A9 D8          	push b			; save remainder
+0546+  07AA B9 00       	cmp al, 0
+0547+  07AC C6 B6 07    	je skip10
+0548+  07AF 6A 30       	add al, $30
+0549+  07B1 23          	mov ah, al
+0550+  07B2 19 00       	mov al, 0
+0551+  07B4 05 03       	syscall sys_io	; print coeff
+0552+  07B6             skip10:
+0553+  07B6 E4          	pop a
+0554+  07B7 1B          	mov al, bl
+0555+  07B8 6A 30       	add al, $30
+0556+  07BA 23          	mov ah, al
+0557+  07BB 19 00       	mov al, 0
+0558+  07BD 05 03       	syscall sys_io	; print coeff
+0559+  07BF E5          	pop b
+0560+  07C0 E4          	pop a
+0561+  07C1 09          	ret
+0562+  07C2             
+0563+  07C2             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0564+  07C2             ; INPUT 8BIT HEX INTEGER
+0565+  07C2             ; read 8bit integer into AL
+0566+  07C2             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0567+  07C2             scan_u8x:
+0568+  07C2 F8 04 00    	enter 4
+0569+  07C5 D8          	push b
+0570+  07C6 DA          	push d
+0571+  07C7             
+0572+  07C7 FA FD FF    	lea d, [bp + -3]
+0573+  07CA 07 A8 05    	call gets				; get number
+0574+  07CD             
+0575+  07CD 32          	mov bl, [d]
+0576+  07CE 37          	mov bh, bl
+0577+  07CF 33 01 00    	mov bl, [d + 1]
+0578+  07D2 07 56 05    	call atoi				; convert to int in AL
+0579+  07D5             
+0580+  07D5 E7          	pop d
+0581+  07D6 E5          	pop b
+0582+  07D7 F9          	leave
+0583+  07D8 09          	ret
+0584+  07D9             
+0585+  07D9             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0586+  07D9             ; input decimal number
+0587+  07D9             ; result in A
+0588+  07D9             ; 655'\0'
+0589+  07D9             ; low--------high
+0590+  07D9             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0591+  07D9             scan_u16d:
+0592+  07D9 F8 08 00    	enter 8
+0593+  07DC E2          	push si
+0594+  07DD D8          	push b
+0595+  07DE D9          	push c
+0596+  07DF DA          	push d
+0597+  07E0 FA F9 FF    	lea d, [bp +- 7]
+0598+  07E3 07 A8 05    	call gets
+0599+  07E6 07 DE 04    	call strlen			; get string length in C
+0600+  07E9 7E          	dec c
+0601+  07EA FD 4E       	mov si, d
+0602+  07EC 12          	mov a, c
+0603+  07ED FD 99       	shl a
+0604+  07EF 3B 3E 05    	mov d, table_power
+0605+  07F2 59          	add d, a
+0606+  07F3 38 00 00    	mov c, 0
+0607+  07F6             mul_loop:
+0608+  07F6 F6          	lodsb			; load ASCII to al
+0609+  07F7 B9 00       	cmp al, 0
+0610+  07F9 C6 0C 08    	je mul_exit
+0611+  07FC 6F 30       	sub al, $30		; make into integer
+0612+  07FE 22 00       	mov ah, 0
+0613+  0800 2A          	mov b, [d]
+0614+  0801 AC          	mul a, b			; result in B since it fits in 16bits
+0615+  0802 11          	mov a, b
+0616+  0803 28          	mov b, c
+0617+  0804 54          	add a, b
+0618+  0805 39          	mov c, a
+0619+  0806 63 02 00    	sub d, 2
+0620+  0809 0A F6 07    	jmp mul_loop
+0621+  080C             mul_exit:
+0622+  080C 12          	mov a, c
+0623+  080D E7          	pop d
+0624+  080E E6          	pop c
+0625+  080F E5          	pop b
+0626+  0810 EF          	pop si
+0627+  0811 F9          	leave
+0628+  0812 09          	ret
+0105   0813             ; --- end include block
+0106   0813             
+0107   0813             .end
 tasm: Number of errors = 0

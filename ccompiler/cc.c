@@ -1207,6 +1207,7 @@ void assign_var(char *var_name){
     var_id = local_var_exists(var_name);
     if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
     || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
+      emitln("  push a");
       emitln("  mov a, b");
       emit("  mov [");
       get_var_base_addr(temp, var_name);
@@ -1214,8 +1215,10 @@ void assign_var(char *var_name){
       emit("], a");
       emit(" ; ");
       emitln(var_name);
+      emitln("  pop a");
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
+      emitln("  push al");
       emitln("  mov al, bl");
       emit("  mov [");
       get_var_base_addr(temp, var_name);
@@ -1223,6 +1226,7 @@ void assign_var(char *var_name){
       emit("], al");
       emit(" ; ");
       emitln(var_name);
+      emitln("  pop al");
     }
   }
   else if(global_var_exists(var_name) != -1){  // is a global variable

@@ -1,19 +1,35 @@
 #include "lib/stdio.asm"
 
-void main(void){
-  int *i[2][2]; // -7
-  int j; // -9
-  int k; // -11
-  j = 55;
-  i[1][1] = &j;
-  k = *i[1][1];
+char *s = "\n";
 
-  asm{
-    mov a, @k
-    call print_u16d
+void main(void){
+  
+  int i;
+  int j;
+
+  for(i=2; ; i++){
+    j = fact(i);
+    asm{
+      mov a, @j
+      call print_u16d
+
+      mov a, @s
+      mov d, a
+      call puts
+    }
   }
 
+
   return;
+}
+
+int fact(int n){
+  int nn;
+  if(n == 1) return 1;
+  else{
+    nn = n * fact(n - 1);
+    return nn;
+  }
 }
 
 
