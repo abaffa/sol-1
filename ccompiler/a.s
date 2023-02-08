@@ -8,21 +8,11 @@ main:
   mov bp, sp
   sub sp, 8 ; i
   sub sp, 2 ; j
-  lea d, [bp + -7] ; i
-  mov b, d
-  mov d, b
-  mov b, 1
-  mov a, 4
-  mul a, b
-  add d, b
-  mov b, 0
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, 2
+  sub sp, 2 ; k
+  mov b, 55
   mov a, b
   swp a
-  mov [d], a
+  mov [bp + -9], a ; j
   lea d, [bp + -7] ; i
   mov b, d
   mov d, b
@@ -34,7 +24,10 @@ main:
   mov a, 2
   mul a, b
   add d, b
-  mov b, 1
+  push d
+  lea d, [bp + -9]
+  mov b, d
+  pop d
   mov a, b
   swp a
   mov [d], a
@@ -45,17 +38,20 @@ main:
   mov a, 4
   mul a, b
   add d, b
-  mov b, 0
+  mov b, 1
   mov a, 2
   mul a, b
   add d, b
   mov b, [d]
   swp b
+  mov d, b
+  mov b, [d]
+  swp b
   mov a, b
   swp a
-  mov [bp + -9], a ; j
+  mov [bp + -11], a ; k
 ; --- begin inline asm block
-    mov a, [bp + -9]
+    mov a, [bp + -11]
     swp a
     call print_u16d
   ; --- end inline asm block

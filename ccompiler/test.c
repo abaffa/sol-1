@@ -1,16 +1,15 @@
 #include "lib/stdio.asm"
 
 void main(void){
-  int i[2][2];
-  int j;
-
-  i[1][0] = sizeof(int);
-  i[1][1] = sizeof(char);
-
-  j = i[1][0];
+  int *i[2][2]; // -7
+  int j; // -9
+  int k; // -11
+  j = 55;
+  i[1][1] = &j;
+  k = *i[1][1];
 
   asm{
-    mov a, @j
+    mov a, @k
     swp a
     call print_u16d
   }

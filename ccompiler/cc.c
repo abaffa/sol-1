@@ -488,7 +488,6 @@ void parse_asm(void){
 void emit_c_var(char *var_name){
   int var_id;
   char temp[256];
-
   if(local_var_exists(var_name) != -1){ // is a local variable
     var_id = local_var_exists(var_name);
     if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){
@@ -1291,7 +1290,6 @@ void parse_assignment(){
 			t_var *matrix; // pointer to the matrix variable
 			int i;
       int data_size; // matrix data size
-			t_data index;
 			int dims;
 			matrix = get_var_pointer(var_name); // gets a pointer to the variable holding the matrix address
 			data_size = get_data_size(&matrix->data);
@@ -1325,7 +1323,9 @@ void parse_assignment(){
 				if(tok != OPENING_BRACKET) break;
 			}
       // we are past the '=' sign here
+      emitln("  push d"); // save 'd' in the stack (which contains the variable address), since the RHS expression could use 'd'
       parse_logical(); // evaluate expression, result in 'b'
+      emitln("  pop d"); // now retrieve the destination address so we can write to it
       if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
         emitln("  mov a, b");
         if(get_var_scope(var_name) == LOCAL) emitln("  swp a");
@@ -1615,7 +1615,7 @@ void parse_atom(void){
   char temp[64];
   char var_address_str[32];
   char enum_value_str[32];
-
+ 
   get();
   if(tok == SIZEOF){
     get();
@@ -1636,6 +1636,8 @@ void parse_atom(void){
     parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
     emitln("  mov b, [d]"); // data fetched as an int. need to improve this to allow any types later.
+    need to PARSE VARIABLE HERE TO SEE IF IS LOCAL OR GLOBAL SO THAT WE CAN SWP OR NOT
+    emitln("  swp b");
     back();
   }
   else if(tok == AMPERSAND){
@@ -1712,15 +1714,11 @@ void parse_atom(void){
     }
     else if(tok == OPENING_BRACKET){ // matrix operations
 			t_var *matrix; // pointer to the matrix variable
-			int i;
-      int data_size; // matrix data size
-			t_data index;
-			int dims;
+			int i, dims, data_size; // matrix data size
 			matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
 			data_size = get_data_size(&matrix->data);
 			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      //emitln("  mov d, 0");
-      try_emitting_var(temp_name); // emit the base address of the matrix or pointer
+      try_emitting_var(temp_name); // emit the base address of the matrix or pointer into 'b'
       emitln("  mov d, b");
 			for(i = 0; i < dims; i++){
         parse_expr(); // result in 'b'
@@ -1824,7 +1822,10 @@ void try_emitting_var(char *var_name){
 
   if(local_var_exists(var_name) != -1){ // is a local variable
     var_id = local_var_exists(var_name);
-    if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){
+    // both matrix and parameter means this is a parameter local variable to a function
+    // that is really a pointer variable and not really a matrix.
+    if(is_matrix(&function_table[current_func_id].local_vars[var_id])
+    && function_table[current_func_id].local_vars[var_id].is_parameter){
       emit("  lea d, [");
       get_var_base_addr(temp, var_name);
       emit(temp);
@@ -1836,26 +1837,24 @@ void try_emitting_var(char *var_name){
                 // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
     }
     else if(is_matrix(&function_table[current_func_id].local_vars[var_id])){
-      if(function_table[current_func_id].local_vars[var_id].is_parameter){
-        emit("  lea d, [");
-        get_var_base_addr(temp, var_name);
-        emit(temp);
-        emit("]");
-        emit(" ; ");
-        emitln(var_name);
-        emitln("  mov b, [d]");
-        emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
-                  // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
-      }
-      else{
-        emit("  lea d, [");
-        get_var_base_addr(temp, var_name);
-        emit(temp);
-        emit("]");
-        emit(" ; ");
-        emitln(var_name);
-        emitln("  mov b, d");
-      }
+      emit("  lea d, [");
+      get_var_base_addr(temp, var_name);
+      emit(temp);
+      emit("]");
+      emit(" ; ");
+      emitln(var_name);
+      emitln("  mov b, d");
+    }
+    else if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){
+      emit("  lea d, [");
+      get_var_base_addr(temp, var_name);
+      emit(temp);
+      emit("]");
+      emit(" ; ");
+      emitln(var_name);
+      emitln("  mov b, [d]");
+      emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
+                // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emit("  mov b, [");
