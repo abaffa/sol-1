@@ -10,7 +10,6 @@ void main(void){
 
   asm{
     mov a, @k
-    swp a
     call print_u16d
   }
 

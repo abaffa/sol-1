@@ -1208,8 +1208,6 @@ void assign_var(char *var_name){
     if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0
     || function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emitln("  mov a, b");
-      emitln("  swp a"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
-                // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
       emit("  mov [");
       get_var_base_addr(temp, var_name);
       emit(temp);
@@ -1328,7 +1326,6 @@ void parse_assignment(){
       emitln("  pop d"); // now retrieve the destination address so we can write to it
       if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
         emitln("  mov a, b");
-        if(get_var_scope(var_name) == LOCAL) emitln("  swp a");
         emitln("  mov [d], a");
       }
       else if(matrix->data.type == DT_CHAR){
@@ -1636,8 +1633,7 @@ void parse_atom(void){
     parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
     emitln("  mov b, [d]"); // data fetched as an int. need to improve this to allow any types later.
-    need to PARSE VARIABLE HERE TO SEE IF IS LOCAL OR GLOBAL SO THAT WE CAN SWP OR NOT
-    emitln("  swp b");
+    //need to PARSE VARIABLE HERE TO SEE IF IS LOCAL OR GLOBAL SO THAT WE CAN SWP OR NOT
     back();
   }
   else if(tok == AMPERSAND){
@@ -1741,11 +1737,7 @@ void parse_atom(void){
               emitln("  mov bl, [d]");
               break;
             case DT_INT:
-              if(get_var_scope(temp_name) == LOCAL){
-                emitln("  mov b, [d]");
-                emitln("  swp b");
-              }
-              else emitln("  mov b, [d]");
+              emitln("  mov b, [d]");
               break;
           }
 			  }
@@ -1833,8 +1825,6 @@ void try_emitting_var(char *var_name){
       emit(" ; ");
       emitln(var_name);
       emitln("  mov b, [d]");
-      emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
-                // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
     }
     else if(is_matrix(&function_table[current_func_id].local_vars[var_id])){
       emit("  lea d, [");
@@ -1853,8 +1843,6 @@ void try_emitting_var(char *var_name){
       emit(" ; ");
       emitln(var_name);
       emitln("  mov b, [d]");
-      emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
-                // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emit("  mov b, [");
@@ -1863,8 +1851,6 @@ void try_emitting_var(char *var_name){
       emit("]");
       emit(" ; ");
       emitln(var_name);
-      emitln("  swp b"); // due to a stack silliness in the CPU where the LSB of a word is at the higher address, we need the swap here. 
-                // i need to fix the stack push/pop in the cpu so that low bytes are at lower addresses!
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
       emit("  mov bl, [");
@@ -1991,6 +1977,7 @@ void parse_function_arguments(int func_id){
     parse_expr();
     if(function_table[func_id].local_vars[param_index].data.ind_level > 0
     || is_matrix(&function_table[func_id].local_vars[param_index])){
+      emitln("  swp b");
       emitln("  push b");
     }
     else
@@ -1999,6 +1986,7 @@ void parse_function_arguments(int func_id){
           emitln("  push bl");
           break;
         case DT_INT:
+          emitln("  swp b");
           emitln("  push b");
           break;
       }
