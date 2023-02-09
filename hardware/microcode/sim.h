@@ -138,7 +138,6 @@ __published:	// IDE-managed Components
         TMenuItem *N42;
         TMenuItem *N52;
         TMenuItem *N102;
-        TPanel *Panel15;
         TPanel *Panel10;
         TGroupBox *GroupBox2;
         TComboBox *combo_type;
@@ -169,18 +168,7 @@ __published:	// IDE-managed Components
         TComboBox *combo_aluop;
         TComboBox *combo_alu_cf_in;
         TPanel *Panel5;
-        TTabSheet *TabSheet1;
-        TPanel *Panel23;
-        TPanel *Panel27;
-        TButton *Button11;
-        TLabeledEdit *edtbaud;
-        TLabeledEdit *edtport;
-        TLabeledEdit *edtdatabits;
-        TLabeledEdit *edtstopbits;
-        TButton *Button10;
         TOpenDialog *OpenDialog2;
-        TMemo *memo_com_out;
-        TButton *Button26;
         TPopupMenu *PopupMenu3;
         TMenuItem *Bookmark1;
         TStatusBar *StatusBar1;
@@ -192,10 +180,8 @@ __published:	// IDE-managed Components
         TMenuItem *SaveAs1;
         TMenuItem *Tools1;
         TMenuItem *CalculateAvgCyclesperInstruction1;
-        TMemo *Memo1;
         TMenuItem *N2;
         TMenuItem *GenerateTASMTable1;
-        TMenuItem *COM1;
         TMenuItem *N13;
         TMenuItem *Options1;
         TSaveDialog *SaveDialog1;
@@ -210,24 +196,10 @@ __published:	// IDE-managed Components
         TMenuItem *Sorted1;
         TMenuItem *N17;
         TMenuItem *Wordwrap1;
-        TMenuItem *Open3;
-        TMenuItem *Directory1;
-        TMenuItem *Hexeditor1;
-        TMenuItem *Programmer1;
-        TMenuItem *Commandprompt1;
-        TMenuItem *Calculator1;
-        TMenuItem *Notepad1;
-        TButton *Button1;
-        TButton *Button17;
-        TButton *Button14;
-        TButton *Button18;
         TSpeedButton *SpeedButton7;
-        TButton *Button15;
         TBitBtn *BitBtn2;
-        TButton *Button32;
         TButton *Button4;
         TButton *Button3;
-        TButton *Button30;
         TBitBtn *BitBtn1;
         TButton *Button13;
         TButton *Button12;
@@ -236,13 +208,6 @@ __published:	// IDE-managed Components
         TButton *Button5;
         TMenuItem *View1;
         TMenuItem *Prompt1;
-        TMenuItem *Openport1;
-        TMenuItem *Closeport1;
-        TMenuItem *N23;
-        TMenuItem *Clearterminal1;
-        TMenuItem *N24;
-        TMenuItem *Sendfile1;
-        TTimer *Timer1;
         TMenuItem *N25;
         TMenuItem *N26;
         TMenuItem *N19;
@@ -252,14 +217,6 @@ __published:	// IDE-managed Components
         TMenuItem *Save3;
         TMenuItem *SaveAs3;
         TMenuItem *Assemble2;
-        TMemo *m_com_in;
-        TIdHTTPServer *IdHTTPServer1;
-        TButton *Button16;
-    TMemo *memo_textarea;
-    TSplitter *Splitter3;
-    TButton *Button8;
-	TLabeledEdit *edt_timeout;
-	TLabeledEdit *edt_chars;
 	TMenuItem *OpenRecent1;
 	TMenuItem *Microcodeedit1;
 	TMenuItem *Copyinstruction1;
@@ -288,13 +245,18 @@ __published:	// IDE-managed Components
 	TMenuItem *MicrocodeEditor1;
 	TListBox *list_names;
 	TSplitter *Splitter1;
-	TServerSocket *telnet;
-	TButton *Button2;
-	TButton *Button9;
 	TMenuItem *Settings1;
 	TMenuItem *MicrocodeEditor2;
 	TMenuItem *ReadOnly1;
 	TMenuItem *Options2;
+        TMenuItem *Openworkingdirectory1;
+        TMenuItem *Hexeditor1;
+        TMenuItem *Programmer1;
+        TMenuItem *Commandprompt1;
+        TMenuItem *Calculator1;
+        TMenuItem *Notepad1;
+        TTabSheet *TabSheet1;
+        TMemo *terminal;
         void __fastcall Button3Click(TObject *Sender);
         void __fastcall Button4Click(TObject *Sender);
         void __fastcall Button34Click(TObject *Sender);
@@ -311,9 +273,6 @@ __published:	// IDE-managed Components
           TShiftState Shift);
         void __fastcall list_cycleClick(TObject *Sender);
         void __fastcall combo_typeSelect(TObject *Sender);
-        void __fastcall Button1Click(TObject *Sender);
-        void __fastcall Button17Click(TObject *Sender);
-        void __fastcall Button18Click(TObject *Sender);
         void __fastcall Button20Click(TObject *Sender);
         void __fastcall Button19Click(TObject *Sender);
         void __fastcall combo_aluAmuxSelect(TObject *Sender);
@@ -352,11 +311,7 @@ __published:	// IDE-managed Components
           int ARow, bool &CanSelect);
         void __fastcall list_cycleKeyPress(TObject *Sender, char &Key);
         void __fastcall Reset1Click(TObject *Sender);
-        void __fastcall Button10Click(TObject *Sender);
-        void __fastcall Button26Click(TObject *Sender);
         void __fastcall FormDestroy(TObject *Sender);
-        void __fastcall Button30Click(TObject *Sender);
-        void __fastcall Button32Click(TObject *Sender);
         void __fastcall CalculateAvgCyclesperInstruction1Click(
           TObject *Sender);
         void __fastcall GenerateTASMTable1Click(TObject *Sender);
@@ -364,21 +319,9 @@ __published:	// IDE-managed Components
         void __fastcall memo_text12Enter(TObject *Sender);
         void __fastcall Sorted1Click(TObject *Sender);
         void __fastcall Directory1Click(TObject *Sender);
-        void __fastcall Button15Click(TObject *Sender);
         void __fastcall Prompt1Click(TObject *Sender);
-        void __fastcall Timer1Timer(TObject *Sender);
-        void __fastcall ASCIITable1Click(TObject *Sender);
         void __fastcall memo_text112Enter(TObject *Sender);
         void __fastcall FormShow(TObject *Sender);
-        void __fastcall m_com_inKeyDown(TObject *Sender, WORD &Key,
-          TShiftState Shift);
-        void __fastcall FormActivate(TObject *Sender);
-        void __fastcall Button16Click(TObject *Sender);
-    void __fastcall IdHTTPServer1CommandGet(TIdPeerThread *AThread,
-          TIdHTTPRequestInfo *RequestInfo,
-          TIdHTTPResponseInfo *ResponseInfo);
-    void __fastcall Button11Click(TObject *Sender);
-    void __fastcall Button8Click(TObject *Sender);
 	void __fastcall Save1Click(TObject *Sender);
 	void __fastcall SaveAs1Click(TObject *Sender);
 	void __fastcall Open1Click(TObject *Sender);
@@ -393,11 +336,7 @@ __published:	// IDE-managed Components
 	void __fastcall N43Click(TObject *Sender);
 	void __fastcall N53Click(TObject *Sender);
 	void __fastcall MicrocodeEditor1Click(TObject *Sender);
-	void __fastcall Button2Click(TObject *Sender);
-	void __fastcall Button9Click(TObject *Sender);
 	void __fastcall telnetClientConnect(TObject *Sender,
-          TCustomWinSocket *Socket);
-	void __fastcall telnetClientRead(TObject *Sender,
           TCustomWinSocket *Socket);
 	void __fastcall ReadOnly1Click(TObject *Sender);
 private:	// User declarations

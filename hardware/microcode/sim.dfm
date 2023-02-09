@@ -1,6 +1,6 @@
 object fmain: Tfmain
-  Left = 228
-  Top = 132
+  Left = 453
+  Top = 140
   Width = 1052
   Height = 850
   Caption = 'Microcode Builder 1.0'
@@ -16,24 +16,23 @@ object fmain: Tfmain
   Scaled = False
   Visible = True
   WindowState = wsMaximized
-  OnActivate = FormActivate
   OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
-    Top = 62
-    Width = 873
-    Height = 723
+    Top = 34
+    Width = 1036
+    Height = 738
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
     object PageControl2: TPageControl
       Left = 0
       Top = 0
-      Width = 873
-      Height = 723
+      Width = 1036
+      Height = 738
       ActivePage = TabSheet1
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
@@ -57,7 +56,7 @@ object fmain: Tfmain
           Left = 553
           Top = 0
           Width = 6
-          Height = 695
+          Height = 710
           Cursor = crHSplit
           AutoSnap = False
           Color = clCream
@@ -68,7 +67,7 @@ object fmain: Tfmain
           Left = 161
           Top = 0
           Width = 392
-          Height = 695
+          Height = 710
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 0
@@ -76,7 +75,7 @@ object fmain: Tfmain
             Left = 361
             Top = 0
             Width = 31
-            Height = 695
+            Height = 710
             Align = alRight
             BevelOuter = bvNone
             TabOrder = 0
@@ -84,7 +83,7 @@ object fmain: Tfmain
               Left = 0
               Top = 0
               Width = 31
-              Height = 695
+              Height = 710
               Align = alClient
               BevelInner = bvNone
               BevelOuter = bvNone
@@ -175,12 +174,12 @@ object fmain: Tfmain
             Left = 0
             Top = 0
             Width = 361
-            Height = 695
+            Height = 710
             Align = alClient
             TabOrder = 1
             object Splitter2: TSplitter
               Left = 1
-              Top = 394
+              Top = 409
               Width = 359
               Height = 4
               Cursor = crVSplit
@@ -194,7 +193,7 @@ object fmain: Tfmain
               Left = 1
               Top = 1
               Width = 359
-              Height = 393
+              Height = 408
               Cursor = crArrow
               OnClickCheck = control_listClickCheck
               Align = alClient
@@ -333,7 +332,7 @@ object fmain: Tfmain
             end
             object Panel3: TPanel
               Left = 1
-              Top = 398
+              Top = 413
               Width = 359
               Height = 296
               Align = alBottom
@@ -382,16 +381,16 @@ object fmain: Tfmain
         object Panel4: TPanel
           Left = 559
           Top = 0
-          Width = 306
-          Height = 695
+          Width = 469
+          Height = 710
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 1
           object list_names: TListBox
             Left = 0
             Top = 0
-            Width = 306
-            Height = 695
+            Width = 469
+            Height = 710
             AutoComplete = False
             Align = alClient
             BevelInner = bvNone
@@ -412,7 +411,7 @@ object fmain: Tfmain
           Left = 0
           Top = 0
           Width = 161
-          Height = 695
+          Height = 710
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 2
@@ -1179,8 +1178,8 @@ object fmain: Tfmain
         object ListBox2: TListBox
           Left = 0
           Top = 0
-          Width = 865
-          Height = 695
+          Width = 1028
+          Height = 710
           AutoComplete = False
           Align = alClient
           BevelInner = bvNone
@@ -1199,450 +1198,30 @@ object fmain: Tfmain
         end
       end
       object TabSheet1: TTabSheet
-        Caption = 'Web / COM'
-        ImageIndex = 5
-        object Panel23: TPanel
+        Caption = 'Terminal'
+        ImageIndex = 2
+        object terminal: TMemo
           Left = 0
           Top = 0
-          Width = 865
-          Height = 695
+          Width = 1028
+          Height = 710
           Align = alClient
-          BevelOuter = bvNone
           TabOrder = 0
-          object Splitter3: TSplitter
-            Left = 553
-            Top = 97
-            Width = 8
-            Height = 537
-            Cursor = crHSplit
-            AutoSnap = False
-            ResizeStyle = rsUpdate
-          end
-          object Panel27: TPanel
-            Left = 0
-            Top = 0
-            Width = 865
-            Height = 97
-            Align = alTop
-            BevelOuter = bvNone
-            TabOrder = 0
-            object Button11: TButton
-              Left = 184
-              Top = 26
-              Width = 75
-              Height = 25
-              Caption = 'Open Port'
-              TabOrder = 0
-              OnClick = Button11Click
-            end
-            object edtbaud: TLabeledEdit
-              Left = 96
-              Top = 24
-              Width = 73
-              Height = 21
-              EditLabel.Width = 54
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Baud Rate:'
-              EditLabel.Font.Charset = DEFAULT_CHARSET
-              EditLabel.Font.Color = clBlack
-              EditLabel.Font.Height = -11
-              EditLabel.Font.Name = 'MS Sans Serif'
-              EditLabel.Font.Style = []
-              EditLabel.ParentFont = False
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'MS Sans Serif'
-              Font.Style = []
-              LabelPosition = lpAbove
-              LabelSpacing = 3
-              ParentFont = False
-              TabOrder = 1
-              Text = '38400'
-            end
-            object edtport: TLabeledEdit
-              Left = 16
-              Top = 24
-              Width = 73
-              Height = 21
-              Ctl3D = True
-              EditLabel.Width = 62
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Port Number:'
-              EditLabel.Font.Charset = DEFAULT_CHARSET
-              EditLabel.Font.Color = clBlack
-              EditLabel.Font.Height = -11
-              EditLabel.Font.Name = 'MS Sans Serif'
-              EditLabel.Font.Style = []
-              EditLabel.ParentFont = False
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'MS Sans Serif'
-              Font.Style = []
-              LabelPosition = lpAbove
-              LabelSpacing = 3
-              ParentCtl3D = False
-              ParentFont = False
-              TabOrder = 2
-              Text = 'COM6'
-            end
-            object edtdatabits: TLabeledEdit
-              Left = 16
-              Top = 64
-              Width = 73
-              Height = 21
-              EditLabel.Width = 46
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Data Bits:'
-              EditLabel.Font.Charset = DEFAULT_CHARSET
-              EditLabel.Font.Color = clBlack
-              EditLabel.Font.Height = -11
-              EditLabel.Font.Name = 'MS Sans Serif'
-              EditLabel.Font.Style = []
-              EditLabel.ParentFont = False
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'MS Sans Serif'
-              Font.Style = []
-              LabelPosition = lpAbove
-              LabelSpacing = 3
-              ParentFont = False
-              TabOrder = 3
-              Text = '8'
-            end
-            object edtstopbits: TLabeledEdit
-              Left = 96
-              Top = 64
-              Width = 73
-              Height = 21
-              EditLabel.Width = 45
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Stop Bits:'
-              EditLabel.Font.Charset = DEFAULT_CHARSET
-              EditLabel.Font.Color = clBlack
-              EditLabel.Font.Height = -11
-              EditLabel.Font.Name = 'MS Sans Serif'
-              EditLabel.Font.Style = []
-              EditLabel.ParentFont = False
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'MS Sans Serif'
-              Font.Style = []
-              LabelPosition = lpAbove
-              LabelSpacing = 3
-              ParentFont = False
-              TabOrder = 4
-              Text = '1'
-            end
-            object Button10: TButton
-              Left = 264
-              Top = 26
-              Width = 75
-              Height = 25
-              Caption = 'Close Port'
-              TabOrder = 5
-              OnClick = Button10Click
-            end
-            object Button26: TButton
-              Left = 184
-              Top = 58
-              Width = 155
-              Height = 25
-              Caption = 'Clear Terminal'
-              TabOrder = 6
-              OnClick = Button26Click
-            end
-            object Button16: TButton
-              Left = 343
-              Top = 26
-              Width = 106
-              Height = 25
-              Caption = 'Clear HTML'
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clBlack
-              Font.Height = -11
-              Font.Name = 'MS Sans Serif'
-              Font.Style = []
-              ParentFont = False
-              TabOrder = 7
-              OnClick = Button16Click
-            end
-            object Button8: TButton
-              Left = 344
-              Top = 58
-              Width = 105
-              Height = 25
-              Caption = 'Turn Server OFF'
-              TabOrder = 8
-              OnClick = Button8Click
-            end
-            object edt_timeout: TLabeledEdit
-              Left = 464
-              Top = 24
-              Width = 73
-              Height = 21
-              EditLabel.Width = 41
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Timeout:'
-              LabelPosition = lpAbove
-              LabelSpacing = 3
-              TabOrder = 9
-              Text = '5'
-            end
-            object edt_chars: TLabeledEdit
-              Left = 464
-              Top = 64
-              Width = 73
-              Height = 21
-              EditLabel.Width = 30
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Chars:'
-              LabelPosition = lpAbove
-              LabelSpacing = 3
-              TabOrder = 10
-              Text = '512'
-            end
-            object Button2: TButton
-              Left = 576
-              Top = 24
-              Width = 97
-              Height = 25
-              Caption = 'Open Telnet'
-              TabOrder = 11
-              OnClick = Button2Click
-            end
-            object Button9: TButton
-              Left = 576
-              Top = 56
-              Width = 97
-              Height = 25
-              Caption = 'Close Telnet'
-              TabOrder = 12
-              OnClick = Button9Click
-            end
-          end
-          object memo_com_out: TMemo
-            Left = 0
-            Top = 97
-            Width = 553
-            Height = 537
-            Align = alLeft
-            Color = clWhite
-            Ctl3D = True
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Courier New'
-            Font.Style = []
-            HideSelection = False
-            ParentCtl3D = False
-            ParentFont = False
-            ReadOnly = True
-            ScrollBars = ssVertical
-            TabOrder = 1
-            WantReturns = False
-          end
-          object m_com_in: TMemo
-            Left = 0
-            Top = 634
-            Width = 865
-            Height = 61
-            Align = alBottom
-            Ctl3D = True
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Courier New'
-            Font.Style = []
-            ParentCtl3D = False
-            ParentFont = False
-            ScrollBars = ssVertical
-            TabOrder = 2
-            WantReturns = False
-            OnKeyDown = m_com_inKeyDown
-          end
-          object memo_textarea: TMemo
-            Left = 561
-            Top = 97
-            Width = 304
-            Height = 537
-            Align = alClient
-            ScrollBars = ssVertical
-            TabOrder = 3
-          end
         end
       end
-    end
-  end
-  object Panel15: TPanel
-    Left = 873
-    Top = 62
-    Width = 171
-    Height = 723
-    Align = alRight
-    TabOrder = 1
-    Visible = False
-    object Memo1: TMemo
-      Left = 1
-      Top = 1
-      Width = 169
-      Height = 721
-      Align = alClient
-      BorderStyle = bsNone
-      Color = clWhite
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clNavy
-      Font.Height = -12
-      Font.Name = 'Consolas'
-      Font.Style = []
-      Lines.Strings = (
-        'D   O    H    ASCII'
-        '0   0    0    NUL'
-        '1   1    1    SOH'
-        '2   2    2    STX'
-        '3   3    3    ETX'
-        '4   4    4    EOT'
-        '5   5    5    ENQ'
-        '6   6    6    ACK'
-        '7   7    7    BEL'
-        '8   10   8    BS'
-        '9   11   9    HT'
-        '10  12   A    LF'
-        '11  13   B    VT'
-        '12  14   C    FF'
-        '13  15   D    CR'
-        '14  16   E    SO'
-        '15  17   F    SI'
-        '16  20   10   DLE'
-        '17  21   11   DC1'
-        '18  22   12   DC2'
-        '19  23   13   DC3'
-        '20  24   14   DC4'
-        '21  25   15   NAK'
-        '22  26   16   SYN'
-        '23  27   17   ETB'
-        '24  30   18   CAN'
-        '25  31   19   EM'
-        '26  32   1A   SUB'
-        '27  33   1B   ESC'
-        '28  34   1C   FS'
-        '29  35   1D   GS'
-        '30  36   1E   RS'
-        '31  37   1F   US'
-        '32  40   20   SP'
-        '33  41   21   !'
-        '34  42   22   "'
-        '35  43   23   #'
-        '36  44   24   $'
-        '37  45   25   %'
-        '38  46   26   &'
-        '39  47   27   '#39
-        '40  50   28   ('
-        '41  51   29   )'
-        '42  52   2A   *'
-        '43  53   2B   +'
-        '44  54   2C   '#180
-        '45  55   2D   -'
-        '46  56   2E   .'
-        '47  57   2F   /'
-        '48  60   30   0'
-        '49  61   31   1'
-        '50  62   32   2'
-        '51  63   33   3'
-        '52  64   34   4'
-        '53  65   35   5'
-        '54  67   36   6'
-        '55  70   37   7'
-        '56  71   38   8'
-        '57  72   39   9'
-        '58  73   3A   :'
-        '59  74   3B   ;'
-        '60  75   3C   <'
-        '61  76   3D   ='
-        '62  77   3E   >'
-        '63  80   3F   ?'
-        '64  81   40   @'
-        '65  82   41   A'
-        '66  83   42   B'
-        '67  84   43   C'
-        '68  85   44   D'
-        '69  86   45   E'
-        '70  87   46   F'
-        '71  90   47   G'
-        '72  91   48   H'
-        '73  92   49   I'
-        '74  93   4A   J'
-        '75  94   4B   K'
-        '76  95   4C   L'
-        '77  96   4D   M'
-        '78  97   4E   N'
-        '79  100  4F   O'
-        '80  101  50   P'
-        '81  102  51   Q'
-        '82  103  52   R'
-        '83  104  53   S'
-        '84  105  54   T'
-        '85  106  55   U'
-        '86  107  56   V'
-        '87  110  57   W'
-        '88  111  58   X'
-        '89  112  59   Y'
-        '90  113  5A   Z'
-        '91  114  5B   ['
-        '92  115  5C   \'
-        '93  116  5D   ]'
-        '94  117  5E   ^'
-        '95  120  5F   _'
-        '96  121  60   `'
-        '97  122  61   a'
-        '98  123  62   b'
-        '99  124  63   c'
-        '100 125  64   d'
-        '101 126  65   e'
-        '102 127  66   f'
-        '103 130  67   g'
-        '104 131  68   h'
-        '105 132  69   i'
-        '106 133  6A   j'
-        '107 134  6B   k'
-        '108 135  6C   l'
-        '109 136  6D   m'
-        '110 137  6E   n'
-        '111 140  6F   o'
-        '112 141  70   p'
-        '113 142  71   q'
-        '114 143  72   r'
-        '115 144  73   s'
-        '116 145  74   t'
-        '117 146  75   u'
-        '118 147  76   v'
-        '119 150  77   w'
-        '120 151  78   x'
-        '121 152  79   y'
-        '122 153  7A   z'
-        '123 154  7B   {'
-        '124 155  7C   |'
-        '125 156  7D   }'
-        '126 157  7E   ~')
-      ParentFont = False
-      ScrollBars = ssVertical
-      TabOrder = 0
     end
   end
   object Panel5: TPanel
     Left = 0
     Top = 0
-    Width = 1044
-    Height = 62
+    Width = 1036
+    Height = 34
     Align = alTop
     BevelInner = bvLowered
     BevelOuter = bvNone
-    TabOrder = 2
+    TabOrder = 1
     object SpeedButton7: TSpeedButton
-      Left = 402
+      Left = 618
       Top = 7
       Width = 76
       Height = 21
@@ -1655,59 +1234,9 @@ object fmain: Tfmain
       ParentFont = False
       OnClick = SpeedButton7Click
     end
-    object Button1: TButton
-      Left = 729
-      Top = 34
-      Width = 80
-      Height = 21
-      Caption = 'Notepad'
-      TabOrder = 0
-      OnClick = Button1Click
-    end
-    object Button17: TButton
-      Left = 649
-      Top = 34
-      Width = 80
-      Height = 21
-      Caption = 'Calculator'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 1
-      OnClick = Button17Click
-    end
-    object Button14: TButton
-      Left = 569
-      Top = 34
-      Width = 80
-      Height = 21
-      Caption = 'ASCII'
-      TabOrder = 2
-    end
-    object Button18: TButton
-      Left = 489
-      Top = 34
-      Width = 80
-      Height = 21
-      Caption = 'Command'
-      TabOrder = 3
-      OnClick = Button18Click
-    end
-    object Button15: TButton
-      Left = 409
-      Top = 34
-      Width = 80
-      Height = 21
-      Caption = 'Programmer'
-      TabOrder = 4
-      OnClick = Button15Click
-    end
     object BitBtn2: TBitBtn
-      Left = 156
-      Top = 34
+      Left = 460
+      Top = 7
       Width = 60
       Height = 21
       Caption = '>>>'
@@ -1717,21 +1246,12 @@ object fmain: Tfmain
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
-      TabOrder = 5
+      TabOrder = 0
       OnClick = BitBtn2Click
     end
-    object Button32: TButton
-      Left = 329
-      Top = 34
-      Width = 80
-      Height = 21
-      Caption = 'Hex'
-      TabOrder = 6
-      OnClick = Button32Click
-    end
     object Button4: TButton
-      Left = 111
-      Top = 34
+      Left = 415
+      Top = 7
       Width = 45
       Height = 21
       Caption = '>'
@@ -1741,12 +1261,12 @@ object fmain: Tfmain
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
-      TabOrder = 7
+      TabOrder = 1
       OnClick = Button4Click
     end
     object Button3: TButton
-      Left = 66
-      Top = 34
+      Left = 370
+      Top = 7
       Width = 45
       Height = 21
       Caption = '<'
@@ -1756,27 +1276,12 @@ object fmain: Tfmain
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
-      TabOrder = 8
+      TabOrder = 2
       OnClick = Button3Click
     end
-    object Button30: TButton
-      Left = 223
-      Top = 34
-      Width = 106
-      Height = 21
-      Caption = 'Working Directory'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'MS Sans Serif'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 9
-      OnClick = Button30Click
-    end
     object BitBtn1: TBitBtn
-      Left = 6
-      Top = 34
+      Left = 310
+      Top = 7
       Width = 60
       Height = 21
       Caption = '<<<'
@@ -1786,7 +1291,7 @@ object fmain: Tfmain
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
-      TabOrder = 10
+      TabOrder = 3
       OnClick = BitBtn1Click
     end
     object Button13: TButton
@@ -1795,7 +1300,7 @@ object fmain: Tfmain
       Width = 75
       Height = 21
       Caption = 'Shift Right'
-      TabOrder = 11
+      TabOrder = 4
       OnClick = Button13Click
     end
     object Button12: TButton
@@ -1804,11 +1309,11 @@ object fmain: Tfmain
       Width = 75
       Height = 21
       Caption = 'Shift Left'
-      TabOrder = 12
+      TabOrder = 5
       OnClick = Button12Click
     end
     object Button7: TButton
-      Left = 316
+      Left = 532
       Top = 7
       Width = 75
       Height = 21
@@ -1819,7 +1324,7 @@ object fmain: Tfmain
       Font.Name = 'MS Sans Serif'
       Font.Style = []
       ParentFont = False
-      TabOrder = 13
+      TabOrder = 6
       OnClick = Button7Click
     end
     object Button6: TButton
@@ -1834,7 +1339,7 @@ object fmain: Tfmain
       Font.Name = 'MS Sans Serif'
       Font.Style = []
       ParentFont = False
-      TabOrder = 14
+      TabOrder = 7
       OnClick = Button6Click
     end
     object Button5: TButton
@@ -1849,14 +1354,14 @@ object fmain: Tfmain
       Font.Name = 'MS Sans Serif'
       Font.Style = []
       ParentFont = False
-      TabOrder = 15
+      TabOrder = 8
       OnClick = Button5Click
     end
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 785
-    Width = 1044
+    Top = 772
+    Width = 1036
     Height = 19
     Panels = <
       item
@@ -2256,7 +1761,6 @@ object fmain: Tfmain
       end
       object ASCIITable1: TMenuItem
         Caption = 'ASCII Table'
-        OnClick = ASCIITable1Click
       end
       object N14: TMenuItem
         Caption = '-'
@@ -2304,53 +1808,25 @@ object fmain: Tfmain
       object Options1: TMenuItem
         Caption = 'Options'
       end
-    end
-    object Open3: TMenuItem
-      Caption = 'Tools'
-      object Directory1: TMenuItem
+      object TMenuItem
+      end
+      object Openworkingdirectory1: TMenuItem
         Caption = 'Open working-directory'
-        OnClick = Button30Click
       end
       object Hexeditor1: TMenuItem
         Caption = 'Hex editor'
-        OnClick = Button32Click
       end
       object Programmer1: TMenuItem
         Caption = 'Programmer'
-        OnClick = Button15Click
       end
       object Commandprompt1: TMenuItem
         Caption = 'Command prompt'
-        OnClick = Button18Click
       end
       object Calculator1: TMenuItem
         Caption = 'Calculator'
-        OnClick = Button17Click
       end
       object Notepad1: TMenuItem
         Caption = 'Notepad'
-        OnClick = Button1Click
-      end
-    end
-    object COM1: TMenuItem
-      Caption = 'COM Port'
-      object Openport1: TMenuItem
-        Caption = 'Open port'
-      end
-      object Closeport1: TMenuItem
-        Caption = 'Close port'
-      end
-      object N23: TMenuItem
-        Caption = '-'
-      end
-      object Clearterminal1: TMenuItem
-        Caption = 'Clear terminal'
-      end
-      object N24: TMenuItem
-        Caption = '-'
-      end
-      object Sendfile1: TMenuItem
-        Caption = 'Send file'
       end
     end
   end
@@ -2379,29 +1855,5 @@ object fmain: Tfmain
       Checked = True
       OnClick = Sorted1Click
     end
-  end
-  object Timer1: TTimer
-    Interval = 1
-    OnTimer = Timer1Timer
-    Left = 760
-    Top = 288
-  end
-  object IdHTTPServer1: TIdHTTPServer
-    Active = True
-    Bindings = <>
-    TerminateWaitTime = 5000000
-    OnCommandGet = IdHTTPServer1CommandGet
-    AutoStartSession = True
-    Left = 792
-    Top = 288
-  end
-  object telnet: TServerSocket
-    Active = False
-    Port = 51515
-    ServerType = stNonBlocking
-    OnClientConnect = telnetClientConnect
-    OnClientRead = telnetClientRead
-    Left = 224
-    Top = 328
   end
 end
