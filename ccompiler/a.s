@@ -27,6 +27,9 @@ _ternary1_cond:
   cmp a, b
   lodflgs
   and al, %00000011
+  cmp al, %00000000
+  lodflgs
+  and al, %00000001
   mov ah, 0
   mov b, a
   pop a
