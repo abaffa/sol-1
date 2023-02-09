@@ -5,14 +5,11 @@ char *s = "\n";
 void main(void){
   
   int j;
+  int i;
 
-    j = fact(6);
-    asm{
-      mov a, @j
-      call print_u16d
+  j = 10;
 
-    }
-
+  j > 0 ? 1 : 0;
 
   return;
 }

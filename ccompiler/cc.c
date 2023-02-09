@@ -1202,51 +1202,46 @@ void parse_expr_no_assign(){
 // A = cond1 ? true_val : false_val;
 void parse_ternary_op(void){
   char s_label[64];
-  char *temp_p;
+  char *temp_prog;
+  char temp_asmp;
 
+  temp_prog = prog;
+  temp_asmp = asmp; // save current assembly output pointer
+  parse_expr_no_assign(); // evaluate condition
+  if(tok != TERNARY_OP){
+    prog = temp_prog;
+    asmp = temp_asmp; // recover asm output pointer
+    parse_logical();
+    return;
+  }
+
+  // '?' was found
   highest_label_index++;
   label_stack_if[label_tos_if] = current_label_index_if;
   label_tos_if++;
   current_label_index_if = highest_label_index;
-
-  parse_expr_no_assign(); // evaluate condition
-  if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   emitln("  cmp b, 0");
   
-  temp_p = prog;
-  skip_statements(); // skip main IF block in order to check for ELSE block.
-  get();
-  if(tok == ELSE){
-    sprintf(s_label, "  je _if%d_else", current_label_index_if);
-    emitln(s_label);
-  }
-  else{
-    sprintf(s_label, "  je _if%d_exit", current_label_index_if);
-    emitln(s_label);
-  }
+  sprintf(s_label, "  je _ternary%d_false", current_label_index_if);
+  emitln(s_label);
 
-  prog = temp_p;
-  sprintf(s_label, "_if%d_true:", current_label_index_if);
+  sprintf(s_label, "_ternary%d_true:", current_label_index_if);
   emitln(s_label);
-  parse_block();  // parse the positive condition block
-  sprintf(s_label, "  jmp _if%d_exit", current_label_index_if);
+  parse_expr_no_assign(); // result in 'b'
+  if(tok != COLON) error(COLON_EXPECTED);
+  sprintf(s_label, "  jmp _ternary%d_exit", current_label_index_if);
   emitln(s_label);
-  get(); // look for 'else'
-  if(tok == ELSE){
-    sprintf(s_label, "_if%d_else:", current_label_index_if);
-    emitln(s_label);
-    parse_block();  // parse the positive condition block
-  }
-  else{
-    back();
-  }
-  
-  sprintf(s_label, "_if%d_exit:", current_label_index_if);
+  sprintf(s_label, "_ternary%d_false:", current_label_index_if);
+  emitln(s_label);
+
+  parse_expr_no_assign(); // result in 'b'
+  sprintf(s_label, "_ternary%d_exit:", current_label_index_if);
   emitln(s_label);
 
   label_tos_if--;
   current_label_index_if = label_stack_if[label_tos_if];
 }
+
 // ################################################################################################
 // ################################################################################################
 // ################################################################################################
@@ -2638,7 +2633,7 @@ void get(void){
     }
     else if(*prog == '?'){
       *t++ = *prog++;
-      tok = COND_OP;
+      tok = TERNARY_OP;
     }
     else if(*prog == '+'){
       *t++ = *prog++;
