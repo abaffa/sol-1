@@ -45,21 +45,17 @@ _ternary2_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _ternary2_false
-_ternary2_true:
+  je _ternary3_false
+_ternary3_true:
   mov b, 11
-  jmp _ternary2_exit
-_ternary2_false:
+  jmp _ternary3_exit
+_ternary3_false:
   mov b, 23
-_ternary2_exit:
+_ternary3_exit:
   jmp _ternary1_exit
 _ternary1_false:
   mov b, 66
 _ternary1_exit:
-  push a
-  mov a, b
-  mov [bp + -3], a ; i
-  pop a
 ; --- begin inline asm block
     mov a, [bp + -3]
     call print_u16d
