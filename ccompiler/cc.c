@@ -1203,11 +1203,13 @@ void parse_expr_no_assign(){
 void parse_ternary_op(void){
   char s_label[64];
   char *temp_prog;
-  char temp_asmp;
+  char *temp_asmp;
 
   temp_prog = prog;
   temp_asmp = asmp; // save current assembly output pointer
-  parse_expr_no_assign(); // evaluate condition
+  sprintf(s_label, "_ternary%d_cond:", current_label_index_if + 1); // +1 because we are emitting the label ahead
+  emitln(s_label);
+  parse_logical(); // evaluate condition
   if(tok != TERNARY_OP){
     prog = temp_prog;
     asmp = temp_asmp; // recover asm output pointer
@@ -1227,14 +1229,17 @@ void parse_ternary_op(void){
 
   sprintf(s_label, "_ternary%d_true:", current_label_index_if);
   emitln(s_label);
-  parse_expr_no_assign(); // result in 'b'
-  if(tok != COLON) error(COLON_EXPECTED);
+  parse_ternary_op(); // result in 'b'
+  if(tok != COLON) {
+    puts(token);
+    error(COLON_EXPECTED);
+  }
   sprintf(s_label, "  jmp _ternary%d_exit", current_label_index_if);
   emitln(s_label);
   sprintf(s_label, "_ternary%d_false:", current_label_index_if);
   emitln(s_label);
 
-  parse_expr_no_assign(); // result in 'b'
+  parse_ternary_op(); // result in 'b'
   sprintf(s_label, "_ternary%d_exit:", current_label_index_if);
   emitln(s_label);
 
@@ -1569,7 +1574,7 @@ void parse_relational(void){
       case GREATER_THAN_OR_EQUAL:
         emitln("  cmp a, b");
         emitln("  lodflgs");
-        emitln("  and al, %00000010"); 
+        emitln("  and al, %00000011"); 
         emitln("  xor al, %00000010"); 
         emitln("  mov ah, 0");
         break;
@@ -1577,7 +1582,10 @@ void parse_relational(void){
         emitln("  cmp a, b");
         emitln("  lodflgs");
         emitln("  and al, %00000011"); 
-        emitln("  xor al, %00000011");
+        emitln("  cmp al, %00000000"); 
+        emitln("  lodflgs");
+        emitln("  and al, %00000001"); 
+        emitln("  mov ah, 0");
         break;
     }
     emitln("  mov b, a");

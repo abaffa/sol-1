@@ -7,69 +7,65 @@ main:
   push bp
   mov bp, sp
   sub sp, 2 ; j
-  mov b, 6
-  swp b
-  push b
-  call fact
-  add sp, 2
+  sub sp, 2 ; i
+  sub sp, 2 ; k
+  mov b, 5
+  push a
+  mov a, b
+  mov [bp + -5], a ; k
+  pop a
+  mov b, 10
   push a
   mov a, b
   mov [bp + -1], a ; j
   pop a
-; --- begin inline asm block
-      mov a, [bp + -1]
-      call print_u16d
-
-    ; --- end inline asm block
-  leave
-  syscall sys_terminate_proc
-fact:
-  push bp
-  mov bp, sp
-  sub sp, 2 ; nn
-_if1_cond:
-  mov b, [bp + 5] ; n
+_ternary1_cond:
+  mov b, [bp + -1] ; j
   push a
   mov a, b
-  mov b, 1
+  mov b, 10
   cmp a, b
   lodflgs
-  and al, %00000001
+  and al, %00000011
   mov ah, 0
   mov b, a
   pop a
   cmp b, 0
-  je _if1_else
-_if1_true:
-  mov b, 1
-  leave
-  ret
-  jmp _if1_exit
-_if1_else:
-  mov b, [bp + 5] ; n
+  je _ternary1_false
+_ternary1_true:
+_ternary2_cond:
+  mov b, [bp + -5] ; k
   push a
   mov a, b
-  mov b, [bp + 5] ; n
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
+  mov b, 2
+  cmp a, b
+  lodflgs
+  and al, %00000010
+  mov ah, 0
   mov b, a
   pop a
-  swp b
-  push b
-  call fact
-  add sp, 2
-  mul a, b
-  pop a
+  cmp b, 0
+  je _ternary2_false
+_ternary2_true:
+  mov b, 11
+  jmp _ternary2_exit
+_ternary2_false:
+  mov b, 23
+_ternary2_exit:
+  jmp _ternary1_exit
+_ternary1_false:
+  mov b, 66
+_ternary1_exit:
   push a
   mov a, b
-  mov [bp + -1], a ; nn
+  mov [bp + -3], a ; i
   pop a
-  mov b, [bp + -1] ; nn
+; --- begin inline asm block
+    mov a, [bp + -3]
+    call print_u16d
+  ; --- end inline asm block
   leave
-  ret
-_if1_exit:
+  syscall sys_terminate_proc
 ; --- end text block
 
 ; --- begin data block

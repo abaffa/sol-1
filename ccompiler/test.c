@@ -6,22 +6,20 @@ void main(void){
   
   int j;
   int i;
-
+  int k;
+  k = 5;
   j = 10;
 
-  j > 0 ? 1 : 0;
+  j <= 10 ? (k < 2 ? 11 : 23) : 66;
+
+  asm{
+    mov a, @i
+    call print_u16d
+  }
 
   return;
 }
 
-int fact(int n){
-  int nn;
-  if(n == 1) return 1;
-  else{
-    nn = n * fact(n - 1);
-    return nn;
-  }
-}
 
 
 /*
