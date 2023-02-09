@@ -25,7 +25,7 @@ typedef enum {
   
   EQUAL, NOT_EQUAL, LESS_THAN, LESS_THAN_OR_EQUAL, GREATER_THAN, GREATER_THAN_OR_EQUAL,
   LOGICAL_AND, LOGICAL_OR, LOGICAL_NOT,
-  ASSIGNMENT, DOLLAR, HASH, CARET, AT,
+  ASSIGNMENT, DOLLAR, HASH, CARET, AT, COND_OP,
   
   BITWISE_AND, AMPERSAND = BITWISE_AND, BITWISE_XOR, BITWISE_OR, BITWISE_NOT, BITWISE_SHL, BITWISE_SHR,
   
@@ -332,6 +332,7 @@ void skip_block(void);
 void skip_case(void);
 
 void parse_expr();
+void parse_expr_no_assign();
 void parse_assignment();
 void parse_logical(void);
 void parse_logical_and(void);
@@ -365,6 +366,7 @@ void generate_file(char *filename);
 
 void parse_for(void);
 void parse_if(void);
+void parse_ternary_op(void);
 void parse_switch(void);
 void parse_while(void);
 void parse_do(void);

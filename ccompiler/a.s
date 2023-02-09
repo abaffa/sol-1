@@ -6,52 +6,28 @@
 main:
   push bp
   mov bp, sp
-  sub sp, 2 ; i
   sub sp, 2 ; j
-_for1_init:
-  mov b, 2
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-_for1_cond:
-  mov b, 1
-  cmp b, 0
-  je _for1_exit
-_for1_block:
-  mov b, [bp + -1] ; i
+  mov b, 6
   swp b
   push b
   call fact
   add sp, 2
   push a
   mov a, b
-  mov [bp + -3], a ; j
+  mov [bp + -1], a ; j
   pop a
 ; --- begin inline asm block
-      mov a, [bp + -3]
+      mov a, [bp + -1]
       call print_u16d
 
-      mov a, [s]
-      mov d, a
-      call puts
     ; --- end inline asm block
-_for1_update:
-  mov b, [bp + -1] ; i
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-  jmp _for1_cond
-_for1_exit:
   leave
   syscall sys_terminate_proc
 fact:
   push bp
   mov bp, sp
   sub sp, 2 ; nn
-_if2_cond:
+_if1_cond:
   mov b, [bp + 5] ; n
   push a
   mov a, b
@@ -63,13 +39,13 @@ _if2_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if2_else_block
-_if2_block:
+  je _if1_else
+_if1_true:
   mov b, 1
   leave
   ret
-  jmp _if2_exit
-_if2_else_block:
+  jmp _if1_exit
+_if1_else:
   mov b, [bp + 5] ; n
   push a
   mov a, b
@@ -93,7 +69,7 @@ _if2_else_block:
   mov b, [bp + -1] ; nn
   leave
   ret
-_if2_exit:
+_if1_exit:
 ; --- end text block
 
 ; --- begin data block

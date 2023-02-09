@@ -4,20 +4,14 @@ char *s = "\n";
 
 void main(void){
   
-  int i;
   int j;
 
-  for(i=2; ; i++){
-    j = fact(i);
+    j = fact(6);
     asm{
       mov a, @j
       call print_u16d
 
-      mov a, @s
-      mov d, a
-      call puts
     }
-  }
 
 
   return;

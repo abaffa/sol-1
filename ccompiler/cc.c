@@ -925,7 +925,7 @@ void parse_if(void){
   skip_statements(); // skip main IF block in order to check for ELSE block.
   get();
   if(tok == ELSE){
-    sprintf(s_label, "  je _if%d_else_block", current_label_index_if);
+    sprintf(s_label, "  je _if%d_else", current_label_index_if);
     emitln(s_label);
   }
   else{
@@ -934,14 +934,14 @@ void parse_if(void){
   }
 
   prog = temp_p;
-  sprintf(s_label, "_if%d_block:", current_label_index_if);
+  sprintf(s_label, "_if%d_true:", current_label_index_if);
   emitln(s_label);
   parse_block();  // parse the positive condition block
   sprintf(s_label, "  jmp _if%d_exit", current_label_index_if);
   emitln(s_label);
   get(); // look for 'else'
   if(tok == ELSE){
-    sprintf(s_label, "_if%d_else_block:", current_label_index_if);
+    sprintf(s_label, "_if%d_else:", current_label_index_if);
     emitln(s_label);
     parse_block();  // parse the positive condition block
   }
@@ -1195,6 +1195,58 @@ void parse_expr(){
   parse_assignment();
 }
 
+void parse_expr_no_assign(){
+  parse_ternary_op();
+}
+
+// A = cond1 ? true_val : false_val;
+void parse_ternary_op(void){
+  char s_label[64];
+  char *temp_p;
+
+  highest_label_index++;
+  label_stack_if[label_tos_if] = current_label_index_if;
+  label_tos_if++;
+  current_label_index_if = highest_label_index;
+
+  parse_expr_no_assign(); // evaluate condition
+  if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
+  emitln("  cmp b, 0");
+  
+  temp_p = prog;
+  skip_statements(); // skip main IF block in order to check for ELSE block.
+  get();
+  if(tok == ELSE){
+    sprintf(s_label, "  je _if%d_else", current_label_index_if);
+    emitln(s_label);
+  }
+  else{
+    sprintf(s_label, "  je _if%d_exit", current_label_index_if);
+    emitln(s_label);
+  }
+
+  prog = temp_p;
+  sprintf(s_label, "_if%d_true:", current_label_index_if);
+  emitln(s_label);
+  parse_block();  // parse the positive condition block
+  sprintf(s_label, "  jmp _if%d_exit", current_label_index_if);
+  emitln(s_label);
+  get(); // look for 'else'
+  if(tok == ELSE){
+    sprintf(s_label, "_if%d_else:", current_label_index_if);
+    emitln(s_label);
+    parse_block();  // parse the positive condition block
+  }
+  else{
+    back();
+  }
+  
+  sprintf(s_label, "_if%d_exit:", current_label_index_if);
+  emitln(s_label);
+
+  label_tos_if--;
+  current_label_index_if = label_stack_if[label_tos_if];
+}
 // ################################################################################################
 // ################################################################################################
 // ################################################################################################
@@ -1279,7 +1331,7 @@ void parse_assignment(){
 
   if(!is_assignment()){ 
     prog = temp_prog;
-    parse_logical();
+    parse_expr_no_assign();
     return;
   }
   // is assignment
@@ -1299,7 +1351,7 @@ void parse_assignment(){
       try_emitting_var(var_name); // emit the base address of the matrix or pointer
       emitln("  mov d, b");
 			for(i = 0; i < dims; i++){
-        parse_logical(); // result in 'b'
+        parse_expr_no_assign(); // result in 'b'
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
 				// if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
 				if(i < dims - 1){
@@ -1326,7 +1378,7 @@ void parse_assignment(){
 			}
       // we are past the '=' sign here
       emitln("  push d"); // save 'd' in the stack (which contains the variable address), since the RHS expression could use 'd'
-      parse_logical(); // evaluate expression, result in 'b'
+      parse_expr_no_assign(); // evaluate expression, result in 'b'
       emitln("  pop d"); // now retrieve the destination address so we can write to it
       if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
         emitln("  mov a, b");
@@ -1339,8 +1391,7 @@ void parse_assignment(){
       return;
 		}
     else if(tok == ASSIGNMENT){
-      //emitln("  mov a, 0");
-      parse_logical(); // evaluate expression, result in 'b'
+      parse_expr_no_assign(); // evaluate expression, result in 'b'
       assign_var(var_name);
       return;
     }
@@ -1355,7 +1406,7 @@ void parse_assignment(){
         parse_atom();
         emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
         // after evaluating the address expression, the token will be a "="
-        parse_logical(); // evaluates the value to be assigned to the address, result in 'b'
+        parse_expr_no_assign(); // evaluates the value to be assigned to the address, result in 'b'
         switch(get_var_type(var_name)){
           case DT_CHAR:
             emitln("  mov al, bl");
@@ -1684,12 +1735,12 @@ void parse_atom(void){
     strcpy(temp_name, token);
     get();
     if(tok == INCREMENT){ 
-      try_emitting_var(temp_name);
+      try_emitting_var(temp_name); // into 'b'
       emitln("  inc b");
       assign_var(temp_name);
     }    
     else if(tok == DECREMENT){ 
-      try_emitting_var(temp_name);
+      try_emitting_var(temp_name); // into 'b'
       emitln("  dec b");
       assign_var(temp_name);
     }    
@@ -2585,6 +2636,10 @@ void get(void){
       }
       else tok = LOGICAL_NOT;
     }
+    else if(*prog == '?'){
+      *t++ = *prog++;
+      tok = COND_OP;
+    }
     else if(*prog == '+'){
       *t++ = *prog++;
       if(*prog == '+'){
@@ -2719,7 +2774,7 @@ int find_keyword(char *keyword){
 // ################################################################################################
 
 char is_delimiter(char c){
-  if(strchr("@$#+-*/%[](){}:;,<>=!&|~.", c)) return 1;
+  if(strchr("?@$#+-*/%[](){}:;,<>=!&|~.", c)) return 1;
   else return 0;
 }
 
