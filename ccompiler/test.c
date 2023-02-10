@@ -1,25 +1,27 @@
 #include "lib/stdio.asm"
 
-char *s = "\n";
-
 void main(void){
-  
-  int j;
   int i;
-  int k;
-  k = 5;
-  j = 10;
 
-  j > 10 ? (k < 2 ? 11 : 23) : 66;
-
-  asm{
-    mov a, @i
-    call print_u16d
+  for(i = 0; i < 65535; i++){
+    print(i);
   }
 
   return;
 }
 
+void print(int n){
+  asm{
+    mov a, @n
+    call print_u16d
+
+    mov ah, $0A
+    call putchar
+    mov ah, $0D
+    call putchar
+  }
+  return;
+}
 
 
 /*

@@ -2,19 +2,19 @@
 
 char *s = "Enter the number of rows: ";
 char *ss = "     ";
-int coef = 1;
+int coef;
 int rows, space, i, j;
 char *nl = "\n\r";
-char **pp;
 
 void main(void){
+  coef = 1;
 
   asm{
-    mov a, $s
+    mov a, @s
     mov d, a
     call puts
     call scan_u16d
-    mov $rows, a
+    mov @rows, a
   }
 
   for (i = 0; i < rows; i=i+1) {
@@ -30,7 +30,7 @@ void main(void){
     }
 
     asm{
-      mov a, $nl
+      mov a, @nl
       mov d, a
       call puts
     }
@@ -40,8 +40,7 @@ void main(void){
 
 void print_nbr(int n){
   asm{
-    mov a, $n
-    swp a ; swap to make up for stack weirdness
+    mov a, @n
     call print_u16d
   }
   return;
@@ -49,7 +48,7 @@ void print_nbr(int n){
 
 void print(void){
   asm{
-    mov a, $ss
+    mov a, @ss
     mov d, a
     call puts
   }
