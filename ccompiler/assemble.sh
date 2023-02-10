@@ -1,8 +1,6 @@
 #! /usr/bin/bash
 
-gcc cc.c -o cc
 
-./cc $1
 echo "assembling a.s ..."
 echo ""
 

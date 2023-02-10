@@ -1,27 +1,20 @@
 #include "lib/stdio.asm"
 
+char *s = "Enter the number of rows: ";
+char *ss = "     ";
+int coef;
+int rows, space, i, j;
+char *nl = "\n\r";
+
 void main(void){
-  int i;
 
-  for(i = 0; i < 65535; i++){
-    print(i);
-  }
+  j == 0 || i == 0;
 
-  return;
+   return;
 }
 
-void print(int n){
-  asm{
-    mov a, @n
-    call print_u16d
 
-    mov ah, $0A
-    call putchar
-    mov ah, $0D
-    call putchar
-  }
-  return;
-}
+
 
 
 /*
