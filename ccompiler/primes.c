@@ -1,9 +1,5 @@
 #include "lib/stdio.asm"
 
-int x = 20;
-int y = 5;
-int z = 10;
-
 int max;
 
 int n, i, j;

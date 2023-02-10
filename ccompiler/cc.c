@@ -70,52 +70,74 @@ void emit_includes(void){
 // ################################################################################################
 
 void emit_data_section(void){
-  int i;
+  int i, j;
   char s_init[1024];
 
   emitln("\n; --- begin data block");
   for(i = 0; i < global_var_tos; i++){
-    if(global_variables[i].data.ind_level > 0){
+    if(is_matrix(&global_variables[i])){
       switch(global_variables[i].data.type){
         case DT_CHAR:
-          if(global_variables[i].as_string[0] != '\0'){ // if var was initialized, then instantiate its data in assembly data block
+          if(global_variables[i].data.ind_level == 0){
             emit(global_variables[i].var_name); // var name
-            emit("_data");
-            emit(": .db \"");
-            emit(global_variables[i].as_string);
-            emitln("\", 0");
-            emit(global_variables[i].var_name); // var name
-            emit(": .dw ");
-            emit(global_variables[i].var_name); // var name
-            emitln("_data");
+            emit(": .db ");
+            for(j = 0; j < global_variables[i].nbr_initial_values; j++){
+              sprintf(s_init, "%d, ", global_variables[i].initial_val.string[j]);
+              emit(s_init);
+            }
+            emitln("0");
           }
           else{
-            emit(global_variables[i].var_name); // var name
-            emitln(": .dw 0");
+            // is a char matrix of pointers
           }
           break;
         case DT_INT:
           emit(global_variables[i].var_name); // var name
           emit(": .dw ");
-          sprintf(s_init, "%d", global_variables[i].data.value.p);
-          emitln(s_init);
+          for(j = 0; j < global_variables[i].nbr_initial_values; j++){
+            sprintf(s_init, "%d, ", global_variables[i].initial_val.shortint[j]);
+            emit(s_init);
+          }
+          emitln("0");
       }
     }
-    else if(global_variables[i].data.type == DT_CHAR){
-      emit(global_variables[i].var_name); // var name
-      emit(": ");
-      sprintf(s_init, ".fill %d, %d", get_total_var_size(&global_variables[i]), global_variables[i].data.value.c);
-      emitln(s_init);
-    }
-    else if(global_variables[i].data.type == DT_INT){
-        sprintf(s_init, "%s: .fill %d, 00", global_variables[i].var_name, get_total_var_size(&global_variables[i]));
+    else{
+      if(global_variables[i].data.ind_level > 0){
+        switch(global_variables[i].data.type){
+          case DT_CHAR:
+            if(global_variables[i].initial_val.string[0] != '\0'){ // if var was initialized, then instantiate its data in assembly data block
+              emit(global_variables[i].var_name); // var name
+              emit("_data");
+              emit(": .db \"");
+              emit(global_variables[i].initial_val.string);
+              emitln("\", 0");
+              emit(global_variables[i].var_name); // var name
+              emit(": .dw ");
+              emit(global_variables[i].var_name); // var name
+              emitln("_data");
+            }
+            else{
+              emit(global_variables[i].var_name); // var name
+              emitln(": .dw 0");
+            }
+            break;
+          case DT_INT:
+            emit(global_variables[i].var_name); // var name
+            emit(": .dw ");
+            sprintf(s_init, "%d", global_variables[i].initial_val.p[0]);
+            emitln(s_init);
+        }
+      }
+      else if(global_variables[i].data.type == DT_CHAR){
+        emit(global_variables[i].var_name); // var name
+        sprintf(s_init, ": .db %d", global_variables[i].initial_val.string[0]);
         emitln(s_init);
-      // bad code below, needs rewriting
-      /*int j;
-      for(j = 0; j < get_total_var_size(&global_variables[i]) / 2; j++){
-        sprintf(s_init, ".dw %d", global_variables[i].data.value.shortint);
+      }
+      else if(global_variables[i].data.type == DT_INT){
+        emit(global_variables[i].var_name); // var name
+        sprintf(s_init, ": .dw %d", global_variables[i].initial_val.shortint[0]);
         emitln(s_init);
-      }*/
+      }
     }
   }
   emitln("; --- end data block");
@@ -2142,14 +2164,6 @@ void declare_global(void){
     if(global_var_tos == MAX_GLOBAL_VARS) error(EXCEEDED_GLOBAL_VAR_LIMIT);
 
     global_variables[global_var_tos].constant = constant;
-
-    // initializes the variable to 0
-    global_variables[global_var_tos].data.value.c = 0;
-    global_variables[global_var_tos].data.value.shortint = 0;
-    global_variables[global_var_tos].data.value.f = 0.0;
-    global_variables[global_var_tos].data.value.d = 0.0;
-    global_variables[global_var_tos].data.value.p = 0;
-    global_variables[global_var_tos].as_string[0] = '\0';
     
     get();
 // **************** checks whether this is a pointer declaration *******************************
@@ -2188,31 +2202,53 @@ void declare_global(void){
 
     // checks for variable initialization
     if(tok == ASSIGNMENT){
-      switch(dt){
-        case DT_VOID:
+      int j;
+      if(is_matrix(&global_variables[global_var_tos])){
+        get();
+        expect(OPENING_BRACE, OPENING_BRACE_EXPECTED);
+        j = 0;
+        do{
           get();
-          global_variables[global_var_tos].data.value.p = atoi(token);
-          break;
-        case DT_CHAR:
-          if(ind_level > 0){ // if is a string
-            get();
-            if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
-            strcpy(global_variables[global_var_tos].as_string, string_constant);
+          switch(dt){
+            case DT_VOID:
+              global_variables[global_var_tos].initial_val.p[j] = atoi(token);
+              break;
+            case DT_CHAR:
+              if(ind_level > 0){ // if is a string
+                if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
+                strcpy(global_variables[global_var_tos] .initial_val.string, string_constant);
+              }
+              else global_variables[global_var_tos].initial_val.string[0] = string_constant[0];
+              break;
+            case DT_INT:
+              if(ind_level > 0) global_variables[global_var_tos].initial_val.p[j] = atoi(token);
+              else global_variables[global_var_tos].initial_val.shortint[j] = atoi(token);
+              break;
           }
-          else{
-            get();
-            global_variables[global_var_tos].data.value.c = string_constant[0];
-          }
-          break;
-        case DT_INT:
+          j++;
           get();
-          if(ind_level > 0) global_variables[global_var_tos].data.value.p = atoi(token);
-          else global_variables[global_var_tos].data.value.shortint = atoi(token);
-          break;
-        case DT_FLOAT:
-          break;
-        case DT_DOUBLE:
-          break;
+        } while(tok == COMMA);
+        global_variables[global_var_tos].nbr_initial_values = j;
+        expect(CLOSING_BRACE, CLOSING_BRACE_EXPECTED);
+      }
+      else{
+        get();
+        switch(dt){
+          case DT_VOID:
+            global_variables[global_var_tos].initial_val.p[0] = atoi(token);
+            break;
+          case DT_CHAR:
+            if(ind_level > 0){ // if is a string
+              if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
+              strcpy(global_variables[global_var_tos].initial_val.string, string_constant);
+            }
+            else global_variables[global_var_tos].initial_val.string[0] = string_constant[0];
+            break;
+          case DT_INT:
+            if(ind_level > 0) global_variables[global_var_tos].initial_val.p[0] = atoi(token);
+            else global_variables[global_var_tos].initial_val.shortint[0] = atoi(token);
+            break;
+        }
       }
       get();
     }

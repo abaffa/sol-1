@@ -103,14 +103,20 @@ typedef struct {
   t_data data;
 } t_const;
 
+typedef union{
+  char string[1024]; // also used if data is a single char. use string[0] then
+  short int shortint[512];
+  short int p[512];
+} t_initial_value;
+
 typedef struct {
   char var_name[ID_LEN];
   t_data data; // holds the type of data and the value itself
   char is_parameter;
   int dims[MAX_MATRIX_DIMS + 1];
   char constant;
-  char as_string[1024]; // this just saves the initialization string in case the var is a string. it makes it easier for the compiler
-  // but is a poor solution that needs fixing later
+  t_initial_value initial_val;
+  int nbr_initial_values;
   int bp_offset; // if var is local, this holds the offset of the var from BP.
   int function_id; // the function does this local var belong to
 } t_var;
