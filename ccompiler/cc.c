@@ -1463,12 +1463,12 @@ void parse_logical_or(void){
 void parse_logical_and(void){
   char temp_tok;
 
-  parse_relational();
+  parse_bitwise_or();
   while(tok == LOGICAL_AND){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
-    parse_relational();
+    parse_bitwise_or();
     emitln("  cmp b, 0");
     emitln("  push a");
     emitln("  lodflgs");
