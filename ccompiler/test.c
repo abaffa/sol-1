@@ -1,16 +1,13 @@
 #include "lib/stdio.asm"
 
-char *s = "Enter the number of rows: ";
-char *ss = "     ";
-int coef;
-int rows, space, i, j;
-char *nl = "\n\r";
+int i;
+int j;
 
 void main(void){
 
-  j == 0 || i == 0;
+  j || i || i;
 
-   return;
+  return;
 }
 
 

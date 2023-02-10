@@ -1441,20 +1441,7 @@ void parse_logical_or(void){
     emitln("  push a");
     emitln("  mov a, b");
     parse_logical_and();
-    emitln("  cmp b, 0");
-    emitln("  push a");
-    emitln("  lodflgs");
-    emitln("  mov b, a");
-    emitln("  pop a");
-    emitln("  not bl");  
-    emitln("  and bl, %00000001"); // isolate ZF only. 
-    emitln("  mov bh, 0");
-    emitln("  cmp a, 0");
-    emitln("  lodflgs");
-    emitln("  not al");  
-    emitln("  and al, %00000001"); // isolate ZF only. 
-    emitln("  mov ah, 0");
-    emitln("  and a, b");
+    emitln("  or a, b");
     emitln("  mov b, a");
     emitln("  pop a");
   }
@@ -1466,6 +1453,14 @@ void parse_logical_and(void){
   parse_bitwise_or();
   while(tok == LOGICAL_AND){
     temp_tok = tok;
+    emitln("  push a");
+    emitln("  mov a, b");
+    parse_bitwise_or();
+    emitln("  or a, b");
+    emitln("  mov b, a");
+    emitln("  pop a");
+
+/*
     emitln("  push a");
     emitln("  mov a, b");
     parse_bitwise_or();
@@ -1484,7 +1479,7 @@ void parse_logical_and(void){
     emitln("  mov ah, 0");
     emitln("  or a, b");
     emitln("  mov b, a");
-    emitln("  pop a");
+    emitln("  pop a");*/
   }
 }
 
