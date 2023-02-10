@@ -310,7 +310,6 @@ int find_keyword(char *keyword);
 int local_var_exists(char *var_name);
 int global_var_exists(char *var_name);
 t_var *get_var(char *var_name);
-t_var *get_var(char *var_name);
 int find_function(char *func_name);
 void load_program(char *filename);
 
@@ -332,7 +331,6 @@ void skip_block(void);
 void skip_case(void);
 
 void parse_expr();
-void parse_expr_no_assign();
 void parse_assignment();
 void parse_logical(void);
 void parse_logical_and(void);
@@ -403,7 +401,6 @@ t_var *get_var_by_name(char *var_name);
 int get_param_size(void);
 t_basic_data get_data_type_from_tok(t_token t);
 void assign_var(char *var_name);
-char is_assignment(void);
 void skip_matrix_bracket(void);
 
 

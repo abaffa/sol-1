@@ -1,14 +1,25 @@
 #include "lib/stdio.asm"
 
-int i;
-int j;
+char **p[2];
+char **pp;
+char *s = "Enter the number of rows: ";
 
 void main(void){
+    p[0] = &s;
+asm{}
+    pp = p[0];
 
-  j || i || i;
-
-  return;
+    asm{
+      mov a, @pp
+      mov d, a
+      mov a, [d]
+      mov d, a
+      call puts
+   }
+   return;
 }
+
+
 
 
 

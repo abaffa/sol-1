@@ -1195,10 +1195,6 @@ void parse_expr(){
   parse_assignment();
 }
 
-void parse_expr_no_assign(){
-  parse_ternary_op();
-}
-
 // A = cond1 ? true_val : false_val;
 void parse_ternary_op(void){
   char s_label[64];
@@ -1302,40 +1298,27 @@ void assign_var(char *var_name){
   else error(UNDECLARED_VARIABLE);
 }
 
-char is_assignment(void){
-  get();
-  if(tok_type != IDENTIFIER){
-    return 0;
-  }
-
-  do{
-    get();
-    if(tok == ASSIGNMENT) return 1;
-    if(tok == OPENING_BRACKET){
-      back();
-      skip_matrix_bracket();
-    }
-  } while(tok_type != END && tok != SEMICOLON && tok != CLOSING_PAREN);
-
-  if(tok_type == END) error(SEMICOLON_EXPECTED);
-  else return 0;
-}
-
 void parse_assignment(){
   char var_name[ID_LEN];
   char temp[ID_LEN];
   char *temp_prog;
   int var_id;
+  char s_label[64];
+  char *temp_asmp;
 
   temp_prog = prog;
-
-  if(!is_assignment()){ 
+  temp_asmp = asmp; // save current assembly output pointer
+  parse_ternary_op(); // evaluate condition
+  if(tok != ASSIGNMENT){
     prog = temp_prog;
-    parse_expr_no_assign();
+    asmp = temp_asmp; // recover asm output pointer
+    parse_ternary_op();
     return;
   }
+
   // is assignment
   prog = temp_prog;
+  asmp = temp_asmp; // recover asm output pointer
   get();
   if(tok_type == IDENTIFIER){
     strcpy(var_name, token);
@@ -1351,7 +1334,7 @@ void parse_assignment(){
       try_emitting_var(var_name); // emit the base address of the matrix or pointer
       emitln("  mov d, b");
 			for(i = 0; i < dims; i++){
-        parse_expr_no_assign(); // result in 'b'
+        parse_ternary_op(); // result in 'b'
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
 				// if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
 				if(i < dims - 1){
@@ -1378,7 +1361,7 @@ void parse_assignment(){
 			}
       // we are past the '=' sign here
       emitln("  push d"); // save 'd' in the stack (which contains the variable address), since the RHS expression could use 'd'
-      parse_expr_no_assign(); // evaluate expression, result in 'b'
+      parse_ternary_op(); // evaluate expression, result in 'b'
       emitln("  pop d"); // now retrieve the destination address so we can write to it
       if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
         emitln("  mov a, b");
@@ -1391,7 +1374,7 @@ void parse_assignment(){
       return;
 		}
     else if(tok == ASSIGNMENT){
-      parse_expr_no_assign(); // evaluate expression, result in 'b'
+      parse_ternary_op(); // evaluate expression, result in 'b'
       assign_var(var_name);
       return;
     }
@@ -1406,7 +1389,7 @@ void parse_assignment(){
         parse_atom();
         emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
         // after evaluating the address expression, the token will be a "="
-        parse_expr_no_assign(); // evaluates the value to be assigned to the address, result in 'b'
+        parse_ternary_op(); // evaluates the value to be assigned to the address, result in 'b'
         switch(get_var_type(var_name)){
           case DT_CHAR:
             emitln("  mov al, bl");
@@ -1619,7 +1602,7 @@ void parse_terms(void){
     emitln("  mov a, b");
     parse_factors();
     if(temp_tok == PLUS) emitln("  add a, b");
-    else emitln("  sub a, b");
+    else if(temp_tok == MINUS) emitln("  sub a, b");
     emitln("  mov b, a");
     emitln("  pop a");
   }
@@ -1785,13 +1768,11 @@ void parse_atom(void){
           emitln(asm_line);
           emitln("  mul a, b");           
           emitln("  add d, b");
-          switch(matrix->data.type){
-            case DT_CHAR:
-              emitln("  mov bl, [d]");
-              break;
-            case DT_INT:
-              emitln("  mov b, [d]");
-              break;
+          if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
+            emitln("  mov b, [d]");
+          }
+          else if(matrix->data.type == DT_CHAR){
+            emitln("  mov bl, [d]");
           }
 			  }
 				get();

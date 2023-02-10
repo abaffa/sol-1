@@ -4,6 +4,8 @@ int x = 20;
 int y = 5;
 int z = 10;
 
+int max;
+
 int n, i, j;
 int s;
 int count = 0;
