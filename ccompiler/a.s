@@ -1,4 +1,4 @@
-; --- Filename: primes.c
+; --- Filename: pascal.c
 .include "lib/kernel.exp"
 .org PROC_TEXT_ORG
 
@@ -6,160 +6,226 @@
 main:
   push bp
   mov bp, sp
-  call primes
+  mov b, 1
+  mov [coef], b
 ; --- begin inline asm block
-		syscall sys_terminate_proc
-	; --- end inline asm block
-primes:
+    mov a, [s]
+    mov d, a
+    call puts
+    call scan_u16d
+    mov [rows], a
+  ; --- end inline asm block
+_for1_init:
+  mov b, 0
+  mov [i], b
+_for1_cond:
+  mov b, [i]
+  push a
+  mov a, b
+  mov b, [rows]
+  cmp a, b
+  lodflgs
+  and al, %00000010
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for1_exit
+_for1_block:
+_for2_init:
+  mov b, 1
+  mov [space], b
+_for2_cond:
+  mov b, [space]
+  push a
+  mov a, b
+  mov b, [rows]
+  push a
+  mov a, b
+  mov b, [i]
+  sub a, b
+  mov b, a
+  pop a
+  cmp a, b
+  lodflgs
+  and al, %00000011
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for2_exit
+_for2_block:
+  call print
+_for2_update:
+  mov b, [space]
+  push a
+  mov a, b
+  mov b, 1
+  add a, b
+  mov b, a
+  pop a
+  mov [space], b
+  jmp _for2_cond
+_for2_exit:
+_for3_init:
+  mov b, 0
+  mov [j], b
+_for3_cond:
+  mov b, [j]
+  push a
+  mov a, b
+  mov b, [i]
+  cmp a, b
+  lodflgs
+  and al, %00000011
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for3_exit
+_for3_block:
+_if4_cond:
+  mov b, [j]
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001
+  mov ah, 0
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  mov b, [i]
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  push a
+  lodflgs
+  mov b, a
+  pop a
+  not bl
+  and bl, %00000001
+  mov bh, 0
+  cmp a, 0
+  lodflgs
+  not al
+  and al, %00000001
+  mov ah, 0
+  and a, b
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if4_else
+_if4_true:
+  mov b, 1
+  mov [coef], b
+  jmp _if4_exit
+_if4_else:
+  mov b, [coef]
+  push a
+  mov a, b
+  mov b, [i]
+  push a
+  mov a, b
+  mov b, [j]
+  sub a, b
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  mov b, 1
+  add a, b
+  mov b, a
+  pop a
+  mul a, b
+  pop a
+  push a
+  mov a, b
+  mov b, [j]
+  div a, b
+  mov g, a
+  mov a, b
+  mov b, g
+  pop a
+  mov [coef], b
+_if4_exit:
+  call print
+  mov b, [coef]
+  swp b
+  push b
+  call print_nbr
+  add sp, 2
+_for3_update:
+  mov b, [j]
+  push a
+  mov a, b
+  mov b, 1
+  add a, b
+  mov b, a
+  pop a
+  mov [j], b
+  jmp _for3_cond
+_for3_exit:
+; --- begin inline asm block
+      mov a, [nl]
+      mov d, a
+      call puts
+    ; --- end inline asm block
+_for1_update:
+  mov b, [i]
+  push a
+  mov a, b
+  mov b, 1
+  add a, b
+  mov b, a
+  pop a
+  mov [i], b
+  jmp _for1_cond
+_for1_exit:
+  leave
+  syscall sys_terminate_proc
+print_nbr:
   push bp
   mov bp, sp
-  mov b, 2
-  mov [n], b
-_while1_cond:
-  mov b, [n]
-  push a
-  mov a, b
-  mov b, 500
-  cmp a, b
-  lodflgs
-  and al, %00000010
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _while1_exit
-_while1_block:
-  mov b, [n]
-  mov [s], b
-  mov b, 0
-  mov [divides], b
-  mov b, 2
-  mov [i], b
-_while2_cond:
-  mov b, [i]
-  push a
-  mov a, b
-  mov b, [s]
-  cmp a, b
-  lodflgs
-  and al, %00000010
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _while2_exit
-_while2_block:
-_if3_cond:
-  mov b, [n]
-  push a
-  mov a, b
-  mov b, [i]
-  div a, b
-  pop a
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if3_exit
-_if3_true:
-  mov b, 1
-  mov [divides], b
-  jmp _while2_exit
-  jmp _if3_exit
-_if3_exit:
-  mov b, [i]
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  mov [i], b
-_if4_cond:
-  mov b, [i]
-  push a
-  mov a, b
-  mov b, [n]
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if4_exit
-_if4_true:
-  jmp _while2_exit
-  jmp _if4_exit
-_if4_exit:
-  jmp _while2_cond
-_while2_exit:
-_if5_cond:
-  mov b, [divides]
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if5_exit
-_if5_true:
-  mov b, [count]
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  mov [count], b
 ; --- begin inline asm block
-				mov a, [n]
-				call print_u16d
-				mov d, newline
-				mov a, [d]
-				mov d, a
-				call puts
-			; --- end inline asm block
-  jmp _if5_exit
-_if5_exit:
-  mov b, [n]
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  mov [n], b
-  jmp _while1_cond
-_while1_exit:
+    mov a, [bp + 5]
+    call print_u16d
+  ; --- end inline asm block
+  leave
+  ret
+print:
+  push bp
+  mov bp, sp
+; --- begin inline asm block
+    mov a, [ss]
+    mov d, a
+    call puts
+  ; --- end inline asm block
   leave
   ret
 ; --- end text block
 
 ; --- begin data block
-x: .fill 2, 00
-y: .fill 2, 00
-z: .fill 2, 00
-n: .fill 2, 00
+s_data: .db "Enter the number of rows: ", 0
+s: .dw s_data
+ss_data: .db "     ", 0
+ss: .dw ss_data
+coef: .fill 2, 00
+rows: .fill 2, 00
+space: .fill 2, 00
 i: .fill 2, 00
 j: .fill 2, 00
-s: .fill 2, 00
-count: .fill 2, 00
-divides: .fill 2, 00
-newline_data: .db "\n", 0
-newline: .dw newline_data
-s1_data: .db "TRUE", 0
-s1: .dw s1_data
+nl_data: .db "\n\r", 0
+nl: .dw nl_data
 ; --- end data block
 ; --- begin include block
 .include "lib/stdio.asm"
