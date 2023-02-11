@@ -82,7 +82,7 @@ void emit_data_section(void){
             emit(global_variables[i].var_name); // var name
             emit(": .db ");
             for(j = 0; j < global_variables[i].nbr_initial_values; j++){
-              sprintf(s_init, "%d, ", global_variables[i].initial_val.string[j]);
+              sprintf(s_init, "%u, ", (unsigned char)global_variables[i].initial_val.string[j]);
               emit(s_init);
             }
             emitln("0");
@@ -130,7 +130,7 @@ void emit_data_section(void){
       }
       else if(global_variables[i].data.type == DT_CHAR){
         emit(global_variables[i].var_name); // var name
-        sprintf(s_init, ": .db %d", global_variables[i].initial_val.string[0]);
+        sprintf(s_init, ": .db %u", (unsigned char)global_variables[i].initial_val.string[0]);
         emitln(s_init);
       }
       else if(global_variables[i].data.type == DT_INT){
@@ -2214,11 +2214,15 @@ void declare_global(void){
               global_variables[global_var_tos].initial_val.p[j] = atoi(token);
               break;
             case DT_CHAR:
-              if(ind_level > 0){ // if is a string
-                if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
-                strcpy(global_variables[global_var_tos] .initial_val.string, string_constant);
+              if(ind_level > 0){ // if is a pointer
+                global_variables[global_var_tos].initial_val.p[j] = atoi(token);
+                //if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
+                //strcpy(global_variables[global_var_tos].initial_val.string, string_constant);
               }
-              else global_variables[global_var_tos].initial_val.string[0] = string_constant[0];
+              else{
+                if(tok_type == CHAR_CONST) global_variables[global_var_tos].initial_val.string[j] = string_constant[0];
+                else if(tok_type == INTEGER_CONST) global_variables[global_var_tos].initial_val.string[j] = (char)atoi(token);
+              }
               break;
             case DT_INT:
               if(ind_level > 0) global_variables[global_var_tos].initial_val.p[j] = atoi(token);
@@ -2242,7 +2246,10 @@ void declare_global(void){
               if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
               strcpy(global_variables[global_var_tos].initial_val.string, string_constant);
             }
-            else global_variables[global_var_tos].initial_val.string[0] = string_constant[0];
+            else{
+              if(tok_type == CHAR_CONST) global_variables[global_var_tos].initial_val.string[0] = string_constant[0];
+              else if(tok_type == INTEGER_CONST) global_variables[global_var_tos].initial_val.string[0] = (char)atoi(token);
+            }
             break;
           case DT_INT:
             if(ind_level > 0) global_variables[global_var_tos].initial_val.p[0] = atoi(token);
