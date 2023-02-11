@@ -13,8 +13,8 @@ main:
 ; --- end text block
 
 ; --- begin data block
-c: .db 255, 254, 253, 0
-matrix: .dw 1, 2, 3, 0
+c: .db 255, 254, 253, 
+matrix: .dw 1, 2, 3, 
 m_data: .db "hello", 0
 m: .dw m_data
 ; --- end data block

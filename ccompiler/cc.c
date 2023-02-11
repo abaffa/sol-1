@@ -85,7 +85,7 @@ void emit_data_section(void){
               sprintf(s_init, "%u, ", (unsigned char)global_variables[i].initial_val.string[j]);
               emit(s_init);
             }
-            emitln("0");
+            emitln("");
           }
           else{
             // is a char matrix of pointers
@@ -98,7 +98,7 @@ void emit_data_section(void){
             sprintf(s_init, "%d, ", global_variables[i].initial_val.shortint[j]);
             emit(s_init);
           }
-          emitln("0");
+          emitln("");
       }
     }
     else{
