@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
   }
 
   prog = pbuf; // resets pointer to the beginning of the program
-  asmp = ASM_outback;  // set ASM outback pointer to the ASM array beginning
+  asmp = ASM_output;  // set ASM outback pointer to the ASM array beginning
 
   pre_scan();
   sprintf(header, "; --- Filename: %s", argv[1]);
@@ -50,7 +50,7 @@ void generate_file(char *filename){
     exit(0);
   }
   
-  fprintf(fp, "%s", ASM_outback);
+  fprintf(fp, "%s", ASM_output);
 
   fclose(fp);
 }

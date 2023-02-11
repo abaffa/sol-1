@@ -286,10 +286,13 @@ char token[CONST_LEN + 2];            // string token representation
 char string_constant[CONST_LEN + 2];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
 char *prog;                           // pointer to the current program position
 char pbuf[PROG_SIZE];                 // pointer to the beginning of the source code
-char ASM_outback[64*1024];             // ASM outback 
+char ASM_output[66*1024];             // ASM output
 char *asmp;
 char asm_line[256];
 char includes_list_ASM[1024];         // keeps a list of all included files
+char data_block_ASM[1024*10];
+char *data_block_p;
+
 int highest_label_index = 0;          // this keeps the next value of the label index for use in new labels.
                                       //label values are never repeating. always increasing.
 int current_label_index_if = 0;       // index of current 'if' label. starts at 0
