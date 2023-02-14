@@ -478,7 +478,7 @@ s_dataentry:	.db "% ", 0
 s_syntax_err:	.db "\nsyntax error\n", 0
 s_hash:			.db " # ", 0
 s_fslash:		.db "/", 0
-s_sol1:			.db "Solarium: ", 0
+s_sol1:			.db "Solarium:", 0
 ; shell variables
 shell_input_buff:	.fill 512, 0
 shell_buff_ptr:		.dw 0
