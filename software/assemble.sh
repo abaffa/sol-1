@@ -9,3 +9,7 @@ for FILE in *.s; do
 	wine tasm -1 -b $FILE
 done
 
+
+
+xxd -ps $1.obj | tr -d '\n' | xclip -selection c
+printf "\n> binary file copied to clipboard.\n"

@@ -7,8 +7,8 @@
 
 #define BAUD_SERIAL 38400
 
-#define RXBUFFERSIZE 1024*4
-#define STACK_PROTECTOR	1024*4 // bytes
+#define RXBUFFERSIZE 1024*32
+#define STACK_PROTECTOR	1024*32 // bytes
 #define MAX_SRV_CLIENTS 5
 
 const char* ssid = STASSID;
