@@ -88,6 +88,13 @@ void emit_data_section(void){
             emitln("");
           }
           else{
+            emit(global_variables[i].var_name); // var name
+            emit(": .dw ");
+            for(j = 0; j < global_variables[i].nbr_initial_values; j++){
+              sprintf(s_init, "%u, ", (unsigned char)global_variables[i].initial_val.string[j]);
+              emit(s_init);
+            }
+            emitln("");
             // is a char matrix of pointers
           }
           break;

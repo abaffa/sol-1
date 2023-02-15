@@ -6,14 +6,14 @@
 // asm file.
 // this way we can parse directly
 
-char c[3] = {255, 254, 253};
-
+char c[3] = {11, 22, 33};
+char *mp[3] = {222, 123, 44};
 int matrix[100] = {1,2,3};
 char *m= "hello";
 
 void main(void){
 
-    asm{
+   asm{
    }
    return;
 }
