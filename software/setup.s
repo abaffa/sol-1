@@ -7,7 +7,7 @@
 
 ; 1) read /etc/boot.conf to find kernel filename
 ; 2) from filename, obtain LBA address of kernel file
-; 3) write LBA address to bootloader sector, at address 1FF (511)
+; 3) write LBA address to bootloader sector, at address 1FE (510)
 
 bootloader_installer:
 ; open /etc/boot.conf file
