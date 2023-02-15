@@ -91,7 +91,7 @@ void emit_data_section(void){
             emit(global_variables[i].var_name); // var name
             emit(": .dw ");
             for(j = 0; j < global_variables[i].nbr_initial_values; j++){
-              sprintf(s_init, "%u, ", (unsigned int)global_variables[i].initial_val.string[j]);
+              sprintf(s_init, "%u, ", global_variables[i].initial_val.p[j]);
               emit(s_init);
             }
             emitln("");

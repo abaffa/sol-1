@@ -14,7 +14,7 @@ main:
 
 ; --- begin data block
 c: .db 11, 22, 33, 
-mp: .dw 222, 0, 123, 
+mp: .dw 222, 123, 44, 
 matrix: .dw 1, 2, 3, 
 m_data: .db "hello", 0
 m: .dw m_data
