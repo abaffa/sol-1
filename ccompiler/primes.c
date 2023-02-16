@@ -1,16 +1,22 @@
 #include "lib/stdio.asm"
 
-int max;
 
 int n, i, j;
 int s;
 int count = 0;
 int divides;
 char *newline = "\n";
-char *s1 = "TRUE";
+char *prompt = "Max: ";
+int top;
 
 void main(void){
-	
+	asm{
+		mov a, @prompt
+		mov d, a
+		call puts
+		call scan_u16d
+		mov @top, a
+	}	
 	primes();
 
 	asm{
@@ -21,7 +27,7 @@ void main(void){
 
 void primes(void){
 	n = 2;
-	while(n < 500){
+	while(n < top){
 		s = n;
 		divides = 0;
 
