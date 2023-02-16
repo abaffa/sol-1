@@ -81,7 +81,7 @@ void emit_data_section(void){
           if(global_variables[i].data.ind_level == 0){
             emit(global_variables[i].var_name); // var name
             emit(": .db ");
-            for(j = 0; j < global_variables[i].nbr_initial_values; j++){
+            for(j = 0; j < get_total_var_size(&global_variables[i]); j++){
               sprintf(s_init, "%u, ", (unsigned char)global_variables[i].initial_val.string[j]);
               emit(s_init);
             }
@@ -90,7 +90,7 @@ void emit_data_section(void){
           else{
             emit(global_variables[i].var_name); // var name
             emit(": .dw ");
-            for(j = 0; j < global_variables[i].nbr_initial_values; j++){
+            for(j = 0; j < get_total_var_size(&global_variables[i]) / 2; j++){
               sprintf(s_init, "%u, ", global_variables[i].initial_val.p[j]);
               emit(s_init);
             }
@@ -101,7 +101,7 @@ void emit_data_section(void){
         case DT_INT:
           emit(global_variables[i].var_name); // var name
           emit(": .dw ");
-          for(j = 0; j < global_variables[i].nbr_initial_values; j++){
+          for(j = 0; j < get_total_var_size(&global_variables[i]) / 2; j++){
             sprintf(s_init, "%d, ", global_variables[i].initial_val.shortint[j]);
             emit(s_init);
           }

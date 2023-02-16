@@ -6,15 +6,26 @@
 // asm file.
 // this way we can parse directly
 
-char c[3] = {11, 22, 33};
-char *mp[3] = {222, 123, 44};
-int matrix[100] = {1,2,3};
-char *m= "hello";
+int cc[4] = {11, 22, 33, 44};
+char *mp[5] = {222, 123, 44};
+int matrix[10] = {1,2,3};
+char *m= "\n";
 
 void main(void){
+  int i;
+  int k;
 
-   asm{
-   }
+  for(i=0; i<4; i++){
+    k = cc[i];
+    asm{
+      mov a, @k
+      call print_u16d
+      mov a, @m
+      mov d, a
+      call puts
+    }
+
+  }
    return;
 }
 
