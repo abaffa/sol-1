@@ -1,52 +1,12 @@
-; --- Filename: test.c
+; --- FILENAME: test.c
 .include "lib/kernel.exp"
 .org PROC_TEXT_ORG
 
-; --- begin text block
+; --- BEGIN TEXT BLOCK
 main:
   push bp
   mov bp, sp
   sub sp, 2 ; i
-_for1_init:
-  mov b, 0
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-_for1_cond:
-  mov b, [bp + -1] ; i
-  push a
-  mov a, b
-  mov b, 100
-  cmp a, b
-  lodflgs
-  and al, %00000010
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for1_exit
-_for1_block:
-  mov b, cc
-  mov d, b
-  mov b, [bp + -1] ; i
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  swp b
-  push b
-  call print
-  add sp, 2
-_for1_update:
-  mov b, [bp + -1] ; i
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-  jmp _for1_cond
-_for1_exit:
   leave
   syscall sys_terminate_proc
 print:
@@ -54,27 +14,25 @@ print:
   mov bp, sp
 
 ; --- BEGIN INLINE ASM BLOCK
-TESTME:
   mov a, [bp + 5]
   call print_u16d
-  mov a, [m]
-  mov d, a
-  call puts
+  mov ah, $0A
+  call putchar
 ; --- END INLINE ASM BLOCK
 
   leave
   ret
-; --- end text block
+; --- END TEXT BLOCK
 
-; --- begin data block
-cc: .dw 11, 22, 33, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-mp: .dw 222, 123, 44, 0, 0, 
+; --- BEGIN DATA BLOCK
+kk: .db 0
+mp: .dw 10, 0, 0, 0, 0, 
 matrix: .dw 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 
-m_data: .db "\n", 0
-m: .dw m_data
-; --- end data block
-; --- begin include block
+; --- END DATA BLOCK
+
+; --- BEGIN INCLUDE BLOCK
 .include "lib/stdio.asm"
-; --- end include block
+; --- END INCLUDE BLOCK
+
 
 .end

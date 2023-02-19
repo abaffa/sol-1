@@ -2194,6 +2194,10 @@ KERNEL_RESET_VECTOR:
 	mov al, %10000000
 	stomsk					; mask out timer interrupt for now (only allow UART to interrupt)
 	sti	
+
+	lodstat
+	and al, %10111111	; disable display register loading
+	stostat
 	
 ; reset fifo pointers
 	mov a, fifo
@@ -2499,7 +2503,7 @@ s_hash:				.db " # ", 0
 file_attrib:		.db "-rw x"			; chars at multiples of 2
 file_type:			.db "-dc"
 s_ps_header:		.db "PID COMMAND\n", 0
-s_host: 			.db "root@Solarium:", 0
+s_host: 			.db "root@Solarium:", 0, 0
 s_uname:			.db "Solarium\n", 0
 
 s_root:				.db "root\n", 0

@@ -17,15 +17,15 @@ int main(int argc, char *argv[]){
   asmp = ASM_output;  // set ASM outback pointer to the ASM array beginning
 
   pre_scan();
-  sprintf(header, "; --- Filename: %s", argv[1]);
+  sprintf(header, "; --- FILENAME: %s", argv[1]);
   emitln(header);
   emitln(".include \"lib/kernel.exp\"");
 
   emitln(".org PROC_TEXT_ORG");
 
-  emitln("\n; --- begin text block");
+  emitln("\n; --- BEGIN TEXT BLOCK");
   parse_functions();
-  emitln("; --- end text block");
+  emitln("; --- END TEXT BLOCK");
   
   emit_data_section();
   emit_includes();
@@ -60,9 +60,9 @@ void generate_file(char *filename){
 // ################################################################################################
 
 void emit_includes(void){
-  emit("; --- begin include block");
+  emit("\n; --- BEGIN INCLUDE BLOCK");
   emitln(includes_list_ASM);
-  emitln("; --- end include block");
+  emitln("; --- END INCLUDE BLOCK\n");
 }
 
 // ################################################################################################
@@ -73,7 +73,7 @@ void emit_data_section(void){
   int i, j;
   char s_init[1024];
 
-  emitln("\n; --- begin data block");
+  emitln("\n; --- BEGIN DATA BLOCK");
   for(i = 0; i < global_var_tos; i++){
     if(is_matrix(&global_variables[i])){
       switch(global_variables[i].data.type){
@@ -147,7 +147,7 @@ void emit_data_section(void){
       }
     }
   }
-  emitln("; --- end data block");
+  emitln("; --- END DATA BLOCK");
 }
 
 // ################################################################################################
@@ -498,33 +498,31 @@ void parse_asm(void){
   get();
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
   emit("\n; --- BEGIN INLINE ASM BLOCK");
-  while(*prog != '}'){
-    if(*prog == 0x0A){
-      *asmp++ = 0x0A;
+  while(1){
+    while(*prog != 0x0A) prog++;
+    *asmp++ = *prog++; // copy 0x0A
+    while(*prog == ' ') prog++; // skip leading spaces
+    temp_prog = prog;
+    get();
+    if(tok == CLOSING_BRACE) break;
+    get();
+    if(tok == COLON){ // is a label
+      prog = temp_prog;
+      while(*prog != ':') *asmp++ = *prog++;
+      *asmp++ = ':';
       prog++;
-      while(*prog == ' ') prog++;
-      temp_prog = prog;
-      get();
-      if(tok == CLOSING_BRACE) break;
-      get();
-      if(tok == COLON){ // is a label
-        prog = temp_prog;
-        while(*prog != ':') *asmp++ = *prog++;
-        *asmp++ = ':';
-        prog++;
-      }
-      else{
-        prog = temp_prog;
-        *asmp++ = ' ';
-        *asmp++ = ' ';
-        while(*prog != 0x0A){
-          if(*prog == '@'){
-            prog++;
-            get();
-            emit_c_var(token);
-          }
-          else *asmp++ = *prog++;
+    }
+    else{
+      prog = temp_prog;
+      *asmp++ = ' ';
+      *asmp++ = ' ';
+      while(*prog != 0x0A){
+        if(*prog == '@'){
+          prog++;
+          get();
+          emit_c_var(token);
         }
+        else *asmp++ = *prog++;
       }
     }
   }

@@ -286,7 +286,9 @@ char token[CONST_LEN + 2];            // string token representation
 char string_constant[CONST_LEN + 2];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
 char *prog;                           // pointer to the current program position
 char pbuf[PROG_SIZE];                 // pointer to the beginning of the source code
-char ASM_output[66*1024];             // ASM output
+char ASM_output[32*1024];             // ASM output
+char data_block[8*1024];              // text area for data block
+char *data_p;
 char *asmp;
 char asm_line[256];
 char includes_list_ASM[1024];         // keeps a list of all included files
