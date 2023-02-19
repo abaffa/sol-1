@@ -1,4 +1,4 @@
-; --- Filename: clock.c
+; --- Filename: test.c
 .include "lib/kernel.exp"
 .org PROC_TEXT_ORG
 
@@ -6,30 +6,18 @@
 main:
   push bp
   mov bp, sp
-  call gen_clk
-  leave
-  syscall sys_terminate_proc
-gen_clk:
-  push bp
-  mov bp, sp
-  sub sp, 2 ; clk
-  sub sp, 2 ; count
-  mov b, 0
-  push a
-  mov a, b
-  mov [bp + -1], a ; clk
-  pop a
+  sub sp, 2 ; i
 _for1_init:
   mov b, 0
   push a
   mov a, b
-  mov [bp + -3], a ; count
+  mov [bp + -1], a ; i
   pop a
 _for1_cond:
-  mov b, [bp + -3] ; count
+  mov b, [bp + -1] ; i
   push a
   mov a, b
-  mov b, 20
+  mov b, 100
   cmp a, b
   lodflgs
   and al, %00000010
@@ -39,63 +27,51 @@ _for1_cond:
   cmp b, 0
   je _for1_exit
 _for1_block:
-_if2_cond:
-  mov b, [bp + -1] ; clk
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if2_else
-_if2_true:
-  mov b, 1
-  push a
-  mov a, b
-  mov [bp + -1], a ; clk
-  pop a
-  jmp _if2_exit
-_if2_else:
-  mov b, 0
-  push a
-  mov a, b
-  mov [bp + -1], a ; clk
-  pop a
-_if2_exit:
-  mov b, [bp + -1] ; clk
+  mov b, cc
+  mov d, b
+  mov b, [bp + -1] ; i
+  mov a, 2
+  mul a, b
+  add d, b
+  mov b, [d]
   swp b
   push b
   call print
   add sp, 2
 _for1_update:
-  mov b, [bp + -3] ; count
+  mov b, [bp + -1] ; i
   inc b
   push a
   mov a, b
-  mov [bp + -3], a ; count
+  mov [bp + -1], a ; i
   pop a
   jmp _for1_cond
 _for1_exit:
   leave
-  ret
+  syscall sys_terminate_proc
 print:
   push bp
   mov bp, sp
-; --- begin inline asm block
-    mov a, [bp + 5]
-    call print_u16d
-    mov ah, $0A
-    call putchar
-  ; --- end inline asm block
+
+; --- BEGIN INLINE ASM BLOCK
+TESTME:
+  mov a, [bp + 5]
+  call print_u16d
+  mov a, [m]
+  mov d, a
+  call puts
+; --- END INLINE ASM BLOCK
+
   leave
   ret
 ; --- end text block
 
 ; --- begin data block
+cc: .dw 11, 22, 33, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+mp: .dw 222, 123, 44, 0, 0, 
+matrix: .dw 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 
+m_data: .db "\n", 0
+m: .dw m_data
 ; --- end data block
 ; --- begin include block
 .include "lib/stdio.asm"

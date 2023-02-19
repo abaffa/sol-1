@@ -493,21 +493,42 @@ int get_total_func_param_size(void){
 // ################################################################################################
 
 void parse_asm(void){
+  char *temp_prog;
+
   get();
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
-  emit("; --- begin inline asm block");
+  emit("\n; --- BEGIN INLINE ASM BLOCK");
   while(*prog != '}'){
-    if(*prog == '@'){
+    if(*prog == 0x0A){
+      *asmp++ = 0x0A;
       prog++;
+      while(*prog == ' ') prog++;
+      temp_prog = prog;
       get();
-      emit_c_var(token);
-    }
-    else{
-      *asmp++ = *prog++;
+      if(tok == CLOSING_BRACE) break;
+      get();
+      if(tok == COLON){ // is a label
+        prog = temp_prog;
+        while(*prog != ':') *asmp++ = *prog++;
+        *asmp++ = ':';
+        prog++;
+      }
+      else{
+        prog = temp_prog;
+        *asmp++ = ' ';
+        *asmp++ = ' ';
+        while(*prog != 0x0A){
+          if(*prog == '@'){
+            prog++;
+            get();
+            emit_c_var(token);
+          }
+          else *asmp++ = *prog++;
+        }
+      }
     }
   }
-  prog++;
-  emitln("; --- end inline asm block");
+  emitln("; --- END INLINE ASM BLOCK\n");
 }
 
 // ################################################################################################
