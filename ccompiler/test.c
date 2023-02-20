@@ -6,27 +6,23 @@
 // asm file.
 // this way we can parse directly
 
+char *h = "Hello World";
+
 char kk;
 char *mp[5] = {10};
 int matrix[10] = {1,2,3};
 
 void main(void){
-  int i;
+  asm{
+    mov a, @h
+    mov d, a
+    call puts
+  }
 
    return;
 }
 
 
-void print(int nbr){
-  asm{
-    mov a, @nbr
-    call print_u16d
-    mov ah, $0A
-    call putchar
-  }
-  
-  return;
-}
 
 
 
