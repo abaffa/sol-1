@@ -8,9 +8,6 @@
 
 char *h = "Hello World";
 
-char kk;
-char *mp[5] = {10};
-int matrix[10] = {1,2,3};
 
 void main(void){
   asm{

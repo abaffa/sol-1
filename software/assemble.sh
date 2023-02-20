@@ -10,6 +10,8 @@ for FILE in *.s; do
 done
 
 
+printf "\n$1\n"
+wine tasm -1 -b $1.s
 
 xxd -ps $1.obj | tr -d '\n' | xclip -selection c
 printf "\n> binary file copied to clipboard.\n"
