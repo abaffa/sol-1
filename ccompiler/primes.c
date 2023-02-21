@@ -18,10 +18,7 @@ void main(void){
 	}	
 	primes();
 
-	asm{
-		syscall sys_terminate_proc
-	}
-
+	return;
 }
 
 void primes(void){
