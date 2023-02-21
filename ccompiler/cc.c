@@ -501,7 +501,7 @@ void parse_asm(void){
   while(1){
     while(*prog != 0x0A) prog++;
     *asmp++ = *prog++; // copy 0x0A
-    while(*prog == ' ') prog++; // skip leading spaces
+    while(*prog == ' ' || *prog == '\t') prog++; // skip leading spaces
     temp_prog = prog;
     get();
     if(tok == CLOSING_BRACE) break;
