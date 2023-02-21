@@ -1,4 +1,4 @@
-; --- FILENAME: primes.c
+; --- FILENAME: test.c
 .include "lib/kernel.exp"
 .org PROC_TEXT_ORG
 
@@ -6,171 +6,182 @@
 main:
   push bp
   mov bp, sp
-
-; --- BEGIN INLINE ASM BLOCK
-  mov a, [prompt]
-  mov d, a
-  call puts
-  call scan_u16d
-  mov [top], a
-; --- END INLINE ASM BLOCK
-
-  call primes
-
-; --- BEGIN INLINE ASM BLOCK
+  sub sp, 2 ; i
+  sub sp, 2 ; j
+_for1_init:
+  mov b, 0
+  push a
+  mov a, b
+  mov [bp + -1], a ; i
+  pop a
+_for1_cond:
+  mov b, [bp + -1] ; i
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000010
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for1_exit
+_for1_block:
+_for2_init:
+  mov b, 0
+  push a
+  mov a, b
+  mov [bp + -3], a ; j
+  pop a
+_for2_cond:
+  mov b, [bp + -3] ; j
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000010
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for2_exit
+_for2_block:
+  mov b, m
+  mov d, b
+  mov b, [bp + -1] ; i
+  mov a, 10
+  mul a, b
+  add d, b
+  mov b, [bp + -3] ; j
+  mov a, 1
+  mul a, b
+  add d, b
+  push d
+  mov b, [bp + -1] ; i
+  push a
+  mov a, b
+  mov b, [bp + -3] ; j
+  add a, b
+  mov b, a
+  pop a
+  pop d
+  mov al, bl
+  mov [d], al
+_for2_update:
+  mov b, [bp + -3] ; j
+  inc b
+  push a
+  mov a, b
+  mov [bp + -3], a ; j
+  pop a
+  jmp _for2_cond
+_for2_exit:
+_for1_update:
+  mov b, [bp + -1] ; i
+  inc b
+  push a
+  mov a, b
+  mov [bp + -1], a ; i
+  pop a
+  jmp _for1_cond
+_for1_exit:
+_for3_init:
+  mov b, 0
+  push a
+  mov a, b
+  mov [bp + -1], a ; i
+  pop a
+_for3_cond:
+  mov b, [bp + -1] ; i
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000010
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for3_exit
+_for3_block:
+_for4_init:
+  mov b, 0
+  push a
+  mov a, b
+  mov [bp + -3], a ; j
+  pop a
+_for4_cond:
+  mov b, [bp + -3] ; j
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000010
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for4_exit
+_for4_block:
+  mov b, m
+  mov d, b
+  mov b, [bp + -1] ; i
+  mov a, 10
+  mul a, b
+  add d, b
+  mov b, [bp + -3] ; j
+  mov a, 1
+  mul a, b
+  add d, b
+  mov bl, [d]
+  swp b
+  push b
+  call print_nbr
+  add sp, 2
+_for4_update:
+  mov b, [bp + -3] ; j
+  inc b
+  push a
+  mov a, b
+  mov [bp + -3], a ; j
+  pop a
+  jmp _for4_cond
+_for4_exit:
+_for3_update:
+  mov b, [bp + -1] ; i
+  inc b
+  push a
+  mov a, b
+  mov [bp + -1], a ; i
+  pop a
+  jmp _for3_cond
+_for3_exit:
+  leave
   syscall sys_terminate_proc
-; --- END INLINE ASM BLOCK
-
-primes:
+print_nbr:
   push bp
   mov bp, sp
-  mov b, 2
-  mov [n], b
-_while1_cond:
-  mov b, [n]
-  push a
-  mov a, b
-  mov b, [top]
-  cmp a, b
-  lodflgs
-  and al, %00000010
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _while1_exit
-_while1_block:
-  mov b, [n]
-  mov [s], b
-  mov b, 0
-  mov [divides], b
-  mov b, 2
-  mov [i], b
-_while2_cond:
-  mov b, [i]
-  push a
-  mov a, b
-  mov b, [s]
-  cmp a, b
-  lodflgs
-  and al, %00000010
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _while2_exit
-_while2_block:
-_if3_cond:
-  mov b, [n]
-  push a
-  mov a, b
-  mov b, [i]
-  div a, b
-  pop a
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if3_exit
-_if3_true:
-  mov b, 1
-  mov [divides], b
-  jmp _while2_exit
-  jmp _if3_exit
-_if3_exit:
-  mov b, [i]
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  mov [i], b
-_if4_cond:
-  mov b, [i]
-  push a
-  mov a, b
-  mov b, [n]
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if4_exit
-_if4_true:
-  jmp _while2_exit
-  jmp _if4_exit
-_if4_exit:
-  jmp _while2_cond
-_while2_exit:
-_if5_cond:
-  mov b, [divides]
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if5_exit
-_if5_true:
-  mov b, [count]
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  mov [count], b
 
 ; --- BEGIN INLINE ASM BLOCK
-  mov a, [n]
+  mov a, [bp + 5]
   call print_u16d
-  mov d, newline
-  mov a, [d]
+  mov a, [ss]
   mov d, a
   call puts
 ; --- END INLINE ASM BLOCK
 
-  jmp _if5_exit
-_if5_exit:
-  mov b, [n]
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  mov [n], b
-  jmp _while1_cond
-_while1_exit:
   leave
   ret
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
-n: .dw 0
-i: .dw 0
-j: .dw 0
-s: .dw 0
-count: .dw 0
-divides: .dw 0
-newline_data: .db "\n", 0
-newline: .dw newline_data
-prompt_data: .db "Max: ", 0
-prompt: .dw prompt_data
-top: .dw 0
+m: .db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+ss_data: .db "\n", 0
+ss: .dw ss_data
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK

@@ -6,20 +6,38 @@
 // asm file.
 // this way we can parse directly
 
-char *h = "Hello World";
-
+char m[10][10];
+char *ss = "\n";
 
 void main(void){
-  asm{
-    mov a, @h
-    mov d, a
-    call puts
+  int i, j;
+
+  for(i=0; i<10; i++){
+    for(j=0; j<10; j++){
+      m[i][j] = i+j;
+    }
+  }
+
+  for(i=0; i<10; i++){
+    for(j=0; j<10; j++){
+      print_nbr(m[i][j]);
+    }
   }
 
    return;
 }
 
 
+void print_nbr(int n){
+  asm{
+    mov a, @n
+    call print_u16d
+    mov a, @ss
+    mov d, a
+    call puts
+  }
+  return;
+}
 
 
 
