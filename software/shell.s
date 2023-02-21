@@ -463,7 +463,6 @@ PATH:			.fill 128, 0		; $PATH environment variable (for now just one path)
 s_etc_profile:	.db "/etc/profile", 0
 s_etc_config:	.db "/etc/sh.conf", 0
 s_home:			.db "home", 0
-s_welcome:		.db "welcome", 0
 s_man:			.db "man", 0
 s_PATH:			.db "PATH", 0
 

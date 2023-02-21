@@ -2,7 +2,6 @@
 ;Floats are IEEE 754 single-precision
 ;Multiplies fp_a and fp_b
 ;Result in fp_c
-			.include "shell.exp"			
 			.include "kernel.exp"
 			.org	8000h
 

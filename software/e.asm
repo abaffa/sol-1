@@ -3,7 +3,6 @@
 ;Uses fpdiv and fpadd as subroutines
 ;e accumulates in fp_e
 
-			.include "shell.exp"			
 			.include "kernel.exp"
 			.org	0400h
 

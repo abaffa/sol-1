@@ -2,9 +2,7 @@
 0002   0000             ;Floats are IEEE 754 single-precision
 0003   0000             ;Multiplies fp_a and fp_b
 0004   0000             ;Result in fp_c
-0005   0000             			.include "shell.exp"			
-0001+  0000             ORG              .EQU  $8000
-0006   0000             			.include "kernel.exp"
+0005   0000             			.include "kernel.exp"
 0001+  0000             PROC_TEXT_ORG    .EQU  $0400
 0002+  0000             sys_bkpt         .EQU  $0000
 0003+  0000             sys_rtc          .EQU  $0001
@@ -20,313 +18,313 @@
 0013+  0000             sys_terminate_proc .EQU  $000b
 0014+  0000             sys_system       .EQU  $000c
 0015+  0000             sys_boot_install .EQU  $000d
-0007   8000             			.org	8000h
-0008   8000             
-0009   8000             ;First gets fp_a and fp_b from input
-0010   8000 07 04 85    			call	scan_u16x
-0011   8003 FD AA       			swp	a
-0012   8005 42 1D 82    			mov	[fp_a],a
-0013   8008 07 04 85    			call	scan_u16x
-0014   800B FD AA       			swp	a
-0015   800D 42 1F 82    			mov	[fp_a+2],a
-0016   8010 07 04 85    			call	scan_u16x
-0017   8013 FD AA       			swp	a
-0018   8015 42 21 82    			mov	[fp_b],a
-0019   8018 07 04 85    			call	scan_u16x
-0020   801B FD AA       			swp	a
-0021   801D 42 23 82    			mov	[fp_b+2],a
-0022   8020             
-0023   8020             multiply_float:
-0024   8020             ;Calculate sign of product first
-0025   8020 1D 1D 82    			mov	al,[fp_a]
-0026   8023 2F          			mov	bl,al
-0027   8024 1D 21 82    			mov	al,[fp_b]
-0028   8027 90          			xor	al,bl		;sign of result is XOR of signs of products
-0029   8028 2F          			mov	bl,al
-0030   8029 19 80       			mov	al,10000000b	;mask of remainder of bits
-0031   802B 88          			and	al,bl
-0032   802C 3D 29 82    			mov	[sign],al	;(sign) is 8-bit mask used to OR-in the sign bit
-0033   802F             ;Calculate exponent of product
-0034   802F             ;Get exponent of a
-0035   802F 1D 1D 82    			mov	al,[fp_a]	;need to get bit 0 of exponent from bit 7 of
-0036   8032 FD 9E 01    			shl	al,1		;fp_a+1 and combine with the rest of the
-0037   8035 2F          			mov	bl,al		;exponent from fp_a
-0038   8036 1D 1E 82    			mov	al,[fp_a+1]	;is bit 7 one?
-0039   8039 87 80       			and	al,10000000b
-0040   803B C7 42 80    			jnz	mfp_next_1	;yes, OR-in a 1 in bit 0 of exponent byte
-0041   803E 1B          			mov	al,bl
-0042   803F 0A 45 80    			jmp	mfp_next_2	;no, skip OR-in (will have a zero from shift)
-0043   8042 19 01       mfp_next_1:		mov	al,00000001b
-0044   8044 8C          			or	al,bl
-0045   8045             ;Remove exponent bias and save
-0046   8045 6F 7F       mfp_next_2:		sub	al,127		;al now has unbiased exponent of a
-0047   8047 3D 2A 82    			mov	[exponent_a],al
-0048   804A             			
-0049   804A             ;Get exponent of b
-0050   804A 1D 21 82    			mov	al,[fp_b]	;need to get bit 0 of exponent from bit 7 of
-0051   804D FD 9E 01    			shl	al,1		;fp_a+1 and combine with the rest of the
-0052   8050 2F          			mov	bl,al		;exponent from fp_a
-0053   8051 1D 22 82    			mov	al,[fp_b+1]	;is bit 7 one?
-0054   8054 87 80       			and	al,10000000b
-0055   8056 C7 5D 80    			jnz	mfp_next_3	;yes, OR-in a 1 in bit 0 of exponent byte
-0056   8059 1B          			mov	al,bl
-0057   805A 0A 60 80    			jmp	mfp_next_4	;no, skip OR-in (will have a zero from shift)
-0058   805D 19 01       mfp_next_3:		mov	al,00000001b
-0059   805F 8C          			or	al,bl
-0060   8060             ;Remove exponent bias and save
-0061   8060 6F 7F       mfp_next_4:		sub	al,127		;al now has unbiased exponent of b
-0062   8062 3D 2B 82    			mov	[exponent_b],al
-0063   8065             ;Add unbiased exponents and save
-0064   8065 3D 2B 82    			mov	[exponent_b],al	;add exponents
-0065   8068 2F          			mov	bl,al
-0066   8069 1D 2A 82    			mov	al,[exponent_a]
-0067   806C 6B          			add	al,bl
-0068   806D 3D 2C 82    			mov	[exponent_c],al	;exponent_c has unbiased exponent of product
-0069   8070             			
-0070   8070             
-0071   8070             			
-0072   8070             ;Multiply significands
-0073   8070 1D 1E 82    			mov	al,[fp_a+1]	;need to set leftmost bit of significand to one
-0074   8073 2F          			mov	bl,al		;this bit is implied but not stored in fp
-0075   8074 19 80       			mov	al,10000000b
-0076   8076 8C          			or	al,bl
-0077   8077 3D 2D 82    			mov	[long_a],al
-0078   807A 1D 1F 82    			mov	al,[fp_a+2]
-0079   807D 3D 2E 82    			mov	[long_a+1],al
-0080   8080 1D 20 82    			mov	al,[fp_a+3]
-0081   8083 3D 2F 82    			mov	[long_a+2],al
-0082   8086 1D 22 82    			mov	al,[fp_b+1]
-0083   8089 2F          			mov	bl,al
-0084   808A 19 80       			mov	al,10000000b
-0085   808C 8C          			or	al,bl
-0086   808D 3D 30 82    			mov	[long_b],al
-0087   8090 1D 23 82    			mov	al,[fp_b+2]
-0088   8093 3D 31 82    			mov	[long_b+1],al
-0089   8096 1D 24 82    			mov	al,[fp_b+3]
-0090   8099 3D 32 82    			mov	[long_b+2],al
-0091   809C             
-0092   809C 07 FB 80    			call	multiply_long		;24-bit integer multiplication
+0006   8000             			.org	8000h
+0007   8000             
+0008   8000             ;First gets fp_a and fp_b from input
+0009   8000 07 04 85    			call	scan_u16x
+0010   8003 FD AA       			swp	a
+0011   8005 42 1D 82    			mov	[fp_a],a
+0012   8008 07 04 85    			call	scan_u16x
+0013   800B FD AA       			swp	a
+0014   800D 42 1F 82    			mov	[fp_a+2],a
+0015   8010 07 04 85    			call	scan_u16x
+0016   8013 FD AA       			swp	a
+0017   8015 42 21 82    			mov	[fp_b],a
+0018   8018 07 04 85    			call	scan_u16x
+0019   801B FD AA       			swp	a
+0020   801D 42 23 82    			mov	[fp_b+2],a
+0021   8020             
+0022   8020             multiply_float:
+0023   8020             ;Calculate sign of product first
+0024   8020 1D 1D 82    			mov	al,[fp_a]
+0025   8023 2F          			mov	bl,al
+0026   8024 1D 21 82    			mov	al,[fp_b]
+0027   8027 90          			xor	al,bl		;sign of result is XOR of signs of products
+0028   8028 2F          			mov	bl,al
+0029   8029 19 80       			mov	al,10000000b	;mask of remainder of bits
+0030   802B 88          			and	al,bl
+0031   802C 3D 29 82    			mov	[sign],al	;(sign) is 8-bit mask used to OR-in the sign bit
+0032   802F             ;Calculate exponent of product
+0033   802F             ;Get exponent of a
+0034   802F 1D 1D 82    			mov	al,[fp_a]	;need to get bit 0 of exponent from bit 7 of
+0035   8032 FD 9E 01    			shl	al,1		;fp_a+1 and combine with the rest of the
+0036   8035 2F          			mov	bl,al		;exponent from fp_a
+0037   8036 1D 1E 82    			mov	al,[fp_a+1]	;is bit 7 one?
+0038   8039 87 80       			and	al,10000000b
+0039   803B C7 42 80    			jnz	mfp_next_1	;yes, OR-in a 1 in bit 0 of exponent byte
+0040   803E 1B          			mov	al,bl
+0041   803F 0A 45 80    			jmp	mfp_next_2	;no, skip OR-in (will have a zero from shift)
+0042   8042 19 01       mfp_next_1:		mov	al,00000001b
+0043   8044 8C          			or	al,bl
+0044   8045             ;Remove exponent bias and save
+0045   8045 6F 7F       mfp_next_2:		sub	al,127		;al now has unbiased exponent of a
+0046   8047 3D 2A 82    			mov	[exponent_a],al
+0047   804A             			
+0048   804A             ;Get exponent of b
+0049   804A 1D 21 82    			mov	al,[fp_b]	;need to get bit 0 of exponent from bit 7 of
+0050   804D FD 9E 01    			shl	al,1		;fp_a+1 and combine with the rest of the
+0051   8050 2F          			mov	bl,al		;exponent from fp_a
+0052   8051 1D 22 82    			mov	al,[fp_b+1]	;is bit 7 one?
+0053   8054 87 80       			and	al,10000000b
+0054   8056 C7 5D 80    			jnz	mfp_next_3	;yes, OR-in a 1 in bit 0 of exponent byte
+0055   8059 1B          			mov	al,bl
+0056   805A 0A 60 80    			jmp	mfp_next_4	;no, skip OR-in (will have a zero from shift)
+0057   805D 19 01       mfp_next_3:		mov	al,00000001b
+0058   805F 8C          			or	al,bl
+0059   8060             ;Remove exponent bias and save
+0060   8060 6F 7F       mfp_next_4:		sub	al,127		;al now has unbiased exponent of b
+0061   8062 3D 2B 82    			mov	[exponent_b],al
+0062   8065             ;Add unbiased exponents and save
+0063   8065 3D 2B 82    			mov	[exponent_b],al	;add exponents
+0064   8068 2F          			mov	bl,al
+0065   8069 1D 2A 82    			mov	al,[exponent_a]
+0066   806C 6B          			add	al,bl
+0067   806D 3D 2C 82    			mov	[exponent_c],al	;exponent_c has unbiased exponent of product
+0068   8070             			
+0069   8070             
+0070   8070             			
+0071   8070             ;Multiply significands
+0072   8070 1D 1E 82    			mov	al,[fp_a+1]	;need to set leftmost bit of significand to one
+0073   8073 2F          			mov	bl,al		;this bit is implied but not stored in fp
+0074   8074 19 80       			mov	al,10000000b
+0075   8076 8C          			or	al,bl
+0076   8077 3D 2D 82    			mov	[long_a],al
+0077   807A 1D 1F 82    			mov	al,[fp_a+2]
+0078   807D 3D 2E 82    			mov	[long_a+1],al
+0079   8080 1D 20 82    			mov	al,[fp_a+3]
+0080   8083 3D 2F 82    			mov	[long_a+2],al
+0081   8086 1D 22 82    			mov	al,[fp_b+1]
+0082   8089 2F          			mov	bl,al
+0083   808A 19 80       			mov	al,10000000b
+0084   808C 8C          			or	al,bl
+0085   808D 3D 30 82    			mov	[long_b],al
+0086   8090 1D 23 82    			mov	al,[fp_b+2]
+0087   8093 3D 31 82    			mov	[long_b+1],al
+0088   8096 1D 24 82    			mov	al,[fp_b+3]
+0089   8099 3D 32 82    			mov	[long_b+2],al
+0090   809C             
+0091   809C 07 FB 80    			call	multiply_long		;24-bit integer multiplication
+0092   809F             
 0093   809F             
-0094   809F             
-0095   809F             			
-0096   809F             ;Normalize product			
-0097   809F 1D 3C 82    mfp_loop_1:		mov	al,[double_long_b]	;check leftmost bit of product
-0098   80A2 2F          			mov	bl,al
-0099   80A3 19 80       			mov	al,10000000b
-0100   80A5 88          			and	al,bl			;test leftmost bit of product
-0101   80A6 C7 B6 80    			jnz	mfp_next_5		;normalized, assemble final fp
-0102   80A9 07 DB 81    			call	shift_left_double_long_b	;not normalized, shift left and dec exponent
-0103   80AC 1D 2C 82    			mov	al,[exponent_c]
-0104   80AF 80          			dec	al
-0105   80B0 3D 2C 82    			mov	[exponent_c],al
-0106   80B3 0A 9F 80    			jmp	mfp_loop_1
-0107   80B6             			
-0108   80B6             
-0109   80B6             ;Assemble final fp 
-0110   80B6 1D 2C 82    mfp_next_5:		mov	al,[exponent_c]	;First byte is sign bit and bits 7 to 1
-0111   80B9 6A 80       			add	al,128			;restore bias + 1 (for effect of multiplication)
-0112   80BB 3D 2C 82    			mov	[exponent_c],al	;exponent_c now has biased exponent
-0113   80BE FD A2 01    			shr	al,1
-0114   80C1 31 29 82    			mov	bl,[sign]			;move over for sign bit
-0115   80C4 8C          			or	al,bl			;put sign bit in
-0116   80C5 3D 25 82    			mov	[fp_c],al		;First byte done
-0117   80C8 1D 3C 82    			mov	al,[double_long_b]	;get first byte of mantissa
-0118   80CB 3D 26 82    			mov	[fp_c+1],al		;store in second byte of fp
-0119   80CE 1D 2C 82    			mov	al,[exponent_c]	;check bit 0 of biased exponent
-0120   80D1 87 01       			and	al,00000001b		;test bit 0 of exponent
-0121   80D3 C7 DE 80    			jnz	mfp_next_6		;bit is one, leave one in bit 7 of fp_c+1
-0122   80D6 1D 26 82    			mov	al,[fp_c+1]		;bit is 0, mask off bit 7 of fp_c+1
-0123   80D9 87 7F       			and	al,01111111b
-0124   80DB 3D 26 82    			mov	[fp_c+1],al
-0125   80DE 1D 3D 82    mfp_next_6:		mov	al,[double_long_b+1]	;get second and third product bytes
-0126   80E1 3D 27 82    			mov	[fp_c+2],al
-0127   80E4 1D 3E 82    			mov	al,[double_long_b+2]
-0128   80E7 3D 28 82    			mov	[fp_c+3],al		;complete fp product now assembled in fp_c
-0129   80EA             
-0130   80EA             ;Print product
-0131   80EA 29 25 82    			mov	b,[fp_c]
-0132   80ED FD AB       			swp	b
-0133   80EF 07 E2 84    			call	print_u16x
-0134   80F2 29 27 82    			mov	b,[fp_c+2]
-0135   80F5 FD AB       			swp	b
-0136   80F7 07 E2 84    			call	print_u16x
-0137   80FA             
-0138   80FA             ;Insert rounding code here -- check leftmost bits of double_long_a+4, and increment mantissa if rounding
-0139   80FA             ;For now just truncate
-0140   80FA             			
-0141   80FA 09          			ret
-0142   80FB             
-0143   80FB             			
-0144   80FB             
-0145   80FB             ;Multiply long integers, using shift and add only -- no nybble multiplication
-0146   80FB             ;Long words passed in long_a and long_b
-0147   80FB             ;Product returned in double_long_b
-0148   80FB             ;Uses double_long_a to hold multiplicand for shifting
-0149   80FB             ;Uses double_long_b for 48-bit addition
-0150   80FB             ;Uses long_c for mask for multiplicand bits in long_b
-0151   80FB             
-0152   80FB 19 00       multiply_long:		mov	al,0
-0153   80FD 3D 36 82    			mov	[double_long_a],al	;clear multiplicand word
-0154   8100 3D 37 82    			mov	[double_long_a+1],al
-0155   8103 3D 38 82    			mov	[double_long_a+2],al
-0156   8106 3D 39 82    			mov	[double_long_a+3],al
-0157   8109 3D 3A 82    			mov	[double_long_a+4],al
-0158   810C 3D 3B 82    			mov	[double_long_a+5],al
-0159   810F 3D 3C 82    			mov	[double_long_b],al	;clear product word
-0160   8112 3D 3D 82    			mov	[double_long_b+1],al
-0161   8115 3D 3E 82    			mov	[double_long_b+2],al
-0162   8118 3D 3F 82    			mov	[double_long_b+3],al
-0163   811B 3D 40 82    			mov	[double_long_b+4],al
-0164   811E 3D 41 82    			mov	[double_long_b+5],al
-0165   8121 3D 33 82    			mov	[long_c],al
-0166   8124 3D 34 82    			mov	[long_c+1],al
-0167   8127 19 01       			mov	al,00000001b		;mask for multiplicand b bits
-0168   8129 3D 35 82    			mov	[long_c+2],al
-0169   812C 1D 2F 82    			mov	al,[long_a+2]
-0170   812F 3D 3B 82    			mov	[double_long_a+5],al	;place multiplicand a in double_long_a
-0171   8132 1D 2E 82    			mov	al,[long_a+1]
-0172   8135 3D 3A 82    			mov	[double_long_a+4],al
-0173   8138 1D 2D 82    			mov	al,[long_a]
-0174   813B 3D 39 82    			mov	[double_long_a+3],al
-0175   813E             
-0176   813E 1D 32 82    mult_long_loop:	mov	al,[long_b+2]		;check bit in multiplicand b with mask
-0177   8141 2F          			mov	bl,al
-0178   8142 1D 35 82    			mov	al,[long_c+2]		;mask in long_c		
-0179   8145 88          			and	al,bl
-0180   8146 C6 4C 81    			jz	mult_long_next_1	;need to check all 3 bytes
-0181   8149 0A 65 81    			jmp	mult_long_add		;bit is one, add
-0182   814C 1D 31 82    mult_long_next_1:	mov	al,[long_b+1]
-0183   814F 2F          			mov	bl,al
-0184   8150 1D 34 82    			mov	al,[long_c+1]
-0185   8153 88          			and	al,bl
-0186   8154 C6 5A 81    			jz	mult_long_next_2
-0187   8157 0A 65 81    			jmp	mult_long_add
-0188   815A 1D 30 82    mult_long_next_2:	mov	al,[long_b]
-0189   815D 2F          			mov	bl,al
-0190   815E 1D 33 82    			mov	al,[long_c]
-0191   8161 88          			and	al,bl
-0192   8162 C6 98 81    			jz	mult_long_shift	;bit is zero, don't add, shift multiplicand
+0094   809F             			
+0095   809F             ;Normalize product			
+0096   809F 1D 3C 82    mfp_loop_1:		mov	al,[double_long_b]	;check leftmost bit of product
+0097   80A2 2F          			mov	bl,al
+0098   80A3 19 80       			mov	al,10000000b
+0099   80A5 88          			and	al,bl			;test leftmost bit of product
+0100   80A6 C7 B6 80    			jnz	mfp_next_5		;normalized, assemble final fp
+0101   80A9 07 DB 81    			call	shift_left_double_long_b	;not normalized, shift left and dec exponent
+0102   80AC 1D 2C 82    			mov	al,[exponent_c]
+0103   80AF 80          			dec	al
+0104   80B0 3D 2C 82    			mov	[exponent_c],al
+0105   80B3 0A 9F 80    			jmp	mfp_loop_1
+0106   80B6             			
+0107   80B6             
+0108   80B6             ;Assemble final fp 
+0109   80B6 1D 2C 82    mfp_next_5:		mov	al,[exponent_c]	;First byte is sign bit and bits 7 to 1
+0110   80B9 6A 80       			add	al,128			;restore bias + 1 (for effect of multiplication)
+0111   80BB 3D 2C 82    			mov	[exponent_c],al	;exponent_c now has biased exponent
+0112   80BE FD A2 01    			shr	al,1
+0113   80C1 31 29 82    			mov	bl,[sign]			;move over for sign bit
+0114   80C4 8C          			or	al,bl			;put sign bit in
+0115   80C5 3D 25 82    			mov	[fp_c],al		;First byte done
+0116   80C8 1D 3C 82    			mov	al,[double_long_b]	;get first byte of mantissa
+0117   80CB 3D 26 82    			mov	[fp_c+1],al		;store in second byte of fp
+0118   80CE 1D 2C 82    			mov	al,[exponent_c]	;check bit 0 of biased exponent
+0119   80D1 87 01       			and	al,00000001b		;test bit 0 of exponent
+0120   80D3 C7 DE 80    			jnz	mfp_next_6		;bit is one, leave one in bit 7 of fp_c+1
+0121   80D6 1D 26 82    			mov	al,[fp_c+1]		;bit is 0, mask off bit 7 of fp_c+1
+0122   80D9 87 7F       			and	al,01111111b
+0123   80DB 3D 26 82    			mov	[fp_c+1],al
+0124   80DE 1D 3D 82    mfp_next_6:		mov	al,[double_long_b+1]	;get second and third product bytes
+0125   80E1 3D 27 82    			mov	[fp_c+2],al
+0126   80E4 1D 3E 82    			mov	al,[double_long_b+2]
+0127   80E7 3D 28 82    			mov	[fp_c+3],al		;complete fp product now assembled in fp_c
+0128   80EA             
+0129   80EA             ;Print product
+0130   80EA 29 25 82    			mov	b,[fp_c]
+0131   80ED FD AB       			swp	b
+0132   80EF 07 E2 84    			call	print_u16x
+0133   80F2 29 27 82    			mov	b,[fp_c+2]
+0134   80F5 FD AB       			swp	b
+0135   80F7 07 E2 84    			call	print_u16x
+0136   80FA             
+0137   80FA             ;Insert rounding code here -- check leftmost bits of double_long_a+4, and increment mantissa if rounding
+0138   80FA             ;For now just truncate
+0139   80FA             			
+0140   80FA 09          			ret
+0141   80FB             
+0142   80FB             			
+0143   80FB             
+0144   80FB             ;Multiply long integers, using shift and add only -- no nybble multiplication
+0145   80FB             ;Long words passed in long_a and long_b
+0146   80FB             ;Product returned in double_long_b
+0147   80FB             ;Uses double_long_a to hold multiplicand for shifting
+0148   80FB             ;Uses double_long_b for 48-bit addition
+0149   80FB             ;Uses long_c for mask for multiplicand bits in long_b
+0150   80FB             
+0151   80FB 19 00       multiply_long:		mov	al,0
+0152   80FD 3D 36 82    			mov	[double_long_a],al	;clear multiplicand word
+0153   8100 3D 37 82    			mov	[double_long_a+1],al
+0154   8103 3D 38 82    			mov	[double_long_a+2],al
+0155   8106 3D 39 82    			mov	[double_long_a+3],al
+0156   8109 3D 3A 82    			mov	[double_long_a+4],al
+0157   810C 3D 3B 82    			mov	[double_long_a+5],al
+0158   810F 3D 3C 82    			mov	[double_long_b],al	;clear product word
+0159   8112 3D 3D 82    			mov	[double_long_b+1],al
+0160   8115 3D 3E 82    			mov	[double_long_b+2],al
+0161   8118 3D 3F 82    			mov	[double_long_b+3],al
+0162   811B 3D 40 82    			mov	[double_long_b+4],al
+0163   811E 3D 41 82    			mov	[double_long_b+5],al
+0164   8121 3D 33 82    			mov	[long_c],al
+0165   8124 3D 34 82    			mov	[long_c+1],al
+0166   8127 19 01       			mov	al,00000001b		;mask for multiplicand b bits
+0167   8129 3D 35 82    			mov	[long_c+2],al
+0168   812C 1D 2F 82    			mov	al,[long_a+2]
+0169   812F 3D 3B 82    			mov	[double_long_a+5],al	;place multiplicand a in double_long_a
+0170   8132 1D 2E 82    			mov	al,[long_a+1]
+0171   8135 3D 3A 82    			mov	[double_long_a+4],al
+0172   8138 1D 2D 82    			mov	al,[long_a]
+0173   813B 3D 39 82    			mov	[double_long_a+3],al
+0174   813E             
+0175   813E 1D 32 82    mult_long_loop:	mov	al,[long_b+2]		;check bit in multiplicand b with mask
+0176   8141 2F          			mov	bl,al
+0177   8142 1D 35 82    			mov	al,[long_c+2]		;mask in long_c		
+0178   8145 88          			and	al,bl
+0179   8146 C6 4C 81    			jz	mult_long_next_1	;need to check all 3 bytes
+0180   8149 0A 65 81    			jmp	mult_long_add		;bit is one, add
+0181   814C 1D 31 82    mult_long_next_1:	mov	al,[long_b+1]
+0182   814F 2F          			mov	bl,al
+0183   8150 1D 34 82    			mov	al,[long_c+1]
+0184   8153 88          			and	al,bl
+0185   8154 C6 5A 81    			jz	mult_long_next_2
+0186   8157 0A 65 81    			jmp	mult_long_add
+0187   815A 1D 30 82    mult_long_next_2:	mov	al,[long_b]
+0188   815D 2F          			mov	bl,al
+0189   815E 1D 33 82    			mov	al,[long_c]
+0190   8161 88          			and	al,bl
+0191   8162 C6 98 81    			jz	mult_long_shift	;bit is zero, don't add, shift multiplicand
+0192   8165             
 0193   8165             
-0194   8165             
-0195   8165             			
-0196   8165             ;In the following add double-long, do 3 16-bit additions with carry
-0197   8165             ;Need to swap before and after add to get memory order correct			
-0198   8165 14 40 82    mult_long_add:		mov	a,[double_long_b+4]	;bit in long_b is one, add multiplicand a to product b
-0199   8168 FD AA       			swp	a
-0200   816A 27          			mov	b,a			;48-bit addition
-0201   816B 14 3A 82    			mov	a,[double_long_a+4]
-0202   816E FD AA       			swp	a
-0203   8170 54          			add	a,b
-0204   8171 FD AA       			swp	a
-0205   8173 42 40 82    			mov	[double_long_b+4],a	;product will accumulate in double_long_b
-0206   8176 14 3E 82    			mov	a,[double_long_b+2]
-0207   8179 FD AA       			swp	a
-0208   817B 27          			mov	b,a
-0209   817C 14 38 82    			mov	a,[double_long_a+2]
-0210   817F FD AA       			swp	a
-0211   8181 5C          			adc	a,b
-0212   8182 FD AA       			swp	a
-0213   8184 42 3E 82    			mov	[double_long_b+2],a
-0214   8187 14 3C 82    			mov	a,[double_long_b]
-0215   818A FD AA       			swp	a
-0216   818C 27          			mov	b,a
-0217   818D 14 36 82    			mov	a,[double_long_a]
-0218   8190 FD AA       			swp	a
-0219   8192 5C          			adc	a,b
-0220   8193 FD AA       			swp	a
-0221   8195 42 3C 82    			mov	[double_long_b],a
-0222   8198             			
-0223   8198 07 B2 81    mult_long_shift:	call	shift_left_double_long_a	;shifts multiplicand in double_long_a
-0224   819B 07 04 82    			call	shift_left_long	;shifts mask in long_c left one
-0225   819E 1D 33 82    			mov	al,[long_c]		;check long_c if zero (24 shifts done)
-0226   81A1 2F          			mov	bl,al
-0227   81A2 1D 34 82    			mov	al,[long_c+1]
-0228   81A5 8C          			or	al,bl
-0229   81A6 C7 3E 81    			jnz	mult_long_loop		;not zero, keep multiplying
-0230   81A9 2F          			mov	bl,al
-0231   81AA 1D 35 82    			mov	al,[long_c+2]
-0232   81AD 8C          			or	al,bl
-0233   81AE C7 3E 81    			jnz	mult_long_loop		;not zero, keep multiplying
-0234   81B1 09          			ret				;mask bytes all zeros, done
-0235   81B2             ;Subroutine to shift left one a 48-bit value
-0236   81B2             ;48-bit value in double_long_a
-0237   81B2             ;concatenates 3 one-bit left shifts of the 3 words that make up the value
-0238   81B2             ;uses 16-bit mov instructions, swaps low and hi bytes to make it right
-0239   81B2             shift_left_double_long_a:
-0240   81B2 14 3A 82    			mov	a,[double_long_a+4]
-0241   81B5 FD AA       			swp	a
-0242   81B7 FD 99       			shl	a
-0243   81B9 FD AA       			swp	a
-0244   81BB 42 3A 82    			mov	[double_long_a+4],a
-0245   81BE 14 38 82    			mov	a,[double_long_a+2]
-0246   81C1 3A 01       			mov	cl, 1
-0247   81C3 FD AA       			swp	a
-0248   81C5 FD E0       			rlc	a, cl
-0249   81C7 FD AA       			swp	a
-0250   81C9 42 38 82    			mov	[double_long_a+2],a
-0251   81CC 14 36 82    			mov	a,[double_long_a]
-0252   81CF 3A 01       			mov	cl, 1
-0253   81D1 FD AA       			swp	a
-0254   81D3 FD E0       			rlc	a, cl
-0255   81D5 FD AA       			swp	a
-0256   81D7 42 36 82    			mov	[double_long_a],a
-0257   81DA 09          			ret
-0258   81DB             			
-0259   81DB             ;Subroutine to shift left one a 48-bit value
-0260   81DB             ;48-bit value in double_long_b
-0261   81DB             ;concatenates 3 one-bit left shifts of the 3 words that make up the value
-0262   81DB             ;uses 16-bit mov instructions, swaps low and hi bytes to make it right
-0263   81DB             shift_left_double_long_b:
-0264   81DB 14 40 82    			mov	a,[double_long_b+4]
-0265   81DE FD AA       			swp	a
-0266   81E0 FD 99       			shl	a
-0267   81E2 FD AA       			swp	a
-0268   81E4 42 40 82    			mov	[double_long_b+4],a
-0269   81E7 14 3E 82    			mov	a,[double_long_b+2]
-0270   81EA 3A 01       			mov	cl, 1
-0271   81EC FD AA       			swp	a
-0272   81EE FD E0       			rlc	a, cl
-0273   81F0 FD AA       			swp	a
-0274   81F2 42 3E 82    			mov	[double_long_b+2],a
-0275   81F5 14 3C 82    			mov	a,[double_long_b]
-0276   81F8 3A 01       			mov	cl, 1
-0277   81FA FD AA       			swp	a
-0278   81FC FD E0       			rlc	a, cl
-0279   81FE FD AA       			swp	a
-0280   8200 42 3C 82    			mov	[double_long_b],a
-0281   8203 09          			ret
-0282   8204             
-0283   8204             ;Subroutine to shift left one a 24-bit value
-0284   8204             ;24-bit value in long_c
-0285   8204 14 34 82    shift_left_long:	mov	a,[long_c+1]	;16-bit load, little endian
-0286   8207 FD AA       			swp	a		;swap to make it fit the big-endian mantissa
-0287   8209 FD 99       			shl	a
-0288   820B FD AA       			swp	a
-0289   820D 42 34 82    			mov	[long_c+1],a
-0290   8210 14 32 82    			mov	a,[long_c-1]	;16-bit load, low byte in memory is garbage
-0291   8213 3A 01       			mov	cl, 1
-0292   8215 FD AA       			swp	a
-0293   8217 FD E0       			rlc	a, cl
-0294   8219 3D 33 82    			mov	[long_c],al	;discard high byte which is garbage
-0295   821C 09          			ret
-0296   821D             							
-0297   821D             ;Variables
-0298   821D 40 83 33 33 fp_a			.db	40h,83h,33h,33h	;IEEE 754 single-precision floating point number 0x40833333 = decimal 4.1
-0299   8221 40 60 00 00 fp_b			.db	40h,60h,00h,00h	;IEEE 754 single-precision floating point number 0x40600000 = decimal 3.5
-0300   8225 00 00 00 00 fp_c			.db	0,0,0,0	;IEEE 754 single-precision floating point number 0x4165999A = decimal 14.35
-0301   8229 00          sign			.db	0
-0302   822A 00          exponent_a		.db	0
-0303   822B 00          exponent_b		.db	0
-0304   822C 00          exponent_c		.db	0
-0305   822D 00 00 00    long_a			.db	0,0,0		;24-bit integer
-0306   8230 00 00 00    long_b			.db	0,0,0		;24-bit integer
-0307   8233 00 00 00    long_c			.db	0,0,0		;24-bit integer
-0308   8236 00 00 00 00 double_long_a	.db	0,0,0,0,0,0	;48-bit integer
-0308   823A 00 00 
-0309   823C 00 00 00 00 double_long_b	.db	0,0,0,0,0,0	;48-bit interger
-0309   8240 00 00 
-0310   8242             
-0311   8242             .include "stdio.asm"
+0194   8165             			
+0195   8165             ;In the following add double-long, do 3 16-bit additions with carry
+0196   8165             ;Need to swap before and after add to get memory order correct			
+0197   8165 14 40 82    mult_long_add:		mov	a,[double_long_b+4]	;bit in long_b is one, add multiplicand a to product b
+0198   8168 FD AA       			swp	a
+0199   816A 27          			mov	b,a			;48-bit addition
+0200   816B 14 3A 82    			mov	a,[double_long_a+4]
+0201   816E FD AA       			swp	a
+0202   8170 54          			add	a,b
+0203   8171 FD AA       			swp	a
+0204   8173 42 40 82    			mov	[double_long_b+4],a	;product will accumulate in double_long_b
+0205   8176 14 3E 82    			mov	a,[double_long_b+2]
+0206   8179 FD AA       			swp	a
+0207   817B 27          			mov	b,a
+0208   817C 14 38 82    			mov	a,[double_long_a+2]
+0209   817F FD AA       			swp	a
+0210   8181 5C          			adc	a,b
+0211   8182 FD AA       			swp	a
+0212   8184 42 3E 82    			mov	[double_long_b+2],a
+0213   8187 14 3C 82    			mov	a,[double_long_b]
+0214   818A FD AA       			swp	a
+0215   818C 27          			mov	b,a
+0216   818D 14 36 82    			mov	a,[double_long_a]
+0217   8190 FD AA       			swp	a
+0218   8192 5C          			adc	a,b
+0219   8193 FD AA       			swp	a
+0220   8195 42 3C 82    			mov	[double_long_b],a
+0221   8198             			
+0222   8198 07 B2 81    mult_long_shift:	call	shift_left_double_long_a	;shifts multiplicand in double_long_a
+0223   819B 07 04 82    			call	shift_left_long	;shifts mask in long_c left one
+0224   819E 1D 33 82    			mov	al,[long_c]		;check long_c if zero (24 shifts done)
+0225   81A1 2F          			mov	bl,al
+0226   81A2 1D 34 82    			mov	al,[long_c+1]
+0227   81A5 8C          			or	al,bl
+0228   81A6 C7 3E 81    			jnz	mult_long_loop		;not zero, keep multiplying
+0229   81A9 2F          			mov	bl,al
+0230   81AA 1D 35 82    			mov	al,[long_c+2]
+0231   81AD 8C          			or	al,bl
+0232   81AE C7 3E 81    			jnz	mult_long_loop		;not zero, keep multiplying
+0233   81B1 09          			ret				;mask bytes all zeros, done
+0234   81B2             ;Subroutine to shift left one a 48-bit value
+0235   81B2             ;48-bit value in double_long_a
+0236   81B2             ;concatenates 3 one-bit left shifts of the 3 words that make up the value
+0237   81B2             ;uses 16-bit mov instructions, swaps low and hi bytes to make it right
+0238   81B2             shift_left_double_long_a:
+0239   81B2 14 3A 82    			mov	a,[double_long_a+4]
+0240   81B5 FD AA       			swp	a
+0241   81B7 FD 99       			shl	a
+0242   81B9 FD AA       			swp	a
+0243   81BB 42 3A 82    			mov	[double_long_a+4],a
+0244   81BE 14 38 82    			mov	a,[double_long_a+2]
+0245   81C1 3A 01       			mov	cl, 1
+0246   81C3 FD AA       			swp	a
+0247   81C5 FD E0       			rlc	a, cl
+0248   81C7 FD AA       			swp	a
+0249   81C9 42 38 82    			mov	[double_long_a+2],a
+0250   81CC 14 36 82    			mov	a,[double_long_a]
+0251   81CF 3A 01       			mov	cl, 1
+0252   81D1 FD AA       			swp	a
+0253   81D3 FD E0       			rlc	a, cl
+0254   81D5 FD AA       			swp	a
+0255   81D7 42 36 82    			mov	[double_long_a],a
+0256   81DA 09          			ret
+0257   81DB             			
+0258   81DB             ;Subroutine to shift left one a 48-bit value
+0259   81DB             ;48-bit value in double_long_b
+0260   81DB             ;concatenates 3 one-bit left shifts of the 3 words that make up the value
+0261   81DB             ;uses 16-bit mov instructions, swaps low and hi bytes to make it right
+0262   81DB             shift_left_double_long_b:
+0263   81DB 14 40 82    			mov	a,[double_long_b+4]
+0264   81DE FD AA       			swp	a
+0265   81E0 FD 99       			shl	a
+0266   81E2 FD AA       			swp	a
+0267   81E4 42 40 82    			mov	[double_long_b+4],a
+0268   81E7 14 3E 82    			mov	a,[double_long_b+2]
+0269   81EA 3A 01       			mov	cl, 1
+0270   81EC FD AA       			swp	a
+0271   81EE FD E0       			rlc	a, cl
+0272   81F0 FD AA       			swp	a
+0273   81F2 42 3E 82    			mov	[double_long_b+2],a
+0274   81F5 14 3C 82    			mov	a,[double_long_b]
+0275   81F8 3A 01       			mov	cl, 1
+0276   81FA FD AA       			swp	a
+0277   81FC FD E0       			rlc	a, cl
+0278   81FE FD AA       			swp	a
+0279   8200 42 3C 82    			mov	[double_long_b],a
+0280   8203 09          			ret
+0281   8204             
+0282   8204             ;Subroutine to shift left one a 24-bit value
+0283   8204             ;24-bit value in long_c
+0284   8204 14 34 82    shift_left_long:	mov	a,[long_c+1]	;16-bit load, little endian
+0285   8207 FD AA       			swp	a		;swap to make it fit the big-endian mantissa
+0286   8209 FD 99       			shl	a
+0287   820B FD AA       			swp	a
+0288   820D 42 34 82    			mov	[long_c+1],a
+0289   8210 14 32 82    			mov	a,[long_c-1]	;16-bit load, low byte in memory is garbage
+0290   8213 3A 01       			mov	cl, 1
+0291   8215 FD AA       			swp	a
+0292   8217 FD E0       			rlc	a, cl
+0293   8219 3D 33 82    			mov	[long_c],al	;discard high byte which is garbage
+0294   821C 09          			ret
+0295   821D             							
+0296   821D             ;Variables
+0297   821D 40 83 33 33 fp_a			.db	40h,83h,33h,33h	;IEEE 754 single-precision floating point number 0x40833333 = decimal 4.1
+0298   8221 40 60 00 00 fp_b			.db	40h,60h,00h,00h	;IEEE 754 single-precision floating point number 0x40600000 = decimal 3.5
+0299   8225 00 00 00 00 fp_c			.db	0,0,0,0	;IEEE 754 single-precision floating point number 0x4165999A = decimal 14.35
+0300   8229 00          sign			.db	0
+0301   822A 00          exponent_a		.db	0
+0302   822B 00          exponent_b		.db	0
+0303   822C 00          exponent_c		.db	0
+0304   822D 00 00 00    long_a			.db	0,0,0		;24-bit integer
+0305   8230 00 00 00    long_b			.db	0,0,0		;24-bit integer
+0306   8233 00 00 00    long_c			.db	0,0,0		;24-bit integer
+0307   8236 00 00 00 00 double_long_a	.db	0,0,0,0,0,0	;48-bit integer
+0307   823A 00 00 
+0308   823C 00 00 00 00 double_long_b	.db	0,0,0,0,0,0	;48-bit interger
+0308   8240 00 00 
+0309   8242             
+0310   8242             .include "stdio.asm"
 0001+  8242             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 0002+  8242             ; stdio.s
 0003+  8242             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1127,6 +1125,6 @@
 0626+  85BB EF          	pop si
 0627+  85BC F9          	leave
 0628+  85BD 09          	ret
-0312   85BE             
-0313   85BE             .end
+0311   85BE             
+0312   85BE             .end
 tasm: Number of errors = 0
