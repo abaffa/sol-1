@@ -1,6 +1,5 @@
 #include "lib/stdio.asm"
 
-
 int n, i, j;
 int s;
 int count = 0;
