@@ -25,11 +25,6 @@ s_warning:        .db "Make sure you are in "
 									.db "/boot before creating "
 									.db "the file.\n", 0
 
-s_prompt:         .db "% ", 0
-s_enter_filename: .db "Kernel filename: ", 0
-kernel_filename:    .fill 64, 0
-kernel_fullpath:  	.db "/boot/"
-                    .fill 64, 0
 
 .include "stdio.asm"
 
