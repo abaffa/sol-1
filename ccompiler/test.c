@@ -6,25 +6,24 @@
 // asm file.
 // this way we can parse directly
 
-char m[10][10];
-char *ss = "\n";
+int current[10];
+int SIZE = 2;
 
-void main(void){
-  int i, j;
+void main() {
+    int left;
+    int i;
 
-  for(i=0; i<10; i++){
-    for(j=0; j<10; j++){
-      m[i][j] = i+j;
-    }
-  }
+    current[0] = 12;
+    current[1] = 15;
 
-  for(i=0; i<10; i++){
-    for(j=0; j<10; j++){
-      print_nbr(m[i][j]);
-    }
-  }
+    i = 10;
 
-   return;
+    left = (i == 0) ? current[SIZE - 1] : current[SIZE - 2];
+
+    print_nbr(left);
+
+
+    return;
 }
 
 
@@ -32,9 +31,6 @@ void print_nbr(int n){
   asm{
     mov a, @n
     call print_u16d
-    mov a, @ss
-    mov d, a
-    call puts
   }
   return;
 }

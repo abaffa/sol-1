@@ -297,21 +297,9 @@ char *data_block_p;
 
 int highest_label_index = 0;          // this keeps the next value of the label index for use in new labels.
                                       //label values are never repeating. always increasing.
-int current_label_index_if = 0;       // index of current 'if' label. starts at 0
-int current_label_index_switch = 0;   // index of current 'switch' label. starts at 0
-int current_label_index_for = 0;      // index of current 'for' label. starts at 0
-int current_label_index_while = 0;    // index of current 'while' label. starts at 0
-int current_label_index_do = 0;       // index of current 'do' label. starts at 0
-int label_stack_for[64];              // for nested for labels 
-int label_stack_while[64];            // for nested while labels 
-int label_stack_do[64];               // for nested do labels 
-int label_stack_if[64];               // for nested if labels 
-int label_stack_switch[64];           // for nested switch labels 
-int label_tos_for = 0;
-int label_tos_while = 0;
-int label_tos_do = 0;
-int label_tos_if = 0;
-int label_tos_switch = 0;
+int current_label_index = 0; 
+int label_stack[64];
+int label_tos = 0;
 t_break_type current_break_type;      // is it a for, while, or switch?
 
 // functions
