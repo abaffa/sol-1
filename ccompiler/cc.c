@@ -1301,10 +1301,7 @@ void parse_ternary_op(void){
   sprintf(s_label, "_ternary%d_true:", current_label_index);
   emitln(s_label);
   parse_ternary_op(); // result in 'b'
-  if(tok != COLON) {
-    puts(token);
-    error(COLON_EXPECTED);
-  }
+  if(tok != COLON) error(COLON_EXPECTED);
   sprintf(s_label, "  jmp _ternary%d_exit", current_label_index);
   emitln(s_label);
   sprintf(s_label, "_ternary%d_false:", current_label_index);
@@ -2611,6 +2608,7 @@ void get(void){
 
   *token = '\0';
   tok = 0;
+  tok_type = 0;
   t = token;
   
 /* Skip comments and whitespaces */
