@@ -1716,9 +1716,41 @@ void parse_factors(void){
 // ################################################################################################
 // ################################################################################################
 
+unsigned int add_string(char *str){
+  int i;
+  char temp[256];
+
+  for(i = 0; i < STRING_TABLE_SIZE; i++){
+    if(!string_table[i][0]){
+      strcpy(string_table[i], str);
+      // emit the declaration of this string, into the data block
+      sprintf(temp, "_string_%d", i);
+      emit_data(temp);
+      emit_data(": .db \"");
+      emit_data(str);
+      emit_data("\", 0\n");
+      return i;
+    }
+  }
+
+  error(MAX_STRINGS);
+}
+
+int find_string(char *str){
+  int i;
+
+  for(i = 0; i < STRING_TABLE_SIZE; i++){
+    if(!strcmp(string_table[i], str)){
+      return i;
+    }
+  }
+  return -1;
+}
+
 void parse_atom(void){
   int var_id;
   int func_id;
+  int string_id;
   char temp_name[ID_LEN];
   char temp[1024];
   char var_address_str[32];
@@ -1726,22 +1758,12 @@ void parse_atom(void){
  
   get();
   if(tok_type == STRING_CONST){
-    if(strstr(data_block_ASM, token) != NULL){ // look for the previous string
-      get();
-      return;
-    }
-    else{
-      sprintf(temp, "_string_%d", data_block_label_index);
-      // emit the declaration of this string, into the data block
-      emit_data(temp);
-      emit_data(": .db \"");
-      emit_data(string_constant);
-      emit_data("\", 0\n");
-      // now emit the reference to this string into the ASM
-      emit("  mov b, ");
-      emitln(temp);
-      data_block_label_index++;
-    }
+    string_id = find_string(string_constant);
+    if(string_id == -1) string_id = add_string(string_constant);
+    // now emit the reference to this string into the ASM
+    sprintf(temp, "_string_%d", string_id);
+    emit("  mov b, ");
+    emitln(temp);
   }
   else if(tok == SIZEOF){
     get();

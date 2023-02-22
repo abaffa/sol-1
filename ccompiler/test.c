@@ -8,18 +8,29 @@
 
 
 void main() {
+  int i;
 
-  prints("Hello World");
-  prints("Hello World2");
-  prints("Hello World3");
-
+  for(i =0; i<65535;i++){
+    prints("Hello World: ", i);
+  }
   return;
 
 }
 
 
-void prints(char *s){
+void prints(char *s, int i){
+  asm{
+    mov a, @s
+    mov d, a
+    call puts
+    mov a, @i
+    call print_u16d
 
+    mov ah, $0A
+    call putchar
+    mov ah, $0D
+    call putchar
+  }
   return;
 }
 

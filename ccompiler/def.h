@@ -1,4 +1,4 @@
-#define STRING_TABLE_SIZE      250
+#define STRING_TABLE_SIZE      256
 #define MAX_USER_FUNC          50
 #define MAX_GLOBAL_VARS        100
 #define MAX_LOCAL_VARS         100
@@ -122,6 +122,8 @@ typedef struct {
 } t_var;
 t_var global_variables[MAX_GLOBAL_VARS];
 
+char string_table[STRING_TABLE_SIZE][1024];
+
 typedef struct {
   char func_name[ID_LEN];
   t_basic_data return_type;
@@ -215,7 +217,8 @@ typedef enum {
   COLON_EXPECTED,
   EXCEEDED_MAX_ENUM_DECL,
   UNDECLARED_ENUM_ELEMENT,
-  UNDECLARED_IDENTIFIER
+  UNDECLARED_IDENTIFIER,
+  MAX_STRINGS
 } t_errorCode;
 
 // variable declaration
@@ -273,7 +276,8 @@ char *error_table[] = {
   "colon expected",
   "maximum enum declaration limit reached",
   "undeclared enum element",
-  "undeclared identifier"
+  "undeclared identifier",
+  "maximum number of strings reached"
 };
 
 int current_function_var_bp_offset;  // this is used to position local variables correctly relative to BP.
@@ -294,7 +298,6 @@ char asm_line[256];
 char includes_list_ASM[1024];         // keeps a list of all included files
 char data_block_ASM[1024*10];
 char *data_block_p;
-int data_block_label_index;
 
 int highest_label_index;          // this keeps the next value of the label index for use in new labels.
                                       //label values are never repeating. always increasing.
@@ -407,3 +410,6 @@ void skip_matrix_bracket(void);
 
 
 void expect(t_token _tok, t_errorCode errorCode);
+
+
+unsigned int add_string(char *str);
