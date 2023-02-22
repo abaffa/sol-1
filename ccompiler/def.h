@@ -294,10 +294,11 @@ char asm_line[256];
 char includes_list_ASM[1024];         // keeps a list of all included files
 char data_block_ASM[1024*10];
 char *data_block_p;
+int data_block_label_index;
 
-int highest_label_index = 0;          // this keeps the next value of the label index for use in new labels.
+int highest_label_index;          // this keeps the next value of the label index for use in new labels.
                                       //label values are never repeating. always increasing.
-int current_label_index = 0; 
+int current_label_index; 
 int label_stack[64];
 int label_tos = 0;
 t_break_type current_break_type;      // is it a for, while, or switch?
@@ -325,6 +326,8 @@ void back(void);
 void emit(char *p);
 void emitln(char *p);
 void emit_c_var(char *var_name);
+void emit_data(char *data);
+
 void skip_statements(void);
 void skip_block(void);
 void skip_case(void);

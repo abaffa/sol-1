@@ -15,6 +15,7 @@ int main(int argc, char *argv[]){
 
   prog = pbuf; // resets pointer to the beginning of the program
   asmp = ASM_output;  // set ASM outback pointer to the ASM array beginning
+  data_block_p = data_block_ASM; // data block pointer
 
   pre_scan();
   sprintf(header, "; --- FILENAME: %s", argv[1]);
@@ -36,6 +37,14 @@ int main(int argc, char *argv[]){
   generate_file("a.s"); // generate a.s assembly file
 
   return 0;
+}
+
+void emit_data(char *data){
+  char *p = data;
+
+  while(*p){
+    *data_block_p++ = *p++;
+  }
 }
 
 // ################################################################################################
@@ -147,6 +156,10 @@ void emit_data_section(void){
       }
     }
   }
+
+  emitln("\n");
+  emitln(data_block_ASM);
+
   emitln("; --- END DATA BLOCK");
 }
 
@@ -1707,12 +1720,30 @@ void parse_atom(void){
   int var_id;
   int func_id;
   char temp_name[ID_LEN];
-  char temp[64];
+  char temp[1024];
   char var_address_str[32];
   char enum_value_str[32];
  
   get();
-  if(tok == SIZEOF){
+  if(tok_type == STRING_CONST){
+    if(strstr(data_block_ASM, token) != NULL){ // look for the previous string
+      get();
+      return;
+    }
+    else{
+      sprintf(temp, "_string_%d", data_block_label_index);
+      // emit the declaration of this string, into the data block
+      emit_data(temp);
+      emit_data(": .db \"");
+      emit_data(string_constant);
+      emit_data("\", 0\n");
+      // now emit the reference to this string into the ASM
+      emit("  mov b, ");
+      emitln(temp);
+      data_block_label_index++;
+    }
+  }
+  else if(tok == SIZEOF){
     get();
     expect(OPENING_PAREN, OPENING_PAREN_EXPECTED);
     get();
