@@ -19,10 +19,13 @@ prints:
 ; --- BEGIN DATA BLOCK
 aa: .dw 233
 p: .dw 444
-ss_data: .db 0, 22, 
-s_data: .db "Hello", 0
+ss_data: .db 'a', 22, 
+ss: .dw ss_data
+s_data: .dw "Hello", 0
 s: .dw s_data
-ii: .dw 45, 22, 
+ii_data: .dw 45, 22, 
+ii: .dw ii_data
+c: .db 'A'
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK

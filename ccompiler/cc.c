@@ -2297,20 +2297,19 @@ void declare_global(void){
 		}
 
     // emit data section for this variable
-    if(ind_level > 0 && dt == DT_CHAR && dim == 0){ 
+    if(ind_level > 0 && dt == DT_CHAR || dim > 0){ 
       sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
       emit_data(temp);
-      emit_data(".db ");
     }
     else{
-      emit_data(global_variables[global_var_tos].var_name);
-      emit_data(": ");
-      if(ind_level > 0 || dt == DT_INT){
-        emit_data(".dw ");
-      }
-      else{
-        emit_data(".db ");
-      }
+      sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
+      emit_data(temp);
+    }
+    if(ind_level > 0 || dt == DT_INT){
+      emit_data(".dw ");
+    }
+    else{
+      emit_data(".db ");
     }
 
     // checks for variable initialization
@@ -2357,7 +2356,8 @@ void declare_global(void){
           j++;
           get();
         } while(tok == COMMA);
-        emit_data("\n");
+        sprintf(temp, "\n%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
+        emit_data(temp);
         global_variables[global_var_tos].nbr_initial_values = j;
         expect(CLOSING_BRACE, CLOSING_BRACE_EXPECTED);
       }
@@ -2378,7 +2378,7 @@ void declare_global(void){
             }
             else{
               if(tok_type == CHAR_CONST){
-                sprintf(temp, "%c\n", string_constant[0]);
+                sprintf(temp, "'%c'\n", string_constant[0]);
                 emit_data(temp);
               }
               else if(tok_type == INTEGER_CONST){

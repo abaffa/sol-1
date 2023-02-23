@@ -11,10 +11,10 @@
 
 int aa = 233;
 int *p = 444;
-char *ss[4]={'a', 22};
+char ss[4]={'a', 22};
 char *s = "Hello";
 int *ii[2] = {45, 22};
-
+char c = 'A';
 void main() {
 
   *s;
