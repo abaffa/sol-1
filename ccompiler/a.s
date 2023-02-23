@@ -19,7 +19,7 @@ prints:
 ; --- BEGIN DATA BLOCK
 aa: .dw 233
 p: .dw 444
-ss: .dw 0, 22, 
+ss_data: .db 0, 22, 
 s_data: .db "Hello", 0
 s: .dw s_data
 ii: .dw 45, 22, 

@@ -2297,7 +2297,7 @@ void declare_global(void){
 		}
 
     // emit data section for this variable
-    if(ind_level > 0 && dt == DT_CHAR){ 
+    if(ind_level > 0 && dt == DT_CHAR && dim == 0){ 
       sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
       emit_data(temp);
       emit_data(".db ");
