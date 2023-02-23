@@ -2299,19 +2299,35 @@ void declare_global(void){
 		}
 
     // emit data section for this variable
-    if(ind_level > 0 && dt == DT_CHAR || dim > 0){ 
+    if(ind_level > 0 && dt == DT_CHAR && dim == 0){ 
       sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
       emit_data(temp);
+      emit_data(".db ");
+    }
+    else if(ind_level > 0 && dt == DT_CHAR && dim > 0){ 
+      sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
+      emit_data(temp);
+      emit_data(".dw ");
+    }
+    else if(ind_level == 0 && dt == DT_CHAR && dim > 0){ 
+      sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
+      emit_data(temp);
+      emit_data(".db ");
+    }
+    else if(ind_level > 0 || dt == DT_INT && dim > 0){ 
+      sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
+      emit_data(temp);
+      emit_data(".dw ");
     }
     else{
       sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
       emit_data(temp);
-    }
-    if(ind_level > 0 || dt == DT_INT){
-      emit_data(".dw ");
-    }
-    else{
-      emit_data(".db ");
+      if(ind_level > 0 || dt == DT_INT){
+        emit_data(".dw ");
+      }
+      else{
+        emit_data(".db ");
+      }
     }
 
     // checks for variable initialization
@@ -2521,7 +2537,7 @@ void declare_local(void){
     new_var.bp_offset = current_function_var_bp_offset + 1;
 
     if(tok == ASSIGNMENT){
-      puts("Assignment of local matrices is not possible yet.");
+      puts("Assignment of local variables is not possible yet.");
       exit(0);
     }
     else{
