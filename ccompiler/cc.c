@@ -83,6 +83,7 @@ void emit_data_section(void){
   char s_init[1024];
 
   emitln("\n; --- BEGIN DATA BLOCK");
+  /*
   for(i = 0; i < global_var_tos; i++){
     if(is_matrix(&global_variables[i])){
       switch(global_variables[i].data.type){
@@ -156,9 +157,8 @@ void emit_data_section(void){
       }
     }
   }
-
-  emitln("\n");
-  emitln(data_block_ASM);
+*/
+  emit(data_block_ASM);
 
   emitln("; --- END DATA BLOCK");
 }
@@ -2231,6 +2231,7 @@ void declare_global(void){
   t_basic_data dt;
   int ind_level;
   char constant = 0;
+  char temp[512];
 
   get(); // gets past the data type
   if(tok == CONST){
@@ -2280,7 +2281,7 @@ void declare_global(void){
 
     get();
 		// checks if this is a matrix declaration
-		int i = 0;
+		int dim = 0;
     int expr;
 		if(tok == OPENING_BRACKET){
 			while(tok == OPENING_BRACKET){
@@ -2288,12 +2289,29 @@ void declare_global(void){
         expr = atoi(token);
         get();
 				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
-				global_variables[global_var_tos].dims[i] = expr;
+				global_variables[global_var_tos].dims[dim] = expr;
 				get();
-				i++;
+				dim++;
 			}
-      global_variables[global_var_tos].dims[i] = 0; // sets the last variable dimention to 0, to mark the end of the list
+      global_variables[global_var_tos].dims[dim] = 0; // sets the last variable dimention to 0, to mark the end of the list
 		}
+
+    // emit data section for this variable
+    if(ind_level > 0 && dt == DT_CHAR && dim == 0){ 
+      sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
+      emit_data(temp);
+      emit_data(".db ");
+    }
+    else{
+      emit_data(global_variables[global_var_tos].var_name);
+      emit_data(": ");
+      if(ind_level > 0 || dt == DT_INT){
+        emit_data(".dw ");
+      }
+      else{
+        emit_data(".db ");
+      }
+    }
 
     // checks for variable initialization
     if(tok == ASSIGNMENT){
@@ -2306,27 +2324,40 @@ void declare_global(void){
           get();
           switch(dt){
             case DT_VOID:
-              global_variables[global_var_tos].initial_val.p[j] = atoi(token);
+              sprintf(temp, "%u, ", atoi(token));
+              emit_data(temp);
               break;
             case DT_CHAR:
               if(ind_level > 0){ // if is a pointer
-                global_variables[global_var_tos].initial_val.p[j] = atoi(token);
-                //if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
-                //strcpy(global_variables[global_var_tos].initial_val.string, string_constant);
+                sprintf(temp, "%u, ", atoi(token));
+                emit_data(temp);
               }
               else{
-                if(tok_type == CHAR_CONST) global_variables[global_var_tos].initial_val.string[j] = string_constant[0];
-                else if(tok_type == INTEGER_CONST) global_variables[global_var_tos].initial_val.string[j] = (char)atoi(token);
+                if(tok_type == CHAR_CONST){
+                  sprintf(temp, "'%c', ", string_constant[0]);
+                  emit_data(temp);
+                }
+                else if(tok_type == INTEGER_CONST){
+                  sprintf(temp, "%u, ", (char)atoi(token));
+                  emit_data(temp);
+                }
               }
               break;
             case DT_INT:
-              if(ind_level > 0) global_variables[global_var_tos].initial_val.p[j] = atoi(token);
-              else global_variables[global_var_tos].initial_val.shortint[j] = atoi(token);
+              if(ind_level > 0){
+                sprintf(temp, "%u, ", atoi(token));
+                emit_data(temp);
+              }
+              else{
+                sprintf(temp, "%u, ", atoi(token));
+                emit_data(temp);
+              }
               break;
           }
           j++;
           get();
         } while(tok == COMMA);
+        emit_data("\n");
         global_variables[global_var_tos].nbr_initial_values = j;
         expect(CLOSING_BRACE, CLOSING_BRACE_EXPECTED);
       }
@@ -2334,21 +2365,37 @@ void declare_global(void){
         get();
         switch(dt){
           case DT_VOID:
-            global_variables[global_var_tos].initial_val.p[0] = atoi(token);
+            sprintf(temp, "%u, ", atoi(token));
+            emit_data(temp);
             break;
           case DT_CHAR:
             if(ind_level > 0){ // if is a string
               if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
-              strcpy(global_variables[global_var_tos].initial_val.string, string_constant);
+              sprintf(temp, "%s, 0\n", token);
+              emit_data(temp);
+              sprintf(temp, "%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
+              emit_data(temp);
             }
             else{
-              if(tok_type == CHAR_CONST) global_variables[global_var_tos].initial_val.string[0] = string_constant[0];
-              else if(tok_type == INTEGER_CONST) global_variables[global_var_tos].initial_val.string[0] = (char)atoi(token);
+              if(tok_type == CHAR_CONST){
+                sprintf(temp, "%c\n", string_constant[0]);
+                emit_data(temp);
+              }
+              else if(tok_type == INTEGER_CONST){
+                sprintf(temp, "%u\n", (char)atoi(token));
+                emit_data(temp);
+              }
             }
             break;
           case DT_INT:
-            if(ind_level > 0) global_variables[global_var_tos].initial_val.p[0] = atoi(token);
-            else global_variables[global_var_tos].initial_val.shortint[0] = atoi(token);
+            if(ind_level > 0){
+                sprintf(temp, "%u\n", atoi(token));
+                emit_data(temp);
+            }
+            else{
+              sprintf(temp, "%u\n", atoi(token));
+              emit_data(temp);
+            }
             break;
         }
       }

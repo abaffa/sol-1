@@ -6,8 +6,9 @@
 main:
   push bp
   mov bp, sp
-  mov b, _string_0
-  call prints
+  mov b, s
+  mov d, b
+  mov b, [d]
   leave
   syscall sys_terminate_proc
 prints:
@@ -16,10 +17,12 @@ prints:
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
-
-
-_string_0: .db "Hello World: ", 0
-
+aa: .dw 233
+p: .dw 444
+ss: .dw 0, 22, 
+s_data: .db "Hello", 0
+s: .dw s_data
+ii: .dw 45, 22, 
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
