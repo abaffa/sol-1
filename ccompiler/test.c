@@ -15,9 +15,11 @@ char ss[4]={'a', 22};
 char *s = "Hello";
 int *ii[2] = {45, 22};
 char c = 'A';
+
 void main() {
 
-  *s;
+  int i[10];
+  i;
 
   return;
 
@@ -25,6 +27,8 @@ void main() {
 
 
 void prints(){
+  int i;
+  i = 23;
 }
 
 

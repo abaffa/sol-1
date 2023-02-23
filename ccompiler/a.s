@@ -6,14 +6,20 @@
 main:
   push bp
   mov bp, sp
-  mov b, s
-  mov d, b
-  mov b, [d]
+  sub sp, 20 ; i
+  lea d, [bp + -19] ; i_data
+  mov b, d
   leave
   syscall sys_terminate_proc
 prints:
   push bp
   mov bp, sp
+  sub sp, 2 ; i
+  mov b, 23
+  push a
+  mov a, b
+  mov [bp + -1], a ; i
+  pop a
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK

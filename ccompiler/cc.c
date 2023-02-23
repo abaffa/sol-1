@@ -1983,7 +1983,8 @@ void try_emitting_var(char *var_name){
       emit(temp);
       emit("]");
       emit(" ; ");
-      emitln(var_name);
+      emit(var_name);
+      emitln("_data");
       emitln("  mov b, d");
     }
     else if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){
@@ -2016,8 +2017,9 @@ void try_emitting_var(char *var_name){
     var_id = global_var_exists(var_name);
     if(global_variables[var_id].data.ind_level > 0
     || is_matrix(&global_variables[var_id])){
-      emit("  mov b, ");
-      emitln(global_variables[var_id].var_name);
+      emit("  mov b, [");
+      emit(global_variables[var_id].var_name);
+      emitln("]");
     }
     else if(global_variables[var_id].data.type == DT_INT){
       emit("  mov b, [");
