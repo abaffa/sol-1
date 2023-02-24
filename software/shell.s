@@ -16,8 +16,9 @@ shell_main:
 
 	mov d, s_prompt_config
 	call puts
+
 ; open config file
-; PATH=/usr/bin;
+; example: PATH=/usr/bin;
 ; read PATH config entry
 	mov d, s_prompt_PATH
 	call puts
