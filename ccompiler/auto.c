@@ -1,12 +1,34 @@
 #include "lib/stdio.asm"
 
-int SIZE = 50;
+int SIZE = 100;
 char *line ="\n";
 char *ast = "*";
 char *space = " ";
 
-int current[50];
-int next[50];
+int current[100] = {
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+                    };
+int next[100] = {
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+    };
 
 
 void print(char *s){
@@ -19,19 +41,22 @@ void print(char *s){
 }
 void main() {
     int i;
-    initialize();
 
-    for (i = 0; i < 100; i++) {
-        compute_next();
-        update_current();
-        display();
+    while(1){
+        initialize();
+
+        for (i = 0; i < SIZE; i++) {
+            compute_next();
+            update_current();
+            display();
+        }
     }
 
     return;
 }
 // Initialize the automaton with a single active cell at the center
 void initialize() {
-    current[25] = 1;
+    current[SIZE/2] = 1;
     return;
 }
 
