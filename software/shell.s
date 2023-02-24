@@ -153,7 +153,7 @@ read_config_EOF_2:
 	stosb					; terminate value with NULL
 	ret
 
-
+; ssh = sol shell
 cmd_ssh:
 	call get_path
 	mov d, tokstr
