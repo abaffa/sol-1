@@ -16,6 +16,24 @@ char *s = "Hello";
 int *ii[2] = {45, 22};
 char c = 'A';
 
+int current_gen[ROWS][COLS];
+int next_gen[ROWS][COLS];
+
+void initialize_cells() {
+    int row;
+    int col;
+
+    // Initialize the cells to a simple pattern
+    for (row = 0; row < ROWS; row++) {
+        for (col = 0; col < COLS; col++) {
+            if (row == 2 && col >= 2 && col <= 6) {
+                current_gen[row][col] = 1;
+            } else {
+                current_gen[row][col] = 0;
+            }
+        }
+    }
+}
 void main() {
 
   int i[10];

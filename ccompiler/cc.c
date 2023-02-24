@@ -2537,8 +2537,7 @@ void declare_local(void){
     new_var.bp_offset = current_function_var_bp_offset + 1;
 
     if(tok == ASSIGNMENT){
-      puts("Assignment of local variables is not possible yet.");
-      exit(0);
+      error(LOCAL_ASSIGNMENT);
     }
     else{
       /*

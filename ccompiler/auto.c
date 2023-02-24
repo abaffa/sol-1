@@ -1,9 +1,6 @@
 #include "lib/stdio.asm"
 
 int SIZE = 100;
-char *line ="\n";
-char *ast = "*";
-char *space = " ";
 
 int current[100] = {
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
@@ -89,11 +86,11 @@ void display() {
     char c;
     int i;
     for (i = 0; i < SIZE; i++) {
-        if(current[i] != 0) print(ast);
-        else print(space);
+        if(current[i] != 0) print("*");
+        else print(" ");
         
     }
-    print(line);
+    print("\n");
     return;
 }
 

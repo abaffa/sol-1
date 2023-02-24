@@ -218,7 +218,8 @@ typedef enum {
   EXCEEDED_MAX_ENUM_DECL,
   UNDECLARED_ENUM_ELEMENT,
   UNDECLARED_IDENTIFIER,
-  MAX_STRINGS
+  MAX_STRINGS,
+  LOCAL_ASSIGNMENT
 } t_errorCode;
 
 // variable declaration
@@ -277,7 +278,8 @@ char *error_table[] = {
   "maximum enum declaration limit reached",
   "undeclared enum element",
   "undeclared identifier",
-  "maximum number of strings reached"
+  "maximum number of strings reached",
+  "Assignment of local variables is not possible yet"
 };
 
 int current_function_var_bp_offset;  // this is used to position local variables correctly relative to BP.
