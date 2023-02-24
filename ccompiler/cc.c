@@ -2298,44 +2298,18 @@ void declare_global(void){
       global_variables[global_var_tos].dims[dim] = 0; // sets the last variable dimention to 0, to mark the end of the list
 		}
 
-    // emit data section for this variable
-    if(ind_level > 0 && dt == DT_CHAR && dim == 0){ 
-      sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
-      emit_data(temp);
-      emit_data(".db ");
-    }
-    else if(ind_level > 0 && dt == DT_CHAR && dim > 0){ 
-      sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
-      emit_data(temp);
-      emit_data(".dw ");
-    }
-    else if(ind_level == 0 && dt == DT_CHAR && dim > 0){ 
-      sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
-      emit_data(temp);
-      emit_data(".db ");
-    }
-    else if(ind_level > 0 || dt == DT_INT && dim > 0){ 
-      sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
-      emit_data(temp);
-      emit_data(".dw ");
-    }
-    else{
-      sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
-      emit_data(temp);
-      if(ind_level > 0 || dt == DT_INT){
-        emit_data(".dw ");
-      }
-      else{
-        emit_data(".db ");
-      }
-    }
-
+    // _data section for var is emmitted if:
+    // ind_level == 1 && dt_char
+    // var is a matrix (dims > 0)
     // checks for variable initialization
     if(tok == ASSIGNMENT){
       int j;
       if(is_matrix(&global_variables[global_var_tos])){
         get();
         expect(OPENING_BRACE, OPENING_BRACE_EXPECTED);
+        sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
+        emit_data(temp);
+        emit_data_dbdw(ind_level, dim, dt);
         j = 0;
         do{
           get();
@@ -2374,7 +2348,10 @@ void declare_global(void){
           j++;
           get();
         } while(tok == COMMA);
-        sprintf(temp, "\n%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
+        // fill in the remaining unitialized array values with 0's 
+        sprintf(temp, "\n.fill %u, 0\n", get_total_var_size(&global_variables[global_var_tos]) - j * get_data_size(&global_variables[global_var_tos].data));
+        emit_data(temp);
+        sprintf(temp, "%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
         emit_data(temp);
         global_variables[global_var_tos].nbr_initial_values = j;
         expect(CLOSING_BRACE, CLOSING_BRACE_EXPECTED);
@@ -2383,18 +2360,27 @@ void declare_global(void){
         get();
         switch(dt){
           case DT_VOID:
+            sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
+            emit_data(temp);
+            emit_data_dbdw(ind_level, dim, dt);
             sprintf(temp, "%u, ", atoi(token));
             emit_data(temp);
             break;
           case DT_CHAR:
             if(ind_level > 0){ // if is a string
               if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
+              sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
+              emit_data(temp);
+              emit_data_dbdw(ind_level, dim, dt);
               sprintf(temp, "%s, 0\n", token);
               emit_data(temp);
               sprintf(temp, "%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
               emit_data(temp);
             }
             else{
+              sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
+              emit_data(temp);
+              emit_data_dbdw(ind_level, dim, dt);
               if(tok_type == CHAR_CONST){
                 sprintf(temp, "'%c'\n", string_constant[0]);
                 emit_data(temp);
@@ -2406,6 +2392,9 @@ void declare_global(void){
             }
             break;
           case DT_INT:
+            sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
+            emit_data(temp);
+            emit_data_dbdw(ind_level, dim, dt);
             if(ind_level > 0){
                 sprintf(temp, "%u\n", atoi(token));
                 emit_data(temp);
@@ -2419,10 +2408,32 @@ void declare_global(void){
       }
       get();
     }
+    else{ // no assignment!
+      if(dim > 0){
+        sprintf(temp, "%s_data: .fill %u, 0\n", global_variables[global_var_tos].var_name, get_total_var_size(&global_variables[global_var_tos]));
+        emit_data(temp);
+        sprintf(temp, "%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
+        emit_data(temp);
+      }
+      else{
+        sprintf(temp, "%s: .fill %u, 0\n", global_variables[global_var_tos].var_name, get_total_var_size(&global_variables[global_var_tos]));
+        emit_data(temp);
+      }
+    }
     global_var_tos++;  
   } while(tok == COMMA);
 
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
+}
+
+void emit_data_dbdw(int ind_level, int dims, t_basic_data dt){
+  if(ind_level > 0 && dt == DT_CHAR && dims == 0
+    || ind_level == 0 && dt == DT_CHAR && dims == 0){ 
+    emit_data(".db ");
+  }
+  else{
+    emit_data(".dw ");
+  }
 }
 
 // ################################################################################################

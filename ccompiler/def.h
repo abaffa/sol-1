@@ -332,6 +332,7 @@ void emit(char *p);
 void emitln(char *p);
 void emit_c_var(char *var_name);
 void emit_data(char *data);
+void emit_data_dbdw(int ind_level, int dims, t_basic_data dt);
 
 void skip_statements(void);
 void skip_block(void);
