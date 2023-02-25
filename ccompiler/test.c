@@ -10,11 +10,16 @@
 // so we can make matrices just like pointers
 
 #define ROWS 50
-#define COLS 50
+#define COLS 51
+#define string "Hello World"
 
+char *s = string;
 
 void main() {
-
+  int i;
+  i = ROWS;
+  int j;
+  j = COLS;
   return;
 
 }

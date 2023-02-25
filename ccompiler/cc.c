@@ -13,10 +13,10 @@ int main(int argc, char *argv[]){
     return 0;
   }
 
-  prog = c_in; // resets pointer to the beginning of the program
   asm_p = asm_out;  // set ASM outback pointer to the ASM array beginning
   data_block_p = data_block_ASM; // data block pointer
 
+  pre_processor();
   pre_scan();
   sprintf(header, "; --- FILENAME: %s", argv[1]);
   emitln(header);
@@ -288,6 +288,7 @@ void pre_processor(void){
   char *tp;
   int define_id;
 
+  prog = c_in; 
   preproc_p = c_preproc_out;
   do{
     tp = prog;
@@ -298,24 +299,29 @@ void pre_processor(void){
       get();
       if(tok == DEFINE){
         declare_define();
+        continue;
       }
       else{
         prog = tp;
       }
     }
 
+    prog = tp;
     get();
-    define_id = find_define(token);
-    if(define_id != -1){
-      strcat(c_preproc_out, defines_table[define_id].content);
+    if(tok_type == IDENTIFIER){
+      define_id = find_define(token);
+      if(define_id != -1){
+        strcat(c_preproc_out, defines_table[define_id].content);
+      }
+      else{
+        strcat(c_preproc_out, token);
+      }
     }
     else{
       strcat(c_preproc_out, token);
     }
     strcat(c_preproc_out, " ");
-    
   } while(tok_type != END);
-  
 }
 
 int find_define(char *name){
@@ -329,6 +335,7 @@ int find_define(char *name){
 void pre_scan(void){
   char *tp;
   
+  prog = c_preproc_out;
   do{
     tp = prog;
     get();
@@ -343,7 +350,8 @@ void pre_scan(void){
         continue;
       }
       else if(tok == DEFINE){
-        declare_define();
+        get();
+        get();
         continue;
       }
       else error(UNKNOWN_DIRECTIVE);
