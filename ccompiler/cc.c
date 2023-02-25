@@ -13,8 +13,8 @@ int main(int argc, char *argv[]){
     return 0;
   }
 
-  prog = pbuf; // resets pointer to the beginning of the program
-  asmp = ASM_output;  // set ASM outback pointer to the ASM array beginning
+  prog = c_in; // resets pointer to the beginning of the program
+  asm_p = asm_out;  // set ASM outback pointer to the ASM array beginning
   data_block_p = data_block_ASM; // data block pointer
 
   pre_scan();
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
 
   emitln("\n.end");
 
-  *asmp = '\0';
+  *asm_p = '\0';
   generate_file("a.s"); // generate a.s assembly file
 
   return 0;
@@ -59,7 +59,7 @@ void generate_file(char *filename){
     exit(0);
   }
   
-  fprintf(fp, "%s", ASM_output);
+  fprintf(fp, "%s", asm_out);
 
   fclose(fp);
 }
@@ -168,12 +168,12 @@ void emit_data_section(void){
 // ################################################################################################
 
 void emitln(char *p){
-  while(*p) *asmp++ = *p++;
-  *asmp++ = '\n';
+  while(*p) *asm_p++ = *p++;
+  *asm_p++ = '\n';
 }
 
 void emit(char *p){
-  while(*p) *asmp++ = *p++;
+  while(*p) *asm_p++ = *p++;
 }
 
 // ################################################################################################
@@ -189,7 +189,7 @@ void load_program(char *filename){
     exit(0);
   }
   
-  prog = pbuf;
+  prog = c_in;
   i = 0;
   
   do{
@@ -284,6 +284,31 @@ void declare_define(){
   defines_tos++;
 }
 
+void pre_processor(void){
+  char *tp;
+  
+  preproc_p = c_preproc_out;
+  do{
+    get();
+    if(tok_type == END) return;
+
+    if(tok == DIRECTIVE){
+      get();
+      if(tok == DEFINE){
+        declare_define();
+        continue;
+      }
+      else get(); // skip "library" string constant. (must be an #include directive)
+    }
+    else{
+      
+    }
+    
+    get();
+    
+  } while(tok_type != END);
+  
+}
 void pre_scan(void){
   char *tp;
   
@@ -542,7 +567,7 @@ void parse_asm(void){
   emit("\n; --- BEGIN INLINE ASM BLOCK");
   while(1){
     while(*prog != 0x0A) prog++;
-    *asmp++ = *prog++; // copy 0x0A
+    *asm_p++ = *prog++; // copy 0x0A
     while(*prog == ' ' || *prog == '\t') prog++; // skip leading spaces
     temp_prog = prog;
     get();
@@ -550,21 +575,21 @@ void parse_asm(void){
     get();
     if(tok == COLON){ // is a label
       prog = temp_prog;
-      while(*prog != ':') *asmp++ = *prog++;
-      *asmp++ = ':';
+      while(*prog != ':') *asm_p++ = *prog++;
+      *asm_p++ = ':';
       prog++;
     }
     else{
       prog = temp_prog;
-      *asmp++ = ' ';
-      *asmp++ = ' ';
+      *asm_p++ = ' ';
+      *asm_p++ = ' ';
       while(*prog != 0x0A){
         if(*prog == '@'){
           prog++;
           get();
           emit_c_var(token);
         }
-        else *asmp++ = *prog++;
+        else *asm_p++ = *prog++;
       }
     }
   }
@@ -935,7 +960,7 @@ void parse_switch(void){
     }
     else if(tok_type == CHAR_CONST){
       emit("  cmp bl, '");
-      emit(string_constant);
+      emit(string_const);
       emitln("'");
       sprintf(s_label, "_switch%d_case%d", current_label_index, current_case_nbr);
       strcpy(asm_line, "  je ");
@@ -1288,16 +1313,16 @@ void parse_expr(){
 void parse_ternary_op(void){
   char s_label[64];
   char *temp_prog;
-  char *temp_asmp;
+  char *temp_asm_p;
 
   temp_prog = prog;
-  temp_asmp = asmp; // save current assembly output pointer
+  temp_asm_p = asm_p; // save current assembly output pointer
   sprintf(s_label, "_ternary%d_cond:", highest_label_index + 1); // +1 because we are emitting the label ahead
   emitln(s_label);
   parse_logical(); // evaluate condition
   if(tok != TERNARY_OP){
     prog = temp_prog;
-    asmp = temp_asmp; // recover asm output pointer
+    asm_p = temp_asm_p; // recover asm output pointer
     parse_logical();
     return;
   }
@@ -1390,21 +1415,21 @@ void parse_assignment(){
   char *temp_prog;
   int var_id;
   char s_label[64];
-  char *temp_asmp;
+  char *temp_asm_p;
 
   temp_prog = prog;
-  temp_asmp = asmp; // save current assembly output pointer
+  temp_asm_p = asm_p; // save current assembly output pointer
   parse_ternary_op(); // evaluate condition
   if(tok != ASSIGNMENT){
     prog = temp_prog;
-    asmp = temp_asmp; // recover asm output pointer
+    asm_p = temp_asm_p; // recover asm output pointer
     parse_ternary_op();
     return;
   }
 
   // is assignment
   prog = temp_prog;
-  asmp = temp_asmp; // recover asm output pointer
+  asm_p = temp_asm_p; // recover asm output pointer
   get();
   if(tok_type == IDENTIFIER){
     strcpy(var_name, token);
@@ -1769,8 +1794,8 @@ void parse_atom(void){
  
   get();
   if(tok_type == STRING_CONST){
-    string_id = find_string(string_constant);
-    if(string_id == -1) string_id = add_string(string_constant);
+    string_id = find_string(string_const);
+    if(string_id == -1) string_id = add_string(string_const);
     // now emit the reference to this string into the ASM
     sprintf(temp, "_string_%d", string_id);
     emit("  mov b, ");
@@ -2339,7 +2364,7 @@ void declare_global(void){
               }
               else{
                 if(tok_type == CHAR_CONST){
-                  sprintf(temp, "'%c', ", string_constant[0]);
+                  sprintf(temp, "'%c', ", string_const[0]);
                   emit_data(temp);
                 }
                 else if(tok_type == INTEGER_CONST){
@@ -2396,7 +2421,7 @@ void declare_global(void){
               emit_data(temp);
               emit_data_dbdw(ind_level, dim, dt);
               if(tok_type == CHAR_CONST){
-                sprintf(temp, "'%c'\n", string_constant[0]);
+                sprintf(temp, "'%c'\n", string_const[0]);
                 emit_data(temp);
               }
               else if(tok_type == INTEGER_CONST){
@@ -2609,17 +2634,17 @@ void expect(t_token _tok, t_errorCode errorCode){
 
 void error(t_errorCode e){
   int line = 1;
-  char *t = pbuf;
+  char *t = c_in;
 
-  puts(error_table[e]);
+  printf("\nERROR: %s\n", error_table[e]);
   
   while(t < prog){
     t++;
     if(*t == '\n') line++;
   }
   
-  printf("line number: %d\n", line);
-  printf("last token: %s\n\n", token);
+  printf("LINE NUMBER: %d\n", line);
+  printf("NEAR: %s\n\n", token);
 
   exit(0);
 }
@@ -2631,7 +2656,7 @@ void error(t_errorCode e){
 
 // converts a literal string or char constant into constants with true escape sequences
 void convert_constant(){
-  char *s = string_constant;
+  char *s = string_const;
   char *t = token;
   
   if(tok_type == CHAR_CONST){
@@ -2935,7 +2960,7 @@ asm{
 void get_line(void){
   char *t;
 
-  t = string_constant;
+  t = string_const;
   
   do{
     while(isspace(*prog)) prog++;

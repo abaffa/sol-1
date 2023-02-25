@@ -297,13 +297,14 @@ int enum_table_tos;
 int defines_tos;
 
 char token[CONST_LEN + 2];            // string token representation
-char string_constant[CONST_LEN + 2];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
+char string_const[CONST_LEN];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
 char *prog;                           // pointer to the current program position
-char pbuf[PROG_SIZE];                 // pointer to the beginning of the source code
-char ASM_output[32*1024];             // ASM output
-char data_block[8*1024];              // text area for data block
+char c_in[PROG_SIZE];               // C program-in buffer
+char c_preproc_out[PROG_SIZE];     // pre-processor out buffer
+char *preproc_p;                   
+char asm_out[32*1024];             // ASM output
+char *asm_p;
 char *data_p;
-char *asmp;
 char asm_line[256];
 char includes_list_ASM[1024];         // keeps a list of all included files
 char data_block_ASM[1024*10];
@@ -425,3 +426,4 @@ void expect(t_token _tok, t_errorCode errorCode);
 
 unsigned int add_string(char *str);
 void declare_define();
+void pre_processor(void);
