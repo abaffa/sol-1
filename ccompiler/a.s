@@ -23,8 +23,6 @@ main:
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
-s_data: .db "Hello World", 0
-s: .dw s_data
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK

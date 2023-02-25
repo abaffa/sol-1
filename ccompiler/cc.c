@@ -17,6 +17,9 @@ int main(int argc, char *argv[]){
   data_block_p = data_block_ASM; // data block pointer
 
   pre_processor();
+
+printf("\n%s\n", c_preproc_out);
+
   pre_scan();
   sprintf(header, "; --- FILENAME: %s", argv[1]);
   emitln(header);
@@ -286,10 +289,10 @@ void declare_define(){
 
 void pre_processor(void){
   char *tp;
+  char *c_preproc_p;
   int define_id;
 
   prog = c_in; 
-  preproc_p = c_preproc_out;
   do{
     tp = prog;
     get();
@@ -316,6 +319,18 @@ void pre_processor(void){
       else{
         strcat(c_preproc_out, token);
       }
+    }
+    else if(tok == ASM){
+      strcat(c_preproc_out, "\nasm{");
+      get(); // get '{'
+      c_preproc_p = c_preproc_out;
+      while(*c_preproc_p) c_preproc_p++; // go to end of buffer
+      while(*prog != '}'){
+        *c_preproc_p++ = *prog++;        
+      }
+      prog++; // skip '}'
+      *c_preproc_p = '\0'; // end with NULL so that strcat can continue working
+      strcat(c_preproc_out, "}\n");
     }
     else{
       strcat(c_preproc_out, token);
@@ -2659,7 +2674,7 @@ void expect(t_token _tok, t_errorCode errorCode){
 
 void error(t_errorCode e){
   int line = 1;
-  char *t = c_in;
+  char *t = c_preproc_out;
 
   printf("\nERROR: %s\n", error_table[e]);
   
