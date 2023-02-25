@@ -1492,7 +1492,7 @@ void parse_logical_and(void){
     emitln("  push a");
     emitln("  mov a, b");
     parse_bitwise_or();
-    emitln("  or a, b");
+    emitln("  and a, b");
     emitln("  mov b, a");
     emitln("  pop a");
 

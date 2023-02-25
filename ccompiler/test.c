@@ -9,17 +9,38 @@
 // for matrices, need to create the data label and also the pointer
 // so we can make matrices just like pointers
 
-#define ROWS 50
-#define COLS 51
+    int n;
+    int i;
+int main() {
 
+    print("Enter the number of triangular numbers to generate: ");
+    asm{
+      call scan_u16d
+      mov @n, a
+    }
 
-void main() {
-  int i;
-  i = ROWS;
-  int j;
-  j = COLS;
-  return;
+    for (i = 1; i < n; i++) {
+    asm{
+        mov a, @i
+        call print_u16d
+        mov ah, $0A
+        call putchar
+    }
+    }
 
+    return 0;
+}
+
+void print(char *s){
+    asm{
+        mov a, @s
+        mov d, a
+        call puts
+    }
+    return;
+}
+void printn(int n){
+    return;
 }
 
 
