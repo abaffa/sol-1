@@ -4,13 +4,14 @@
 #define MAX_LOCAL_VARS         100
 #define ID_LEN                 50
 #define CONST_LEN              500
-#define PROG_SIZE              99999
+#define PROG_SIZE              1024 * 64
 #define MAX_MATRIX_DIMS        10
 #define MAX_ENUM_ELEMENTS      64
 #define MAX_ENUM_DECLARATIONS  64
+#define MAX_DEFINES            128
 
 typedef enum {
-  DIRECTIVE = 1, INCLUDE,
+  DIRECTIVE = 1, INCLUDE, DEFINE,
   
   VOID, CHAR, INT, FLOAT, DOUBLE,
   SHORT, LONG, SIGNED, UNSIGNED,
@@ -25,7 +26,7 @@ typedef enum {
   
   EQUAL, NOT_EQUAL, LESS_THAN, LESS_THAN_OR_EQUAL, GREATER_THAN, GREATER_THAN_OR_EQUAL,
   LOGICAL_AND, LOGICAL_OR, LOGICAL_NOT,
-  ASSIGNMENT, DOLLAR, HASH, CARET, AT, TERNARY_OP,
+  ASSIGNMENT, DOLLAR, CARET, AT, TERNARY_OP,
   
   BITWISE_AND, AMPERSAND = BITWISE_AND, BITWISE_XOR, BITWISE_OR, BITWISE_NOT, BITWISE_SHL, BITWISE_SHR,
   
@@ -122,6 +123,11 @@ typedef struct {
 } t_var;
 t_var global_variables[MAX_GLOBAL_VARS];
 
+struct{
+  char name[ID_LEN];
+  char content[256];
+} defines_table[MAX_DEFINES];
+
 char string_table[STRING_TABLE_SIZE][1024];
 
 typedef struct {
@@ -159,6 +165,7 @@ struct _keyword_table{
   "case", CASE,
   "default", DEFAULT,
   "include", INCLUDE,
+  "define", DEFINE,
   "asm", ASM,
   "", 0
 };
@@ -287,6 +294,7 @@ int current_func_id;
 int function_table_tos;
 int global_var_tos;
 int enum_table_tos;
+int defines_tos;
 
 char token[CONST_LEN + 2];            // string token representation
 char string_constant[CONST_LEN + 2];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
@@ -416,3 +424,4 @@ void expect(t_token _tok, t_errorCode errorCode);
 
 
 unsigned int add_string(char *str);
+void declare_define();

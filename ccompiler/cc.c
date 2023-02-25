@@ -276,6 +276,14 @@ void include_lib(char *lib_name){
 // ################################################################################################
 // ################################################################################################
 
+void declare_define(){
+  get(); // get define's name
+  strcpy(defines_table[defines_tos].name, token);
+  get(); // get definition
+  strcpy(defines_table[defines_tos].content, token);
+  defines_tos++;
+}
+
 void pre_scan(void){
   char *tp;
   
@@ -286,11 +294,17 @@ void pre_scan(void){
 
     if(tok == DIRECTIVE){
       get();
-      if(tok != INCLUDE) error(UNKNOWN_DIRECTIVE);
-      get();
-      if(tok_type != STRING_CONST) error(DIRECTIVE_SYNTAX);
-      include_lib(token);
-      continue;
+      if(tok == INCLUDE){
+        get();
+        if(tok_type != STRING_CONST) error(DIRECTIVE_SYNTAX);
+        include_lib(token);
+        continue;
+      }
+      else if(tok == DEFINE){
+        declare_define();
+        continue;
+      }
+      else error(UNKNOWN_DIRECTIVE);
     }
     else if(tok == ENUM){
       declare_enum();
@@ -2860,10 +2874,6 @@ void get(void){
     else if(*prog == '@'){
       *t++ = *prog++;
       tok = AT;
-    }
-    else if(*prog == '#'){
-      *t++ = *prog++;
-      tok = HASH;
     }
     else if(*prog == '*'){
       *t++ = *prog++;
