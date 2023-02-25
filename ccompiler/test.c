@@ -11,9 +11,7 @@
 
 #define ROWS 50
 #define COLS 51
-#define string "Hello World"
 
-char *s = string;
 
 void main() {
   int i;
