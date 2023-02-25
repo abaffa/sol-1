@@ -427,3 +427,4 @@ void expect(t_token _tok, t_errorCode errorCode);
 unsigned int add_string(char *str);
 void declare_define();
 void pre_processor(void);
+int find_define(char *name);

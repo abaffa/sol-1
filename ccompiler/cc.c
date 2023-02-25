@@ -286,9 +286,11 @@ void declare_define(){
 
 void pre_processor(void){
   char *tp;
-  
+  int define_id;
+
   preproc_p = c_preproc_out;
   do{
+    tp = prog;
     get();
     if(tok_type == END) return;
 
@@ -296,19 +298,34 @@ void pre_processor(void){
       get();
       if(tok == DEFINE){
         declare_define();
-        continue;
       }
-      else get(); // skip "library" string constant. (must be an #include directive)
+      else{
+        prog = tp;
+      }
+    }
+
+    get();
+    define_id = find_define(token);
+    if(define_id != -1){
+      strcat(c_preproc_out, defines_table[define_id].content);
     }
     else{
-      
+      strcat(c_preproc_out, token);
     }
-    
-    get();
+    strcat(c_preproc_out, " ");
     
   } while(tok_type != END);
   
 }
+
+int find_define(char *name){
+  int i;
+  for(i = 0; i < defines_tos; i++){
+    if(!strcmp(defines_table[i].name, name)) return i;
+  }
+  return -1;
+}
+
 void pre_scan(void){
   char *tp;
   
