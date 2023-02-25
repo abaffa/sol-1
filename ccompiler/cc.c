@@ -1542,7 +1542,8 @@ void parse_bitwise_xor(void){
     emitln("  push a");
     emitln("  mov a, b");
     parse_bitwise_and();
-    emitln("  xor b, a");
+    emitln("  xor a, b");
+    emitln("  mov b, a");
     emitln("  pop a");
   }
 }
@@ -2576,7 +2577,7 @@ void expect(t_token _tok, t_errorCode errorCode){
 
 void error(t_errorCode e){
   int line = 1;
-  char *t = c_preproc_out;
+  char *t = c_in;
 
   printf("\nERROR: %s\n", error_table[e]);
   
@@ -2836,7 +2837,7 @@ void get(void){
     }
     else if(*prog == '^'){
       *t++ = *prog++;
-      tok = CARET;
+      tok = BITWISE_XOR;
     }
     else if(*prog == '@'){
       *t++ = *prog++;
@@ -2944,7 +2945,7 @@ int find_keyword(char *keyword){
 // ################################################################################################
 
 char is_delimiter(char c){
-  if(strchr("?@$#+-*/%[](){}:;,<>=!&|~.", c)) return 1;
+  if(strchr("?@$#+-*/%[](){}:;,<>=!^&|~.", c)) return 1;
   else return 0;
 }
 
