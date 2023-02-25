@@ -49,7 +49,7 @@ void print(char *s){
 void printn(int n){
     asm{
         mov b, @n
-        call print_u8x
+        call print_u8d
     }
     return;
 }
