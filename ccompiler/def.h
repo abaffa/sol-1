@@ -301,7 +301,6 @@ char string_const[CONST_LEN];  // holds string and char constants without quotes
 char *prog;                           // pointer to the current program position
 char c_in[PROG_SIZE];               // C program-in buffer
 char c_preproc_out[PROG_SIZE];     // pre-processor out buffer
-char *preproc_p;                   
 char asm_out[32*1024];             // ASM output
 char *asm_p;
 char *data_p;
@@ -373,9 +372,6 @@ void convert_data(t_data *data_to_convert, t_basic_data into_type);
 t_basic_data get_var_type(char *var_name);
 
 void parse_directive(void);
-void emit_data_section(void);
-void emit_includes(void);
-
 
 void generate_file(char *filename);
 

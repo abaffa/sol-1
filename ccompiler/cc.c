@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
 
   if(argc > 1) load_program(argv[1]);  
   else{
-    printf("usage: cc [filename]\n");
+    printf("Usage: cc [filename]\n");
     return 0;
   }
 
@@ -17,9 +17,6 @@ int main(int argc, char *argv[]){
   data_block_p = data_block_ASM; // data block pointer
 
   pre_processor();
-
-printf("\n%s\n", c_preproc_out);
-
   pre_scan();
   sprintf(header, "; --- FILENAME: %s", argv[1]);
   emitln(header);
@@ -31,8 +28,12 @@ printf("\n%s\n", c_preproc_out);
   parse_functions();
   emitln("; --- END TEXT BLOCK");
   
-  emit_data_section();
-  emit_includes();
+  emitln("\n; --- BEGIN DATA BLOCK");
+  emit(data_block_ASM);
+  emitln("; --- END DATA BLOCK");
+  emit("\n; --- BEGIN INCLUDE BLOCK");
+  emitln(includes_list_ASM);
+  emitln("; --- END INCLUDE BLOCK\n");
 
   emitln("\n.end");
 
@@ -65,105 +66,6 @@ void generate_file(char *filename){
   fprintf(fp, "%s", asm_out);
 
   fclose(fp);
-}
-
-// ################################################################################################
-// ################################################################################################
-// ################################################################################################
-
-void emit_includes(void){
-  emit("\n; --- BEGIN INCLUDE BLOCK");
-  emitln(includes_list_ASM);
-  emitln("; --- END INCLUDE BLOCK\n");
-}
-
-// ################################################################################################
-// ################################################################################################
-// ################################################################################################
-
-void emit_data_section(void){
-  int i, j;
-  char s_init[1024];
-
-  emitln("\n; --- BEGIN DATA BLOCK");
-  /*
-  for(i = 0; i < global_var_tos; i++){
-    if(is_matrix(&global_variables[i])){
-      switch(global_variables[i].data.type){
-        case DT_CHAR:
-          if(global_variables[i].data.ind_level == 0){
-            emit(global_variables[i].var_name); // var name
-            emit(": .db ");
-            for(j = 0; j < get_total_var_size(&global_variables[i]); j++){
-              sprintf(s_init, "%u, ", (unsigned char)global_variables[i].initial_val.string[j]);
-              emit(s_init);
-            }
-            emitln("");
-          }
-          else{
-            emit(global_variables[i].var_name); // var name
-            emit(": .dw ");
-            for(j = 0; j < get_total_var_size(&global_variables[i]) / 2; j++){
-              sprintf(s_init, "%u, ", global_variables[i].initial_val.p[j]);
-              emit(s_init);
-            }
-            emitln("");
-            // is a char matrix of pointers
-          }
-          break;
-        case DT_INT:
-          emit(global_variables[i].var_name); // var name
-          emit(": .dw ");
-          for(j = 0; j < get_total_var_size(&global_variables[i]) / 2; j++){
-            sprintf(s_init, "%d, ", global_variables[i].initial_val.shortint[j]);
-            emit(s_init);
-          }
-          emitln("");
-      }
-    }
-    else{
-      if(global_variables[i].data.ind_level > 0){
-        switch(global_variables[i].data.type){
-          case DT_CHAR:
-            if(global_variables[i].initial_val.string[0] != '\0'){ // if var was initialized, then instantiate its data in assembly data block
-              emit(global_variables[i].var_name); // var name
-              emit("_data");
-              emit(": .db \"");
-              emit(global_variables[i].initial_val.string);
-              emitln("\", 0");
-              emit(global_variables[i].var_name); // var name
-              emit(": .dw ");
-              emit(global_variables[i].var_name); // var name
-              emitln("_data");
-            }
-            else{
-              emit(global_variables[i].var_name); // var name
-              emitln(": .dw 0");
-            }
-            break;
-          case DT_INT:
-            emit(global_variables[i].var_name); // var name
-            emit(": .dw ");
-            sprintf(s_init, "%d", global_variables[i].initial_val.p[0]);
-            emitln(s_init);
-        }
-      }
-      else if(global_variables[i].data.type == DT_CHAR){
-        emit(global_variables[i].var_name); // var name
-        sprintf(s_init, ": .db %u", (unsigned char)global_variables[i].initial_val.string[0]);
-        emitln(s_init);
-      }
-      else if(global_variables[i].data.type == DT_INT){
-        emit(global_variables[i].var_name); // var name
-        sprintf(s_init, ": .dw %d", global_variables[i].initial_val.shortint[0]);
-        emitln(s_init);
-      }
-    }
-  }
-*/
-  emit(data_block_ASM);
-
-  emitln("; --- END DATA BLOCK");
 }
 
 // ################################################################################################
