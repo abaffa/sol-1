@@ -294,8 +294,8 @@ printn:
   mov bp, sp
 
 ; --- BEGIN INLINE ASM BLOCK
-  mov b, [bp + 5]
-  call print_u8x
+  mov a, [bp + 5]
+  call print_u8d
 ; --- END INLINE ASM BLOCK
 
   leave
