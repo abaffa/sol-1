@@ -2278,6 +2278,10 @@ void declare_global(void){
           }
           j++;
           get();
+          if(j % 30 == 0){ // split into multiple lines due to TASM limitation of how many items per .dw directive
+            emit_data("\n");
+            emit_data_dbdw(ind_level, dim, dt);
+          }
         } while(tok == COMMA);
         // fill in the remaining unitialized array values with 0's 
         sprintf(temp, "\n.fill %u, 0\n", get_total_var_size(&global_variables[global_var_tos]) - j * get_data_size(&global_variables[global_var_tos].data));
