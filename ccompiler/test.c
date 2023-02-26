@@ -9,40 +9,42 @@
 // for matrices, need to create the data label and also the pointer
 // so we can make matrices just like pointers
 
-#define WIDTH 20
-#define HEIGHT 20
-
-// Global arrays to hold the current and next states of the game grid
-int curr_state[HEIGHT][WIDTH];
-int next_state[HEIGHT][WIDTH];
 
 int main() {
-    int i;
-    int j;
-    int ni;
-    int nj;
-    int count;
     int n;
-    n = 0;
-    // Copy the current state of the grid to the next state
-    for (i = 0; i < 20; i++) {
-        for (j = 0; j < 20; j++) {
-            curr_state[i][j] = n;
-            n++;
+    n = 10000; // number of rows and columns
+    int i, j;
+
+    // Generate the pattern
+    for (i = 1; i <= n; i++) {
+        for (j = 1; j <= n; j++) {
+            if ((i+j) % 2 == 0) {
+                print(" ");
+                printn(i*j);
+            } else {
+                print(" ");
+                printn(i+j);
+            }
         }
+        print("\n");
     }
 
-    for (i = 0; i < 20; i++) {
-        for (j = 0; j < 20; j++) {
-            next_state[i][j] = curr_state[i][j] ;
-        }
+    return 0;
+}
+
+void printarray(int a[4][4]){
+  int i, j;
+  for(i=0;i<4;i++){
+    for(j=0;j<4;j++){
+      printn(a[i][j]);
+      print("\n");
     }
-    for (i = 0; i < 20; i++) {
-        for (j = 0; j < 20; j++) {
-          printn(curr_state[i][j]);
-          print("\n");
-        }
-    }
+  }
+  return;
+}
+
+int main() {
+    printarray(a);
     return 0;
 }
 

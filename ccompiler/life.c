@@ -3,10 +3,8 @@
 
 #define SIZE 30
 
-char *s[10] = {"Hello World", "Hi"};
-
 // Global arrays to hold the current and next states of the game grid
-int curr_state[SIZE][SIZE] ={
+int curr_state[SIZE][SIZE] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
