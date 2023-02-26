@@ -33,7 +33,6 @@ _for1_cond:
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -70,7 +69,7 @@ init_game:
   mov b, [curr_state]
   mov d, b
   mov b, 4
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, 4
@@ -85,7 +84,7 @@ init_game:
   mov b, [curr_state]
   mov d, b
   mov b, 4
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, 5
@@ -100,7 +99,7 @@ init_game:
   mov b, [curr_state]
   mov d, b
   mov b, 4
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, 6
@@ -115,7 +114,7 @@ init_game:
   mov b, [curr_state]
   mov d, b
   mov b, 3
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, 6
@@ -130,7 +129,7 @@ init_game:
   mov b, [curr_state]
   mov d, b
   mov b, 2
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, 5
@@ -172,8 +171,7 @@ getn:
 print_game:
   push bp
   mov bp, sp
-  sub sp, 2 ; i
-  sub sp, 2 ; j
+  sub sp, 4 ; i
 _for2_init:
   mov b, 0
   push a
@@ -184,11 +182,10 @@ _for2_cond:
   mov b, [bp + -1] ; i
   push a
   mov a, b
-  mov b, 37
+  mov b, 30
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -209,11 +206,10 @@ _for3_cond:
   mov b, [bp + -3] ; j
   push a
   mov a, b
-  mov b, 37
+  mov b, 30
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -229,7 +225,7 @@ _if4_cond:
   push a
   mov d, b
   mov b, [bp + -1] ; i
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, [bp + -3] ; j
@@ -282,11 +278,7 @@ _for2_exit:
 update_game:
   push bp
   mov bp, sp
-  sub sp, 2 ; i
-  sub sp, 2 ; j
-  sub sp, 2 ; ni
-  sub sp, 2 ; nj
-  sub sp, 2 ; count
+  sub sp, 10 ; i
 _for5_init:
   mov b, 0
   push a
@@ -297,11 +289,10 @@ _for5_cond:
   mov b, [bp + -1] ; i
   push a
   mov a, b
-  mov b, 37
+  mov b, 30
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -322,11 +313,10 @@ _for6_cond:
   mov b, [bp + -3] ; j
   push a
   mov a, b
-  mov b, 37
+  mov b, 30
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -340,7 +330,7 @@ _for6_block:
   mov b, [next_state]
   mov d, b
   mov b, [bp + -1] ; i
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, [bp + -3] ; j
@@ -352,7 +342,7 @@ _for6_block:
   push a
   mov d, b
   mov b, [bp + -1] ; i
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, [bp + -3] ; j
@@ -392,11 +382,10 @@ _for7_cond:
   mov b, [bp + -1] ; i
   push a
   mov a, b
-  mov b, 37
+  mov b, 30
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -417,11 +406,10 @@ _for8_cond:
   mov b, [bp + -3] ; j
   push a
   mov a, b
-  mov b, 37
+  mov b, 30
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -444,8 +432,6 @@ _for9_init:
   mov b, 1
   sub a, b
   mov b, a
-  pop a
-  push a
   mov a, b
   mov [bp + -5], a ; ni
   pop a
@@ -463,7 +449,6 @@ _for9_cond:
   cmp a, b
   lodflgs
   and al, %00000011 ; <=
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -481,8 +466,6 @@ _for10_init:
   mov b, 1
   sub a, b
   mov b, a
-  pop a
-  push a
   mov a, b
   mov [bp + -7], a ; nj
   pop a
@@ -500,7 +483,6 @@ _for10_cond:
   cmp a, b
   lodflgs
   and al, %00000011 ; <=
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -515,19 +497,16 @@ _if11_cond:
   mov b, [bp + -5] ; ni
   push a
   mov a, b
-  mov b, 37
+  mov b, 30
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
   and al, %00000001 ; transform relational logical condition result into a single bit
   mov ah, 0
   mov b, a
-  pop a
-  push a
   mov a, b
   cmp al, 0
   lodflgs
@@ -537,19 +516,15 @@ _if11_cond:
   mov b, [bp + -7] ; nj
   push a
   mov a, b
-  mov b, 37
+  mov b, 30
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
   and al, %00000001 ; transform relational logical condition result into a single bit
-  mov ah, 0
   mov b, a
-  pop a
-  push a
   cmp bl, 0
   lodflgs
   not al
@@ -572,15 +547,12 @@ _if12_cond:
   lodflgs
   and al, %00000001
   xor al, %00000001 ; !=
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
   and al, %00000001 ; transform relational logical condition result into a single bit
   mov ah, 0
   mov b, a
-  pop a
-  push a
   mov a, b
   mov b, [bp + -7] ; nj
   push a
@@ -590,7 +562,6 @@ _if12_cond:
   lodflgs
   and al, %00000001
   xor al, %00000001 ; !=
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -611,7 +582,7 @@ _if12_true:
   push a
   mov d, b
   mov b, [bp + -5] ; ni
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, [bp + -7] ; nj
@@ -622,8 +593,6 @@ _if12_true:
   pop a
   add a, b
   mov b, a
-  pop a
-  push a
   mov a, b
   mov [bp + -9], a ; count
   pop a
@@ -654,7 +623,7 @@ _if13_cond:
   push a
   mov d, b
   mov b, [bp + -1] ; i
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, [bp + -3] ; j
@@ -674,15 +643,12 @@ _if14_cond:
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
   and al, %00000001 ; transform relational logical condition result into a single bit
   mov ah, 0
   mov b, a
-  pop a
-  push a
   mov a, b
   mov b, [bp + -9] ; count
   push a
@@ -694,7 +660,6 @@ _if14_cond:
   cmp al, %00000000
   lodflgs
   and al, %00000001 ; >
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -711,7 +676,7 @@ _if14_true:
   mov b, [next_state]
   mov d, b
   mov b, [bp + -1] ; i
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, [bp + -3] ; j
@@ -735,7 +700,6 @@ _if15_cond:
   cmp a, b
   lodflgs
   and al, %00000001 ; ==
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -749,7 +713,7 @@ _if15_true:
   mov b, [next_state]
   mov d, b
   mov b, [bp + -1] ; i
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, [bp + -3] ; j
@@ -792,11 +756,10 @@ _for16_cond:
   mov b, [bp + -1] ; i
   push a
   mov a, b
-  mov b, 37
+  mov b, 30
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -817,11 +780,10 @@ _for17_cond:
   mov b, [bp + -3] ; j
   push a
   mov a, b
-  mov b, 37
+  mov b, 30
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  mov ah, 0
   cmp al, 0
   lodflgs
   not al
@@ -835,7 +797,7 @@ _for17_block:
   mov b, [curr_state]
   mov d, b
   mov b, [bp + -1] ; i
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, [bp + -3] ; j
@@ -847,7 +809,7 @@ _for17_block:
   push a
   mov d, b
   mov b, [bp + -1] ; i
-  mov a, 74
+  mov a, 60
   mul a, b
   add d, b
   mov b, [bp + -3] ; j
@@ -913,13 +875,13 @@ curr_state_data:
 .dw 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 .dw 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 .dw 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-.fill 944, 0
+.fill 6, 0
 curr_state: .dw curr_state_data
-next_state_data: .fill 2738, 0
+next_state_data: .fill 1800, 0
 next_state: .dw next_state_data
 _string_0: .db "Generations: ", 0
-_string_1: .db "*", 0
-_string_2: .db " ", 0
+_string_1: .db "@ ", 0
+_string_2: .db ". ", 0
 _string_3: .db "\n", 0
 ; --- END DATA BLOCK
 
