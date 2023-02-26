@@ -1445,9 +1445,6 @@ void parse_assignment(){
 }
 
 
-
-
-
 void parse_logical(void){
   parse_logical_or();
 }
@@ -1475,14 +1472,13 @@ void parse_logical_and(void){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
-    emitln("  cmp al, 0");
+    emitln("  cmp a, 0");
     emitln("  lodflgs");
     emitln("  not al");
     emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
-    emitln("  mov ah, 0");
     parse_bitwise_or();
     emitln("  push a");
-    emitln("  cmp bl, 0");
+    emitln("  cmp b, 0");
     emitln("  lodflgs");
     emitln("  not al");
     emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
@@ -1540,16 +1536,13 @@ void parse_bitwise_and(void){
 }
 
 
-
-
-
 void parse_relational(void){
   char temp_tok;
 
 /* x = y > 1 && z<4 && y == 2 */
   parse_bitwise_shift();
-  while(tok == EQUAL || tok == NOT_EQUAL || tok == LESS_THAN || tok == LESS_THAN_OR_EQUAL
-    || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
+  while(tok == EQUAL || tok == NOT_EQUAL || tok == LESS_THAN
+    || tok == LESS_THAN_OR_EQUAL || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
@@ -1559,33 +1552,28 @@ void parse_relational(void){
         emitln("  cmp a, b");
         emitln("  lodflgs");
         emitln("  and al, %00000001 ; =="); // isolate ZF only. therefore if ZF==1 then A == B
-        emitln("  mov ah, 0");
         break;
       case NOT_EQUAL:
         emitln("  cmp a, b");
         emitln("  lodflgs");
         emitln("  and al, %00000001"); // isolate ZF only.
         emitln("  xor al, %00000001 ; !="); // invert the condition
-        emitln("  mov ah, 0");
         break;
       case LESS_THAN:
         emitln("  cmp a, b");
         emitln("  lodflgs");
         emitln("  and al, %00000010 ; <"); // isolate CF only. therefore if CF==1 then A < B
-        emitln("  mov ah, 0");
         break;
       case LESS_THAN_OR_EQUAL:
         emitln("  cmp a, b");
         emitln("  lodflgs");
         emitln("  and al, %00000011 ; <="); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
-        emitln("  mov ah, 0");
         break;
       case GREATER_THAN_OR_EQUAL:
         emitln("  cmp a, b");
         emitln("  lodflgs");
         emitln("  and al, %00000011"); 
         emitln("  xor al, %00000010 ; >="); 
-        emitln("  mov ah, 0");
         break;
       case GREATER_THAN:
         emitln("  cmp a, b");
@@ -1594,7 +1582,6 @@ void parse_relational(void){
         emitln("  cmp al, %00000000"); 
         emitln("  lodflgs");
         emitln("  and al, %00000001 ; >"); 
-        emitln("  mov ah, 0");
         break;
     }
     emitln("  cmp al, 0");
@@ -2172,22 +2159,7 @@ void declare_global(void){
     get();
   }
   
-  switch(tok){
-    case VOID:
-      dt = DT_VOID;
-      break;
-    case CHAR:
-      dt = DT_CHAR;
-      break;
-    case INT:
-      dt = DT_INT;
-      break;
-    case FLOAT:
-      dt = DT_FLOAT;
-      break;
-    case DOUBLE:
-      dt = DT_DOUBLE;
-  }
+  dt = get_data_type_from_tok(tok);
 
   do{
     if(global_var_tos == MAX_GLOBAL_VARS) error(EXCEEDED_GLOBAL_VAR_LIMIT);
