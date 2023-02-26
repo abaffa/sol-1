@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
   }
 
   asm_p = asm_out;  // set ASM outback pointer to the ASM array beginning
-  data_block_p = data_block_ASM; // data block pointer
+  data_block_p = data_block_asm; // data block pointer
 
   pre_processor();
   pre_scan();
@@ -27,12 +27,11 @@ int main(int argc, char *argv[]){
   emitln("\n; --- BEGIN TEXT BLOCK");
   parse_functions();
   emitln("; --- END TEXT BLOCK");
+
+  emit_data_block();
   
-  emitln("\n; --- BEGIN DATA BLOCK");
-  emit(data_block_ASM);
-  emitln("; --- END DATA BLOCK");
   emit("\n; --- BEGIN INCLUDE BLOCK");
-  emitln(includes_list_ASM);
+  emitln(includes_list_asm);
   emitln("; --- END INCLUDE BLOCK\n");
 
   emitln("\n.end");
@@ -41,6 +40,13 @@ int main(int argc, char *argv[]){
   generate_file("a.s"); // generate a.s assembly file
 
   return 0;
+}
+
+void emit_data_block(){
+  emitln("\n; --- BEGIN DATA BLOCK");
+  emit_string_table_data();
+  emit(data_block_asm);
+  emitln("; --- END DATA BLOCK");
 }
 
 void emit_data(char *data){
@@ -152,17 +158,11 @@ void parse_functions(void){
 }
 
 
-
-
-
 void include_lib(char *lib_name){
-  strcat(includes_list_ASM, "\n.include ");
-  strcat(includes_list_ASM, lib_name); // concatenate library name into a small text session that
+  strcat(includes_list_asm, "\n.include ");
+  strcat(includes_list_asm, lib_name); // concatenate library name into a small text session that
   // in the end we add this to the final ASM text  
 }
-
-
-
 
 
 void declare_define(){
@@ -172,6 +172,7 @@ void declare_define(){
   strcpy(defines_table[defines_tos].content, token);
   defines_tos++;
 }
+
 
 void pre_processor(void){
   char *tp;
@@ -1654,24 +1655,32 @@ void parse_factors(void){
   }
 }
 
-unsigned int add_string(char *str){
+unsigned int add_string_data(char *str){
   int i;
   char temp[256];
 
   for(i = 0; i < STRING_TABLE_SIZE; i++){
     if(!string_table[i][0]){
       strcpy(string_table[i], str);
-      // emit the declaration of this string, into the data block
-      sprintf(temp, "_string_%d", i);
-      emit_data(temp);
-      emit_data(": .db \"");
-      emit_data(str);
-      emit_data("\", 0\n");
       return i;
     }
   }
 
   error(MAX_STRINGS);
+}
+
+void emit_string_table_data(void){
+  int i;
+  char temp[256];
+
+  for(i = 0; string_table[i][0]; i++){
+      // emit the declaration of this string, into the data block
+      sprintf(temp, "_string_%d", i);
+      emit_data(temp);
+      emit_data(": .db \"");
+      emit_data(string_table[i]);
+      emit_data("\", 0\n");
+    }
 }
 
 int find_string(char *str){
@@ -1697,7 +1706,7 @@ void parse_atom(void){
   get();
   if(tok_type == STRING_CONST){
     string_id = find_string(string_const);
-    if(string_id == -1) string_id = add_string(string_const);
+    if(string_id == -1) string_id = add_string_data(string_const);
     // now emit the reference to this string into the ASM
     sprintf(temp, "_string_%d", string_id);
     emit("  mov b, ");
@@ -2148,7 +2157,7 @@ void declare_global(void){
   t_basic_data dt;
   int ind_level;
   char constant = 0;
-  char temp[512];
+  char temp[512 + 8];
 
   get(); // gets past the data type
   if(tok == CONST){
@@ -2213,38 +2222,21 @@ void declare_global(void){
         j = 0;
         do{
           get();
-          switch(dt){
-            case DT_VOID:
-              sprintf(temp, "%u, ", atoi(token));
-              emit_data(temp);
-              break;
-            case DT_CHAR:
-              if(ind_level > 0){ // if is a pointer
-                sprintf(temp, "%u, ", atoi(token));
-                emit_data(temp);
-              }
-              else{
-                if(tok_type == CHAR_CONST){
-                  sprintf(temp, "'%c', ", string_const[0]);
-                  emit_data(temp);
-                }
-                else if(tok_type == INTEGER_CONST){
-                  sprintf(temp, "%u, ", (char)atoi(token));
-                  emit_data(temp);
-                }
-              }
-              break;
-            case DT_INT:
-              if(ind_level > 0){
-                sprintf(temp, "%u, ", atoi(token));
-                emit_data(temp);
-              }
-              else{
-                sprintf(temp, "%u, ", atoi(token));
-                emit_data(temp);
-              }
-              break;
+          if(tok_type == CHAR_CONST){
+            sprintf(temp, "'%c', ", string_const[0]);
+            emit_data(temp);
           }
+          else if(tok_type == INTEGER_CONST){
+            sprintf(temp, "%u, ", (char)atoi(token));
+            emit_data(temp);
+          }
+          else if(tok_type == STRING_CONST){
+            int string_id;
+            string_id = add_string_data(string_const);
+            sprintf(temp, "_string_%u, ", string_id);
+            emit_data(temp);
+          }
+          else error(UNKNOWN_DATA_TYPE);
           j++;
           get();
           if(j % 30 == 0){ // split into multiple lines due to TASM limitation of how many items per .dw directive

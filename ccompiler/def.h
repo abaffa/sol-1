@@ -1,4 +1,5 @@
 #define STRING_TABLE_SIZE      256
+#define STRING_CONST_SIZE      512
 #define MAX_USER_FUNC          50
 #define MAX_GLOBAL_VARS        100
 #define MAX_LOCAL_VARS         100
@@ -128,7 +129,7 @@ struct{
   char content[256];
 } defines_table[MAX_DEFINES];
 
-char string_table[STRING_TABLE_SIZE][1024];
+char string_table[STRING_TABLE_SIZE][STRING_CONST_SIZE];
 
 typedef struct {
   char func_name[ID_LEN];
@@ -226,7 +227,8 @@ typedef enum {
   UNDECLARED_ENUM_ELEMENT,
   UNDECLARED_IDENTIFIER,
   MAX_STRINGS,
-  LOCAL_ASSIGNMENT
+  LOCAL_ASSIGNMENT,
+  UNKNOWN_DATA_TYPE
 } t_errorCode;
 
 // variable declaration
@@ -286,7 +288,8 @@ char *error_table[] = {
   "undeclared enum element",
   "undeclared identifier",
   "maximum number of strings reached",
-  "Assignment of local variables is not possible yet"
+  "Assignment of local variables is not possible yet",
+  "Unknown data type in array initialization"
 };
 
 int current_function_var_bp_offset;  // this is used to position local variables correctly relative to BP.
@@ -305,8 +308,8 @@ char asm_out[32*1024];             // ASM output
 char *asm_p;
 char *data_p;
 char asm_line[256];
-char includes_list_ASM[1024];         // keeps a list of all included files
-char data_block_ASM[1024*10];
+char includes_list_asm[1024];         // keeps a list of all included files
+char data_block_asm[1024*10];
 char *data_block_p;
 
 int highest_label_index;          // this keeps the next value of the label index for use in new labels.
@@ -340,7 +343,9 @@ void emit(char *p);
 void emitln(char *p);
 void emit_c_var(char *var_name);
 void emit_data(char *data);
+void emit_data_block();
 void emit_data_dbdw(int ind_level, int dims, t_basic_data dt);
+void emit_string_table_data(void);
 
 void skip_statements(void);
 void skip_block(void);
@@ -420,7 +425,7 @@ void skip_matrix_bracket(void);
 void expect(t_token _tok, t_errorCode errorCode);
 
 
-unsigned int add_string(char *str);
+unsigned int add_string_data(char *str);
 void declare_define();
 void pre_processor(void);
 int find_define(char *name);

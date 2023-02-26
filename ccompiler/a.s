@@ -8,7 +8,7 @@ main:
   mov bp, sp
   sub sp, 2 ; i
   sub sp, 2 ; n
-  mov b, _string_0
+  mov b, _string_2
   swp b
   push b
   call print
@@ -238,14 +238,14 @@ _if4_cond:
   cmp b, 0
   je _if4_else
 _if4_true:
-  mov b, _string_1
+  mov b, _string_3
   swp b
   push b
   call print
   add sp, 2
   jmp _if4_exit
 _if4_else:
-  mov b, _string_2
+  mov b, _string_4
   swp b
   push b
   call print
@@ -260,7 +260,7 @@ _for3_update:
   pop a
   jmp _for3_cond
 _for3_exit:
-  mov b, _string_3
+  mov b, _string_5
   swp b
   push b
   call print
@@ -864,7 +864,7 @@ _for16_exit:
 
 ; --- BEGIN DATA BLOCK
 s_data: 
-.dw 0, 0, 
+.dw _string_0, _string_1, 
 .fill 16, 0
 s: .dw s_data
 curr_state_data: 
@@ -882,10 +882,12 @@ curr_state_data:
 curr_state: .dw curr_state_data
 next_state_data: .fill 1800, 0
 next_state: .dw next_state_data
-_string_0: .db "Generations: ", 0
-_string_1: .db "@ ", 0
-_string_2: .db ". ", 0
-_string_3: .db "\n", 0
+_string_0: .db "Hello World", 0
+_string_1: .db "Hi", 0
+_string_2: .db "Generations: ", 0
+_string_3: .db "@ ", 0
+_string_4: .db ". ", 0
+_string_5: .db "\n", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
