@@ -4,6 +4,7 @@
 .include "lib/string.asm"
 
 s_hex_digits:	.db "0123456789ABCDEF"	
+s_telnet_clear:	.db 27, "[2J", 27, "[H", 0
 
 table_power:.dw 1
 			.dw 10

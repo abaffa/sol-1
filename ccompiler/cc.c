@@ -2238,7 +2238,7 @@ void declare_global(void){
       if(is_matrix(&global_variables[global_var_tos])){
         get();
         expect(OPENING_BRACE, OPENING_BRACE_EXPECTED);
-        sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
+        sprintf(temp, "%s_data: \n", global_variables[global_var_tos].var_name);
         emit_data(temp);
         emit_data_dbdw(ind_level, dim, dt);
         j = 0;
