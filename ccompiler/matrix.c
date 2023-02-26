@@ -1,5 +1,4 @@
 #include "lib/stdio.asm"
-#define HAHA 52
 
 char *str = "\033[38;2;8;202;40m";
 char *strWhite = "\033[38;2;255;255;255m";
@@ -9,7 +8,38 @@ char *init = "\033[";
 char *semicolon = ";";
 char *H = "H";
 
+void print_nbr(int n){
+  asm{
+    mov a, @n
+    call print_u16d
+  }
+  return;
+}
 
+void prints(char *ss){
+  asm{
+    mov a, @ss
+    mov d, a
+    call puts
+  }
+  return;
+}
+
+void print(int w, int h, char c){
+            //prints("\033[%i;%iH%c", h, w, c);
+			prints(init);
+			print_nbr(h);
+			prints(semicolon);
+			print_nbr(w);
+			prints(H);
+
+  asm{
+    mov a, @c
+		swp a
+    call putchar
+  }
+	return;
+}
 
 
 int main(){
@@ -17,6 +47,7 @@ int main(){
 	int rnd_h[24];	
 	int rnd_w[80];
 
+  prints(start);
 
 	rnd_w[0] =15;
 	rnd_w[1] =65;
@@ -168,11 +199,8 @@ int main(){
 	int start; start = 0;
 	
 	while(1){
-
-		asm{
-			call puts
-			mov a, 1
-		}
+        
+		print(rnd_w[w], rnd_h[h], c_ref[i]);
 
 		w++; if( w >= 80) w = 0;
 		h++; if( h >= 24){
@@ -186,6 +214,7 @@ int main(){
   }
   
 
+  prints( "\033[1;1H\033[2J\033[?25h\033[m" );
 
   return 0;
 }

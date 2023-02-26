@@ -1,11 +1,25 @@
 #include "lib/stdio.asm"
+//#include <stdio.h>
 
-#define WIDTH 20
-#define HEIGHT 20
+#define SIZE 37
 
 // Global arrays to hold the current and next states of the game grid
-int curr_state[HEIGHT][WIDTH];
-int next_state[HEIGHT][WIDTH];
+int curr_state[SIZE][SIZE] ={
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,
+1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+
+};
+int next_state[SIZE][SIZE];
 
 // Function to initialize the game grid with a pattern
 void init_game() {
@@ -18,12 +32,23 @@ void init_game() {
 }
 
 void print(char *s){
+//    printf("%s", s);
     asm{
         mov a, @s
         mov d, a
         call puts
     }
+    
     return;
+}
+
+int getn(){
+    int n;
+    asm{
+        call scan_u16d
+        mov @n, a
+    }
+    return n;
 }
 
 // Function to print out the current state of the game grid
@@ -31,8 +56,8 @@ void print_game() {
     int i;
     int j;
 
-    for (i = 0; i < HEIGHT; i++) {
-        for (j = 0; j < WIDTH; j++) {
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
             if (curr_state[i][j]) {
                 print("* ");
             } else {
@@ -53,22 +78,22 @@ void update_game() {
     int count;
 
     // Copy the current state of the grid to the next state
-    for (i = 0; i < HEIGHT; i++) {
-        for (j = 0; j < WIDTH; j++) {
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
             next_state[i][j] = curr_state[i][j];
         }
     }
 
     // Update the next state based on the current state
-    for (i = 1; i < HEIGHT; i++) {
-        for (j = 1; j < WIDTH; j++) {
+    for (i = 1; i < SIZE; i++) {
+        for (j = 1; j < SIZE; j++) {
             // Count the number of live neighbors for the current cell
             count = 0;
             for (ni = i-1; ni <= i+1; ni++) {
                 for (nj = j-1; nj <= j+1; nj++) {
-                    if (ni >= 0 && ni < HEIGHT && nj >= 0 && nj < WIDTH) {
+                    if (ni < SIZE && nj < SIZE) {
                         if (ni != i || nj != j) {
-                            count =count+ curr_state[ni][nj];
+                            count = count + curr_state[ni][nj];
                         }
                     }
                 }
@@ -88,8 +113,8 @@ void update_game() {
     }
 
     // Copy the next state back to the current state
-    for (i = 0; i < HEIGHT; i++) {
-        for (j = 0; j < WIDTH; j++) {
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
             curr_state[i][j] = next_state[i][j];
         }
     }
@@ -98,12 +123,15 @@ void update_game() {
 
 int main() {
     int i;
+    int n;
 
+    print("Generations: ");
+    n = getn();
     // Initialize the game grid with a pattern
     init_game();
 
     // Run the game for 10 generations
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < n; i++) {
         // Print out the current state of the game grid
         print_game();
 

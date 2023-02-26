@@ -51,10 +51,6 @@ void emit_data(char *data){
   }
 }
 
-
-
-
-
 void generate_file(char *filename){
   FILE *fp;
   int i;
@@ -68,10 +64,6 @@ void generate_file(char *filename){
   fclose(fp);
 }
 
-
-
-
-
 void emitln(char *p){
   while(*p) *asm_p++ = *p++;
   *asm_p++ = '\n';
@@ -80,10 +72,6 @@ void emitln(char *p){
 void emit(char *p){
   while(*p) *asm_p++ = *p++;
 }
-
-
-
-
 
 void load_program(char *filename){
   FILE *fp;
@@ -108,10 +96,6 @@ void load_program(char *filename){
   if(*(prog - 2) == 0x1A) *(prog - 2) = '\0';
   else *(prog - 1) = '\0';
 }
-
-
-
-
 
 void parse_main(void){
   register int i;
@@ -1491,31 +1475,24 @@ void parse_logical_and(void){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
+    emitln("  cmp al, 0");
+    emitln("  lodflgs");
+    emitln("  not al");
+    emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
+    emitln("  mov ah, 0");
     parse_bitwise_or();
+    emitln("  push a");
+    emitln("  cmp bl, 0");
+    emitln("  lodflgs");
+    emitln("  not al");
+    emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
+    emitln("  mov ah, 0");
+    emitln("  mov b, a");
+
+    emitln("  pop a");
     emitln("  and a, b");
     emitln("  mov b, a");
     emitln("  pop a");
-
-/*
-    emitln("  push a");
-    emitln("  mov a, b");
-    parse_bitwise_or();
-    emitln("  cmp b, 0");
-    emitln("  push a");
-    emitln("  lodflgs");
-    emitln("  mov b, a");
-    emitln("  pop a");
-    emitln("  not bl");  
-    emitln("  and bl, %00000001"); // isolate ZF only. 
-    emitln("  mov bh, 0");
-    emitln("  cmp a, 0");
-    emitln("  lodflgs");
-    emitln("  not al");  
-    emitln("  and al, %00000001"); // isolate ZF only. 
-    emitln("  mov ah, 0");
-    emitln("  or a, b");
-    emitln("  mov b, a");
-    emitln("  pop a");*/
   }
 }
 
@@ -1581,33 +1558,33 @@ void parse_relational(void){
       case EQUAL:
         emitln("  cmp a, b");
         emitln("  lodflgs");
-        emitln("  and al, %00000001"); // isolate ZF only. therefore if ZF==1 then A == B
+        emitln("  and al, %00000001 ; =="); // isolate ZF only. therefore if ZF==1 then A == B
         emitln("  mov ah, 0");
         break;
       case NOT_EQUAL:
         emitln("  cmp a, b");
         emitln("  lodflgs");
         emitln("  and al, %00000001"); // isolate ZF only.
-        emitln("  xor al, %00000001"); // invert the condition
+        emitln("  xor al, %00000001 ; !="); // invert the condition
         emitln("  mov ah, 0");
         break;
       case LESS_THAN:
         emitln("  cmp a, b");
         emitln("  lodflgs");
-        emitln("  and al, %00000010"); // isolate CF only. therefore if CF==1 then A < B
+        emitln("  and al, %00000010 ; <"); // isolate CF only. therefore if CF==1 then A < B
         emitln("  mov ah, 0");
         break;
       case LESS_THAN_OR_EQUAL:
         emitln("  cmp a, b");
         emitln("  lodflgs");
-        emitln("  and al, %00000011"); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
+        emitln("  and al, %00000011 ; <="); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
         emitln("  mov ah, 0");
         break;
       case GREATER_THAN_OR_EQUAL:
         emitln("  cmp a, b");
         emitln("  lodflgs");
         emitln("  and al, %00000011"); 
-        emitln("  xor al, %00000010"); 
+        emitln("  xor al, %00000010 ; >="); 
         emitln("  mov ah, 0");
         break;
       case GREATER_THAN:
@@ -1616,10 +1593,15 @@ void parse_relational(void){
         emitln("  and al, %00000011"); 
         emitln("  cmp al, %00000000"); 
         emitln("  lodflgs");
-        emitln("  and al, %00000001"); 
+        emitln("  and al, %00000001 ; >"); 
         emitln("  mov ah, 0");
         break;
     }
+    emitln("  cmp al, 0");
+    emitln("  lodflgs");
+    emitln("  not al");
+    emitln("  and al, %00000001 ; transform relational logical condition result into a single bit"); 
+    emitln("  mov ah, 0");
     emitln("  mov b, a");
     emitln("  pop a");
   }
@@ -1643,9 +1625,6 @@ void parse_bitwise_shift(void){
 }
 
 
-
-
-
 void parse_terms(void){
   char temp_tok;
   
@@ -1661,9 +1640,6 @@ void parse_terms(void){
     emitln("  pop a");
   }
 }
-
-
-
 
 
 void parse_factors(void){
@@ -1846,6 +1822,7 @@ void parse_atom(void){
 			data_size = get_data_size(&matrix->data);
 			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
       try_emitting_var(temp_name); // emit the base address of the matrix or pointer into 'b'
+      emitln("  push a");
       emitln("  mov d, b");
 			for(i = 0; i < dims; i++){
         parse_expr(); // result in 'b'
@@ -1876,6 +1853,7 @@ void parse_atom(void){
           break;
         }
 			}
+      emitln("  pop a");
 		}
     else if(enum_element_exists(temp_name) != -1){
       back();
@@ -2862,15 +2840,6 @@ void back(void){
 }
 
 
-
-
-
-/*
-asm{
-  line1
-  line2
-}
-*/
 void get_line(void){
   char *t;
 
@@ -2899,9 +2868,6 @@ void get_line(void){
 }
 
 
-
-
-
 int find_keyword(char *keyword){
   register int i;
   
@@ -2912,13 +2878,11 @@ int find_keyword(char *keyword){
 }
 
 
-
-
-
 char is_delimiter(char c){
   if(strchr("?@$#+-*/%[](){}:;,<>=!^&|~.", c)) return 1;
   else return 0;
 }
+
 
 char is_id_char(char c){
   return(isalpha(c) || c == '_');
