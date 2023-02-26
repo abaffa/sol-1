@@ -2144,9 +2144,6 @@ int get_enum_val(char *element_name){
 }
 
 
-
-
-
 void declare_global(void){
   t_basic_data dt;
   int ind_level;
