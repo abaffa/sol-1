@@ -322,6 +322,8 @@ int highest_label_index;          // this keeps the next value of the label inde
 int current_label_index; 
 int label_stack[64];
 int label_tos = 0;
+
+//>>>>> needs to be a stack instead. because we can have whiles inside fors etc
 t_break_type current_break_type;      // is it a for, while, or switch?
 
 // functions
