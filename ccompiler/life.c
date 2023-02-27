@@ -1,4 +1,4 @@
-#include "lib/stdio.asm"
+#inc_asm "lib/stdio.asm"
 //#include <stdio.h>
 
 #define SIZE 30

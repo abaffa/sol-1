@@ -253,7 +253,7 @@ void pre_scan(void){
 
     if(tok == DIRECTIVE){
       get();
-      if(tok == INCLUDE){
+      if(tok == INC_ASM){
         get();
         continue;
       }
