@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "def.h"
@@ -42,12 +41,14 @@ int main(int argc, char *argv[]){
   return 0;
 }
 
+
 void emit_data_block(){
   emitln("\n; --- BEGIN DATA BLOCK");
   emit_string_table_data();
   emit(data_block_asm);
   emitln("; --- END DATA BLOCK");
 }
+
 
 void emit_data(char *data){
   char *p = data;
@@ -56,6 +57,7 @@ void emit_data(char *data){
     *data_block_p++ = *p++;
   }
 }
+
 
 void generate_file(char *filename){
   FILE *fp;
@@ -75,9 +77,11 @@ void emitln(char *p){
   *asm_p++ = '\n';
 }
 
+
 void emit(char *p){
   while(*p) *asm_p++ = *p++;
 }
+
 
 void load_program(char *filename){
   FILE *fp;
@@ -102,6 +106,7 @@ void load_program(char *filename){
   fclose(fp);
 }
 
+
 void parse_main(void){
   register int i;
 
@@ -116,9 +121,6 @@ void parse_main(void){
   
   error(NO_MAIN_FOUND);
 }
-
-
-
 
 
 void parse_functions(void){
