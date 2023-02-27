@@ -12,7 +12,7 @@
 #define MAX_DEFINES            128
 
 typedef enum {
-  DIRECTIVE = 1, INCLUDE, DEFINE,
+  DIRECTIVE = 1, INCLUDE, INC_ASM, DEFINE,
   
   VOID, CHAR, INT, FLOAT, DOUBLE,
   SHORT, LONG, SIGNED, UNSIGNED,
@@ -145,30 +145,34 @@ struct _keyword_table{
   char *keyword;
   t_token key;
 } keyword_table[] = {
-  "void", VOID,
-  "char", CHAR,
-  "int", INT,
-  "float", FLOAT,
-  "double", DOUBLE,
-  "const", CONST,
-  "enum", ENUM,
-  "struct", STRUCT,
-  "sizeof", SIZEOF,
-  "return", RETURN,
-  "if", IF,
-  "else", ELSE,
-  "for", FOR,
-  "do", DO,
-  "break", BREAK,
+  "include",  INCLUDE,
+  "inc_asm",  INC_ASM,
+  "define",   DEFINE,
+  "asm",      ASM,
+
+  "void",     VOID,
+  "char",     CHAR,
+  "int",      INT,
+  "float",    FLOAT,
+  "double",   DOUBLE,
+
+  "const",    CONST,
+  "enum",     ENUM,
+  "struct",   STRUCT,
+  "sizeof",   SIZEOF,
+
+  "if",       IF,
+  "else",     ELSE,
+  "for",      FOR,
+  "do",       DO,
+  "break",    BREAK,
   "continue", CONTINUE,
-  "while", WHILE,
-  "switch", SWITCH,
-  "case", CASE,
-  "default", DEFAULT,
-  "include", INCLUDE,
-  "define", DEFINE,
-  "asm", ASM,
-  "", 0
+  "while",    WHILE,
+  "switch",   SWITCH,
+  "case",     CASE,
+  "default",  DEFAULT,
+  "return",   RETURN,
+  "",         0
 };
 
 typedef enum {
@@ -429,3 +433,4 @@ unsigned int add_string_data(char *str);
 void declare_define();
 void pre_processor(void);
 int find_define(char *name);
+void include_asm_lib(char *lib_name);

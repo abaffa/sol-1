@@ -84,7 +84,7 @@ void load_program(char *filename){
   int i;
   
   if((fp = fopen(filename, "rb")) == NULL){
-    printf("program source file not found");
+    printf("%s: Source file not found\n", filename);
     exit(0);
   }
   
@@ -97,10 +97,9 @@ void load_program(char *filename){
     i++;
   } while(!feof(fp));
   
+  *(prog - 1) = '\0';
+
   fclose(fp);
-  
-  if(*(prog - 2) == 0x1A) *(prog - 2) = '\0';
-  else *(prog - 1) = '\0';
 }
 
 void parse_main(void){
@@ -158,7 +157,7 @@ void parse_functions(void){
 }
 
 
-void include_lib(char *lib_name){
+void include_asm_lib(char *lib_name){
   strcat(includes_list_asm, "\n.include ");
   strcat(includes_list_asm, lib_name); // concatenate library name into a small text session that
   // in the end we add this to the final ASM text  
@@ -187,7 +186,13 @@ void pre_processor(void){
 
     if(tok == DIRECTIVE){
       get();
-      if(tok == DEFINE){
+      if(tok == INC_ASM){
+        get();
+        if(tok_type != STRING_CONST) error(DIRECTIVE_SYNTAX);
+        include_asm_lib(token);
+        continue;
+      }
+      else if(tok == DEFINE){
         declare_define();
         continue;
       }
@@ -247,16 +252,11 @@ void pre_scan(void){
       get();
       if(tok == INCLUDE){
         get();
-        if(tok_type != STRING_CONST) error(DIRECTIVE_SYNTAX);
-        include_lib(token);
         continue;
       }
       else if(tok == DEFINE){
-        get();
-        get();
         continue;
       }
-      else error(UNKNOWN_DIRECTIVE);
     }
     else if(tok == ENUM){
       declare_enum();
@@ -1124,9 +1124,6 @@ void parse_block(void){
     }    
   } while(braces); // exits when it finds the last closing brace
 }
-
-
-
 
 
 void skip_statements(void){
@@ -2482,12 +2479,10 @@ t_var *get_var(char *var_name){
 }
 
 
-
-
-
 void expect(t_token _tok, t_errorCode errorCode){
   if(tok != _tok) error(errorCode);
 }
+
 
 void error(t_errorCode e){
   int line = 1;
@@ -2505,10 +2500,6 @@ void error(t_errorCode e){
 
   exit(0);
 }
-
-
-
-
 
 
 // converts a literal string or char constant into constants with true escape sequences

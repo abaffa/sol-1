@@ -1,42 +1,26 @@
-#include "lib/stdio.asm"
+#inc_asm "lib/stdio.asm"
+
 
 int main() {
-    int n;
-    n = 10000; // number of rows and columns
-    int i, j;
+  int a;
 
-    // Generate the pattern
-    for (i = 1; i <= n; i++) {
-        for (j = 1; j <= n; j++) {
-            if ((i+j) % 2 == 0) {
-                print(" ");
-                printn(i*j);
-            } else {
-                print(" ");
-                printn(i+j);
-            }
-        }
-        print("\n");
-    }
+  scann(&a);
 
-    return 0;
+  printn(a);
+
+  return 0;
 }
 
-void printarray(int a[4][4]){
-  int i, j;
-  for(i=0;i<4;i++){
-    for(j=0;j<4;j++){
-      printn(a[i][j]);
-      print("\n");
-    }
+void scann(int *n){
+  int m;
+  asm{
+    call scan_u16d
+    mov @m, a
   }
+  *n = m;
   return;
 }
 
-int main() {
-    printarray(a);
-    return 0;
-}
 
 void printn(int n){
   asm{
@@ -54,7 +38,6 @@ void print(char *s){
     }
     return;
 }
-
 
 
 
