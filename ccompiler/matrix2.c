@@ -1,4 +1,4 @@
-#include "lib/stdio.asm"
+#inc_asm "lib/stdio.asm"
 
 #define ROWS 24
 #define COLS 80

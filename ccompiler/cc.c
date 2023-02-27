@@ -37,11 +37,47 @@ int main(int argc, char *argv[]){
   emitln("\n.end");
 
   *asm_p = '\0';
+
+  optimize();
   generate_file("a.s"); // generate a.s assembly file
+
+
 
   return 0;
 }
 
+void optimize(void){
+  char s1[STRING_CONST_SIZE];
+  prog = asm_out;
+
+  do{
+    get_line();
+    if(!*string_const) break;
+    strcpy(s1, string_const);
+    if(!strcmp(s1, "  pop a\n")
+      ||!strcmp(s1, "  pop b\n")
+      ||!strcmp(s1, "  pop c\n")
+      ||!strcmp(s1, "  pop d\n")){
+
+      get_line();
+      if(!*string_const) break;
+
+      if(!strcmp(string_const, "  push a\n")
+        || !strcmp(string_const, "  push b\n")
+        || !strcmp(string_const, "  push c\n")
+        || !strcmp(string_const, "  push d\n")){
+        continue;
+      }
+    }
+    else{
+      strcat(asm_optimized, s1);
+      continue;
+    }
+
+    strcat(asm_optimized, s1);
+    strcat(asm_optimized, string_const);
+  } while(string_const[0] != '\0');
+}
 
 void emit_data_block(){
   emitln("\n; --- BEGIN DATA BLOCK");
@@ -68,7 +104,7 @@ void generate_file(char *filename){
     exit(0);
   }
   
-  fprintf(fp, "%s", asm_out);
+  fprintf(fp, "%s", asm_optimized);
 
   fclose(fp);
 }
@@ -2804,25 +2840,8 @@ void get_line(void){
 
   t = string_const;
   
-  do{
-    while(isspace(*prog)) prog++;
-    if(*prog == '/' && *(prog+1) == '*'){
-      prog = prog + 2;
-      while(!(*prog == '*' && *(prog+1) == '/')) prog++;
-      prog = prog + 2;
-    }
-  } while(isspace(*prog));
-
-  if(*prog == '\0'){
-    error(UNEXPECTED_EOF);
-  }
-
-  while(*prog != '\n'){
-    *t = *prog;
-    t++;
-    prog++;
-  }
-
+  while(*prog != '\n' && *prog != '\0') *t++ = *prog++;
+  *t++ = *prog++;
   *t = '\0';
 }
 

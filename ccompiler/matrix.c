@@ -1,4 +1,4 @@
-#include "lib/stdio.asm"
+#inc_asm "lib/stdio.asm"
 
 char *str = "\033[38;2;8;202;40m";
 char *strWhite = "\033[38;2;255;255;255m";

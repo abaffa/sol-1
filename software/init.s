@@ -24,9 +24,9 @@ shell_main:
 
 s_shell_path:	.db "/usr/bin/sh", 0
 
-s_prompt_shell:	.db "launching a shell session\n", 0
+s_prompt_shell:	.db "launching a shell session...\n\r", 0
 
-s_prompt_init:	.db "init started\n", 0
+s_prompt_init:	.db "init started\n\r", 0
 
 .include "stdio.asm"
 

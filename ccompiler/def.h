@@ -4,7 +4,7 @@
 #define MAX_GLOBAL_VARS        100
 #define MAX_LOCAL_VARS         100
 #define ID_LEN                 50
-#define CONST_LEN              500
+#define CONST_LEN              50
 #define PROG_SIZE              1024 * 64
 #define MAX_MATRIX_DIMS        10
 #define MAX_ENUM_ELEMENTS      64
@@ -304,11 +304,12 @@ int enum_table_tos;
 int defines_tos;
 
 char token[CONST_LEN + 2];            // string token representation
-char string_const[CONST_LEN];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
+char string_const[STRING_CONST_SIZE];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
 char *prog;                           // pointer to the current program position
 char c_in[PROG_SIZE];               // C program-in buffer
 char c_preproc_out[PROG_SIZE];     // pre-processor out buffer
 char asm_out[32*1024];             // ASM output
+char asm_optimized[32*1024];             // ASM output optimized
 char *asm_p;
 char *data_p;
 char asm_line[256];
@@ -434,3 +435,5 @@ void declare_define();
 void pre_processor(void);
 int find_define(char *name);
 void include_asm_lib(char *lib_name);
+
+void optimize(void);
