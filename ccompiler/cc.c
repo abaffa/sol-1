@@ -523,8 +523,6 @@ int get_total_func_param_size(void){
 }
 
 
-
-
 void parse_asm(void){
   char *temp_prog;
 
@@ -563,8 +561,6 @@ void parse_asm(void){
 }
 
 
-
-
 void emit_c_var(char *var_name){
   int var_id;
   char temp[256];
@@ -598,9 +594,6 @@ void emit_c_var(char *var_name){
 }
 
 
-
-
-
 void parse_break(void){
   if(current_break_type == FOR_BREAK) parse_for_break();
   else if(current_break_type == WHILE_BREAK) parse_while_break();
@@ -612,33 +605,30 @@ void parse_break(void){
 void parse_switch_break(void){
   char s_label[64];
   
-  sprintf(s_label, "  jmp _switch%d_exit", current_label_index);
+  sprintf(s_label, "  jmp _switch%d_exit", current_label_index_switch);
   emitln(s_label);
 }
 
 void parse_while_break(void){
   char s_label[64];
   
-  sprintf(s_label, "  jmp _while%d_exit", current_label_index);
+  sprintf(s_label, "  jmp _while%d_exit", current_label_index_while);
   emitln(s_label);
 }
 
 void parse_do_break(void){
   char s_label[64];
   
-  sprintf(s_label, "  jmp _do%d_exit", current_label_index);
+  sprintf(s_label, "  jmp _do%d_exit", current_label_index_do);
   emitln(s_label);
 }
 
 void parse_for_break(void){
   char s_label[64];
   
-  sprintf(s_label, "  jmp _for%d_exit", current_label_index);
+  sprintf(s_label, "  jmp _for%d_exit", current_label_index_for);
   emitln(s_label);
 }
-
-
-
 
 
 void parse_for(void){
@@ -647,11 +637,11 @@ void parse_for(void){
   
   current_break_type = FOR_BREAK;
   highest_label_index++;
-  label_stack[label_tos] = current_label_index;
-  label_tos++;
-  current_label_index = highest_label_index;
+  label_stack_for[label_tos_for] = current_label_index_for;
+  label_tos_for++;
+  current_label_index_for = highest_label_index;
 
-  sprintf(s_label, "_for%d_init:", current_label_index);
+  sprintf(s_label, "_for%d_init:", current_label_index_for);
   emitln(s_label);
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
@@ -662,7 +652,7 @@ void parse_for(void){
   }
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
 
-  sprintf(s_label, "_for%d_cond:", current_label_index);
+  sprintf(s_label, "_for%d_cond:", current_label_index_for);
   emitln(s_label);
   
   // checks for an empty condition, which means always true
@@ -677,9 +667,9 @@ void parse_for(void){
   }
 
   emitln("  cmp b, 0");
-  sprintf(s_label, "  je _for%d_exit", current_label_index);
+  sprintf(s_label, "  je _for%d_exit", current_label_index_for);
   emitln(s_label);
-  sprintf(s_label, "_for%d_block:", current_label_index);
+  sprintf(s_label, "_for%d_block:", current_label_index_for);
   emitln(s_label);
 
   update_loc = prog; // holds the location of incrementation part
@@ -695,7 +685,7 @@ void parse_for(void){
 
   parse_block();
   
-  sprintf(s_label, "_for%d_update:", current_label_index);
+  sprintf(s_label, "_for%d_update:", current_label_index_for);
   emitln(s_label);
   
   prog = update_loc;
@@ -706,20 +696,17 @@ void parse_for(void){
     parse_expr();
   }
     
-  sprintf(s_label, "  jmp _for%d_cond", current_label_index);
+  sprintf(s_label, "  jmp _for%d_cond", current_label_index_for);
   emitln(s_label);
 
   skip_statements();
 
-  sprintf(s_label, "_for%d_exit:", current_label_index);
+  sprintf(s_label, "_for%d_exit:", current_label_index_for);
   emitln(s_label);
 
-  label_tos--;
-  current_label_index = label_stack[label_tos];
+  label_tos_for--;
+  current_label_index_for = label_stack_for[label_tos_for];
 }
-
-
-
 
 
 void parse_while(void){
@@ -727,33 +714,30 @@ void parse_while(void){
 
   current_break_type = WHILE_BREAK;
   highest_label_index++;
-  label_stack[label_tos] = current_label_index;
-  label_tos++;
-  current_label_index = highest_label_index;
+  label_stack_while[label_tos_while] = current_label_index_while;
+  label_tos_while++;
+  current_label_index_while = highest_label_index;
 
-  sprintf(s_label, "_while%d_cond:", current_label_index);
+  sprintf(s_label, "_while%d_cond:", current_label_index_while);
   emitln(s_label);
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   emitln("  cmp b, 0");
-  sprintf(s_label, "  je _while%d_exit", current_label_index);
+  sprintf(s_label, "  je _while%d_exit", current_label_index_while);
   emitln(s_label);
-  sprintf(s_label, "_while%d_block:", current_label_index);
+  sprintf(s_label, "_while%d_block:", current_label_index_while);
   emitln(s_label);
   parse_block();  // parse while block
-  sprintf(s_label, "  jmp _while%d_cond", current_label_index);
+  sprintf(s_label, "  jmp _while%d_cond", current_label_index_while);
   emitln(s_label);
-  sprintf(s_label, "_while%d_exit:", current_label_index);
+  sprintf(s_label, "_while%d_exit:", current_label_index_while);
   emitln(s_label);
 
-  label_tos--;
-  current_label_index = label_stack[label_tos];
+  label_tos_while--;
+  current_label_index_while = label_stack_while[label_tos_while];
 }
-
-
-
 
 
 void parse_do(void){
@@ -761,15 +745,15 @@ void parse_do(void){
 
   current_break_type = DO_BREAK;
   highest_label_index++;
-  label_stack[label_tos] = current_label_index;
-  label_tos++;
-  current_label_index = highest_label_index;
+  label_stack_do[label_tos_do] = current_label_index_do;
+  label_tos_do++;
+  current_label_index_do = highest_label_index;
 
-  sprintf(s_label, "_do%d_block:", current_label_index);
+  sprintf(s_label, "_do%d_block:", current_label_index_do);
   emitln(s_label);
   parse_block();  // parse block
 
-  sprintf(s_label, "_do%d_cond:", current_label_index);
+  sprintf(s_label, "_do%d_cond:", current_label_index_do);
   emitln(s_label);
   get(); // get 'while'
   get();
@@ -777,21 +761,17 @@ void parse_do(void){
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   emitln("  cmp b, 1");
-  sprintf(s_label, "  je _do%d_block", current_label_index);
+  sprintf(s_label, "  je _do%d_block", current_label_index_do);
   emitln(s_label);
 
-  sprintf(s_label, "_do%d_exit:", current_label_index);
+  sprintf(s_label, "_do%d_exit:", current_label_index_do);
   emitln(s_label);
 
-  label_tos--;
-  current_label_index = label_stack[label_tos];
+  label_tos_do--;
+  current_label_index_do = label_stack_do[label_tos_do];
   get();
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
 }
-
-
-
-
 
 /*
   switch(expr){
@@ -823,9 +803,6 @@ int count_cases(void){
 }
 
 
-
-
-
 void skip_case(void){
   do{
     get();
@@ -836,9 +813,6 @@ void skip_case(void){
     }
   } while(tok != CASE && tok != DEFAULT && tok != CLOSING_BRACE);
 }
-
-
-
 
 
 void goto_next_case(void){
@@ -855,9 +829,6 @@ void goto_next_case(void){
 }
 
 
-
-
-
 int switch_has_default(void){
   do{
     get();
@@ -871,9 +842,6 @@ int switch_has_default(void){
 }
 
 
-
-
-
 void parse_switch(void){
   char s_label[64];
   char s_nextcase[64];
@@ -884,17 +852,17 @@ void parse_switch(void){
 
   current_break_type = SWITCH_BREAK;
   highest_label_index++;
-  label_stack[label_tos] = current_label_index;
-  label_tos++;
-  current_label_index = highest_label_index;
+  label_stack_switch[label_tos_switch] = current_label_index_switch;
+  label_tos_switch++;
+  current_label_index_switch = highest_label_index;
 
-  sprintf(s_label, "_switch%d_expr:", current_label_index);
+  sprintf(s_label, "_switch%d_expr:", current_label_index_switch);
   emitln(s_label);
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
   parse_expr(); // evaluate condition
   if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
-  sprintf(s_label, "_switch%d_comparisons:", current_label_index);
+  sprintf(s_label, "_switch%d_comparisons:", current_label_index_switch);
   emitln(s_label);
 
   get();
@@ -915,7 +883,7 @@ void parse_switch(void){
     if(tok_type == INTEGER_CONST){
       emit("  cmp b, ");
       emitln(token);
-      sprintf(s_label, "_switch%d_case%d", current_label_index, current_case_nbr);
+      sprintf(s_label, "_switch%d_case%d", current_label_index_switch, current_case_nbr);
       strcpy(asm_line, "  je ");
       strcat(asm_line, s_label);
       emitln(asm_line);
@@ -928,7 +896,7 @@ void parse_switch(void){
       emit("  cmp bl, '");
       emit(string_const);
       emitln("'");
-      sprintf(s_label, "_switch%d_case%d", current_label_index, current_case_nbr);
+      sprintf(s_label, "_switch%d_case%d", current_label_index_switch, current_case_nbr);
       strcpy(asm_line, "  je ");
       strcat(asm_line, s_label);
       emitln(asm_line);
@@ -945,12 +913,12 @@ void parse_switch(void){
   if(tok == DEFAULT){
     get(); // get default
     get(); // get ':'
-    sprintf(s_label, "_switch%d_default:", current_label_index);
+    sprintf(s_label, "_switch%d_default:", current_label_index_switch);
     emitln(s_label);
     parse_case();
   }
 
-  sprintf(s_label, "  jmp _switch%d_exit", current_label_index);
+  sprintf(s_label, "  jmp _switch%d_exit", current_label_index_switch);
   emitln(s_label);
 
   // emit code for each case block
@@ -961,17 +929,17 @@ void parse_switch(void){
     get(); // get constant
     get(); // get ':'
 
-    sprintf(s_label, "_switch%d_case%d:", current_label_index, current_case_nbr);
+    sprintf(s_label, "_switch%d_case%d:", current_label_index_switch, current_case_nbr);
     emitln(s_label);
     parse_case();
     current_case_nbr++;
   } while(tok == CASE);
 
-  sprintf(s_label, "_switch%d_exit:", current_label_index);
+  sprintf(s_label, "_switch%d_exit:", current_label_index_switch);
   emitln(s_label);
 
-  label_tos--;
-  current_label_index = label_stack[label_tos];
+  label_tos_switch--;
+  current_label_index_switch = label_stack_switch[label_tos_switch];
   get();
   if(tok == DEFAULT){
     get(); // get ':'
@@ -981,19 +949,16 @@ void parse_switch(void){
 }
 
 
-
-
-
 void parse_if(void){
   char s_label[64];
   char *temp_p;
 
   highest_label_index++;
-  label_stack[label_tos] = current_label_index;
-  label_tos++;
-  current_label_index = highest_label_index;
+  label_stack_if[label_tos_if] = current_label_index_if;
+  label_tos_if++;
+  current_label_index_if = highest_label_index;
 
-  sprintf(s_label, "_if%d_cond:", current_label_index);
+  sprintf(s_label, "_if%d_cond:", current_label_index_if);
   emitln(s_label);
   get();
   if(tok != OPENING_PAREN) error(OPENING_PAREN_EXPECTED);
@@ -1005,23 +970,23 @@ void parse_if(void){
   skip_statements(); // skip main IF block in order to check for ELSE block.
   get();
   if(tok == ELSE){
-    sprintf(s_label, "  je _if%d_else", current_label_index);
+    sprintf(s_label, "  je _if%d_else", current_label_index_if);
     emitln(s_label);
   }
   else{
-    sprintf(s_label, "  je _if%d_exit", current_label_index);
+    sprintf(s_label, "  je _if%d_exit", current_label_index_if);
     emitln(s_label);
   }
 
   prog = temp_p;
-  sprintf(s_label, "_if%d_true:", current_label_index);
+  sprintf(s_label, "_if%d_true:", current_label_index_if);
   emitln(s_label);
   parse_block();  // parse the positive condition block
-  sprintf(s_label, "  jmp _if%d_exit", current_label_index);
+  sprintf(s_label, "  jmp _if%d_exit", current_label_index_if);
   emitln(s_label);
   get(); // look for 'else'
   if(tok == ELSE){
-    sprintf(s_label, "_if%d_else:", current_label_index);
+    sprintf(s_label, "_if%d_else:", current_label_index_if);
     emitln(s_label);
     parse_block();  // parse the positive condition block
   }
@@ -1029,15 +994,12 @@ void parse_if(void){
     back();
   }
   
-  sprintf(s_label, "_if%d_exit:", current_label_index);
+  sprintf(s_label, "_if%d_exit:", current_label_index_if);
   emitln(s_label);
 
-  label_tos--;
-  current_label_index = label_stack[label_tos];
+  label_tos_if--;
+  current_label_index_if = label_stack_if[label_tos_if];
 }
-
-
-
 
 
 void parse_return(void){
@@ -1055,9 +1017,6 @@ void parse_return(void){
     emitln("  ret");
   }
 }
-
-
-
 
 
 void parse_case(void){
@@ -1107,9 +1066,6 @@ void parse_case(void){
     }    
   } while(1); 
 }
-
-
-
 
 
 void parse_block(void){
@@ -1292,33 +1248,30 @@ void parse_ternary_op(void){
 
   // '?' was found
   highest_label_index++;
-  label_stack[label_tos] = current_label_index;
-  label_tos++;
-  current_label_index = highest_label_index;
+  label_stack_ter[label_tos_ter] = current_label_index_ter;
+  label_tos_ter++;
+  current_label_index_ter = highest_label_index;
   emitln("  cmp b, 0");
   
-  sprintf(s_label, "  je _ternary%d_false", current_label_index);
+  sprintf(s_label, "  je _ternary%d_false", current_label_index_ter);
   emitln(s_label);
 
-  sprintf(s_label, "_ternary%d_true:", current_label_index);
+  sprintf(s_label, "_ternary%d_true:", current_label_index_ter);
   emitln(s_label);
   parse_ternary_op(); // result in 'b'
   if(tok != COLON) error(COLON_EXPECTED);
-  sprintf(s_label, "  jmp _ternary%d_exit", current_label_index);
+  sprintf(s_label, "  jmp _ternary%d_exit", current_label_index_ter);
   emitln(s_label);
-  sprintf(s_label, "_ternary%d_false:", current_label_index);
+  sprintf(s_label, "_ternary%d_false:", current_label_index_ter);
   emitln(s_label);
 
   parse_ternary_op(); // result in 'b'
-  sprintf(s_label, "_ternary%d_exit:", current_label_index);
+  sprintf(s_label, "_ternary%d_exit:", current_label_index_ter);
   emitln(s_label);
 
-  label_tos--;
-  current_label_index = label_stack[label_tos];
+  label_tos_ter--;
+  current_label_index_ter = label_stack_ter[label_tos_ter];
 }
-
-
-
 
 
 void assign_var(char *var_name){

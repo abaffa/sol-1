@@ -317,11 +317,25 @@ char includes_list_asm[1024];         // keeps a list of all included files
 char data_block_asm[1024*10];
 char *data_block_p;
 
-int highest_label_index;          // this keeps the next value of the label index for use in new labels.
-                                      //label values are never repeating. always increasing.
-int current_label_index; 
-int label_stack[64];
-int label_tos = 0;
+int highest_label_index; // keeps the highest label index and always increases
+int current_label_index_if; 
+int current_label_index_ter; 
+int current_label_index_for; 
+int current_label_index_do; 
+int current_label_index_while; 
+int current_label_index_switch; 
+int label_stack_if[64];
+int label_stack_ter[64];
+int label_stack_for[64];
+int label_stack_do[64];
+int label_stack_while[64];
+int label_stack_switch[64];
+int label_tos_if = 0;
+int label_tos_ter = 0;
+int label_tos_for = 0;
+int label_tos_do = 0;
+int label_tos_while = 0;
+int label_tos_switch = 0;
 
 //>>>>> needs to be a stack instead. because we can have whiles inside fors etc
 t_break_type current_break_type;      // is it a for, while, or switch?
