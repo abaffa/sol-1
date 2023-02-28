@@ -408,7 +408,7 @@ void parse_switch(void);
 void parse_while(void);
 void parse_do(void);
 void parse_break(void);
-void parse_switch_break(void);
+void parse_case_break(void);
 int switch_has_default(void);
 void parse_while_break(void);
 void parse_do_break(void);

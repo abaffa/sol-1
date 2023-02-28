@@ -593,40 +593,39 @@ void emit_c_var(char *var_name){
   else error(UNDECLARED_VARIABLE);
 }
 
-
 void parse_break(void){
   if(current_break_type == FOR_BREAK) parse_for_break();
   else if(current_break_type == WHILE_BREAK) parse_while_break();
   else if(current_break_type == DO_BREAK) parse_do_break();
-  else if(current_break_type == SWITCH_BREAK) parse_switch_break();
+  else if(current_break_type == SWITCH_BREAK) parse_case_break();
   get();
 }
 
-void parse_switch_break(void){
+void parse_case_break(void){
   char s_label[64];
   
-  sprintf(s_label, "  jmp _switch%d_exit", current_label_index_switch);
+  sprintf(s_label, "  jmp _switch%d_exit ; case break", current_label_index_switch);
   emitln(s_label);
 }
 
 void parse_while_break(void){
   char s_label[64];
   
-  sprintf(s_label, "  jmp _while%d_exit", current_label_index_while);
+  sprintf(s_label, "  jmp _while%d_exit ; while break", current_label_index_while);
   emitln(s_label);
 }
 
 void parse_do_break(void){
   char s_label[64];
   
-  sprintf(s_label, "  jmp _do%d_exit", current_label_index_do);
+  sprintf(s_label, "  jmp _do%d_exit ; do break", current_label_index_do);
   emitln(s_label);
 }
 
 void parse_for_break(void){
   char s_label[64];
   
-  sprintf(s_label, "  jmp _for%d_exit", current_label_index_for);
+  sprintf(s_label, "  jmp _for%d_exit ; for break", current_label_index_for);
   emitln(s_label);
 }
 
