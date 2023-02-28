@@ -45,36 +45,36 @@ void displaynumber(int n){
 
 void main(void) {
 
-  for (infi = 0; infi < 10; infi = infi+1) {
-    pc = 0; 
-    displaynumber(12312);
-    cmdadr = readint();
+for (infi = 0; infi < 10; infi = infi+1) {
+pc = 0; 
+displaynumber(12312);
+cmdadr = readint();
 
-    if (cmdadr <= 120) {
+if (cmdadr <= 120) {
 
-      opr = readint();
-      
-      datadr1 = readint();
-      
-      datadr2 = readint();
-      
-      datadr3 = readint();
+  opr = readint();
+  
+  datadr1 = readint();
+  
+  datadr2 = readint();
+  
+  datadr3 = readint();
 
-      instruction[cmdadr * 4] = opr;
-      instruction[(cmdadr * 4) + 1] = datadr1;
-      instruction[(cmdadr * 4) + 2] = datadr2;
-      instruction[(cmdadr * 4) + 3] = datadr3;
-      displaynumber(cmdadr);
-      displaynumber(opr);
-      displaynumber(datadr1);
-      displaynumber(datadr2);
-      displaynumber(datadr3);
+  instruction[cmdadr * 4] = opr;
+  instruction[(cmdadr * 4) + 1] = datadr1;
+  instruction[(cmdadr * 4) + 2] = datadr2;
+  instruction[(cmdadr * 4) + 3] = datadr3;
+  displaynumber(cmdadr);
+  displaynumber(opr);
+  displaynumber(datadr1);
+  displaynumber(datadr2);
+  displaynumber(datadr3);
 
-      if (cmdadr == 0) {
-        break; 
-      }
-    } 
+  if (cmdadr == 0) {
+    break; 
   }
+} 
+}
 
   return;
 }

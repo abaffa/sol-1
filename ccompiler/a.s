@@ -670,7 +670,7 @@ _if14_cond:
   mov b, [bp + -9] ; count
   push a
   mov a, b
-  mov b, 4
+  mov b, 3
   cmp a, b
   lodflgs
   and al, %00000011
@@ -722,23 +722,6 @@ _if15_cond:
   not al
   and al, %00000001 ; transform relational logical condition result into a single bit
   mov ah, 0
-  mov b, a
-  mov a, b
-  mov b, [bp + -9] ; count
-  push a
-  mov a, b
-  mov b, 4
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  cmp al, 0
-  lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
-  mov ah, 0
-  mov b, a
-  pop a
-  or a, b
   mov b, a
   pop a
   cmp b, 0
