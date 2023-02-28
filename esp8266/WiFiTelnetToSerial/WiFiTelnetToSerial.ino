@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #define STASSID "Quantum Mechanics"
-#define STAPSK	"P@ulinhopj201"
+#define STAPSK	"password"
 
 #define BAUD_SERIAL 38400
 

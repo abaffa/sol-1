@@ -119,11 +119,11 @@ void update_game() {
 
             // Apply the rules of the game to update the next state
             if (curr_state[i][j]) {
-                if (count < 2 || count > 3) {
+                if (count < 2 || count > 4) {
                     next_state[i][j] = 0;
                 }
             } else {
-                if (count == 3) {
+                if (count == 3 || count == 4) {
                     next_state[i][j] = 1;
                 }
             }
