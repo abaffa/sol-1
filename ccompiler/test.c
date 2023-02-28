@@ -8,7 +8,18 @@ int main() {
 
   scann(&a);
 
-  printn(a);
+  switch(a){
+    case 1:
+      printn(1);
+      break;
+    case 2:
+      printn(2);
+      break;
+    default:
+      printn(99);
+  }
+
+
 
   return 0;
 }
