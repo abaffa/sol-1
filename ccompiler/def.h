@@ -339,6 +339,8 @@ int label_tos_switch = 0;
 
 //>>>>> needs to be a stack instead. because we can have whiles inside fors etc
 t_break_type current_break_type;      // is it a for, while, or switch?
+t_break_type break_type_stack[64];
+int break_type_tos;
 
 // functions
 char is_delimiter(char c);

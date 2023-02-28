@@ -1,5 +1,7 @@
 #inc_asm "lib/stdio.asm"
 
+char **s[4][4]={1,2, "Helo"};
+int **i[1]={22};
 
 int main() {
   int a;

@@ -634,6 +634,8 @@ void parse_for(void){
   char s_label[64];
   char *update_loc;
   
+  break_type_stack[break_type_tos] = current_break_type;
+  break_type_tos++;
   current_break_type = FOR_BREAK;
   highest_label_index++;
   label_stack_for[label_tos_for] = current_label_index_for;
@@ -705,12 +707,16 @@ void parse_for(void){
 
   label_tos_for--;
   current_label_index_for = label_stack_for[label_tos_for];
+  break_type_tos--;
+  current_break_type = break_type_stack[break_type_tos];
 }
 
 
 void parse_while(void){
   char s_label[64];
 
+  break_type_stack[break_type_tos] = current_break_type;
+  break_type_tos++;
   current_break_type = WHILE_BREAK;
   highest_label_index++;
   label_stack_while[label_tos_while] = current_label_index_while;
@@ -736,12 +742,16 @@ void parse_while(void){
 
   label_tos_while--;
   current_label_index_while = label_stack_while[label_tos_while];
+  break_type_tos--;
+  current_break_type = break_type_stack[break_type_tos];
 }
 
 
 void parse_do(void){
   char s_label[64];
 
+  break_type_stack[break_type_tos] = current_break_type;
+  break_type_tos++;
   current_break_type = DO_BREAK;
   highest_label_index++;
   label_stack_do[label_tos_do] = current_label_index_do;
@@ -766,10 +776,13 @@ void parse_do(void){
   sprintf(s_label, "_do%d_exit:", current_label_index_do);
   emitln(s_label);
 
-  label_tos_do--;
-  current_label_index_do = label_stack_do[label_tos_do];
   get();
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
+
+  label_tos_do--;
+  current_label_index_do = label_stack_do[label_tos_do];
+  break_type_tos--;
+  current_break_type = break_type_stack[break_type_tos];
 }
 
 /*
@@ -849,6 +862,8 @@ void parse_switch(void){
   int current_case_nbr;
   int has_default;
 
+  break_type_stack[break_type_tos] = current_break_type;
+  break_type_tos++;
   current_break_type = SWITCH_BREAK;
   highest_label_index++;
   label_stack_switch[label_tos_switch] = current_label_index_switch;
@@ -939,6 +954,8 @@ void parse_switch(void){
 
   label_tos_switch--;
   current_label_index_switch = label_stack_switch[label_tos_switch];
+  break_type_tos--;
+  current_break_type = break_type_stack[break_type_tos];
   get();
   if(tok == DEFAULT){
     get(); // get ':'
