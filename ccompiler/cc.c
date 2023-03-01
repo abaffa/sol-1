@@ -4,6 +4,11 @@
 #include <ctype.h>
 #include "def.h"
 
+/* 
+  TODO:
+    fix logical value comparisons: remove ah half
+*/
+
 int main(int argc, char *argv[]){
   char header[256];
 
@@ -325,9 +330,6 @@ void pre_scan(void){
 }
 
 
-
-
-
 void declare_func(void){
   t_user_func *func; // variable to hold a pointer to the user function top of stack
   t_basic_data param_data_type; // function data type
@@ -337,12 +339,16 @@ void declare_func(void){
   char param_name[ID_LEN];
 
   if(function_table_tos == MAX_USER_FUNC - 1) error(EXCEEDED_FUNC_DECL_LIMIT);
-
   func = &function_table[function_table_tos];
 
   get();
-  func->return_type = get_data_type_from_tok(tok);
-  get(); // gets the function name
+  func->return_type.type = get_data_type_from_tok(tok);
+
+  get();
+  while(tok == STAR){
+    func->return_type.ind_level++;
+    get();
+  }
   strcpy(func->func_name, token);
   get(); // gets past "("
 
@@ -387,11 +393,9 @@ void declare_func(void){
           break;
       }
       get();
-      if(tok == STAR){
-        while(tok == STAR){
-          func->local_vars[func->local_var_tos].data.ind_level++;
-          get();
-        }
+      while(tok == STAR){
+        func->local_vars[func->local_var_tos].data.ind_level++;
+        get();
       }
       if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
       strcpy(param_name, token); // copy parameter name

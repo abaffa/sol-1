@@ -1,28 +1,39 @@
 #inc_asm "lib/stdio.asm"
 
-char **s[4][4]={1,2, "Helo"};
-int **i[1]={22};
+char s1[50] = {'H','e','l','l','o',0};
+char *s2 = ". My name is Sol-1.";
 
 int main() {
-  int a;
-  int i,j;
 
-  scann(&a);
+  _strcat(s1, s2);
 
-  switch(a){
-    case 1:
-      printn(1);
-      break;
-    case 2:
-      for(i=0;i<10;i++)
-        for(j=0;j<10;j++)
-          printn(2);
-      break;
-    default:
-      printn(99);
-  }
+  printn(_strlen(s1));
 
   return 0;
+}
+
+int _strlen(char *str) {
+    int length;
+    length = 0;
+    
+    while (*(str+length) != 0) {
+        length++;
+    }
+    
+    return length;
+}
+
+char *_strcat(char *dest, char *src) {
+    int dest_len;
+    int i;
+    dest_len = _strlen(dest);
+    
+    for (i = 0; *(src+i) != 0; i++) {
+        *(dest+dest_len + i) = *(src+i);
+    }
+    *(dest+dest_len + i) = 0;
+    
+    return dest;
 }
 
 void scann(int *n){

@@ -133,7 +133,7 @@ char string_table[STRING_TABLE_SIZE][STRING_CONST_SIZE];
 
 typedef struct {
   char func_name[ID_LEN];
-  t_basic_data return_type;
+  t_data return_type;
   char *code_location;
   t_var local_vars[MAX_LOCAL_VARS + 1];
   int local_var_tos;
@@ -263,8 +263,8 @@ char *error_table[] = {
   "invalid expression",
   "invalid argument for the bitwise not operation",
   "while part of do-while loop expected",
-  "duplicate global variable declared",
   "duplicate local variable declared",
+  "duplicate global variable declared",
   "string constant expected",
   "pointer expected",
   "invalid pointer type",
