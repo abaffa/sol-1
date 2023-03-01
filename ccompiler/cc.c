@@ -1488,8 +1488,7 @@ void parse_logical_and(void){
     emitln("  lodflgs");
     emitln("  not al");
     emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
-    emitln("  mov ah, 0");
-    emitln("  mov b, a");
+    emitln("  mov b, a"); // test only al and bl instead? logical operations result in 1bit operands so no point in testing both halves of each register
 
     emitln("  pop a");
     emitln("  and a, b");
