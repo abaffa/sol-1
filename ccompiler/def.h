@@ -317,6 +317,10 @@ char includes_list_asm[1024];         // keeps a list of all included files
 char data_block_asm[1024*10];
 char *data_block_p;
 
+t_break_type current_break_type;      // is it a for, while, or switch?
+t_break_type break_type_stack[64];
+int break_type_tos;
+
 int highest_label_index; // keeps the highest label index and always increases
 int current_label_index_if; 
 int current_label_index_ter; 
@@ -337,10 +341,6 @@ int label_tos_do = 0;
 int label_tos_while = 0;
 int label_tos_switch = 0;
 
-//>>>>> needs to be a stack instead. because we can have whiles inside fors etc
-t_break_type current_break_type;      // is it a for, while, or switch?
-t_break_type break_type_stack[64];
-int break_type_tos;
 
 // functions
 char is_delimiter(char c);
