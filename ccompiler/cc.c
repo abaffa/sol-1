@@ -952,16 +952,17 @@ void parse_switch(void){
   sprintf(s_label, "_switch%d_exit:", current_label_index_switch);
   emitln(s_label);
 
-  label_tos_switch--;
-  current_label_index_switch = label_stack_switch[label_tos_switch];
-  break_type_tos--;
-  current_break_type = break_type_stack[break_type_tos];
   get();
   if(tok == DEFAULT){
     get(); // get ':'
     skip_case();
   }
   if(tok != CLOSING_BRACE) error(CLOSING_BRACE_EXPECTED);
+
+  label_tos_switch--;
+  current_label_index_switch = label_stack_switch[label_tos_switch];
+  break_type_tos--;
+  current_break_type = break_type_stack[break_type_tos];
 }
 
 
