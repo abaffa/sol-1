@@ -5,6 +5,7 @@ int **i[1]={22};
 
 int main() {
   int a;
+  int i,j;
 
   scann(&a);
 
@@ -13,13 +14,13 @@ int main() {
       printn(1);
       break;
     case 2:
-      printn(2);
+      for(i=0;i<10;i++)
+        for(j=0;j<10;j++)
+          printn(2);
       break;
     default:
       printn(99);
   }
-
-
 
   return 0;
 }
