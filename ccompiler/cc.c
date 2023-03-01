@@ -853,7 +853,6 @@ int switch_has_default(void){
   } while(1);
 }
 
-
 void parse_switch(void){
   char s_label[64];
   char s_nextcase[64];
