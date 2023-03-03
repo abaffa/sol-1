@@ -45,7 +45,6 @@ _while1_cond:
   mov b, a
   pop a
   mov d, b
-  mov b, [d]
   push a
   mov a, b
   mov b, 0
@@ -105,7 +104,6 @@ _for2_cond:
   mov b, a
   pop a
   mov d, b
-  mov b, [d]
   push a
   mov a, b
   mov b, 0
@@ -145,7 +143,6 @@ _for2_block:
   mov b, a
   pop a
   mov d, b
-  mov b, [d]
   mov a, b
   mov [d], a
 _for2_update:

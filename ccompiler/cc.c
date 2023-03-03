@@ -1241,7 +1241,7 @@ t_data_type get_var_type(char *var_name){
 }
 
 
-void assign_var(char *var_name){
+void emit_var_assignment(char *var_name){
   int var_id;
   char temp[ID_LEN];
 
@@ -1376,7 +1376,7 @@ t_data parse_assignment(){
 		}
     else if(tok == ASSIGNMENT){
       parse_ternary_op(); // evaluate expression, result in 'b'
-      assign_var(var_name);
+      emit_var_assignment(var_name);
       return;
     }
   }
@@ -1686,7 +1686,7 @@ t_data parse_atom(void){
     sprintf(temp, "_string_%d", string_id);
     emit("  mov b, ");
     emitln(temp);
-    expr_out.type = DT_VOID;
+    expr_out.type = DT_CHAR;
     expr_out.ind_level = 1;
   }
   else if(tok == SIZEOF){
@@ -1709,7 +1709,8 @@ t_data parse_atom(void){
   else if(tok == STAR){ // is a pointer operator
     expr_in = parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
-    if(expr_in.ind_level > 0 || expr_in.type == DT_INT){
+    if(expr_in.ind_level == 0) error(POINTER_EXPECTED);
+    if(expr_in.type == DT_INT){
       emitln("  mov b, [d]"); // fixed: data fetched as an int. need to improve this to allow any types later.
     }
     else if(expr_in.type == DT_CHAR){
@@ -1720,7 +1721,7 @@ t_data parse_atom(void){
     expr_out.type = expr_in.type;
     expr_out.ind_level = expr_in.ind_level - 1;
   }
-  else if(tok == AMPERSAND){
+  else if(tok == AMPERSAND){ // TODO: gather expr type
     get(); // get variable name
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
     if(local_var_exists(token) != -1){ // is a local variable
@@ -1783,14 +1784,18 @@ t_data parse_atom(void){
     strcpy(temp_name, token);
     get();
     if(tok == INCREMENT){ 
-      try_emitting_var(temp_name); // into 'b'
-      emitln("  inc b");
-      assign_var(temp_name);
+      expr_in = try_emitting_var(temp_name); // into 'b'
+      if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  inc b");
+      else emitln("  add bl, 1"); // no 'inc bl' opcode exists
+      emit_var_assignment(temp_name);
+      expr_out =  expr_in;
     }    
     else if(tok == DECREMENT){ 
-      try_emitting_var(temp_name); // into 'b'
-      emitln("  dec b");
-      assign_var(temp_name);
+      expr_in = try_emitting_var(temp_name); // into 'b'
+      if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  dec b");
+      else emitln("  sub bl, 1"); // no 'inc bl' opcode exists
+      emit_var_assignment(temp_name);
+      expr_out =  expr_in;
     }    
     else if(tok == OPENING_PAREN){ // function call      
       func_id = find_function(temp_name);
@@ -1951,9 +1956,10 @@ t_var *get_var_by_name(char *var_name){
   }
 }
 
-void try_emitting_var(char *var_name){
+t_data try_emitting_var(char *var_name){
   int var_id;
   char temp[64];
+  t_data expr_out;
 
   if(local_var_exists(var_name) != -1){ // is a local variable
     var_id = local_var_exists(var_name);
@@ -1964,67 +1970,86 @@ void try_emitting_var(char *var_name){
       emit("  lea d, [");
       get_var_base_addr(temp, var_name);
       emit(temp);
-      emit("]");
-      emit(" ; ");
+      emit("] ; ");
       emitln(var_name);
       emitln("  mov b, [d]");
+      expr_out.type = function_table[current_func_id].local_vars[var_id].data.type;
+      expr_out.ind_level = function_table[current_func_id].local_vars[var_id].data.ind_level + 1; // +1 because a matrix reference is a pointer even though it can have ind_level = 0
     }
     else if(is_matrix(&function_table[current_func_id].local_vars[var_id])){
       emit("  lea d, [");
       get_var_base_addr(temp, var_name);
       emit(temp);
-      emit("]");
-      emit(" ; ");
+      emit("] ; ");
       emit(var_name);
       emitln("_data");
       emitln("  mov b, d");
+      expr_out.type = function_table[current_func_id].local_vars[var_id].data.type;
+      expr_out.ind_level = function_table[current_func_id].local_vars[var_id].data.ind_level + 1; // +1 because a matrix reference is a pointer even though it can have ind_level = 0
     }
     else if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){
       emit("  lea d, [");
       get_var_base_addr(temp, var_name);
       emit(temp);
-      emit("]");
-      emit(" ; ");
+      emit("] ; ");
       emitln(var_name);
       emitln("  mov b, [d]");
+      expr_out.type = function_table[current_func_id].local_vars[var_id].data.type;
+      expr_out.ind_level = function_table[current_func_id].local_vars[var_id].data.ind_level;
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emit("  mov b, [");
       get_var_base_addr(temp, var_name);
       emit(temp);
-      emit("]");
-      emit(" ; ");
+      emit("] ; ");
       emitln(var_name);
+      expr_out.type = DT_INT;
+      expr_out.ind_level = 0;
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
       emit("  mov bl, [");
       get_var_base_addr(temp, var_name);
       emit(temp);
-      emit("]");
-      emit(" ; ");
+      emit("] ; ");
       emitln(var_name);
+      expr_out.type = DT_CHAR;
+      expr_out.ind_level = 0;
     }
   }
   else if(global_var_exists(var_name) != -1){  // is a global variable
     var_id = global_var_exists(var_name);
-    if(global_variables[var_id].data.ind_level > 0
-    || is_matrix(&global_variables[var_id])){
+    if(is_matrix(&global_variables[var_id])){
       emit("  mov b, [");
       emit(global_variables[var_id].var_name);
       emitln("]");
+      expr_out.type = global_variables[var_id].data.type;
+      expr_out.ind_level = global_variables[var_id].data.ind_level + 1;
+    }
+    else if(global_variables[var_id].data.ind_level > 0){
+      emit("  mov b, [");
+      emit(global_variables[var_id].var_name);
+      emitln("]");
+      expr_out.type = global_variables[var_id].data.type;
+      expr_out.ind_level = global_variables[var_id].data.ind_level;
     }
     else if(global_variables[var_id].data.type == DT_INT){
       emit("  mov b, [");
       emit(global_variables[var_id].var_name);
       emitln("]");
+      expr_out.type = global_variables[var_id].data.type;
+      expr_out.ind_level = global_variables[var_id].data.ind_level;
     }
     else if(global_variables[var_id].data.type == DT_CHAR){
       emit("  mov bl, [");
       emit(global_variables[var_id].var_name);
       emitln("]");
+      expr_out.type = global_variables[var_id].data.type;
+      expr_out.ind_level = global_variables[var_id].data.ind_level;
     }
   }
   else error(UNDECLARED_IDENTIFIER);
+
+  return expr_out;
 }
 
 t_var *get_var_pointer(char *var_name){
