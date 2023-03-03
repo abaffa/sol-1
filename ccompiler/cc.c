@@ -1759,17 +1759,24 @@ t_data parse_atom(void){
     expr_out.ind_level = expr_in.ind_level;
   }
   else if(tok == BITWISE_NOT){
-    parse_atom();
-    emitln("  not b");
+    expr_in = parse_atom();
+    if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  not b");
+    else emitln("  not bl");
+    expr_out.type = expr_in.type;
+    expr_out.ind_level = expr_in.ind_level;
     back();
   }
   else if(tok == LOGICAL_NOT){
     parse_atom();
-    emitln("  not b"); // TODO: this is probably wrong
+    if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  not b");
+    else emitln("  not bl");
+    expr_out.type = expr_in.type;
+    expr_out.ind_level = expr_in.ind_level;
     back();
   }
   else if(tok == OPENING_PAREN){
-    parse_expr();  // parses expression between parenthesis and result will be in B
+    expr_in = parse_expr();  // parses expression between parenthesis and result will be in B
+    expr_out = expr_in;
     if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   }
   else if(tok_type == IDENTIFIER){
