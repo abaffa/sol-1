@@ -1,4 +1,4 @@
-#include "lib/stdio.asm"
+#inc_asm "lib/stdio.asm"
 
 char *s = "Enter the number of rows: ";
 char *ss = "     ";

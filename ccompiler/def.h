@@ -56,23 +56,13 @@ typedef enum {
 } t_token_type;
 t_token_type tok_type;
 
-typedef enum {
-  JF_NULL, 
-  JF_BREAK, 
-  JF_CONTINUE, 
-  JF_RETURN
-} t_jump_flag;
-
 typedef union {
   char c;
-  short int shortint;
+  int i;
   short int p; // pointer value. 2 bytes since Sol-1 integers/pointers are 2 bytes long
-  //int i;
-  long int longint;
-  long long int longlongint;
+  long int li;
   float f;
   double d;
-  long double longdouble;
 } t_value;
 
 typedef struct{
@@ -87,40 +77,27 @@ t_enum enum_table[MAX_ENUM_DECLARATIONS];
 // basic data types
 typedef enum {
   DT_VOID = 1, DT_CHAR, DT_INT, DT_FLOAT, DT_DOUBLE, DT_STRUCT
-} t_basic_data;
+} t_data_type;
 
 typedef enum {
-  mSIGNED = 1, mUNSIGNED, mSHORT, mLONG
+  MOD_SIGNED = 1, MOD_UNSIGNED, MOD_SHORT, MOD_LONG
 } t_modifier;
 
 typedef struct {
-  t_basic_data type;
+  t_data_type type;
   t_modifier smodf, lmodf, modf3;
   t_value value;
   int ind_level; // holds the pointer indirection level
 } t_data;
 
 typedef struct {
-  char *str;
-  t_data data;
-} t_const;
-
-typedef union{
-  char string[1024]; // also used if data is a single char. use string[0] then
-  short int shortint[512];
-  short int p[512];
-} t_initial_value;
-
-typedef struct {
   char var_name[ID_LEN];
   t_data data; // holds the type of data and the value itself
   char is_parameter;
   int dims[MAX_MATRIX_DIMS + 1];
-  char constant;
-  t_initial_value initial_val;
-  int nbr_initial_values;
+  char constant; // is it a constant?
   int bp_offset; // if var is local, this holds the offset of the var from BP.
-  int function_id; // the function does this local var belong to
+  int function_id; // the function does var belong to? (if it is a local var)
 } t_var;
 t_var global_variables[MAX_GLOBAL_VARS];
 
@@ -128,8 +105,6 @@ struct{
   char name[ID_LEN];
   char content[256];
 } defines_table[MAX_DEFINES];
-
-char string_table[STRING_TABLE_SIZE][STRING_CONST_SIZE];
 
 typedef struct {
   char func_name[ID_LEN];
@@ -296,6 +271,8 @@ char *error_table[] = {
   "Unknown data type in array initialization"
 };
 
+char string_table[STRING_TABLE_SIZE][STRING_CONST_SIZE];
+
 int current_function_var_bp_offset;  // this is used to position local variables correctly relative to BP.
 int current_func_id;
 int function_table_tos;
@@ -367,37 +344,38 @@ void emitln(char *p);
 void emit_c_var(char *var_name);
 void emit_data(char *data);
 void emit_data_block();
-void emit_data_dbdw(int ind_level, int dims, t_basic_data dt);
+void emit_data_dbdw(int ind_level, int dims, t_data_type dt);
 void emit_string_table_data(void);
 
 void skip_statements(void);
 void skip_block(void);
 void skip_case(void);
 
-void parse_expr();
-void parse_assignment();
-void parse_logical(void);
-void parse_logical_and(void);
-void parse_logical_or(void);
-void parse_bitwise_and(void);
-void parse_bitwise_or(void);
-void parse_bitwise_xor(void);
-void parse_relational(void);
-void parse_bitwise_shift(void);
-void parse_terms();
-void parse_factors();
-void parse_atom();
-void parse_return(void);
+t_data parse_expr();
+t_data parse_assignment();
+t_data parse_ternary_op(void);
+t_data parse_logical(void);
+t_data parse_logical_and(void);
+t_data parse_logical_or(void);
+t_data parse_bitwise_and(void);
+t_data parse_bitwise_or(void);
+t_data parse_bitwise_xor(void);
+t_data parse_relational(void);
+t_data parse_bitwise_shift(void);
+t_data parse_terms();
+t_data parse_factors();
+t_data parse_atom();
 
 int count_cases(void);
 void parse_case(void);
 void parse_block(void);
 void parse_functions(void);
 void parse_main(void);
+void parse_return(void);
 
-void convert_data(t_data *data_to_convert, t_basic_data into_type);
+void convert_data(t_data *data_to_convert, t_data_type into_type);
 
-t_basic_data get_var_type(char *var_name);
+t_data_type get_var_type(char *var_name);
 
 void parse_directive(void);
 
@@ -405,17 +383,16 @@ void generate_file(char *filename);
 
 void parse_for(void);
 void parse_if(void);
-void parse_ternary_op(void);
 void parse_switch(void);
 void parse_while(void);
 void parse_do(void);
 void parse_break(void);
 void parse_case_break(void);
-int switch_has_default(void);
 void parse_while_break(void);
 void parse_do_break(void);
 void parse_for_break(void);
 void parse_asm(void);
+int switch_has_default(void);
 
 
 void parse_function_arguments(int func_index);
@@ -440,7 +417,7 @@ void try_emitting_var(char *var_name);
 t_var_scope get_var_scope(char *var_name);
 t_var *get_var_by_name(char *var_name);
 int get_param_size(void);
-t_basic_data get_data_type_from_tok(t_token t);
+t_data_type get_data_type_from_tok(t_token t);
 void assign_var(char *var_name);
 void skip_matrix_bracket(void);
 
@@ -455,3 +432,4 @@ int find_define(char *name);
 void include_asm_lib(char *lib_name);
 
 void optimize(void);
+int find_string(char *str);

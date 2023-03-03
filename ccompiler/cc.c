@@ -6,7 +6,9 @@
 
 /* 
   TODO:
-    fix logical value comparisons: remove ah half
+    * fix logical value comparisons: remove ah half
+    * add data types to expressions as return values
+    * add automatic return to function ends when final } met
 */
 
 int main(int argc, char *argv[]){
@@ -332,7 +334,7 @@ void pre_scan(void){
 
 void declare_func(void){
   t_user_func *func; // variable to hold a pointer to the user function top of stack
-  t_basic_data param_data_type; // function data type
+  t_data_type param_data_type; // function data type
   int bp_offset; // for each parameter, keep the running offset of that parameter.
   char *temp_prog, *temp_prog2;
   int total_parameter_bytes;
@@ -1224,9 +1226,7 @@ void skip_matrix_bracket(void){
 }
 
 
-
-
-t_basic_data get_var_type(char *var_name){
+t_data_type get_var_type(char *var_name){
   register int i;
 
   for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
@@ -1238,59 +1238,6 @@ t_basic_data get_var_type(char *var_name){
       return global_variables[i].data.type;
 
   error(UNDECLARED_VARIABLE);
-}
-
-
-
-
-
-void parse_expr(){
-  parse_assignment();
-}
-
-// A = cond1 ? true_val : false_val;
-void parse_ternary_op(void){
-  char s_label[64];
-  char *temp_prog;
-  char *temp_asm_p;
-
-  temp_prog = prog;
-  temp_asm_p = asm_p; // save current assembly output pointer
-  sprintf(s_label, "_ternary%d_cond:", highest_label_index + 1); // +1 because we are emitting the label ahead
-  emitln(s_label);
-  parse_logical(); // evaluate condition
-  if(tok != TERNARY_OP){
-    prog = temp_prog;
-    asm_p = temp_asm_p; // recover asm output pointer
-    parse_logical();
-    return;
-  }
-
-  // '?' was found
-  highest_label_index++;
-  label_stack_ter[label_tos_ter] = current_label_index_ter;
-  label_tos_ter++;
-  current_label_index_ter = highest_label_index;
-  emitln("  cmp b, 0");
-  
-  sprintf(s_label, "  je _ternary%d_false", current_label_index_ter);
-  emitln(s_label);
-
-  sprintf(s_label, "_ternary%d_true:", current_label_index_ter);
-  emitln(s_label);
-  parse_ternary_op(); // result in 'b'
-  if(tok != COLON) error(COLON_EXPECTED);
-  sprintf(s_label, "  jmp _ternary%d_exit", current_label_index_ter);
-  emitln(s_label);
-  sprintf(s_label, "_ternary%d_false:", current_label_index_ter);
-  emitln(s_label);
-
-  parse_ternary_op(); // result in 'b'
-  sprintf(s_label, "_ternary%d_exit:", current_label_index_ter);
-  emitln(s_label);
-
-  label_tos_ter--;
-  current_label_index_ter = label_stack_ter[label_tos_ter];
 }
 
 
@@ -1345,7 +1292,14 @@ void assign_var(char *var_name){
   else error(UNDECLARED_VARIABLE);
 }
 
-void parse_assignment(){
+
+t_data parse_expr(){
+  t_data ret;
+  ret = parse_assignment();
+}
+
+
+t_data parse_assignment(){
   char var_name[ID_LEN];
   char temp[ID_LEN];
   char *temp_prog;
@@ -1455,11 +1409,58 @@ void parse_assignment(){
 }
 
 
-void parse_logical(void){
+// A = cond1 ? true_val : false_val;
+t_data parse_ternary_op(void){
+  char s_label[64];
+  char *temp_prog;
+  char *temp_asm_p;
+
+  temp_prog = prog;
+  temp_asm_p = asm_p; // save current assembly output pointer
+  sprintf(s_label, "_ternary%d_cond:", highest_label_index + 1); // +1 because we are emitting the label ahead
+  emitln(s_label);
+  parse_logical(); // evaluate condition
+  if(tok != TERNARY_OP){
+    prog = temp_prog;
+    asm_p = temp_asm_p; // recover asm output pointer
+    parse_logical();
+    return;
+  }
+
+  // '?' was found
+  highest_label_index++;
+  label_stack_ter[label_tos_ter] = current_label_index_ter;
+  label_tos_ter++;
+  current_label_index_ter = highest_label_index;
+  emitln("  cmp b, 0");
+  
+  sprintf(s_label, "  je _ternary%d_false", current_label_index_ter);
+  emitln(s_label);
+
+  sprintf(s_label, "_ternary%d_true:", current_label_index_ter);
+  emitln(s_label);
+  parse_ternary_op(); // result in 'b'
+  if(tok != COLON) error(COLON_EXPECTED);
+  sprintf(s_label, "  jmp _ternary%d_exit", current_label_index_ter);
+  emitln(s_label);
+  sprintf(s_label, "_ternary%d_false:", current_label_index_ter);
+  emitln(s_label);
+
+  parse_ternary_op(); // result in 'b'
+  sprintf(s_label, "_ternary%d_exit:", current_label_index_ter);
+  emitln(s_label);
+
+  label_tos_ter--;
+  current_label_index_ter = label_stack_ter[label_tos_ter];
+}
+
+
+t_data parse_logical(void){
   parse_logical_or();
 }
 
-void parse_logical_or(void){
+
+t_data parse_logical_or(void){
   char temp_tok;
 
   parse_logical_and();
@@ -1474,7 +1475,8 @@ void parse_logical_or(void){
   }
 }
 
-void parse_logical_and(void){
+
+t_data parse_logical_and(void){
   char temp_tok;
 
   parse_bitwise_or();
@@ -1487,21 +1489,22 @@ void parse_logical_and(void){
     emitln("  not al");
     emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
     parse_bitwise_or();
-    emitln("  push a");
+    emitln("  push al");
     emitln("  cmp b, 0");
     emitln("  lodflgs");
     emitln("  not al");
     emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
-    emitln("  mov b, a"); // test only al and bl instead? logical operations result in 1bit operands so no point in testing both halves of each register
 
-    emitln("  pop a");
-    emitln("  and a, b");
-    emitln("  mov b, a");
+    emitln("  pop bl"); // popping into bl rather than al so we don't need an extra 'mov bl, al'
+    emitln("  and al, bl");
+    emitln("  mov bl, al");
+    emitln("  mov bh, 0");  // bh needs to be set to 0 since the logical result still needs to be 16bit 
+                            //(an if/while/do/for condition always tests whether a whole 16bit number could be 0 or 1, since conditions can be 16bit numbers as well)
     emitln("  pop a");
   }
 }
 
-void parse_bitwise_or(void){
+t_data parse_bitwise_or(void){
   char temp_tok;
 
   parse_bitwise_xor();
@@ -1515,7 +1518,7 @@ void parse_bitwise_or(void){
   }
 }
 
-void parse_bitwise_xor(void){
+t_data parse_bitwise_xor(void){
   char temp_tok;
 
   parse_bitwise_and();
@@ -1530,7 +1533,7 @@ void parse_bitwise_xor(void){
   }
 }
 
-void parse_bitwise_and(void){
+t_data parse_bitwise_and(void){
   char temp_tok;
 
   parse_relational();
@@ -1545,7 +1548,7 @@ void parse_bitwise_and(void){
 }
 
 
-void parse_relational(void){
+t_data parse_relational(void){
   char temp_tok;
 
 /* x = y > 1 && z<4 && y == 2 */
@@ -1603,7 +1606,7 @@ void parse_relational(void){
   }
 }
 
-void parse_bitwise_shift(void){
+t_data parse_bitwise_shift(void){
   char temp_tok;
 
   parse_terms();
@@ -1612,7 +1615,7 @@ void parse_bitwise_shift(void){
     emitln("  push a");
     emitln("  mov a, b");
     parse_terms();
-    emitln("  mov c, b");
+    emitln("  mov cl, bl"); // only using bl since shifts only use cl
     emitln("  mov b, a");
     if(temp_tok == BITWISE_SHL) emitln("  shl b, cl");
     else if(temp_tok == BITWISE_SHR) emitln("  shr b, cl");
@@ -1621,7 +1624,7 @@ void parse_bitwise_shift(void){
 }
 
 
-void parse_terms(void){
+t_data parse_terms(void){
   char temp_tok;
   
   parse_factors();
@@ -1638,7 +1641,7 @@ void parse_terms(void){
 }
 
 
-void parse_factors(void){
+t_data parse_factors(void){
   char temp_tok;
 
   parse_atom();
@@ -1663,46 +1666,8 @@ void parse_factors(void){
   }
 }
 
-unsigned int add_string_data(char *str){
-  int i;
-  char temp[256];
 
-  for(i = 0; i < STRING_TABLE_SIZE; i++){
-    if(!string_table[i][0]){
-      strcpy(string_table[i], str);
-      return i;
-    }
-  }
-
-  error(MAX_STRINGS);
-}
-
-void emit_string_table_data(void){
-  int i;
-  char temp[256];
-
-  for(i = 0; string_table[i][0]; i++){
-      // emit the declaration of this string, into the data block
-      sprintf(temp, "_string_%d", i);
-      emit_data(temp);
-      emit_data(": .db \"");
-      emit_data(string_table[i]);
-      emit_data("\", 0\n");
-    }
-}
-
-int find_string(char *str){
-  int i;
-
-  for(i = 0; i < STRING_TABLE_SIZE; i++){
-    if(!strcmp(string_table[i], str)){
-      return i;
-    }
-  }
-  return -1;
-}
-
-void parse_atom(void){
+t_data parse_atom(void){
   int var_id;
   int func_id;
   int string_id;
@@ -1874,6 +1839,44 @@ void parse_atom(void){
   get(); // gets the next token (it must be a delimiter)
 }
 
+unsigned int add_string_data(char *str){
+  int i;
+  char temp[256];
+
+  for(i = 0; i < STRING_TABLE_SIZE; i++){
+    if(!string_table[i][0]){
+      strcpy(string_table[i], str);
+      return i;
+    }
+  }
+
+  error(MAX_STRINGS);
+}
+
+void emit_string_table_data(void){
+  int i;
+  char temp[256];
+
+  for(i = 0; string_table[i][0]; i++){
+      // emit the declaration of this string, into the data block
+      sprintf(temp, "_string_%d", i);
+      emit_data(temp);
+      emit_data(": .db \"");
+      emit_data(string_table[i]);
+      emit_data("\", 0\n");
+    }
+}
+
+int find_string(char *str){
+  int i;
+
+  for(i = 0; i < STRING_TABLE_SIZE; i++){
+    if(!strcmp(string_table[i], str)){
+      return i;
+    }
+  }
+  return -1;
+}
 t_var_scope get_var_scope(char *var_name){
   int var_id;
 
@@ -2162,7 +2165,7 @@ int get_enum_val(char *element_name){
 
 
 void declare_global(void){
-  t_basic_data dt;
+  t_data_type dt;
   int ind_level;
   char constant = 0;
   char temp[512 + 8];
@@ -2235,7 +2238,7 @@ void declare_global(void){
             emit_data(temp);
           }
           else if(tok_type == INTEGER_CONST){
-            sprintf(temp, "%u, ", (char)atoi(token));
+            sprintf(temp, "%u,", (char)atoi(token));
             emit_data(temp);
           }
           else if(tok_type == STRING_CONST){
@@ -2257,7 +2260,6 @@ void declare_global(void){
         emit_data(temp);
         sprintf(temp, "%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
         emit_data(temp);
-        global_variables[global_var_tos].nbr_initial_values = j;
         expect(CLOSING_BRACE, CLOSING_BRACE_EXPECTED);
       }
       else{
@@ -2330,7 +2332,7 @@ void declare_global(void){
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
 }
 
-void emit_data_dbdw(int ind_level, int dims, t_basic_data dt){
+void emit_data_dbdw(int ind_level, int dims, t_data_type dt){
   if(ind_level > 0 && dt == DT_CHAR && dims == 0
     || ind_level == 0 && dt == DT_CHAR && dims == 0){ 
     emit_data(".db ");
@@ -2385,7 +2387,7 @@ int local_var_exists(char *var_name){
 
 
 
-t_basic_data get_data_type_from_tok(t_token t){
+t_data_type get_data_type_from_tok(t_token t){
   switch(t){
     case VOID:
       return DT_VOID;
@@ -2401,7 +2403,7 @@ t_basic_data get_data_type_from_tok(t_token t){
 }
 
 void declare_local(void){                        
-  t_basic_data dt;
+  t_data_type dt;
   t_var new_var;
   char *temp_prog;
   

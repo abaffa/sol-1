@@ -1,4 +1,5 @@
-#include "lib/stdio.asm"
+#inc_asm "lib/stdio.asm"
+
 char *s= "Enter a positive integer: ";
 char *s2= "Factors are: ";
 char *nl = "\n";

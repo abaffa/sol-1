@@ -1,7 +1,7 @@
 //#include "lib/stdio.asm"
 #include <stdio.h>
 
-#define SIZE 37
+#define SIZE 100
 
 // Global arrays to hold the current and next states of the game grid
 int curr_state[SIZE][SIZE] ={
