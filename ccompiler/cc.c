@@ -1675,6 +1675,8 @@ t_data parse_atom(void){
   char temp[1024];
   char var_address_str[32];
   char enum_value_str[32];
+  t_data expr_in;
+  t_data expr_out;
  
   get();
   if(tok_type == STRING_CONST){
@@ -1684,6 +1686,8 @@ t_data parse_atom(void){
     sprintf(temp, "_string_%d", string_id);
     emit("  mov b, ");
     emitln(temp);
+    expr_out.type = DT_VOID;
+    expr_out.ind_level = 1;
   }
   else if(tok == SIZEOF){
     get();
@@ -1698,14 +1702,23 @@ t_data parse_atom(void){
         break;
     }
     get();
+    expr_out.type = DT_INT;
+    expr_out.ind_level = 0;
     expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
   }
   else if(tok == STAR){ // is a pointer operator
-    parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
+    expr_in = parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
-    emitln("  mov b, [d]"); // data fetched as an int. need to improve this to allow any types later.
+    if(expr_in.ind_level > 0 || expr_in.type == DT_INT){
+      emitln("  mov b, [d]"); // fixed: data fetched as an int. need to improve this to allow any types later.
+    }
+    else if(expr_in.type == DT_CHAR){
+      emitln("  mov bl, [d]"); // fixed: data fetched as an int. need to improve this to allow any types later.
+    }
     //need to PARSE VARIABLE HERE TO SEE IF IS LOCAL OR GLOBAL SO THAT WE CAN SWP OR NOT
     back();
+    expr_out.type = expr_in.type;
+    expr_out.ind_level = expr_in.ind_level - 1;
   }
   else if(tok == AMPERSAND){
     get(); // get variable name
@@ -1727,16 +1740,23 @@ t_data parse_atom(void){
   else if(tok_type == INTEGER_CONST){
     emit("  mov b, ");
     emitln(token);
+    expr_out.type = DT_INT;
+    expr_out.ind_level = 0;
   }
   else if(tok_type == CHAR_CONST){
     emit("  mov bl, ");
     emitln(token);
+    expr_out.type = DT_CHAR;
+    expr_out.ind_level = 0;
     //emitln("  mov bh, 0"); // not sure why i set bh to 0 here, but removing as doesnt seem to be needed
   }
   else if(tok == MINUS){
-    parse_atom();
-    emitln("  neg b");
+    expr_in = parse_atom(); // TODO: add error if type is pointer since cant neg a pointer?
+    if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  neg b");
+    else emitln("  neg bl");
     back();
+    expr_out.type = expr_in.type;
+    expr_out.ind_level = expr_in.ind_level;
   }
   else if(tok == BITWISE_NOT){
     parse_atom();
@@ -1837,6 +1857,8 @@ t_data parse_atom(void){
   else error(INVALID_EXPRESSION);
 
   get(); // gets the next token (it must be a delimiter)
+
+  return expr_out;
 }
 
 unsigned int add_string_data(char *str){
