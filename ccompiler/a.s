@@ -105,6 +105,7 @@ _for2_cond:
   mov b, a
   pop a
   mov d, b
+  mov b, [d]
   push a
   mov a, b
   mov b, 0
