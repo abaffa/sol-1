@@ -2,28 +2,22 @@
 
 char s1[50] = {'H','e','l','l','o',0};
 char *s2 = ". My name is Sol-1.";
-char **p;
 
-int main() {
+void main() {
 
- // _strcat(s1, s2);
-    *p = 1;
+ //_strcat(s1, s2);
   //printn(_strlen(s1));
 
-  return 0;
+  return;
 }
 
 int _strlen(char *str) {
     int length;
-    length = 0;
     
-    while (*(str+length) != 0) {
-        length++;
-    }
+    *str;
     
-    return length;
 }
-
+/*
 char *_strcat(char *dest, char *src) {
     int dest_len;
     int i;
@@ -36,34 +30,7 @@ char *_strcat(char *dest, char *src) {
     
     return dest;
 }
-
-void scann(int *n){
-  int m;
-  asm{
-    call scan_u16d
-    mov @m, a
-  }
-  *n = m;
-  return;
-}
-
-
-void printn(int n){
-  asm{
-    mov a, @n
-    call print_u16d
-  }
-  return;
-}
-
-void print(char *s){
-    asm{
-        mov a, @s
-        mov d, a
-        call puts
-    }
-    return;
-}
+*/
 
 
 

@@ -1337,7 +1337,7 @@ t_data parse_assignment(){
       matrix = get_var_pointer(var_name); // gets a pointer to the variable holding the matrix address
       data_size = get_data_size(&matrix->data);
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      try_emitting_var(var_name); // emit the base address of the matrix or pointer
+      expr_out = try_emitting_var(var_name); // emit the base address of the matrix or pointer
       emitln("  mov d, b");
       for(i = 0; i < dims; i++){
         parse_ternary_op(); // result in 'b'
@@ -1348,6 +1348,7 @@ t_data parse_assignment(){
           emitln(asm_line);
           emitln("  mul a, b");
           emitln("  add d, b");
+          expr_out.ind_level--;
         }
         // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
         else if(i == dims - 1){
@@ -1377,7 +1378,7 @@ t_data parse_assignment(){
         emitln("  mov al, bl");
         emitln("  mov [d], al");
       }
-      return;
+      return expr_out;
     }
     else if(tok == ASSIGNMENT){
       expr_out = parse_ternary_op(); // evaluate expression, result in 'b'
@@ -1392,7 +1393,7 @@ t_data parse_assignment(){
       if(tok == ASSIGNMENT){ // is an assignemnt
         prog = temp_prog; // goes back to the beginning of the expression
         get(); // gets past the first asterisk
-        parse_atom();
+        expr_out = parse_atom();
         emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'd'
         // after evaluating the address expression, the token will be a "="
         parse_ternary_op(); // evaluates the value to be assigned to the address, result in 'b'
@@ -1407,7 +1408,8 @@ t_data parse_assignment(){
             break;
           default: error(INVALID_POINTER);
         }
-        return;
+        expr_out.ind_level--;
+        return expr_out;
       }
     }
   }
@@ -1699,6 +1701,7 @@ t_data parse_terms(void){
     emitln("  pop a");
   }
   expr_out = cast(data1, data2);
+    printf("TERMS: ind_level: %d, type: %d\n", expr_out.ind_level, expr_out.type);
   return expr_out;
 }
 
@@ -1730,7 +1733,10 @@ t_data parse_factors(void){
     }
     emitln("  pop a");
   }
+    printf("FACT data1: ind_level: %d, type: %d\n", data1.ind_level, data1.type);
+    printf("FACT data2: ind_level: %d, type: %d\n", data2.ind_level, data2.type);
   expr_out = cast(data1, data2);
+    printf("FACT CAST: ind_level: %d, type: %d\n", expr_out.ind_level, expr_out.type);
   return expr_out;
 }
 
@@ -1775,14 +1781,16 @@ t_data parse_atom(void){
     expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
   }
   else if(tok == STAR){ // is a pointer operator
+    emitln("; TEST");
     expr_in = parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
+    printf("STAR: ind_level: %d, type: %d\n", expr_in.ind_level, expr_in.type);
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
     if(expr_in.ind_level == 0) error(POINTER_EXPECTED);
-    if(expr_in.type == DT_INT){
-      emitln("  mov b, [d]"); // fixed: data fetched as an int. need to improve this to allow any types later.
+    if(expr_in.type == DT_INT || expr_in.ind_level > 1){
+      emitln("  mov b, [d]"); 
     }
     else if(expr_in.type == DT_CHAR){
-      emitln("  mov bl, [d]"); // fixed: data fetched as an int. need to improve this to allow any types later.
+      emitln("  mov bl, [d]"); 
       emitln("  mov bh, 0");
     }
     //need to PARSE VARIABLE HERE TO SEE IF IS LOCAL OR GLOBAL SO THAT WE CAN SWP OR NOT
@@ -1852,6 +1860,7 @@ t_data parse_atom(void){
   else if(tok == OPENING_PAREN){
     expr_in = parse_expr();  // parses expression between parenthesis and result will be in B
     expr_out = expr_in;
+    printf("PAREN: ind:%u, type:%u\n", expr_in.ind_level, expr_in.type);
     if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   }
   else if(tok_type == IDENTIFIER){
@@ -1942,6 +1951,7 @@ t_data parse_atom(void){
     }
     else{
       back();
+      puts("IDENTIFIER!!!!!!!!!!!!!!");
       expr_in = try_emitting_var(temp_name);
       expr_out = expr_in;
     }
@@ -1955,9 +1965,9 @@ t_data parse_atom(void){
 
 
 t_data cast(t_data t1, t_data t2){
-  char *ss;
   t_data data;
 // TODO: check for matrix type
+          printf("T1 IND: %d\n", t1.ind_level);
   switch(t1.type){
     case DT_CHAR:
       switch(t2.type){
