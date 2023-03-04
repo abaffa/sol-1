@@ -1625,13 +1625,15 @@ t_data parse_bitwise_shift(void){
 
 t_data parse_terms(void){
   char temp_tok;
+  t_data fact1, fact2, expr_out;
   
-  parse_factors();
+  fact1 = parse_factors();
   while(tok == PLUS || tok == MINUS){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
-    parse_factors();
+    fact2 = parse_factors();
+// better treat chars in atom() as integers (mov bh, 0), otherwise conversion from char to int will require more assembly to do it and its less efficient then
     if(temp_tok == PLUS) emitln("  add a, b");
     else if(temp_tok == MINUS) emitln("  sub a, b");
     emitln("  mov b, a");
