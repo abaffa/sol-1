@@ -6,7 +6,7 @@ char *s2 = ". My name is Sol-1.";
 int main() {
 
  // _strcat(s1, s2);
-
+    *s2 = 1;
   printn(_strlen(s1));
 
   return 0;
