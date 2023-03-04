@@ -433,3 +433,4 @@ void include_asm_lib(char *lib_name);
 
 void optimize(void);
 int find_string(char *str);
+t_data cast(t_data t1, t_data t2);

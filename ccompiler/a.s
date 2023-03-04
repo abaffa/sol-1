@@ -21,18 +21,18 @@ main:
 _strlen:
   push bp
   mov bp, sp
-  sub sp, 1 ; length
+  sub sp, 2 ; length
   mov b, 0
-  push al
-  mov al, bl
-  mov [bp + 0], al ; length
-  pop al
+  push a
+  mov a, b
+  mov [bp + -1], a ; length
+  pop a
 _while1_cond:
   lea d, [bp + 5] ; str
   mov b, [d]
   push a
   mov a, b
-  mov bl, [bp + 0] ; length
+  mov b, [bp + -1] ; length
   add a, b
   mov b, a
   pop a
@@ -54,15 +54,15 @@ _while1_cond:
   cmp b, 0
   je _while1_exit
 _while1_block:
-  mov bl, [bp + 0] ; length
-  add bl, 1
-  push al
-  mov al, bl
-  mov [bp + 0], al ; length
-  pop al
+  mov b, [bp + -1] ; length
+  inc b
+  push a
+  mov a, b
+  mov [bp + -1], a ; length
+  pop a
   jmp _while1_cond
 _while1_exit:
-  mov bl, [bp + 0] ; length
+  mov b, [bp + -1] ; length
   leave
   ret
 _strcat:
@@ -96,6 +96,8 @@ _for2_cond:
   mov b, a
   pop a
   mov d, b
+  mov bl, [d]
+  mov bh, 0
   push a
   mov a, b
   mov b, 0

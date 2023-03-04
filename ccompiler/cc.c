@@ -9,7 +9,14 @@
     * fix logical value comparisons: remove ah half
     * add data types to expressions as return values
     * add automatic return to function ends when final } met
+
+  COMMENTS:
+    for char data types, we still put them in a 16bit register.
+    if the data type is char, then we just make the high byte of the register = 0
+    this makes it easier in places where matrices or pointers are used to dereference chars,
+    specially when they are used in conditional expressions such as in while loops
 */
+
 
 int main(int argc, char *argv[]){
   char header[256];
@@ -1294,8 +1301,7 @@ void emit_var_assignment(char *var_name){
 
 
 t_data parse_expr(){
-  t_data ret;
-  ret = parse_assignment();
+  return parse_assignment();
 }
 
 
@@ -1324,20 +1330,20 @@ t_data parse_assignment(){
     strcpy(var_name, token);
     get();
     if(tok == OPENING_BRACKET){ // matrix operations
-			t_var *matrix; // pointer to the matrix variable
-			int i;
+      t_var *matrix; // pointer to the matrix variable
+      int i;
       int data_size; // matrix data size
-			int dims;
-			matrix = get_var_pointer(var_name); // gets a pointer to the variable holding the matrix address
-			data_size = get_data_size(&matrix->data);
-			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
+      int dims;
+      matrix = get_var_pointer(var_name); // gets a pointer to the variable holding the matrix address
+      data_size = get_data_size(&matrix->data);
+      dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
       try_emitting_var(var_name); // emit the base address of the matrix or pointer
       emitln("  mov d, b");
-			for(i = 0; i < dims; i++){
+      for(i = 0; i < dims; i++){
         parse_ternary_op(); // result in 'b'
-				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
-				// if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
-				if(i < dims - 1){
+        if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+        // if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
+        if(i < dims - 1){
           sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix) * data_size);
           emitln(asm_line);
           emitln("  mul a, b");
@@ -1355,10 +1361,10 @@ t_data parse_assignment(){
           // the code is similar to the matrix handling code in parse_atom,
           // except that the corresponding section which would be hereis deleted
           // since we only need the address and not the value at this matrix position.
-			  }
-				get();
-				if(tok != OPENING_BRACKET) break;
-			}
+        }
+        get();
+        if(tok != OPENING_BRACKET) break;
+      }
       // we are past the '=' sign here
       emitln("  push d"); // save 'd' in the stack (which contains the variable address), since the RHS expression could use 'd'
       parse_ternary_op(); // evaluate expression, result in 'b'
@@ -1372,11 +1378,11 @@ t_data parse_assignment(){
         emitln("  mov [d], al");
       }
       return;
-		}
+    }
     else if(tok == ASSIGNMENT){
-      parse_ternary_op(); // evaluate expression, result in 'b'
+      expr_out = parse_ternary_op(); // evaluate expression, result in 'b'
       emit_var_assignment(var_name);
-      return;
+      return expr_out;
     }
   }
   else if(tok == STAR){ // tests if this is a pointer assignment
@@ -1387,7 +1393,7 @@ t_data parse_assignment(){
         prog = temp_prog; // goes back to the beginning of the expression
         get(); // gets past the first asterisk
         parse_atom();
-        emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'a'
+        emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'd'
         // after evaluating the address expression, the token will be a "="
         parse_ternary_op(); // evaluates the value to be assigned to the address, result in 'b'
         switch(get_var_type(var_name)){
@@ -1413,6 +1419,7 @@ t_data parse_ternary_op(void){
   char s_label[64];
   char *temp_prog;
   char *temp_asm_p;
+  t_data data1, data2, expr_out;
 
   temp_prog = prog;
   temp_asm_p = asm_p; // save current assembly output pointer
@@ -1422,8 +1429,7 @@ t_data parse_ternary_op(void){
   if(tok != TERNARY_OP){
     prog = temp_prog;
     asm_p = temp_asm_p; // recover asm output pointer
-    parse_logical();
-    return;
+    return parse_logical();
   }
 
   // '?' was found
@@ -1438,219 +1444,278 @@ t_data parse_ternary_op(void){
 
   sprintf(s_label, "_ternary%d_true:", current_label_index_ter);
   emitln(s_label);
-  parse_ternary_op(); // result in 'b'
+  data1 = parse_ternary_op(); // result in 'b'
   if(tok != COLON) error(COLON_EXPECTED);
   sprintf(s_label, "  jmp _ternary%d_exit", current_label_index_ter);
   emitln(s_label);
   sprintf(s_label, "_ternary%d_false:", current_label_index_ter);
   emitln(s_label);
 
-  parse_ternary_op(); // result in 'b'
+  data2 = parse_ternary_op(); // result in 'b'
   sprintf(s_label, "_ternary%d_exit:", current_label_index_ter);
   emitln(s_label);
 
   label_tos_ter--;
   current_label_index_ter = label_stack_ter[label_tos_ter];
+
+  expr_out = cast(data1, data2);
+  return expr_out;
 }
 
 
 t_data parse_logical(void){
-  parse_logical_or();
+  return parse_logical_or();
 }
 
 
 t_data parse_logical_or(void){
   char temp_tok;
+  t_data data1, data2, expr_out;
 
-  parse_logical_and();
-  while(tok == LOGICAL_OR){
-    temp_tok = tok;
-    emitln("  push a");
-    emitln("  mov a, b");
-    parse_logical_and();
-    emitln("  or a, b");
-    emitln("  mov b, a");
-    emitln("  pop a");
+  data1 = parse_logical_and();
+  if(tok == LOGICAL_OR){
+    while(tok == LOGICAL_OR){
+      temp_tok = tok;
+      emitln("  push a");
+      emitln("  mov a, b");
+      data2 = parse_logical_and();
+      emitln("  or a, b");
+      emitln("  mov b, a");
+      emitln("  pop a");
+    }
+    expr_out.ind_level = 0; // if is a logical operation then result is an integer with ind_level = 0
+    expr_out.type = DT_INT;
   }
+  else{
+    expr_out.type = data1.type;
+    expr_out.ind_level = data1.ind_level;
+  }
+  return expr_out;
 }
 
 
 t_data parse_logical_and(void){
   char temp_tok;
+  t_data data1, data2, expr_out;
 
-  parse_bitwise_or();
-  while(tok == LOGICAL_AND){
-    temp_tok = tok;
-    emitln("  push a");
-    emitln("  mov a, b");
-    emitln("  cmp a, 0");
-    emitln("  lodflgs");
-    emitln("  not al");
-    emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
-    parse_bitwise_or();
-    emitln("  push al");
-    emitln("  cmp b, 0");
-    emitln("  lodflgs");
-    emitln("  not al");
-    emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
+  data1 = parse_bitwise_or();
+  if(tok == LOGICAL_AND){
+    while(tok == LOGICAL_AND){
+      temp_tok = tok;
+      emitln("  push a");
+      emitln("  mov a, b");
+      emitln("  cmp a, 0");
+      emitln("  lodflgs");
+      emitln("  not al");
+      emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
+      data2 = parse_bitwise_or();
+      emitln("  push al");
+      emitln("  cmp b, 0");
+      emitln("  lodflgs");
+      emitln("  not al");
+      emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
 
-    emitln("  pop bl"); // popping into bl rather than al so we don't need an extra 'mov bl, al'
-    emitln("  and al, bl");
-    emitln("  mov bl, al");
-    emitln("  mov bh, 0");  // bh needs to be set to 0 since the logical result still needs to be 16bit 
-                            //(an if/while/do/for condition always tests whether a whole 16bit number could be 0 or 1, since conditions can be 16bit numbers as well)
-    emitln("  pop a");
+      emitln("  pop bl"); // popping into bl rather than al so we don't need an extra 'mov bl, al'
+      emitln("  and al, bl");
+      emitln("  mov bl, al");
+      emitln("  mov bh, 0");  // bh needs to be set to 0 since the logical result still needs to be 16bit 
+                              //(an if/while/do/for condition always tests whether a whole 16bit number could be 0 or 1, since conditions can be 16bit numbers as well)
+      emitln("  pop a");
+    }
+    expr_out.ind_level = 0; // if is a logical operation then result is an integer with ind_level = 0
+    expr_out.type = DT_INT;
   }
+  else{
+    expr_out.type = data1.type;
+    expr_out.ind_level = data1.ind_level;
+  }
+  return expr_out;
 }
 
 t_data parse_bitwise_or(void){
   char temp_tok;
+  t_data data1, data2, expr_out;
 
-  parse_bitwise_xor();
+  data1 = parse_bitwise_xor();
   while(tok == BITWISE_OR){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
-    parse_bitwise_xor();
+    data2 = parse_bitwise_xor();
     emitln("  or b, a");
     emitln("  pop a");
   }
+  expr_out = cast(data1, data2);
+  return expr_out;
 }
 
 t_data parse_bitwise_xor(void){
   char temp_tok;
+  t_data data1, data2, expr_out;
 
-  parse_bitwise_and();
+  data1 = parse_bitwise_and();
+  data2.type = DT_CHAR;
+  data2.ind_level = 0; // initialize so that cast works even if 'while' below does not trigger
   while(tok == BITWISE_XOR){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
-    parse_bitwise_and();
+    data2 = parse_bitwise_and();
     emitln("  xor a, b");
     emitln("  mov b, a");
     emitln("  pop a");
   }
+  expr_out = cast(data1, data2);
+  return expr_out;
 }
 
 t_data parse_bitwise_and(void){
   char temp_tok;
+  t_data data1, data2, expr_out;
 
-  parse_relational();
+  data1 = parse_relational();
+  data2.type = DT_CHAR;
+  data2.ind_level = 0; // initialize so that cast works even if 'while' below does not trigger
   while(tok == BITWISE_AND){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
-    parse_relational();
+    data2 = parse_relational();
     emitln("  and b, a");
     emitln("  pop a");
   }
+  expr_out = cast(data1, data2);
+  return expr_out;
 }
 
 
 t_data parse_relational(void){
   char temp_tok;
+  t_data data1, data2, expr_out;
 
 /* x = y > 1 && z<4 && y == 2 */
-  parse_bitwise_shift();
-  while(tok == EQUAL || tok == NOT_EQUAL || tok == LESS_THAN
-    || tok == LESS_THAN_OR_EQUAL || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
-    temp_tok = tok;
-    emitln("  push a");
-    emitln("  mov a, b");
-    parse_bitwise_shift();
-    switch(temp_tok){
-      case EQUAL:
-        emitln("  cmp a, b");
-        emitln("  lodflgs");
-        emitln("  and al, %00000001 ; =="); // isolate ZF only. therefore if ZF==1 then A == B
-        break;
-      case NOT_EQUAL:
-        emitln("  cmp a, b");
-        emitln("  lodflgs");
-        emitln("  and al, %00000001"); // isolate ZF only.
-        emitln("  xor al, %00000001 ; !="); // invert the condition
-        break;
-      case LESS_THAN:
-        emitln("  cmp a, b");
-        emitln("  lodflgs");
-        emitln("  and al, %00000010 ; <"); // isolate CF only. therefore if CF==1 then A < B
-        break;
-      case LESS_THAN_OR_EQUAL:
-        emitln("  cmp a, b");
-        emitln("  lodflgs");
-        emitln("  and al, %00000011 ; <="); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
-        break;
-      case GREATER_THAN_OR_EQUAL:
-        emitln("  cmp a, b");
-        emitln("  lodflgs");
-        emitln("  and al, %00000011"); 
-        emitln("  xor al, %00000010 ; >="); 
-        break;
-      case GREATER_THAN:
-        emitln("  cmp a, b");
-        emitln("  lodflgs");
-        emitln("  and al, %00000011"); 
-        emitln("  cmp al, %00000000"); 
-        emitln("  lodflgs");
-        emitln("  and al, %00000001 ; >"); 
-        break;
+  data1 = parse_bitwise_shift();
+  if(tok == EQUAL || tok == NOT_EQUAL || tok == LESS_THAN
+  || tok == LESS_THAN_OR_EQUAL || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
+    while(tok == EQUAL || tok == NOT_EQUAL || tok == LESS_THAN
+      || tok == LESS_THAN_OR_EQUAL || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
+      temp_tok = tok;
+      emitln("  push a");
+      emitln("  mov a, b");
+      data2 = parse_bitwise_shift();
+      switch(temp_tok){
+        case EQUAL:
+          emitln("  cmp a, b");
+          emitln("  lodflgs");
+          emitln("  and al, %00000001 ; =="); // isolate ZF only. therefore if ZF==1 then A == B
+          break;
+        case NOT_EQUAL:
+          emitln("  cmp a, b");
+          emitln("  lodflgs");
+          emitln("  and al, %00000001"); // isolate ZF only.
+          emitln("  xor al, %00000001 ; !="); // invert the condition
+          break;
+        case LESS_THAN:
+          emitln("  cmp a, b");
+          emitln("  lodflgs");
+          emitln("  and al, %00000010 ; <"); // isolate CF only. therefore if CF==1 then A < B
+          break;
+        case LESS_THAN_OR_EQUAL:
+          emitln("  cmp a, b");
+          emitln("  lodflgs");
+          emitln("  and al, %00000011 ; <="); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
+          break;
+        case GREATER_THAN_OR_EQUAL:
+          emitln("  cmp a, b");
+          emitln("  lodflgs");
+          emitln("  and al, %00000011"); 
+          emitln("  xor al, %00000010 ; >="); 
+          break;
+        case GREATER_THAN:
+          emitln("  cmp a, b");
+          emitln("  lodflgs");
+          emitln("  and al, %00000011"); 
+          emitln("  cmp al, %00000000"); 
+          emitln("  lodflgs");
+          emitln("  and al, %00000001 ; >"); 
+          break;
+      }
+      emitln("  cmp al, 0");
+      emitln("  lodflgs");
+      emitln("  not al");
+      emitln("  and al, %00000001 ; transform relational logical condition result into a single bit"); 
+      emitln("  mov ah, 0");
+      emitln("  mov b, a");
+      emitln("  pop a");
     }
-    emitln("  cmp al, 0");
-    emitln("  lodflgs");
-    emitln("  not al");
-    emitln("  and al, %00000001 ; transform relational logical condition result into a single bit"); 
-    emitln("  mov ah, 0");
-    emitln("  mov b, a");
-    emitln("  pop a");
+    expr_out.ind_level = 0; // if is a relational operation then result is an integer with ind_level = 0
+    expr_out.type = DT_INT;
   }
+  else{
+    expr_out.type = data1.type;
+    expr_out.ind_level = data1.ind_level;
+  }
+  return expr_out;
 }
 
 t_data parse_bitwise_shift(void){
   char temp_tok;
+  t_data data1, data2, expr_out;
 
-  parse_terms();
+  data1 = parse_terms();
+  data2.type = DT_CHAR;
+  data2.ind_level = 0; // initialize so that cast works even if 'while' below does not trigger
   while(tok == BITWISE_SHL || tok == BITWISE_SHR){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
-    parse_terms();
+    data2 = parse_terms();
     emitln("  mov cl, bl"); // only using bl since shifts only use cl
     emitln("  mov b, a");
     if(temp_tok == BITWISE_SHL) emitln("  shl b, cl");
     else if(temp_tok == BITWISE_SHR) emitln("  shr b, cl");
     emitln("  pop a");
   }
+  expr_out = cast(data1, data2);
+  return expr_out;
 }
 
 
 t_data parse_terms(void){
   char temp_tok;
-  t_data fact1, fact2, expr_out;
+  t_data data1, data2, expr_out;
   
-  fact1 = parse_factors();
+  data1 = parse_factors();
+  data2.type = DT_CHAR;
+  data2.ind_level = 0; // initialize so that cast works even if 'while' below does not trigger
   while(tok == PLUS || tok == MINUS){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
-    fact2 = parse_factors();
-// better treat chars in atom() as integers (mov bh, 0), otherwise conversion from char to int will require more assembly to do it and its less efficient then
+    data2 = parse_factors();
     if(temp_tok == PLUS) emitln("  add a, b");
     else if(temp_tok == MINUS) emitln("  sub a, b");
     emitln("  mov b, a");
     emitln("  pop a");
   }
+  expr_out = cast(data1, data2);
+  return expr_out;
 }
 
 
 t_data parse_factors(void){
   char temp_tok;
+  t_data data1, data2, expr_out;
 
-  parse_atom();
+// if data1 is an INT and data2 is a char*, then the result should be a char* still
+  data1 = parse_atom();
+  data2.type = DT_CHAR;
+  data2.ind_level = 0; // initialize so that cast works even if 'while' below does not trigger
   while(tok == STAR || tok == FSLASH || tok == MOD){
     temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
-    parse_atom();
+    data2 = parse_atom();
     if(temp_tok == STAR){
       emitln("  mul a, b");
     }
@@ -1665,6 +1730,8 @@ t_data parse_factors(void){
     }
     emitln("  pop a");
   }
+  expr_out = cast(data1, data2);
+  return expr_out;
 }
 
 
@@ -1713,12 +1780,10 @@ t_data parse_atom(void){
     if(expr_in.ind_level == 0) error(POINTER_EXPECTED);
     if(expr_in.type == DT_INT){
       emitln("  mov b, [d]"); // fixed: data fetched as an int. need to improve this to allow any types later.
-      puts("INT!!!!!!!!!!!!!");
     }
     else if(expr_in.type == DT_CHAR){
       emitln("  mov bl, [d]"); // fixed: data fetched as an int. need to improve this to allow any types later.
       emitln("  mov bh, 0");
-      puts("CHAR!!!!!!!!!!!!!");
     }
     //need to PARSE VARIABLE HERE TO SEE IF IS LOCAL OR GLOBAL SO THAT WE CAN SWP OR NOT
     back();
@@ -1754,16 +1819,16 @@ t_data parse_atom(void){
     expr_out.ind_level = 0;
   }
   else if(tok_type == CHAR_CONST){
-    emit("  mov bl, ");
+    emit("  mov b, ");
     emitln(token);
-    expr_out.type = DT_CHAR;
+    expr_out.type = DT_INT; // considering it an INT as an experiment for now
     expr_out.ind_level = 0;
     //emitln("  mov bh, 0"); // not sure why i set bh to 0 here, but removing as doesnt seem to be needed
   }
   else if(tok == MINUS){
     expr_in = parse_atom(); // TODO: add error if type is pointer since cant neg a pointer?
     if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  neg b");
-    else emitln("  neg bl");
+    else emitln("  neg b"); // treating as int as experiment
     back();
     expr_out.type = expr_in.type;
     expr_out.ind_level = expr_in.ind_level;
@@ -1771,7 +1836,7 @@ t_data parse_atom(void){
   else if(tok == BITWISE_NOT){
     expr_in = parse_atom();
     if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  not b");
-    else emitln("  not bl");
+    else emitln("  not b"); // treating as int as an experiment
     expr_out.type = expr_in.type;
     expr_out.ind_level = expr_in.ind_level;
     back();
@@ -1779,7 +1844,7 @@ t_data parse_atom(void){
   else if(tok == LOGICAL_NOT){
     parse_atom();
     if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  not b");
-    else emitln("  not bl");
+    else emitln("  not b"); // treating as int as an experiment
     expr_out.type = expr_in.type;
     expr_out.ind_level = expr_in.ind_level;
     back();
@@ -1795,14 +1860,14 @@ t_data parse_atom(void){
     if(tok == INCREMENT){ 
       expr_in = try_emitting_var(temp_name); // into 'b'
       if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  inc b");
-      else emitln("  add bl, 1"); // no 'inc bl' opcode exists
+      else emitln("  inc b"); // treating as int as an experiment
       emit_var_assignment(temp_name);
       expr_out = expr_in;
     }    
     else if(tok == DECREMENT){ 
       expr_in = try_emitting_var(temp_name); // into 'b'
       if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  dec b");
-      else emitln("  sub bl, 1"); // no 'inc bl' opcode exists
+      else emitln("  dec b"); // treating as int as an experiment
       emit_var_assignment(temp_name);
       expr_out = expr_in;
     }    
@@ -1826,20 +1891,20 @@ t_data parse_atom(void){
       else error(UNDECLARED_FUNC);
     }
     else if(tok == OPENING_BRACKET){ // matrix operations
-			t_var *matrix; // pointer to the matrix variable
-			int i, dims, data_size; // matrix data size
+      t_var *matrix; // pointer to the matrix variable
+      int i, dims, data_size; // matrix data size
       t_data var;
-			matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
-			data_size = get_data_size(&matrix->data);
-			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
+      matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
+      data_size = get_data_size(&matrix->data);
+      dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
       expr_out = try_emitting_var(temp_name); // emit the base address of the matrix or pointer into 'b'
       emitln("  push a");
       emitln("  mov d, b");
-			for(i = 0; i < dims; i++){
+      for(i = 0; i < dims; i++){
         parse_expr(); // result in 'b'
-				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
-				// if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
-				if(i < dims - 1){
+        if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+        // if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
+        if(i < dims - 1){
           sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix) * data_size);
           emitln(asm_line);
           emitln("  mul a, b");
@@ -1857,16 +1922,17 @@ t_data parse_atom(void){
           }
           else if(matrix->data.type == DT_CHAR){
             emitln("  mov bl, [d]");
+            emitln("  mov bh, 0"); // treating as an int as an experiment
           }
-			  }
-				get();
-				if(tok != OPENING_BRACKET){
+        }
+        get();
+        if(tok != OPENING_BRACKET){
           back();
           break;
         }
-			}
+      }
       emitln("  pop a");
-		}
+    }
     else if(enum_element_exists(temp_name) != -1){
       back();
       sprintf(asm_line, "  mov b, %d; %s", get_enum_val(temp_name), temp_name);
@@ -1886,6 +1952,60 @@ t_data parse_atom(void){
 
   return expr_out;
 }
+
+
+t_data cast(t_data t1, t_data t2){
+  char *ss;
+  t_data data;
+// TODO: check for matrix type
+  switch(t1.type){
+    case DT_CHAR:
+      switch(t2.type){
+        case DT_CHAR:
+          data.type = DT_CHAR;
+          if(t1.ind_level > 0) data.ind_level = t1.ind_level;
+          else if(t2.ind_level > 0) data.ind_level = t2.ind_level;
+          break;
+        case DT_INT:
+          if(t1.ind_level > 0){
+            data.type = DT_CHAR;
+            data.ind_level = t1.ind_level;
+          }
+          else if(t2.ind_level > 0){
+            data.type = DT_INT;
+            data.ind_level = t2.ind_level;
+          }
+          else{
+            data.type = DT_INT;
+            data.ind_level = 0;
+          }
+      }
+      break;
+    case DT_INT:
+      switch(t2.type){
+        case DT_CHAR:
+          if(t1.ind_level > 0){
+            data.type = DT_INT;
+            data.ind_level = t1.ind_level;
+          }
+          else if(t2.ind_level > 0){
+            data.type = DT_CHAR;
+            data.ind_level = t2.ind_level;
+          }
+          else{
+            data.type = DT_INT;
+            data.ind_level = 0;
+          }
+          break;
+        case DT_INT:
+          data.type = DT_INT;
+          if(t1.ind_level > 0) data.ind_level = t1.ind_level;
+          else if(t2.ind_level > 0) data.ind_level = t2.ind_level;
+      }
+  }
+  return data;
+}
+
 
 unsigned int add_string_data(char *str){
   int i;
@@ -2073,39 +2193,39 @@ t_data try_emitting_var(char *var_name){
 }
 
 t_var *get_var_pointer(char *var_name){
-	register int i;
+  register int i;
 
   for(i = 0; i < function_table[current_func_id].local_var_tos; i++)
     if(!strcmp(function_table[current_func_id].local_vars[i].var_name, var_name))
       return &function_table[current_func_id].local_vars[i];
 
-	for(i = 0; i < global_var_tos; i++)
-		if(!strcmp(global_variables[i].var_name, var_name)) 
-			return &global_variables[i];
+  for(i = 0; i < global_var_tos; i++)
+    if(!strcmp(global_variables[i].var_name, var_name)) 
+      return &global_variables[i];
 
-	error(UNDECLARED_VARIABLE);
+  error(UNDECLARED_VARIABLE);
 }
 
 int get_matrix_offset(char dim, t_var *matrix){
-	int i;
-	int offset = 1;
-	
-	for(i = dim + 1; i < matrix_dim_count(matrix); i++)
-		offset = offset * matrix -> dims[i];
-	
-	return offset;
+  int i;
+  int offset = 1;
+  
+  for(i = dim + 1; i < matrix_dim_count(matrix); i++)
+    offset = offset * matrix -> dims[i];
+  
+  return offset;
 }
 
 int get_total_var_size(t_var *var){
-	int i;
-	int size = 1;
+  int i;
+  int size = 1;
 
   // if it is a matrix, return its number of dimensions
-	for(i = 0; i < matrix_dim_count(var); i++)
-		size = size * var->dims[i];
-	
+  for(i = 0; i < matrix_dim_count(var); i++)
+    size = size * var->dims[i];
+  
   // if it is not a mtrix, it will return 1 * the data size
-	return size * get_data_size(&var->data);
+  return size * get_data_size(&var->data);
 }
 
 int is_matrix(t_var *var){
@@ -2115,22 +2235,22 @@ int is_matrix(t_var *var){
 }
 
 int matrix_dim_count(t_var *var){
-	int i;
-	
-	for(i = 0; var->dims[i]; i++);
-	
-	return i;
+  int i;
+  
+  for(i = 0; var->dims[i]; i++);
+  
+  return i;
 }
 
 int get_data_size(t_data *data){
-	if(data -> ind_level > 0) return 2;
-	else
-		switch(data -> type){
-			case DT_CHAR:
-				return 1;
-			case DT_INT:
-				return 2;
-		}
+  if(data -> ind_level > 0) return 2;
+  else
+    switch(data -> type){
+      case DT_CHAR:
+        return 1;
+      case DT_INT:
+        return 2;
+    }
 }
 
 void parse_function_arguments(int func_id){
@@ -2270,21 +2390,21 @@ void declare_global(void){
     strcpy(global_variables[global_var_tos].var_name, token);
 
     get();
-		// checks if this is a matrix declaration
-		int dim = 0;
+    // checks if this is a matrix declaration
+    int dim = 0;
     int expr;
-		if(tok == OPENING_BRACKET){
-			while(tok == OPENING_BRACKET){
+    if(tok == OPENING_BRACKET){
+      while(tok == OPENING_BRACKET){
         get();
         expr = atoi(token);
         get();
-				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
-				global_variables[global_var_tos].dims[dim] = expr;
-				get();
-				dim++;
-			}
+        if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+        global_variables[global_var_tos].dims[dim] = expr;
+        get();
+        dim++;
+      }
       global_variables[global_var_tos].dims[dim] = 0; // sets the last variable dimention to 0, to mark the end of the list
-		}
+    }
 
     // _data section for var is emmitted if:
     // ind_level == 1 && dt_char
@@ -2501,20 +2621,20 @@ void declare_local(void){
     strcpy(new_var.var_name, token);
     get();
 
-		// checks if this is a matrix declaration
-		int i = 0;
+    // checks if this is a matrix declaration
+    int i = 0;
     new_var.dims[0] = 0; // in case its not a matrix, this signals that fact
-		if(tok == OPENING_BRACKET){
-			while(tok == OPENING_BRACKET){
+    if(tok == OPENING_BRACKET){
+      while(tok == OPENING_BRACKET){
         get();
-				new_var.dims[i] = atoi(token);
+        new_var.dims[i] = atoi(token);
         get();
-				if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
-				get();
-				i++;
-			}
+        if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+        get();
+        i++;
+      }
       new_var.dims[i] = 0; // sets the last variable dimention to 0, to mark the end of the list
-		}
+    }
     // this is used to position local variables correctly relative to BP.
     // whenever a new function is parsed, this is reset to 0.
     // then inside the function it can increase according to how many local vars there are.
