@@ -1,40 +1,16 @@
 #inc_asm "lib/stdio.asm"
 
-char s1[50] = {'H','e','l','l','o',0};
+int m[50] = {123, 111, 123};
 char *s2 = ". My name is Sol-1.";
+char *c = "hi";
 
 int main() {
 
-  _strcat(s1, s2);
-
-  printn(_strlen(s1));
+  &m;
 
   return 0;
 }
 
-int _strlen(char *str) {
-    int length;
-    length = 0;
-    
-    while (*(str+length) != 0) {
-        length++;
-    }
-    
-    return length;
-}
-
-char *_strcat(char *dest, char *src) {
-    int dest_len;
-    int i;
-    dest_len = _strlen(dest);
-    
-    for (i = 0; *(src+i) != 0; i++) {
-        *(dest+dest_len + i) = *(src+i);
-    }
-    *(dest+dest_len + i) = 0;
-    
-    return dest;
-}
 
 void scann(int *n){
   int m;

@@ -1,4 +1,4 @@
-; --- FILENAME: test.c
+; --- FILENAME: strcat.c
 .include "lib/kernel.exp"
 .org PROC_TEXT_ORG
 
@@ -6,14 +6,6 @@
 main:
   push bp
   mov bp, sp
-  mov b, [s1]
-  swp b
-  push b
-  mov b, [s2]
-  swp b
-  push b
-  call _strcat
-  add sp, 4
   mov b, [s1]
   swp b
   push b
@@ -29,18 +21,18 @@ main:
 _strlen:
   push bp
   mov bp, sp
-  sub sp, 2 ; length
+  sub sp, 1 ; length
   mov b, 0
-  push a
-  mov a, b
-  mov [bp + -1], a ; length
-  pop a
+  push al
+  mov al, bl
+  mov [bp + 0], al ; length
+  pop al
 _while1_cond:
   lea d, [bp + 5] ; str
   mov b, [d]
   push a
   mov a, b
-  mov b, [bp + -1] ; length
+  mov bl, [bp + 0] ; length
   add a, b
   mov b, a
   pop a
@@ -62,15 +54,15 @@ _while1_cond:
   cmp b, 0
   je _while1_exit
 _while1_block:
-  mov b, [bp + -1] ; length
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; length
-  pop a
+  mov bl, [bp + 0] ; length
+  add bl, 1
+  push al
+  mov al, bl
+  mov [bp + 0], al ; length
+  pop al
   jmp _while1_cond
 _while1_exit:
-  mov b, [bp + -1] ; length
+  mov bl, [bp + 0] ; length
   leave
   ret
 _strcat:

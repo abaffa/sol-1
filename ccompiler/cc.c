@@ -1306,15 +1306,14 @@ t_data parse_assignment(){
   int var_id;
   char s_label[64];
   char *temp_asm_p;
+  t_data expr_in, expr_out;
 
   temp_prog = prog;
   temp_asm_p = asm_p; // save current assembly output pointer
-  parse_ternary_op(); // evaluate condition
+  expr_in = parse_ternary_op(); // parse expression before assignment(if assignment exists)
   if(tok != ASSIGNMENT){
-    prog = temp_prog;
-    asm_p = temp_asm_p; // recover asm output pointer
-    parse_ternary_op();
-    return;
+    expr_out = expr_in;
+    return expr_out;
   }
 
   // is assignment
@@ -1712,9 +1711,12 @@ t_data parse_atom(void){
     if(expr_in.ind_level == 0) error(POINTER_EXPECTED);
     if(expr_in.type == DT_INT){
       emitln("  mov b, [d]"); // fixed: data fetched as an int. need to improve this to allow any types later.
+      puts("INT!!!!!!!!!!!!!");
     }
     else if(expr_in.type == DT_CHAR){
       emitln("  mov bl, [d]"); // fixed: data fetched as an int. need to improve this to allow any types later.
+      emitln("  mov bh, 0");
+      puts("CHAR!!!!!!!!!!!!!");
     }
     //need to PARSE VARIABLE HERE TO SEE IF IS LOCAL OR GLOBAL SO THAT WE CAN SWP OR NOT
     back();
@@ -1731,12 +1733,17 @@ t_data parse_atom(void){
       emit(temp);
       emitln("]");
       emitln("  mov b, d");
-    }
+      expr_out = function_table[current_func_id].local_vars[var_id].data;
+      expr_out.ind_level++;
+      }
     else if(global_var_exists(token) != -1){  // is a global variable
       var_id = global_var_exists(token);
       emit("  mov b, ");
       emitln(global_variables[var_id].var_name);
+      expr_out = global_variables[var_id].data;
+      expr_out.ind_level++;
     }
+    //printf("ind_level: %d, type: %d\n", expr_out.ind_level, expr_out.type);
   }
   else if(tok_type == INTEGER_CONST){
     emit("  mov b, ");
@@ -1788,14 +1795,14 @@ t_data parse_atom(void){
       if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  inc b");
       else emitln("  add bl, 1"); // no 'inc bl' opcode exists
       emit_var_assignment(temp_name);
-      expr_out =  expr_in;
+      expr_out = expr_in;
     }    
     else if(tok == DECREMENT){ 
       expr_in = try_emitting_var(temp_name); // into 'b'
       if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  dec b");
       else emitln("  sub bl, 1"); // no 'inc bl' opcode exists
       emit_var_assignment(temp_name);
-      expr_out =  expr_in;
+      expr_out = expr_in;
     }    
     else if(tok == OPENING_PAREN){ // function call      
       func_id = find_function(temp_name);
@@ -1819,10 +1826,11 @@ t_data parse_atom(void){
     else if(tok == OPENING_BRACKET){ // matrix operations
 			t_var *matrix; // pointer to the matrix variable
 			int i, dims, data_size; // matrix data size
+      t_data var;
 			matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
 			data_size = get_data_size(&matrix->data);
 			dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      try_emitting_var(temp_name); // emit the base address of the matrix or pointer into 'b'
+      expr_out = try_emitting_var(temp_name); // emit the base address of the matrix or pointer into 'b'
       emitln("  push a");
       emitln("  mov d, b");
 			for(i = 0; i < dims; i++){
@@ -1834,6 +1842,7 @@ t_data parse_atom(void){
           emitln(asm_line);
           emitln("  mul a, b");
           emitln("  add d, b");
+          expr_out.ind_level--;
         }
         // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
         else if(i == dims - 1){
@@ -1904,6 +1913,7 @@ void emit_string_table_data(void){
     }
 }
 
+
 int find_string(char *str){
   int i;
 
@@ -1914,6 +1924,8 @@ int find_string(char *str){
   }
   return -1;
 }
+
+
 t_var_scope get_var_scope(char *var_name){
   int var_id;
 
@@ -1926,6 +1938,7 @@ t_var_scope get_var_scope(char *var_name){
 
   return -1;
 }
+
 
 void get_var_base_addr(char *dest, char *var_name){
   int var_id;
@@ -1946,6 +1959,7 @@ void get_var_base_addr(char *dest, char *var_name){
   else error(UNDECLARED_IDENTIFIER);
 }
 
+
 t_var *get_var_by_name(char *var_name){
   int var_id;
 
@@ -1958,6 +1972,7 @@ t_var *get_var_by_name(char *var_name){
     return &global_variables[var_id];
   }
 }
+
 
 t_data try_emitting_var(char *var_name){
   int var_id;
@@ -2188,9 +2203,6 @@ void declare_enum(void){
 }
 
 
-
-
-
 int enum_element_exists(char *element_name){
   int i, j;
   
@@ -2202,9 +2214,6 @@ int enum_element_exists(char *element_name){
   }
   return -1;
 }
-
-
-
 
 
 int get_enum_val(char *element_name){
@@ -2335,7 +2344,7 @@ void declare_global(void){
               sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
               emit_data(temp);
               emit_data_dbdw(ind_level, dim, dt);
-              sprintf(temp, "%s, 0\n", token);
+              sprintf(temp, "%s, 0\n", token); // TODO: do not require char pointer initialization to be a string only!
               emit_data(temp);
               sprintf(temp, "%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
               emit_data(temp);
