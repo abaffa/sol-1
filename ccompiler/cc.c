@@ -1800,12 +1800,12 @@ t_data parse_atom(void){
     else if(tok == OPENING_PAREN){ // function call      
       func_id = find_function(temp_name);
       if(func_id != -1){
+        expr_out = function_table[func_id].return_type; // get function's return type
         parse_function_arguments(func_id);
         emit("  call ");
         emitln(temp_name);
         if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
         // the function's return value is in register B
-
         if(function_table[func_id].total_parameter_size > 0){
           // clean stack of the arguments added to it
           char bp_offset_string[10];
@@ -1860,10 +1860,13 @@ t_data parse_atom(void){
       back();
       sprintf(asm_line, "  mov b, %d; %s", get_enum_val(temp_name), temp_name);
       emit(asm_line);
+      expr_out.ind_level = 0;
+      expr_out.type = DT_INT;
     }
     else{
       back();
-      try_emitting_var(temp_name);
+      expr_in = try_emitting_var(temp_name);
+      expr_out = expr_in;
     }
   }
   else error(INVALID_EXPRESSION);
