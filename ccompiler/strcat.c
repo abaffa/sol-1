@@ -2,12 +2,13 @@
 
 char s1[50] = {'H','e','l','l','o',0};
 char *s2 = ". My name is Sol-1.";
+char **p;
 
 int main() {
 
  // _strcat(s1, s2);
-    *s2 = 1;
-  printn(_strlen(s1));
+    *p = 1;
+  //printn(_strlen(s1));
 
   return 0;
 }

@@ -6,15 +6,11 @@
 main:
   push bp
   mov bp, sp
-  mov b, [s1]
-  swp b
-  push b
-  call _strlen
-  add sp, 2
-  swp b
-  push b
-  call printn
-  add sp, 2
+  mov b, [p]
+  mov d, b
+  mov b, 1
+  mov al, bl
+  mov [d], al
   mov b, 0
   leave
   syscall sys_terminate_proc
@@ -218,6 +214,7 @@ s1_data:
 s1: .dw s1_data
 s2_data: .db ". My name is Sol-1.", 0
 s2: .dw s2_data
+p: .fill 2, 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
