@@ -1539,6 +1539,8 @@ t_data parse_bitwise_or(void){
   t_data data1, data2, expr_out;
 
   data1 = parse_bitwise_xor();
+  data2.type = DT_CHAR;
+  data2.ind_level = 0; // initialize so that cast works even if 'while' below does not trigger
   while(tok == BITWISE_OR){
     temp_tok = tok;
     emitln("  push a");
@@ -2524,17 +2526,14 @@ void declare_global(void){
 }
 
 void emit_data_dbdw(int ind_level, int dims, t_data_type dt){
-  if(ind_level > 0 && dt == DT_CHAR && dims == 0
-    || ind_level == 0 && dt == DT_CHAR && dims == 0){ 
+  if(ind_level >  0 && dt == DT_CHAR && dims == 0
+  || ind_level == 0 && dt == DT_CHAR){ 
     emit_data(".db ");
   }
   else{
     emit_data(".dw ");
   }
 }
-
-
-
 
 
 int find_function(char *func_name){
@@ -2548,9 +2547,6 @@ int find_function(char *func_name){
 }
 
 
-
-
-
 int global_var_exists(char *var_name){
   register int i;
 
@@ -2559,9 +2555,6 @@ int global_var_exists(char *var_name){
   
   return -1;
 }
-
-
-
 
 
 int local_var_exists(char *var_name){
