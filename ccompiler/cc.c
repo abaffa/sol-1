@@ -6,9 +6,10 @@
 
 /* 
   TODO:
-    * fix logical value comparisons: remove ah half
-    * add data types to expressions as return values
+    * fix logical value comparisons: remove ah half (DONE)
+    * add data types to expressions as return values (DONE)
     * add automatic return to function ends when final } met
+    * implement 'goto'
 
   COMMENTS:
     for char data types, we still put them in a 16bit register.
