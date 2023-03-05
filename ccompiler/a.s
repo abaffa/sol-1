@@ -75,15 +75,13 @@ _while1_cond:
   lea d, [bp + 5] ; str
   mov b, [d]
   push a
-  mov a, b
-  mov b, [bp + -1] ; length
-  add a, b
-  mov b, a
-  pop a
   mov d, b
+  mov b, [bp + -1] ; length
+  mov a, 1
+  mul a, b
+  add d, b
   mov bl, [d]
   mov bh, 0
-  push a
   mov a, b
   mov b, 0
   cmp a, b
@@ -136,15 +134,13 @@ _for2_cond:
   lea d, [bp + 5] ; src
   mov b, [d]
   push a
-  mov a, b
-  mov b, [bp + -3] ; i
-  add a, b
-  mov b, a
-  pop a
   mov d, b
+  mov b, [bp + -3] ; i
+  mov a, 1
+  mul a, b
+  add d, b
   mov bl, [d]
   mov bh, 0
-  push a
   mov a, b
   mov b, 0
   cmp a, b
@@ -163,29 +159,29 @@ _for2_cond:
 _for2_block:
   lea d, [bp + 7] ; dest
   mov b, [d]
-  push a
-  mov a, b
+  mov d, b
   mov b, [bp + -1] ; dest_len
-  add a, b
-  mov b, a
+  push a
   mov a, b
   mov b, [bp + -3] ; i
   add a, b
   mov b, a
   pop a
-  mov d, b
+  mov a, 1
+  mul a, b
+  add d, b
   push d
   lea d, [bp + 5] ; src
   mov b, [d]
   push a
-  mov a, b
-  mov b, [bp + -3] ; i
-  add a, b
-  mov b, a
-  pop a
   mov d, b
+  mov b, [bp + -3] ; i
+  mov a, 1
+  mul a, b
+  add d, b
   mov bl, [d]
   mov bh, 0
+  pop a
   pop d
   mov al, bl
   mov [d], al
@@ -200,17 +196,17 @@ _for2_update:
 _for2_exit:
   lea d, [bp + 7] ; dest
   mov b, [d]
-  push a
-  mov a, b
+  mov d, b
   mov b, [bp + -1] ; dest_len
-  add a, b
-  mov b, a
+  push a
   mov a, b
   mov b, [bp + -3] ; i
   add a, b
   mov b, a
   pop a
-  mov d, b
+  mov a, 1
+  mul a, b
+  add d, b
   push d
   mov b, 0
   pop d

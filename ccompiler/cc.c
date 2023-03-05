@@ -1745,7 +1745,7 @@ t_data parse_atom(void){
   char enum_value_str[32];
   t_data expr_in;
   t_data expr_out;
- 
+
   get();
   if(tok_type == STRING_CONST){
     string_id = find_string(string_const);
@@ -1913,6 +1913,7 @@ t_data parse_atom(void){
         }
         // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
         else if(i == dims - 1){
+          expr_out.ind_level--;
           sprintf(asm_line, "  mov a, %d", data_size);
           emitln(asm_line);
           emitln("  mul a, b");           

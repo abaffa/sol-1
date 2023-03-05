@@ -21,26 +21,26 @@ int main() {
   return 0;
 }
 
-int _strlen(char *str) {
+int _strlen(char str[50]) {
     int length;
     length = 0;
     
-    while (*(str+length) != 0) {
+    while (str[length] != 0) {
         length++;
     }
     
     return length;
 }
 
-char *_strcat(char *dest, char *src) {
+char *_strcat(char dest[50], char src[50]) {
     int dest_len;
     int i;
     dest_len = _strlen(dest);
     
-    for (i = 0; *(src+i) != 0; i++) {
-        *(dest+dest_len + i) = *(src+i);
+    for (i = 0; src[i] != 0; i++) {
+        dest[dest_len + i] = src[i];
     }
-    *(dest+dest_len + i) = 0;
+    dest[dest_len + i] = 0;
     
     return dest;
 }
