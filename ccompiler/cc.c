@@ -1701,7 +1701,6 @@ t_data parse_terms(void){
     emitln("  pop a");
   }
   expr_out = cast(data1, data2);
-    printf("TERMS: ind_level: %d, type: %d\n", expr_out.ind_level, expr_out.type);
   return expr_out;
 }
 
@@ -1733,10 +1732,7 @@ t_data parse_factors(void){
     }
     emitln("  pop a");
   }
-    printf("FACT data1: ind_level: %d, type: %d\n", data1.ind_level, data1.type);
-    printf("FACT data2: ind_level: %d, type: %d\n", data2.ind_level, data2.type);
   expr_out = cast(data1, data2);
-    printf("FACT CAST: ind_level: %d, type: %d\n", expr_out.ind_level, expr_out.type);
   return expr_out;
 }
 
@@ -1781,9 +1777,7 @@ t_data parse_atom(void){
     expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
   }
   else if(tok == STAR){ // is a pointer operator
-    emitln("; TEST");
     expr_in = parse_atom(); // parse expression after STAR, which could be inside parenthesis. result in B
-    printf("STAR: ind_level: %d, type: %d\n", expr_in.ind_level, expr_in.type);
     emitln("  mov d, b");// now we have the pointer value. we then get the data at the address.
     if(expr_in.ind_level == 0) error(POINTER_EXPECTED);
     if(expr_in.type == DT_INT || expr_in.ind_level > 1){
@@ -1860,7 +1854,6 @@ t_data parse_atom(void){
   else if(tok == OPENING_PAREN){
     expr_in = parse_expr();  // parses expression between parenthesis and result will be in B
     expr_out = expr_in;
-    printf("PAREN: ind:%u, type:%u\n", expr_in.ind_level, expr_in.type);
     if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   }
   else if(tok_type == IDENTIFIER){
@@ -1951,7 +1944,6 @@ t_data parse_atom(void){
     }
     else{
       back();
-      puts("IDENTIFIER!!!!!!!!!!!!!!");
       expr_in = try_emitting_var(temp_name);
       expr_out = expr_in;
     }
@@ -1966,9 +1958,8 @@ t_data parse_atom(void){
 
 t_data cast(t_data t1, t_data t2){
   t_data data;
+
 // TODO: check for matrix type
-  printf("T1 IND: %d, T2 type: %d\n", t1.ind_level, t1.type);
-  printf("T2 IND: %d, T2 type: %d\n", t2.ind_level, t2.type);
   data.ind_level = 0; // initialize to zero in case both t1 and t2 are not pointers
   switch(t1.type){
     case DT_CHAR:

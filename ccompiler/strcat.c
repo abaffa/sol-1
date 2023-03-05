@@ -14,7 +14,7 @@ void main() {
 int _strlen(char *str) {
     int length;
     
-    *str;
+    *(str+1);
     
 }
 /*
