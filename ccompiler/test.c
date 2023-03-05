@@ -4,8 +4,13 @@ int m1[10] = {123, 111, 123};
 int m2[10] = {0, 1, 2};
 
 int main() {
+  int i, j,k;
+  i = 100;
+  j = 50;
+  k = 5;
+  printn(i / (j / k));
 
-  printn(m1[m2[0]]);
+  //printn(m1[m2[0]]);
 
   return 0;
 }

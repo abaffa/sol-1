@@ -56,8 +56,6 @@ int main(int argc, char *argv[]){
   optimize();
   generate_file("a.s"); // generate a.s assembly file
 
-
-
   return 0;
 }
 
@@ -69,18 +67,31 @@ void optimize(void){
     get_line();
     if(!*string_const) break;
     strcpy(s1, string_const);
-    if(!strcmp(s1, "  pop a\n")
-      ||!strcmp(s1, "  pop b\n")
-      ||!strcmp(s1, "  pop c\n")
-      ||!strcmp(s1, "  pop d\n")){
-
+    if(!strcmp(s1, "  pop a\n")){
       get_line();
       if(!*string_const) break;
-
-      if(!strcmp(string_const, "  push a\n")
-        || !strcmp(string_const, "  push b\n")
-        || !strcmp(string_const, "  push c\n")
-        || !strcmp(string_const, "  push d\n")){
+      if(!strcmp(string_const, "  push a\n")) continue;
+    }
+    else if(!strcmp(s1, "  pop b\n")){
+      get_line();
+      if(!*string_const) break;
+      if(!strcmp(string_const, "  push b\n")) continue;
+    }
+    else if(!strcmp(s1, "  pop c\n")){
+      get_line();
+      if(!*string_const) break;
+      if(!strcmp(string_const, "  push c\n")) continue;
+    }
+    else if(!strcmp(s1, "  pop d\n")){
+      get_line();
+      if(!*string_const) break;
+      if(!strcmp(string_const, "  push d\n")) continue;
+    }
+    else if(!strcmp(s1, "  mov b, a\n")){
+      get_line();
+      if(!*string_const) break;
+      if(!strcmp(string_const, "  mov a, b\n")){
+        strcat(asm_optimized, s1);
         continue;
       }
     }
