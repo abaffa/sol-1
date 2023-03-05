@@ -1967,7 +1967,9 @@ t_data parse_atom(void){
 t_data cast(t_data t1, t_data t2){
   t_data data;
 // TODO: check for matrix type
-          printf("T1 IND: %d\n", t1.ind_level);
+  printf("T1 IND: %d, T2 type: %d\n", t1.ind_level, t1.type);
+  printf("T2 IND: %d, T2 type: %d\n", t2.ind_level, t2.type);
+  data.ind_level = 0; // initialize to zero in case both t1 and t2 are not pointers
   switch(t1.type){
     case DT_CHAR:
       switch(t2.type){
