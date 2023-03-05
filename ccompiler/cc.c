@@ -1387,31 +1387,27 @@ t_data parse_assignment(){
     }
   }
   else if(tok == STAR){ // tests if this is a pointer assignment
-    while(tok != SEMICOLON && tok_type != END){
-      get();
-      if(tok_type == IDENTIFIER) strcpy(var_name, token); // save var name
-      if(tok == ASSIGNMENT){ // is an assignemnt
-        prog = temp_prog; // goes back to the beginning of the expression
-        get(); // gets past the first asterisk
-        expr_out = parse_atom();
-        emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'd'
-        // after evaluating the address expression, the token will be a "="
-        parse_ternary_op(); // evaluates the value to be assigned to the address, result in 'b'
-        switch(get_var_type(var_name)){
-          case DT_CHAR:
-            emitln("  mov al, bl");
-            emitln("  mov [d], al");
-            break;
-          case DT_INT:
-            emitln("  mov a, b");
-            emitln("  mov [d], a");
-            break;
-          default: error(INVALID_POINTER);
-        }
-        expr_out.ind_level--;
-        return expr_out;
-      }
+    expr_in = parse_atom();
+    emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'd'
+    // after evaluating the address expression, the token will be a "="
+    if(tok != ASSIGNMENT) error(SYNTAX);
+    emitln("  push d"); // push 'd' in case expression after = also uses 'd' (likely)
+    parse_ternary_op(); // evaluates the value to be assigned to the address, result in 'b'
+    emitln("  pop d"); // now pop 'd' so that we can recover the address for the assignment
+    switch(expr_in.type){
+      case DT_CHAR:
+        emitln("  mov al, bl");
+        emitln("  mov [d], al");
+        break;
+      case DT_INT:
+        emitln("  mov a, b");
+        emitln("  mov [d], a");
+        break;
+      default: error(INVALID_POINTER);
     }
+    expr_out = expr_in;
+    expr_out.ind_level--;
+    return expr_out;
   }
 }
 

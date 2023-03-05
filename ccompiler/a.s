@@ -6,10 +6,58 @@
 main:
   push bp
   mov bp, sp
+  mov b, _string_0
+  swp b
+  push b
+  call print
+  add sp, 2
   mov b, [s1]
   swp b
   push b
-  call _strlen
+  call print
+  add sp, 2
+  mov b, _string_1
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, _string_2
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, [s2]
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, _string_1
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, _string_3
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, [s1]
+  swp b
+  push b
+  mov b, [s2]
+  swp b
+  push b
+  call _strcat
+  add sp, 4
+  mov b, [s1]
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, _string_1
+  swp b
+  push b
+  call print
   add sp, 2
   mov b, 0
   leave
@@ -126,6 +174,7 @@ _for2_block:
   mov b, a
   pop a
   mov d, b
+  push d
   lea d, [bp + 5] ; src
   mov b, [d]
   push a
@@ -137,8 +186,9 @@ _for2_block:
   mov d, b
   mov bl, [d]
   mov bh, 0
-  mov a, b
-  mov [d], a
+  pop d
+  mov al, bl
+  mov [d], al
 _for2_update:
   mov b, [bp + -3] ; i
   inc b
@@ -161,9 +211,11 @@ _for2_exit:
   mov b, a
   pop a
   mov d, b
+  push d
   mov b, 0
-  mov a, b
-  mov [d], a
+  pop d
+  mov al, bl
+  mov [d], al
   lea d, [bp + 7] ; dest
   mov b, [d]
   leave
@@ -181,7 +233,9 @@ scann:
   lea d, [bp + 5] ; n
   mov b, [d]
   mov d, b
+  push d
   mov b, [bp + -1] ; m
+  pop d
   mov a, b
   mov [d], a
   leave
@@ -213,11 +267,15 @@ print:
 
 ; --- BEGIN DATA BLOCK
 s1_data: 
-.dw 'H', 'e', 'l', 'l', 'o', 0,
-.fill 88, 0
+.db 'H', 'e', 'l', 'l', 'o', 0,
+.fill 44, 0
 s1: .dw s1_data
 s2_data: .db ". My name is Sol-1.", 0
 s2: .dw s2_data
+_string_0: .db "Destination: ", 0
+_string_1: .db "\n", 0
+_string_2: .db "Source: ", 0
+_string_3: .db "Concatenation: ", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK

@@ -1,13 +1,22 @@
 #inc_asm "lib/stdio.asm"
 
-char *s1[50] = {'H','e','l','l','o',0};
+char s1[50] = {'H','e','l','l','o',0};
 char *s2 = ". My name is Sol-1.";
 
 int main() {
 
- // _strcat(s1, s2);
+    print("Destination: ");
+    print(s1);
+    print("\n");
+    print("Source: ");
+    print(s2);
+    print("\n");
 
-  _strlen(s1);
+    print("Concatenation: ");
+    _strcat(s1, s2);
+    print(s1);
+
+    print("\n");
 
   return 0;
 }
