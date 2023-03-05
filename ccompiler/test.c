@@ -1,12 +1,11 @@
 #inc_asm "lib/stdio.asm"
 
-int m[50] = {123, 111, 123};
-char *s2 = ". My name is Sol-1.";
-char *c = "hi";
+int m1[10] = {123, 111, 123};
+int m2[10] = {0, 1, 2};
 
 int main() {
 
-  &m;
+  printn(m1[m2[0]]);
 
   return 0;
 }

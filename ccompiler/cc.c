@@ -1337,10 +1337,12 @@ t_data parse_assignment(){
       matrix = get_var_pointer(var_name); // gets a pointer to the variable holding the matrix address
       data_size = get_data_size(&matrix->data);
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      expr_out = try_emitting_var(var_name); // emit the base address of the matrix or pointer
+      expr_out = try_emitting_var(var_name); // in 'b'. emit the base address of the matrix or pointer
       emitln("  mov d, b");
       for(i = 0; i < dims; i++){
+        emitln("  push d"); // save 'd'. this is the matrix base address. save because indexing expr below could use 'd' and overwrite it
         parse_ternary_op(); // result in 'b'
+        emitln("  pop d"); // retrieve 'b' from before, into 'd'. This is the destination address so we can write to it
         if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
         // if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
         if(i < dims - 1){
@@ -1367,9 +1369,9 @@ t_data parse_assignment(){
         if(tok != OPENING_BRACKET) break;
       }
       // we are past the '=' sign here
-      emitln("  push d"); // save 'd' in the stack (which contains the variable address), since the RHS expression could use 'd'
+      emitln("  push d"); // save 'd'. this is the matrix base address. save because expr below could use 'd' and overwrite it
       parse_ternary_op(); // evaluate expression, result in 'b'
-      emitln("  pop d"); // now retrieve the destination address so we can write to it
+      emitln("  pop d"); 
       if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
         emitln("  mov a, b");
         emitln("  mov [d], a");
@@ -1387,13 +1389,13 @@ t_data parse_assignment(){
     }
   }
   else if(tok == STAR){ // tests if this is a pointer assignment
-    expr_in = parse_atom();
-    emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'd'
+    expr_in = parse_atom(); // parte what comes after '*' (considered a pointer)
+    emitln("  push b"); // pointer given in 'b'. push 'd' into stack to save it. we will retrieve it below into 'd' for the assognment address
+    //emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'd'
     // after evaluating the address expression, the token will be a "="
     if(tok != ASSIGNMENT) error(SYNTAX);
-    emitln("  push d"); // push 'd' in case expression after = also uses 'd' (likely)
     parse_ternary_op(); // evaluates the value to be assigned to the address, result in 'b'
-    emitln("  pop d"); // now pop 'd' so that we can recover the address for the assignment
+    emitln("  pop d"); // now pop 'b' from before into 'd' so that we can recover the address for the assignment
     switch(expr_in.type){
       case DT_CHAR:
         emitln("  mov al, bl");
@@ -1894,6 +1896,7 @@ t_data parse_atom(void){
       t_var *matrix; // pointer to the matrix variable
       int i, dims, data_size; // matrix data size
       t_data var;
+
       matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
       data_size = get_data_size(&matrix->data);
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
@@ -1901,7 +1904,9 @@ t_data parse_atom(void){
       emitln("  push a");
       emitln("  mov d, b");
       for(i = 0; i < dims; i++){
+        emitln("  push d"); // save 'd' in case the expressions inside brackets use 'd' for addressing (likely)
         parse_expr(); // result in 'b'
+        emitln("  pop d");
         if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
         // if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
         if(i < dims - 1){
