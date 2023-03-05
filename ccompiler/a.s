@@ -13,7 +13,8 @@ _strlen:
   mov bp, sp
   sub sp, 2 ; length
 ; TEST
-  mov b, [s2]
+  lea d, [bp + 5] ; str
+  mov b, [d]
   mov d, b
   mov bl, [d]
   mov bh, 0
