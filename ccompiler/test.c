@@ -5,12 +5,23 @@ int m2[10] = {0, 1, 2};
 
 int main() {
   int i, j,k;
-  i = 100;
+  i = 3;
   j = 50;
   k = 5;
 
-  printn(i / (j / k));
-  //printn(m1[m2[0]]);
+  switch(i){
+    case 1:
+      print("1");
+    case 2:
+      print("2");
+    case 3:{
+      print("3");
+      print("Inside block");
+    }
+    default:
+      print("Default");
+  }
+
 
   return 0;
 }

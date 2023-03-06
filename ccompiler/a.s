@@ -3,13 +3,14 @@
 .org PROC_TEXT_ORG
 
 ; --- BEGIN TEXT BLOCK
+
 main:
   push bp
   mov bp, sp
   sub sp, 2 ; i
   sub sp, 2 ; j
   sub sp, 2 ; k
-  mov b, 100
+  mov b, 3
   push a
   mov a, b
   mov [bp + -1], a ; i
@@ -24,30 +25,50 @@ main:
   mov a, b
   mov [bp + -5], a ; k
   pop a
+_switch1_expr:
   mov b, [bp + -1] ; i
-  push a
-  mov a, b
-  mov b, [bp + -3] ; j
-  push a
-  mov a, b
-  mov b, [bp + -5] ; k
-  div a, b
-  mov g, a
-  mov a, b
-  mov b, g
-  pop a
-  div a, b
-  mov g, a
-  mov a, b
-  mov b, g
-  pop a
+_switch1_comparisons:
+  cmp b, 1
+  je _switch1_case0
+  cmp b, 2
+  je _switch1_case1
+  cmp b, 3
+  je _switch1_case2
+  jmp _switch1_default
+_switch1_case0:
+  mov b, _string_0 ; "1"
   swp b
   push b
-  call printn
+  call print
   add sp, 2
+_switch1_case1:
+  mov b, _string_1 ; "2"
+  swp b
+  push b
+  call print
+  add sp, 2
+_switch1_case2:
+  mov b, _string_2 ; "3"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, _string_3 ; "Inside block"
+  swp b
+  push b
+  call print
+  add sp, 2
+_switch1_default:
+  mov b, _string_4 ; "Default"
+  swp b
+  push b
+  call print
+  add sp, 2
+_switch1_exit:
   mov b, 0
   leave
   syscall sys_terminate_proc
+
 scann:
   push bp
   mov bp, sp
@@ -67,6 +88,7 @@ scann:
   mov [d], a
   leave
   ret
+
 printn:
   push bp
   mov bp, sp
@@ -78,6 +100,7 @@ printn:
 
   leave
   ret
+
 print:
   push bp
   mov bp, sp
@@ -101,6 +124,11 @@ m2_data:
 .dw 0,1,2,
 .fill 14, 0
 m2: .dw m2_data
+_string_0: .db "1", 0
+_string_1: .db "2", 0
+_string_2: .db "3", 0
+_string_3: .db "Inside block", 0
+_string_4: .db "Default", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK

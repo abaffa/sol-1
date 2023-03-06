@@ -199,6 +199,7 @@ void parse_functions(void){
                         // then inside the function it can increase according to how any local vars there are.
       current_func_id = i;
       prog = function_table[i].code_location;
+      emitln("");
       emit(function_table[i].func_name);
       emitln(":");
       emitln("  push bp");
@@ -215,6 +216,7 @@ void parse_functions(void){
                         // then inside the function it can increase according to how any local vars there are.
       current_func_id = i;
       prog = function_table[i].code_location;
+      emitln("");
       emit(function_table[i].func_name);
       emitln(":");
       emitln("  push bp");
@@ -848,11 +850,8 @@ int switch_has_default(void){
 
 void parse_switch(void){
   char s_label[64];
-  char s_nextcase[64];
   char *temp_p;
-  int nbr_cases;
   int current_case_nbr;
-  int has_default;
 
   break_type_stack[break_type_tos] = current_break_type;
   break_type_tos++;
@@ -875,10 +874,6 @@ void parse_switch(void){
   if(tok != OPENING_BRACE) error(OPENING_BRACE_EXPECTED);
 
   temp_p = prog;
-  nbr_cases = count_cases();
-  prog = temp_p;
-  has_default = switch_has_default();
-  prog = temp_p;
   current_case_nbr = 0;
 
   // emit compares and jumps
@@ -915,17 +910,14 @@ void parse_switch(void){
     current_case_nbr++;
   } while(tok == CASE);
 
-  // generate default if it exists
+  // generate default jump if it exists
   if(tok == DEFAULT){
+    sprintf(s_label, "  jmp _switch%d_default", current_label_index_switch);
+    emitln(s_label);
     get(); // get default
     get(); // get ':'
-    sprintf(s_label, "_switch%d_default:", current_label_index_switch);
-    emitln(s_label);
-    parse_case();
+    skip_case();
   }
-
-  sprintf(s_label, "  jmp _switch%d_exit", current_label_index_switch);
-  emitln(s_label);
 
   // emit code for each case block
   prog = temp_p;
@@ -941,15 +933,20 @@ void parse_switch(void){
     current_case_nbr++;
   } while(tok == CASE);
 
-  sprintf(s_label, "_switch%d_exit:", current_label_index_switch);
-  emitln(s_label);
-
   get();
   if(tok == DEFAULT){
     get(); // get ':'
-    skip_case();
+    sprintf(s_label, "_switch%d_default:", current_label_index_switch);
+    emitln(s_label);
+    parse_case();
   }
+
+  get(); // get the final '}'
   if(tok != CLOSING_BRACE) error(CLOSING_BRACE_EXPECTED);
+
+  sprintf(s_label, "_switch%d_exit:", current_label_index_switch);
+  emitln(s_label);
+  
 
   label_tos_switch--;
   current_label_index_switch = label_stack_switch[label_tos_switch];
@@ -1032,46 +1029,16 @@ void parse_case(void){
   do{
     get();
     switch(tok){
-      case INT:
-      case CHAR:
-      case FLOAT:
-      case DOUBLE:
-        back();
-        declare_local();
-        break;
-      case ASM:
-        parse_asm();
-        break;
-      case IF:
-        parse_if();
-        break;
-      case SWITCH:
-        parse_switch();
-        break;
-      case FOR:
-        parse_for();
-        break;
-      case WHILE:
-        parse_while();
-        break;
-      case DO:
-        parse_do();
-        break;
-      case BREAK:
-        parse_break();
-        break;
       case CASE:
       case DEFAULT:
       case CLOSING_BRACE:
         back();
         return;
-      case RETURN:
-        parse_return();
-        break;
       default:
         back();
-        parse_expr();
-        if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
+    get();
+        back();
+        parse_block();
     }    
   } while(1); 
 }
@@ -1728,8 +1695,7 @@ t_data parse_atom(void){
     string_id = find_string(string_const);
     if(string_id == -1) string_id = add_string_data(string_const);
     // now emit the reference to this string into the ASM
-    sprintf(temp, "_string_%d", string_id);
-    emit("  mov b, ");
+    sprintf(temp, "  mov b, _string_%d ; \"%s\"", string_id, string_const);
     emitln(temp);
     expr_out.type = DT_CHAR;
     expr_out.ind_level = 1;
