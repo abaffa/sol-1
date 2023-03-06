@@ -53,12 +53,13 @@ int main(int argc, char *argv[]){
 
   *asm_p = '\0';
 
-  optimize();
+//  optimize();
   generate_file("a.s"); // generate a.s assembly file
 
   return 0;
 }
 
+/*
 void optimize(void){
   char s1[STRING_CONST_SIZE];
   prog = asm_out;
@@ -104,6 +105,7 @@ void optimize(void){
     strcat(asm_optimized, string_const);
   } while(string_const[0] != '\0');
 }
+*/
 
 void emit_data_block(){
   emitln("\n; --- BEGIN DATA BLOCK");
@@ -130,7 +132,7 @@ void generate_file(char *filename){
     exit(0);
   }
   
-  fprintf(fp, "%s", asm_optimized);
+  fprintf(fp, "%s", asm_out);
 
   fclose(fp);
 }

@@ -92,6 +92,8 @@ _if3_true:
   mov a, b
   mov b, 4
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, 1
   add a, b
@@ -114,6 +116,8 @@ _if3_true:
   mov a, b
   mov b, 4
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, 2
   add a, b
@@ -136,6 +140,8 @@ _if3_true:
   mov a, b
   mov b, 4
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, 3
   add a, b
@@ -247,6 +253,8 @@ _if5_true:
   mov a, b
   mov b, 4
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, 1
   add a, b
@@ -271,6 +279,8 @@ _if5_true:
   mov a, b
   mov b, 4
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, 2
   add a, b
@@ -295,6 +305,8 @@ _if5_true:
   mov a, b
   mov b, 4
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, 3
   add a, b
@@ -680,6 +692,8 @@ _if16_exit:
   mov a, b
   mov b, 4
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, 1
   add a, b
@@ -701,6 +715,8 @@ _if16_exit:
   mov a, b
   mov b, 4
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, 2
   add a, b
@@ -722,6 +738,8 @@ _if16_exit:
   mov a, b
   mov b, 4
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, 3
   add a, b
@@ -818,6 +836,8 @@ _if18_exit:
   mov a, b
   mov b, 100
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, [opr]
   add a, b
@@ -911,6 +931,8 @@ _if22_cond:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, 0
   cmp a, b
@@ -952,6 +974,8 @@ _if22_cond:
   and al, bl
   mov bl, al
   mov bh, 0
+  pop a
+  push a
   mov a, b
   mov b, [datum]
   push a
@@ -963,6 +987,8 @@ _if22_cond:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, 32767
   cmp a, b
@@ -1023,6 +1049,8 @@ _if22_cond:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, 32767
   cmp a, b
@@ -1081,6 +1109,8 @@ _if22_cond:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, 0
   cmp a, b
@@ -1112,6 +1142,8 @@ _if22_cond:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, 32767
   cmp a, b
@@ -1133,6 +1165,8 @@ _if22_cond:
   and al, bl
   mov bl, al
   mov bh, 0
+  pop a
+  push a
   mov a, b
   cmp a, 0
   lodflgs
@@ -1177,6 +1211,8 @@ _if22_cond:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, 0
   cmp a, b
@@ -1206,6 +1242,8 @@ _if22_cond:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, 32767
   cmp a, b
@@ -1227,6 +1265,8 @@ _if22_cond:
   and al, bl
   mov bl, al
   mov bh, 0
+  pop a
+  push a
   mov a, b
   cmp a, 0
   lodflgs
@@ -1271,6 +1311,8 @@ _if22_cond:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, 0
   cmp a, b
@@ -1585,6 +1627,8 @@ _if27_true:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, [datum]
   push a
@@ -1642,6 +1686,8 @@ _if28_true:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, [datum]
   push a
@@ -1699,6 +1745,8 @@ _if29_true:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, [datum]
   push a
@@ -1712,6 +1760,8 @@ _if29_true:
   mov b, [d]
   pop a
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, 100
   div a, b
@@ -1753,6 +1803,8 @@ _if31_cond:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, 0
   cmp a, b
@@ -1788,9 +1840,13 @@ _if31_true:
   mul a, b
   add d, b
   mov b, [d]
+  pop a
+  push a
   mov a, b
   mov b, 100
   mul a, b
+  pop a
+  push a
   mov a, b
   mov b, [datum]
   push a
