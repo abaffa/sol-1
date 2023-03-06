@@ -24,7 +24,6 @@ main:
   mov a, b
   mov [bp + -5], a ; k
   pop a
-  mov b, 20
   mov b, [bp + -1] ; i
   push a
   mov a, b

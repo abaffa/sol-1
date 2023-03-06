@@ -153,7 +153,7 @@ void load_program(char *filename){
   int i;
   
   if((fp = fopen(filename, "rb")) == NULL){
-    printf("%s: Source file not found\n", filename);
+    printf("%s: Source file not found.\n", filename);
     exit(0);
   }
   
@@ -166,7 +166,7 @@ void load_program(char *filename){
     i++;
   } while(!feof(fp));
   
-  *(prog - 1) = '\0';
+  *(prog - 1) = '\0'; // overwrite the EOF char with NULL
 
   fclose(fp);
 }
@@ -460,40 +460,6 @@ void declare_func(void){
   function_table_tos++;
 }
 
-
-
-
-
-int find_parameter_size(void){
-  int total_bytes;
-  int data_size;
-
-  total_bytes = 0;
-  get();
-  switch(tok){
-    case CHAR:
-      data_size += 1;
-      break;
-    case INT:
-      data_size += 2;
-      break;
-    case FLOAT:
-      data_size += 2;
-      break;
-    case DOUBLE:
-      data_size += 4;
-  }
-  get(); // get past parameter name
-  get();
-  while(tok == OPENING_BRACKET){
-    get();
-    total_bytes += data_size * atoi(token);
-    get(); // ']'
-    get();
-  }
-
-  return total_bytes;
-}
 
 int get_param_size(void){
   int data_size;
