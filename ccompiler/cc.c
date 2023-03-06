@@ -1752,15 +1752,10 @@ t_data parse_factors(void){
 
 
 t_data parse_atom(void){
-  int var_id;
-  int func_id;
-  int string_id;
-  char temp_name[ID_LEN];
-  char temp[1024];
-  char var_address_str[32];
-  char enum_value_str[32];
-  t_data expr_in;
-  t_data expr_out;
+  int var_id, func_id, string_id;
+  char temp_name[ID_LEN], temp[1024];
+  char var_address_str[32], enum_value_str[32];
+  t_data expr_in, expr_out;
 
   get();
   if(tok_type == STRING_CONST){
@@ -1777,13 +1772,28 @@ t_data parse_atom(void){
     get();
     expect(OPENING_PAREN, OPENING_PAREN_EXPECTED);
     get();
-    switch(tok){
-      case CHAR:
-        emitln("  mov b, 1");
-        break;
-      case INT:
-        emitln("  mov b, 2");
-        break;
+    if(tok_type == IDENTIFIER){
+      if(local_var_exists(token) != -1){ // is a local variable
+        var_id = local_var_exists(token);
+        sprintf(temp, "  mov b, %d", get_total_var_size(&function_table[current_func_id].local_vars[var_id]));
+        emitln(temp);
+      }
+      else if(global_var_exists(token) != -1){  // is a global variable
+        var_id = global_var_exists(token);
+        sprintf(temp, "  mov b, %d", get_total_var_size(&global_variables[var_id]));
+        emitln(temp);
+      }
+      else error(UNDECLARED_IDENTIFIER);
+    }
+    else{
+      switch(tok){
+        case CHAR:
+          emitln("  mov b, 1");
+          break;
+        case INT:
+          emitln("  mov b, 2");
+          break;
+      }
     }
     get();
     expr_out.type = DT_INT;
@@ -2241,7 +2251,7 @@ int get_total_var_size(t_var *var){
   int i;
   int size = 1;
 
-  // if it is a matrix, return its number of dimensions
+  // if it is a matrix, return its number of dimensions * type size
   for(i = 0; i < matrix_dim_count(var); i++)
     size = size * var->dims[i];
   

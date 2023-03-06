@@ -8,8 +8,8 @@ int main() {
   i = 100;
   j = 50;
   k = 5;
-  printn(i / (j / k));
 
+  printn(i / (j / k));
   //printn(m1[m2[0]]);
 
   return 0;
