@@ -68,8 +68,10 @@ int main()
 
 void push (int f)
 {
-	if (sp < MAXVAL)
-		val[sp++] = f;
+	if (sp < MAXVAL){
+		val[sp] = f;
+		sp++;
+	}
 	else
 		print("Error: stack full, can't push: ");
 		printn(f);
