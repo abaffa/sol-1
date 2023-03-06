@@ -1248,7 +1248,16 @@ void emit_var_assignment(char *var_name){
 
 
 t_data parse_expr(){
-  return parse_assignment();
+  t_data data;
+
+  data.ind_level = 0;
+  data.type = DT_INT;
+  get();
+  if(tok == SEMICOLON) return data;
+  else{
+    back();
+    return parse_assignment();
+  }
 }
 
 
@@ -1288,7 +1297,7 @@ t_data parse_assignment(){
       emitln("  mov d, b");
       for(i = 0; i < dims; i++){
         emitln("  push d"); // save 'd'. this is the matrix base address. save because indexing expr below could use 'd' and overwrite it
-        parse_ternary_op(); // result in 'b'
+        parse_expr(); // result in 'b'
         emitln("  pop d"); // retrieve 'b' from before, into 'd'. This is the destination address so we can write to it
         if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
         // if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
@@ -1317,7 +1326,7 @@ t_data parse_assignment(){
       }
       // we are past the '=' sign here
       emitln("  push d"); // save 'd'. this is the matrix base address. save because expr below could use 'd' and overwrite it
-      parse_ternary_op(); // evaluate expression, result in 'b'
+      parse_expr(); // evaluate expression, result in 'b'
       emitln("  pop d"); 
       if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
         emitln("  mov a, b");
@@ -1330,7 +1339,7 @@ t_data parse_assignment(){
       return expr_out;
     }
     else if(tok == ASSIGNMENT){
-      expr_out = parse_ternary_op(); // evaluate expression, result in 'b'
+      expr_out = parse_expr(); // evaluate expression, result in 'b'
       emit_var_assignment(var_name);
       return expr_out;
     }
@@ -1792,7 +1801,7 @@ t_data parse_atom(void){
     expr_out.ind_level = expr_in.ind_level;
   }
   else if(tok == BITWISE_NOT){
-    expr_in = parse_atom();
+    expr_in = parse_atom(); // in 'b'
     if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  not b");
     else emitln("  not b"); // treating as int as an experiment
     expr_out.type = expr_in.type;
@@ -1800,9 +1809,16 @@ t_data parse_atom(void){
     back();
   }
   else if(tok == LOGICAL_NOT){
-    parse_atom();
-    if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  not b");
-    else emitln("  not b"); // treating as int as an experiment
+    parse_atom(); // in 'b'
+    emitln("  push al");
+    emitln("  cmp b, 0");
+    emitln("  lodflgs");
+    emitln("  and al, %00000001 ; transform logical not condition result into a single bit"); 
+    emitln("  mov bl, al");
+    emitln("  mov bh, 0");
+    emitln("  pop al");
+    //if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  not b");
+    //else emitln("  not b"); // treating as int as an experiment
     expr_out.type = expr_in.type;
     expr_out.ind_level = expr_in.ind_level;
     back();
@@ -2115,6 +2131,7 @@ t_data try_emitting_var(char *var_name){
       emit(temp);
       emit("] ; ");
       emitln(var_name);
+      emitln("  mov bh, 0");
       expr_out.type = DT_CHAR;
       expr_out.ind_level = 0;
     }
@@ -2131,21 +2148,25 @@ t_data try_emitting_var(char *var_name){
     else if(global_variables[var_id].data.ind_level > 0){
       emit("  mov b, [");
       emit(global_variables[var_id].var_name);
-      emitln("]");
+      emit("] ; ");
+      emitln(var_name);
       expr_out.type = global_variables[var_id].data.type;
       expr_out.ind_level = global_variables[var_id].data.ind_level;
     }
     else if(global_variables[var_id].data.type == DT_INT){
       emit("  mov b, [");
       emit(global_variables[var_id].var_name);
-      emitln("]");
+      emit("] ; ");
+      emitln(var_name);
       expr_out.type = global_variables[var_id].data.type;
       expr_out.ind_level = global_variables[var_id].data.ind_level;
     }
     else if(global_variables[var_id].data.type == DT_CHAR){
       emit("  mov bl, [");
       emit(global_variables[var_id].var_name);
-      emitln("]");
+      emit("] ; ");
+      emitln(var_name);
+      emit("  mov bh, 0");
       expr_out.type = global_variables[var_id].data.type;
       expr_out.ind_level = global_variables[var_id].data.ind_level;
     }

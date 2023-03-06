@@ -5,6 +5,7 @@ char *s2 = ". My name is Sol-1.";
 
 int main() {
 
+
     print("Destination: ");
     print(s1);
     print("\n");

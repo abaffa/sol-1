@@ -4,26 +4,13 @@ int m1[10] = {123, 111, 123};
 int m2[10] = {0, 1, 2};
 
 int main() {
-  int i, j,k;
-  i = 3;
-  j = 50;
-  k = 5;
 
-  switch(i){
-    case 1:
-      print("1");
-    case 2:
-      print("2");
-    case 3:{
-      print("3");
-      print("Inside block");
-    }
-    default:
-      print("Default");
-  }
+	char c;
+	char c2;
+	(c2 = (c = getch())) == ' ';
 
+	return;
 
-  return 0;
 }
 
 
