@@ -1809,7 +1809,7 @@ t_data parse_atom(void){
     back();
   }
   else if(tok == LOGICAL_NOT){
-    parse_atom(); // in 'b'
+    expr_in = parse_atom(); // in 'b'
     emitln("  push al");
     emitln("  cmp b, 0");
     emitln("  lodflgs");
@@ -1819,8 +1819,7 @@ t_data parse_atom(void){
     emitln("  pop al");
     //if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  not b");
     //else emitln("  not b"); // treating as int as an experiment
-    expr_out.type = expr_in.type;
-    expr_out.ind_level = expr_in.ind_level;
+    expr_out = expr_in;
     back();
   }
   else if(tok == OPENING_PAREN){

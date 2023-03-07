@@ -7,7 +7,9 @@ int main() {
 
 	char c;
 	char c2;
-	(c2 = (c = getch())) == ' ';
+  int i;
+  scann(&i);
+  printn(i > 0);
 
 	return;
 

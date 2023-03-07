@@ -214,7 +214,7 @@ push:
   push bp
   mov bp, sp
 _if4_cond:
-  mov b, [sp] ; sp
+  mov b, [_sp] ; _sp
   push a
   mov a, b
   mov b, 100
@@ -234,7 +234,7 @@ _if4_true:
   mov b, [val]
   mov d, b
   push d
-  mov b, [sp] ; sp
+  mov b, [_sp] ; _sp
   pop d
   mov a, 2
   mul a, b
@@ -244,9 +244,9 @@ _if4_true:
   pop d
   mov a, b
   mov [d], a
-  mov b, [sp] ; sp
+  mov b, [_sp] ; _sp
   inc b
-  mov [sp], b
+  mov [_sp], b
   jmp _if4_exit
 _if4_else:
   mov b, _string_3 ; "Error: stack full, can't push: "
@@ -267,7 +267,7 @@ pop:
   push bp
   mov bp, sp
 _if5_cond:
-  mov b, [sp] ; sp
+  mov b, [_sp] ; _sp
   push a
   mov a, b
   mov b, 0
@@ -287,14 +287,14 @@ _if5_cond:
   cmp b, 0
   je _if5_else
 _if5_true:
-  mov b, [sp] ; sp
+  mov b, [_sp] ; _sp
   dec b
-  mov [sp], b
+  mov [_sp], b
   mov b, [val]
   push a
   mov d, b
   push d
-  mov b, [sp] ; sp
+  mov b, [_sp] ; _sp
   pop d
   mov a, 2
   mul a, b
@@ -711,7 +711,7 @@ print:
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
-sp: .dw 0
+_sp: .dw 0
 val_data: .fill 200, 0
 val: .dw val_data
 buf_data: .fill 100, 0

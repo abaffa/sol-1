@@ -5,7 +5,7 @@
 #define MAXVAL 100
 #define BUFSIZE 100
 
-int sp = 0;		/*stack pointer*/
+int _sp = 0;		/*stack pointer*/
 int val[MAXVAL];	/*this is the stack*/
 char buf[BUFSIZE];
 int bufp = 0;
@@ -70,9 +70,9 @@ int main()
 
 void push (int f)
 {
-	if (sp < MAXVAL){
-		val[sp] = f;
-		sp++;
+	if (_sp < MAXVAL){
+		val[_sp] = f;
+		_sp++;
 	}
 	else{
 		print("Error: stack full, can't push: ");
@@ -83,9 +83,9 @@ void push (int f)
 
 int pop (void)
 {	
-	if (sp > 0){
-		sp--;
-		return val[sp];
+	if (_sp > 0){
+		_sp--;
+		return val[_sp];
 	}
 	else
 	{
