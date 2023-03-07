@@ -35,27 +35,27 @@ int main()
 	switch (type)
 		{
 		case NUMBER:
-			push(_atoi(s));
+			_push(_atoi(s));
 			break;
 		case '+':
-			push(pop() + pop());
+			_push(_pop() + _pop());
 			break;
 		case '*':
-			push(pop() * pop());
+			_push(_pop() * _pop());
 			break;
 		case '-':
-			op2 = pop();
-			push(pop() - op2);
+			op2 = _pop();
+			_push(_pop() - op2);
 			break;
 		case '/':
-			op2 = pop();
+			op2 = _pop();
 			if (op2 != 0)
-				push(pop() / op2);
+				_push(_pop() / op2);
 			else
 				print("Divide by zero error\n");
 			break;
 		case 10:
-			printn(pop());
+			printn(_pop());
 			print("\n");
 			break;
 		default:
@@ -68,21 +68,21 @@ int main()
 	return 0;
 }
 
-void push (int f)
+void _push (int f)
 {
 	if (_sp < MAXVAL){
 		val[_sp] = f;
 		_sp++;
 	}
 	else{
-		print("Error: stack full, can't push: ");
+		print("Error: stack full, can't _push: ");
 		printn(f);
 	}
 	return;
 }
 
-int pop (void)
-{	
+int _pop (void)
+{
 	if (_sp > 0){
 		_sp--;
 		return val[_sp];

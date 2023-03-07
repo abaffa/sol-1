@@ -63,41 +63,41 @@ _switch2_case0:
   add sp, 2
   swp b
   push b
-  call push
+  call _push
   add sp, 2
   jmp _switch2_exit ; case break
 _switch2_case1:
-  call pop
+  call _pop
   push a
   mov a, b
-  call pop
+  call _pop
   add a, b
   mov b, a
   pop a
   swp b
   push b
-  call push
+  call _push
   add sp, 2
   jmp _switch2_exit ; case break
 _switch2_case2:
-  call pop
+  call _pop
   push a
   mov a, b
-  call pop
+  call _pop
   mul a, b
   pop a
   swp b
   push b
-  call push
+  call _push
   add sp, 2
   jmp _switch2_exit ; case break
 _switch2_case3:
-  call pop
+  call _pop
   push a
   mov a, b
   mov [bp + -3], a ; op2
   pop a
-  call pop
+  call _pop
   push a
   mov a, b
   mov b, [bp + -3] ; op2
@@ -106,11 +106,11 @@ _switch2_case3:
   pop a
   swp b
   push b
-  call push
+  call _push
   add sp, 2
   jmp _switch2_exit ; case break
 _switch2_case4:
-  call pop
+  call _pop
   push a
   mov a, b
   mov [bp + -3], a ; op2
@@ -134,7 +134,7 @@ _if3_cond:
   cmp b, 0
   je _if3_else
 _if3_true:
-  call pop
+  call _pop
   push a
   mov a, b
   mov b, [bp + -3] ; op2
@@ -145,7 +145,7 @@ _if3_true:
   pop a
   swp b
   push b
-  call push
+  call _push
   add sp, 2
   jmp _if3_exit
 _if3_else:
@@ -157,7 +157,7 @@ _if3_else:
 _if3_exit:
   jmp _switch2_exit ; case break
 _switch2_case5:
-  call pop
+  call _pop
   swp b
   push b
   call printn
@@ -210,7 +210,7 @@ _atoi:
   leave
   ret
 
-push:
+_push:
   push bp
   mov bp, sp
 _if4_cond:
@@ -249,7 +249,7 @@ _if4_true:
   mov [_sp], b
   jmp _if4_exit
 _if4_else:
-  mov b, _string_3 ; "Error: stack full, can't push: "
+  mov b, _string_3 ; "Error: stack full, can't _push: "
   swp b
   push b
   call print
@@ -263,9 +263,14 @@ _if4_exit:
   leave
   ret
 
-pop:
+_pop:
   push bp
   mov bp, sp
+  mov b, _string_4 ; "POP"
+  swp b
+  push b
+  call print
+  add sp, 2
 _if5_cond:
   mov b, [_sp] ; _sp
   push a
@@ -305,7 +310,7 @@ _if5_true:
   ret
   jmp _if5_exit
 _if5_else:
-  mov b, _string_4 ; "Error: stack empty.\n"
+  mov b, _string_5 ; "Error: stack empty.\n"
   swp b
   push b
   call print
@@ -556,7 +561,7 @@ _if12_cond:
   cmp b, 0
   je _if12_else
 _if12_true:
-  mov b, _string_5 ; "Error: too many characters.\n"
+  mov b, _string_6 ; "Error: too many characters.\n"
   swp b
   push b
   call print
@@ -720,9 +725,10 @@ bufp: .dw 0
 _string_0: .db "Divide by zero error\n", 0
 _string_1: .db "\n", 0
 _string_2: .db "Unknown input: ", 0
-_string_3: .db "Error: stack full, can't push: ", 0
-_string_4: .db "Error: stack empty.\n", 0
-_string_5: .db "Error: too many characters.\n", 0
+_string_3: .db "Error: stack full, can't _push: ", 0
+_string_4: .db "POP", 0
+_string_5: .db "Error: stack empty.\n", 0
+_string_6: .db "Error: too many characters.\n", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
