@@ -16,6 +16,8 @@ int _atoi(char *s){
 	int n;
 	asm{
 		lea d, @s
+		mov a, [d]
+		mov d, a
 		call strtoint
 		mov @n, a
 	}
@@ -72,9 +74,10 @@ void push (int f)
 		val[sp] = f;
 		sp++;
 	}
-	else
+	else{
 		print("Error: stack full, can't push: ");
 		printn(f);
+	}
 	return;
 }
 
@@ -120,7 +123,7 @@ int getch(void)
 	//return (bufp > 0) ? buf[--bufp] : getchar();
 }
 
-void ungetch(int c)
+void ungetch(char c)
 {
 	if (bufp >= BUFSIZE)
 		print("Error: too many characters.\n");

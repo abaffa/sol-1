@@ -200,6 +200,8 @@ _atoi:
 
 ; --- BEGIN INLINE ASM BLOCK
   lea d, [bp + 5]
+  mov a, [d]
+  mov d, a
   call strtoint
   mov [bp + -1], a
 ; --- END INLINE ASM BLOCK
@@ -233,8 +235,6 @@ _if4_true:
   mov d, b
   push d
   mov b, [sp] ; sp
-  inc b
-  mov [sp], b
   pop d
   mov a, 2
   mul a, b
@@ -244,6 +244,9 @@ _if4_true:
   pop d
   mov a, b
   mov [d], a
+  mov b, [sp] ; sp
+  inc b
+  mov [sp], b
   jmp _if4_exit
 _if4_else:
   mov b, _string_3 ; "Error: stack full, can't push: "
@@ -251,12 +254,12 @@ _if4_else:
   push b
   call print
   add sp, 2
-_if4_exit:
   mov b, [bp + 5] ; f
   swp b
   push b
   call printn
   add sp, 2
+_if4_exit:
   leave
   ret
 
@@ -474,10 +477,9 @@ _if10_cond:
 _if10_true:
   mov bl, [bp + -2] ; c
   mov bh, 0
-  swp b
-  push b
+  push bl
   call ungetch
-  add sp, 2
+  add sp, 1
   jmp _if10_exit
 _if10_exit:
   mov b, 999
@@ -570,7 +572,8 @@ _if12_else:
   mul a, b
   add d, b
   push d
-  mov b, [bp + 5] ; c
+  mov bl, [bp + 5] ; c
+  mov bh, 0
   pop d
   mov al, bl
   mov [d], al
