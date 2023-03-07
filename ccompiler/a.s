@@ -234,8 +234,10 @@ _if4_true:
   mov a, b
   mov [d], a
   mov b, [_sp] ; _sp
+  mov a, b
   inc b
   mov [_sp], b
+  mov b, a
   jmp _if4_exit
 _if4_else:
   mov b, _string_3 ; "Error: stack full, can't _push: "
@@ -272,8 +274,10 @@ _if5_cond:
   je _if5_else
 _if5_true:
   mov b, [_sp] ; _sp
+  mov a, b
   dec b
   mov [_sp], b
+  mov b, a
   mov b, [val]
   push a
   mov d, b
@@ -393,11 +397,13 @@ _while9_cond:
   mov d, b
   push d
   mov b, [bp + -1] ; i
+  mov a, b
   inc b
   push a
   mov a, b
   mov [bp + -1], a ; i
   pop a
+  mov b, a
   pop d
   mov a, 1
   mul a, b
@@ -482,8 +488,10 @@ _if11_cond:
   je _if11_else
 _if11_true:
   mov b, [bufp] ; bufp
+  mov a, b
   dec b
   mov [bufp], b
+  mov b, a
   mov b, [buf]
   push a
   mov d, b
@@ -548,8 +556,10 @@ _if12_else:
   mov al, bl
   mov [d], al
   mov b, [bufp] ; bufp
+  mov a, b
   inc b
   mov [bufp], b
+  mov b, a
 _if12_exit:
   leave
   ret

@@ -413,7 +413,7 @@ t_var *get_var_pointer(char *var_name);
 int get_total_var_size(t_var *var);
 
 void get_var_base_addr(char *dest, char *var_name);
-t_data try_emitting_var(char *var_name);
+t_data emit_var_into_b(char *var_name);
 t_var_scope get_var_scope(char *var_name);
 t_var *get_var_by_name(char *var_name);
 int get_param_size(void);

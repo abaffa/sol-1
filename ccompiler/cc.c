@@ -1293,7 +1293,7 @@ t_data parse_assignment(){
       matrix = get_var_pointer(var_name); // gets a pointer to the variable holding the matrix address
       data_size = get_data_size(&matrix->data);
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      expr_out = try_emitting_var(var_name); // in 'b'. emit the base address of the matrix or pointer
+      expr_out = emit_var_into_b(var_name); // in 'b'. emit the base address of the matrix or pointer
       emitln("  mov d, b");
       for(i = 0; i < dims; i++){
         emitln("  push d"); // save 'd'. this is the matrix base address. save because indexing expr below could use 'd' and overwrite it
@@ -1836,18 +1836,22 @@ t_data parse_atom(void){
   else if(tok_type == IDENTIFIER){
     strcpy(temp_name, token);
     get();
-    if(tok == INCREMENT){ 
-      expr_in = try_emitting_var(temp_name); // into 'b'
+    if(tok == INCREMENT){  // post increment. get value first, then do assignment
+      expr_in = emit_var_into_b(temp_name); // into 'b'
+      emitln("  mov a, b"); // TODO: inefficient, needs changing later. emit var directly into 'a' instead by adding regsel parameter to emitter function?
       if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  inc b");
       else emitln("  inc b"); // treating as int as an experiment
       emit_var_assignment(temp_name);
+      emitln("  mov b, a"); // TODO: inefficient, needs changing later. emit var directly into 'a' instead by adding regsel parameter to emitter function?
       expr_out = expr_in;
     }    
-    else if(tok == DECREMENT){ 
-      expr_in = try_emitting_var(temp_name); // into 'b'
+    else if(tok == DECREMENT){ // post decrement. get value first, then do assignment
+      expr_in = emit_var_into_b(temp_name); // into 'b'
+      emitln("  mov a, b"); // TODO: inefficient, needs changing later. emit var directly into 'a' instead by adding regsel parameter to emitter function?
       if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  dec b");
       else emitln("  dec b"); // treating as int as an experiment
       emit_var_assignment(temp_name);
+      emitln("  mov b, a"); // TODO: inefficient, needs changing later. emit var directly into 'a' instead by adding regsel parameter to emitter function?
       expr_out = expr_in;
     }    
     else if(tok == OPENING_PAREN){ // function call      
@@ -1877,7 +1881,7 @@ t_data parse_atom(void){
       matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
       data_size = get_data_size(&matrix->data);
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      expr_out = try_emitting_var(temp_name); // emit the base address of the matrix or pointer into 'b'
+      expr_out = emit_var_into_b(temp_name); // emit the base address of the matrix or pointer into 'b'
       emitln("  push a");
       emitln("  mov d, b");
       for(i = 0; i < dims; i++){
@@ -1925,7 +1929,7 @@ t_data parse_atom(void){
     }
     else{
       back();
-      expr_in = try_emitting_var(temp_name);
+      expr_in = emit_var_into_b(temp_name);
       expr_out = expr_in;
     }
   }
@@ -2080,7 +2084,7 @@ t_var *get_var_by_name(char *var_name){
 }
 
 
-t_data try_emitting_var(char *var_name){
+t_data emit_var_into_b(char *var_name){
   int var_id;
   char temp[64];
   t_data expr_out;
