@@ -1833,6 +1833,26 @@ t_data parse_atom(void){
     expr_out = expr_in;
     if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   }
+  else if(tok == INCREMENT){  // pre increment. do assignment first
+    get();
+    if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
+    strcpy(temp_name, token);
+    expr_in = emit_var_into_b(temp_name); // into 'b'
+    if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  inc b");
+    else emitln("  inc b"); // treating as int as an experiment
+    emit_var_assignment(temp_name);
+    expr_out = expr_in;
+  }    
+  else if(tok == DECREMENT){ // pre decrement. do assignment first
+    get();
+    if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
+    strcpy(temp_name, token);
+    expr_in = emit_var_into_b(temp_name); // into 'b'
+    if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  dec b");
+    else emitln("  dec b"); // treating as int as an experiment
+    emit_var_assignment(temp_name);
+    expr_out = expr_in;
+  }    
   else if(tok_type == IDENTIFIER){
     strcpy(temp_name, token);
     get();

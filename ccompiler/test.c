@@ -5,11 +5,28 @@ int m2[10] = {0, 1, 2};
 
 int main() {
 
-	char c;
-	char c2;
-  int i;
-  scann(&i);
-  printn(i > 0);
+  int i1, i2, i3, i4;
+  i1=1;
+  i2=1;
+  i3=1;
+  i4=1;
+
+  printn(--i1);
+  print("\n");
+  printn(i1);
+  print("\n");
+  printn(++i2);
+  print("\n");
+  printn(i2);
+  print("\n");
+  printn(i3--);
+  print("\n");
+  printn(i3);
+  print("\n");
+  printn(i4++);
+  print("\n");
+  printn(i4);
+  print("\n");
 
 	return;
 
