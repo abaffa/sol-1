@@ -1577,17 +1577,27 @@ t_data parse_relational(void){
           emitln("  cmp a, b");
           emitln("  lodflgs");
           emitln("  and al, %00000010 ; <"); // isolate CF only. therefore if CF==1 then A < B
+          emitln("  shr al"); // move to 0th position
           break;
         case LESS_THAN_OR_EQUAL:
           emitln("  cmp a, b");
           emitln("  lodflgs");
           emitln("  and al, %00000011 ; <="); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
+          emitln("  cmp al, 0");
+          emitln("  lodflgs");
+          emitln("  xor al, %00000001");
+          //emitln("  and al, %00000001 ; transform relational logical condition result into a single bit"); 
+          emitln("  mov ah, 0");
           break;
         case GREATER_THAN_OR_EQUAL:
           emitln("  cmp a, b");
           emitln("  lodflgs");
           emitln("  and al, %00000011"); 
           emitln("  xor al, %00000010 ; >="); 
+          emitln("  cmp al, 0");
+          emitln("  lodflgs");
+          emitln("  xor al, %00000001");
+          //emitln("  and al, %00000001 ; transform relational logical condition result into a single bit"); 
           break;
         case GREATER_THAN:
           emitln("  cmp a, b");
@@ -1595,13 +1605,9 @@ t_data parse_relational(void){
           emitln("  and al, %00000011"); 
           emitln("  cmp al, %00000000"); 
           emitln("  lodflgs");
-          emitln("  and al, %00000001 ; >"); 
+          //emitln("  and al, %00000001 ; >"); 
           break;
       }
-      emitln("  cmp al, 0");
-      emitln("  lodflgs");
-      emitln("  not al");
-      emitln("  and al, %00000001 ; transform relational logical condition result into a single bit"); 
       emitln("  mov ah, 0");
       emitln("  mov b, a");
       emitln("  pop a");

@@ -28,10 +28,6 @@ _while1_cond:
   lodflgs
   and al, %00000001
   xor al, %00000001 ; !=
-  cmp al, 0
-  lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
   mov ah, 0
   mov b, a
   pop a
@@ -124,10 +120,6 @@ _if3_cond:
   lodflgs
   and al, %00000001
   xor al, %00000001 ; !=
-  cmp al, 0
-  lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
   mov ah, 0
   mov b, a
   pop a
@@ -221,10 +213,7 @@ _if4_cond:
   cmp a, b
   lodflgs
   and al, %00000010 ; <
-  cmp al, 0
-  lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
+  shr al
   mov ah, 0
   mov b, a
   pop a
@@ -266,11 +255,6 @@ _if4_exit:
 _pop:
   push bp
   mov bp, sp
-  mov b, _string_4 ; "POP"
-  swp b
-  push b
-  call print
-  add sp, 2
 _if5_cond:
   mov b, [_sp] ; _sp
   push a
@@ -281,11 +265,6 @@ _if5_cond:
   and al, %00000011
   cmp al, %00000000
   lodflgs
-  and al, %00000001 ; >
-  cmp al, 0
-  lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
   mov ah, 0
   mov b, a
   pop a
@@ -310,7 +289,7 @@ _if5_true:
   ret
   jmp _if5_exit
 _if5_else:
-  mov b, _string_5 ; "Error: stack empty.\n"
+  mov b, _string_4 ; "Error: stack empty.\n"
   swp b
   push b
   call print
@@ -350,10 +329,6 @@ _while6_cond:
   cmp a, b
   lodflgs
   and al, %00000001 ; ==
-  cmp al, 0
-  lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
   mov ah, 0
   mov b, a
   pop a
@@ -470,10 +445,6 @@ _if10_cond:
   lodflgs
   and al, %00000001
   xor al, %00000001 ; !=
-  cmp al, 0
-  lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
   mov ah, 0
   mov b, a
   pop a
@@ -504,11 +475,6 @@ _if11_cond:
   and al, %00000011
   cmp al, %00000000
   lodflgs
-  and al, %00000001 ; >
-  cmp al, 0
-  lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
   mov ah, 0
   mov b, a
   pop a
@@ -553,15 +519,14 @@ _if12_cond:
   xor al, %00000010 ; >=
   cmp al, 0
   lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
+  xor al, %00000001
   mov ah, 0
   mov b, a
   pop a
   cmp b, 0
   je _if12_else
 _if12_true:
-  mov b, _string_6 ; "Error: too many characters.\n"
+  mov b, _string_5 ; "Error: too many characters.\n"
   swp b
   push b
   call print
@@ -604,8 +569,7 @@ _if13_cond:
   xor al, %00000010 ; >=
   cmp al, 0
   lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
+  xor al, %00000001
   mov ah, 0
   mov b, a
   pop a
@@ -625,8 +589,8 @@ _if13_cond:
   and al, %00000011 ; <=
   cmp al, 0
   lodflgs
-  not al
-  and al, %00000001 ; transform relational logical condition result into a single bit
+  xor al, %00000001
+  mov ah, 0
   mov ah, 0
   mov b, a
   pop a
@@ -726,9 +690,8 @@ _string_0: .db "Divide by zero error\n", 0
 _string_1: .db "\n", 0
 _string_2: .db "Unknown input: ", 0
 _string_3: .db "Error: stack full, can't _push: ", 0
-_string_4: .db "POP", 0
-_string_5: .db "Error: stack empty.\n", 0
-_string_6: .db "Error: too many characters.\n", 0
+_string_4: .db "Error: stack empty.\n", 0
+_string_5: .db "Error: too many characters.\n", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
