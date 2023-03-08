@@ -2029,6 +2029,7 @@ unsigned int add_string_data(char *str){
   error(MAX_STRINGS);
 }
 
+
 void emit_string_table_data(void){
   int i;
   char temp[256];
@@ -2205,6 +2206,7 @@ t_data emit_var_into_b(char *var_name){
   return expr_out;
 }
 
+
 t_var *get_var_pointer(char *var_name){
   register int i;
 
@@ -2219,6 +2221,7 @@ t_var *get_var_pointer(char *var_name){
   error(UNDECLARED_VARIABLE);
 }
 
+
 int get_matrix_offset(char dim, t_var *matrix){
   int i;
   int offset = 1;
@@ -2228,6 +2231,7 @@ int get_matrix_offset(char dim, t_var *matrix){
   
   return offset;
 }
+
 
 int get_total_var_size(t_var *var){
   int i;
@@ -2241,11 +2245,13 @@ int get_total_var_size(t_var *var){
   return size * get_data_size(&var->data);
 }
 
+
 int is_matrix(t_var *var){
   if(var->dims[0]) return 1;
   else return 0;
 
 }
+
 
 int matrix_dim_count(t_var *var){
   int i;
@@ -2254,6 +2260,7 @@ int matrix_dim_count(t_var *var){
   
   return i;
 }
+
 
 int get_data_size(t_data *data){
   if(data -> ind_level > 0) return 2;
@@ -2265,6 +2272,7 @@ int get_data_size(t_data *data){
         return 2;
     }
 }
+
 
 void parse_function_arguments(int func_id){
   int param_index = 0;
@@ -2292,8 +2300,6 @@ void parse_function_arguments(int func_id){
     param_index++;
   } while(tok == COMMA);
 }
-
-
 
 
 int find_global_var(char *var_name){
@@ -2766,9 +2772,6 @@ void convert_constant(){
 }
 
 
-
-
-
 void get(void){
   char *t;
   // skip blank spaces
@@ -2830,8 +2833,8 @@ void get(void){
     while(isdigit(*prog)) *t++ = *prog++;
     tok_type = INTEGER_CONST;
   }
-  else if(is_id_char(*prog)){
-    while(is_id_char(*prog) || isdigit(*prog))
+  else if(is_identifier_char(*prog)){
+    while(is_identifier_char(*prog) || isdigit(*prog))
       *t++ = *prog++;
     *t = '\0';
 
@@ -3028,7 +3031,7 @@ char is_delimiter(char c){
 }
 
 
-char is_id_char(char c){
+char is_identifier_char(char c){
   return(isalpha(c) || c == '_');
 }
 
