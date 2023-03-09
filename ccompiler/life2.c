@@ -35,7 +35,7 @@ void show(void){
 
 	for(i = 0; i < SIZE; i++){
 		for(j = 0; j < SIZE; j++){
-			_putchar(currState[i][j]);
+            currState[i][j] == '@' ? print("@ ") : print(". ");
 		}
         _putchar(10);
 	}

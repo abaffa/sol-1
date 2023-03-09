@@ -457,6 +457,7 @@ _for11_cond:
   cmp b, 0
   je _for11_exit
 _for11_block:
+_ternary12_cond:
   mov b, [currState]
   push a
   mov d, b
@@ -475,9 +476,31 @@ _for11_block:
   mov bl, [d]
   mov bh, 0
   pop a
-  push bl
-  call _putchar
-  add sp, 1
+  push a
+  mov a, b
+  mov b, '@'
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _ternary12_false
+_ternary12_true:
+  mov b, _string_0 ; "@ "
+  swp b
+  push b
+  call print
+  add sp, 2
+  jmp _ternary12_exit
+_ternary12_false:
+  mov b, _string_1 ; ". "
+  swp b
+  push b
+  call print
+  add sp, 2
+_ternary12_exit:
 _for11_update:
   mov b, [bp + -3] ; j
   mov a, b
@@ -510,7 +533,7 @@ _for10_exit:
 alive:
   push bp
   mov bp, sp
-_if12_cond:
+_if13_cond:
   mov b, [currState]
   push a
   mov d, b
@@ -539,17 +562,17 @@ _if12_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if12_else
-_if12_true:
+  je _if13_else
+_if13_true:
   mov b, 1
   leave
   ret
-  jmp _if12_exit
-_if12_else:
+  jmp _if13_exit
+_if13_else:
   mov b, 0
   leave
   ret
-_if12_exit:
+_if13_exit:
 
 neighbours:
   push bp
@@ -560,53 +583,6 @@ neighbours:
   mov a, b
   mov [bp + -1], a ; count
   pop a
-_if13_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + 7] ; i
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + 5] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if13_exit
-_if13_true:
-  mov b, [bp + -1] ; count
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; count
-  pop a
-  mov b, a
-  jmp _if13_exit
-_if13_exit:
 _if14_cond:
   mov b, [currState]
   push a
@@ -625,12 +601,6 @@ _if14_cond:
   add d, b
   push d
   mov b, [bp + 5] ; j
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
   pop d
   mov a, 1
   mul a, b
@@ -681,7 +651,7 @@ _if15_cond:
   push a
   mov a, b
   mov b, 1
-  add a, b
+  sub a, b
   mov b, a
   pop a
   pop d
@@ -719,6 +689,12 @@ _if16_cond:
   mov d, b
   push d
   mov b, [bp + 7] ; i
+  push a
+  mov a, b
+  mov b, 1
+  sub a, b
+  mov b, a
+  pop a
   pop d
   mov a, 40
   mul a, b
@@ -728,7 +704,7 @@ _if16_cond:
   push a
   mov a, b
   mov b, 1
-  sub a, b
+  add a, b
   mov b, a
   pop a
   pop d
@@ -775,7 +751,7 @@ _if17_cond:
   push a
   mov a, b
   mov b, 1
-  add a, b
+  sub a, b
   mov b, a
   pop a
   pop d
@@ -813,12 +789,6 @@ _if18_cond:
   mov d, b
   push d
   mov b, [bp + 7] ; i
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
   pop d
   mov a, 40
   mul a, b
@@ -828,7 +798,7 @@ _if18_cond:
   push a
   mov a, b
   mov b, 1
-  sub a, b
+  add a, b
   mov b, a
   pop a
   pop d
@@ -878,6 +848,12 @@ _if19_cond:
   add d, b
   push d
   mov b, [bp + 5] ; j
+  push a
+  mov a, b
+  mov b, 1
+  sub a, b
+  mov b, a
+  pop a
   pop d
   mov a, 1
   mul a, b
@@ -925,12 +901,6 @@ _if20_cond:
   add d, b
   push d
   mov b, [bp + 5] ; j
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
   pop d
   mov a, 1
   mul a, b
@@ -960,6 +930,59 @@ _if20_true:
   mov b, a
   jmp _if20_exit
 _if20_exit:
+_if21_cond:
+  mov b, [currState]
+  push a
+  mov d, b
+  push d
+  mov b, [bp + 7] ; i
+  push a
+  mov a, b
+  mov b, 1
+  add a, b
+  mov b, a
+  pop a
+  pop d
+  mov a, 40
+  mul a, b
+  add d, b
+  push d
+  mov b, [bp + 5] ; j
+  push a
+  mov a, b
+  mov b, 1
+  add a, b
+  mov b, a
+  pop a
+  pop d
+  mov a, 1
+  mul a, b
+  add d, b
+  mov bl, [d]
+  mov bh, 0
+  pop a
+  push a
+  mov a, b
+  mov b, '@'
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if21_exit
+_if21_true:
+  mov b, [bp + -1] ; count
+  mov a, b
+  inc b
+  push a
+  mov a, b
+  mov [bp + -1], a ; count
+  pop a
+  mov b, a
+  jmp _if21_exit
+_if21_exit:
   mov b, [bp + -1] ; count
   leave
   ret
@@ -1024,6 +1047,8 @@ currState_data:
 .db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
 .fill 800, 0
 currState: .dw currState_data
+_string_0: .db "@ ", 0
+_string_1: .db ". ", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
