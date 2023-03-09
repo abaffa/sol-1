@@ -657,14 +657,11 @@ void parse_for(void){
     back();
     parse_expr();
     if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
-  }
-  else{
-    emitln("  mov b, 1"); // emit a TRUE condition
+    emitln("  cmp b, 0");
+    sprintf(s_label, "  je _for%d_exit", current_label_index_for);
+    emitln(s_label);
   }
 
-  emitln("  cmp b, 0");
-  sprintf(s_label, "  je _for%d_exit", current_label_index_for);
-  emitln(s_label);
   sprintf(s_label, "_for%d_block:", current_label_index_for);
   emitln(s_label);
 
@@ -1462,18 +1459,14 @@ t_data parse_logical_and(void){
       emitln("  mov a, b");
       emitln("  cmp a, 0");
       emitln("  lodflgs");
-      emitln("  not al");
-      emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
+      emitln("  xor al, %00000001"); 
       data2 = parse_bitwise_or();
       emitln("  push al");
       emitln("  cmp b, 0");
       emitln("  lodflgs");
-      emitln("  not al");
-      emitln("  and al, %00000001 ; transform logical AND condition result into a single bit"); 
+      emitln("  xor al, %00000001"); 
 
       emitln("  pop bl"); // popping into bl rather than al so we don't need an extra 'mov bl, al'
-      emitln("  and al, bl");
-      emitln("  mov bl, al");
       emitln("  mov bh, 0");  // bh needs to be set to 0 since the logical result still needs to be 16bit 
                               //(an if/while/do/for condition always tests whether a whole 16bit number could be 0 or 1, since conditions can be 16bit numbers as well)
       emitln("  pop a");
@@ -1587,7 +1580,6 @@ t_data parse_relational(void){
           emitln("  lodflgs");
           emitln("  xor al, %00000001");
           //emitln("  and al, %00000001 ; transform relational logical condition result into a single bit"); 
-          emitln("  mov ah, 0");
           break;
         case GREATER_THAN_OR_EQUAL:
           emitln("  cmp a, b");
@@ -1603,7 +1595,7 @@ t_data parse_relational(void){
           emitln("  cmp a, b");
           emitln("  lodflgs");
           emitln("  and al, %00000011"); 
-          emitln("  cmp al, %00000000"); 
+          emitln("  cmp al, 0"); 
           emitln("  lodflgs");
           //emitln("  and al, %00000001 ; >"); 
           break;
