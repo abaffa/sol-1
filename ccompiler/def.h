@@ -321,7 +321,7 @@ int label_tos_switch = 0;
 
 // functions
 char is_delimiter(char c);
-char is_id_char(char c);
+char is_identifier_char(char c);
 int find_keyword(char *keyword);
 int local_var_exists(char *var_name);
 int global_var_exists(char *var_name);
