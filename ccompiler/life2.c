@@ -4,7 +4,8 @@
 #define SIZE 40
 
 // Global arrays to hold the current and next states of the game grid
-char cells[SIZE][SIZE] = {
+char nextState[SIZE][SIZE];
+char currState[SIZE][SIZE] = {
 ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
 ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
 ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
@@ -28,31 +29,13 @@ char cells[SIZE][SIZE] = {
 
 };
 
-int main(void){
-	int i, j;
-    int n;
-
-    
-
-	for(;;){
-		show();
-		for(i = 1; i < SIZE-1; i++){
-			for(j = 1; j < SIZE-1; j++){
-                n = neighbours(i, j);
-				if(n < 2 || n > 4) cells[i][j] = ' ';
-	            else if(n == 3) cells[i][j] = '@';
-			}
-        }
-	}
-	return 0;
-}
 
 void show(void){
 	int i, j;
 
 	for(i = 0; i < SIZE; i++){
 		for(j = 0; j < SIZE; j++){
-			_putchar(cells[i][j]);
+			_putchar(currState[i][j]);
 		}
         _putchar(10);
 	}
@@ -60,7 +43,7 @@ void show(void){
 }
 
 int alive(int i, int j){
-	if(cells[i][j] == '@') return 1;
+	if(currState[i][j] == '@') return 1;
 	else return 0;
 }
 
@@ -68,15 +51,15 @@ int neighbours(int i, int j){
 	int count;
     count = 0;
 
-	if(alive(i-1, j)) count++;
-	if(alive(i-1, j-1)) count++;
-	if(alive(i-1, j+1)) count++;
-	if(alive(i, j-1)) count++;
-	if(alive(i, j+1)) count++;
+	if(currState[i-1][j] == '@') count++;
+	if(currState[i-1][j-1] == '@') count++;
+	if(currState[i-1][j+1] == '@') count++;
+	if(currState[i][j-1] == '@') count++;
+	if(currState[i][j+1] == '@') count++;
 
-	if(alive(i+1, j-1)) count++;
-	if(alive(i+1, j)) count++;
-	if(alive(i+1, j+1)) count++;
+	if(currState[i+1][j-1] == '@') count++;
+	if(currState[i+1][j] == '@') count++;
+	if(currState[i+1][j+1] == '@') count++;
 
 	return count;
 }
@@ -98,4 +81,35 @@ void _putchar(char c){
         call putchar
     }
     return;
+}
+
+
+int main(void){
+	int i, j;
+    int n;
+
+
+    for(i = 0; i < SIZE; i++){
+        for(j = 0; j < SIZE; j++){
+            nextState[i][j] = currState[i][j];
+        }
+    }
+
+	for(;;){
+		for(i = 1; i < SIZE-1; i++){
+			for(j = 1; j < SIZE-1; j++){
+                n = neighbours(i, j);
+				if(n < 2 || n > 3) nextState[i][j] = ' ';
+	            else if(n == 3) nextState[i][j] = '@';
+			}
+        }
+		for(i = 1; i < SIZE-1; i++){
+			for(j = 1; j < SIZE-1; j++){
+				currState[i][j] = nextState[i][j];
+			}
+        }
+		show();
+
+	}
+	return 0;
 }
