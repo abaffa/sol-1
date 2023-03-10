@@ -11,8 +11,6 @@ cmd_clear:
 
 	syscall sys_terminate_proc
 
-s_telnet_clear:	.db 27, "[2J", 27, "[H", 0
-
 .include "token.asm"
 .include "stdio.asm"
 .include "ctype.asm"

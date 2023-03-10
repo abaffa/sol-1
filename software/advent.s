@@ -214,7 +214,6 @@ adv_text_table:
 	.dw s_adv_9	
 	
 
-s_telnet_clear:	.db 27, "[2J", 27, "[H", 0
 
 s_adv_instr:	.db "INSTRUCTIONS:\n"
 				.db "n: go north\n"

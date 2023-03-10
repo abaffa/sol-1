@@ -473,7 +473,6 @@ s_prompt_PATH:		.db "PATH=", 0
 s_prompt_config:	.db "\nreading \'/etc/sh.conf\' configuration file\n", 0
 
 s_rebooting: 	.db 27, "[2J", 27, "[H", "rebooting", 0
-s_telnet_clear:	.db 27, "[2J", 27, "[H", 0
 s_dataentry:	.db "% ", 0
 s_syntax_err:	.db "\nsyntax error\n", 0
 s_hash:			.db " # ", 0

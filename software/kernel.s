@@ -2434,7 +2434,7 @@ _load_hex:
 	push d
 	push si
 	push di
-	sub sp, $6000				; string data block
+	sub sp, $7000				; string data block
 	mov c, 0
 	mov a, sp
 	inc a
@@ -2453,7 +2453,7 @@ __load_hex_loop:
 	inc c
 	jmp __load_hex_loop
 __load_hex_ret:
-	add sp, $6000
+	add sp, $7000
 	pop di
 	pop si
 	pop d
