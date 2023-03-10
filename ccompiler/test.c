@@ -1,8 +1,8 @@
 #inc_asm "lib/stdio.asm"
 
+  int i;
 int main() {
 
-  signed int i;
 
 
 	return;

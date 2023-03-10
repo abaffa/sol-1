@@ -1,14 +1,14 @@
-#define STRING_TABLE_SIZE      256
+#define STRING_TABLE_SIZE      512
 #define STRING_CONST_SIZE      512
-#define MAX_USER_FUNC          50
-#define MAX_GLOBAL_VARS        100
-#define MAX_LOCAL_VARS         100
-#define ID_LEN                 50
-#define CONST_LEN              50
+#define MAX_USER_FUNC          512
+#define MAX_GLOBAL_VARS        512
+#define MAX_LOCAL_VARS         512
+#define ID_LEN                 128
+#define CONST_LEN              128
 #define PROG_SIZE              1024 * 64
 #define MAX_MATRIX_DIMS        10
-#define MAX_ENUM_ELEMENTS      64
-#define MAX_ENUM_DECLARATIONS  64
+#define MAX_ENUM_ELEMENTS      128
+#define MAX_ENUM_DECLARATIONS  128
 #define MAX_DEFINES            128
 
 typedef enum {
@@ -289,13 +289,13 @@ char string_const[STRING_CONST_SIZE];  // holds string and char constants withou
 char *prog;                           // pointer to the current program position
 char c_in[PROG_SIZE];               // C program-in buffer
 char c_preproc_out[PROG_SIZE];     // pre-processor out buffer
-char asm_out[32*1024];             // ASM output
-char asm_optimized[32*1024];             // ASM output optimized
+char asm_out[64*1024];             // ASM output
+char asm_optimized[64*1024];             // ASM output optimized
 char *asm_p;
 char *data_p;
 char asm_line[256];
 char includes_list_asm[1024];         // keeps a list of all included files
-char data_block_asm[1024*10];
+char data_block_asm[1024*32];
 char *data_block_p;
 
 t_break_type current_break_type;      // is it a for, while, or switch?
