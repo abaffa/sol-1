@@ -333,8 +333,9 @@ void pre_scan(void){
     }
     
     if(tok == CONST) get();
+    if(tok == SIGNED || tok == UNSIGNED || tok == LONG) get();
     if(tok != VOID && tok != CHAR && tok != INT && tok != FLOAT && tok != DOUBLE) error(NOT_VAR_OR_FUNC_OUTSIDE);
-    
+
     get();
     
     while(tok == STAR) get();
@@ -1047,6 +1048,9 @@ void parse_block(void){
   do{
     get();
     switch(tok){
+      case SIGNED:
+      case UNSIGNED:
+      case LONG:
       case INT:
       case CHAR:
       case FLOAT:
@@ -2362,20 +2366,28 @@ int get_enum_val(char *element_name){
   return -1;
 }
 
-
 void declare_global(void){
-  t_data_type dt;
+  t_data data;
   int ind_level;
   char constant = 0;
   char temp[512 + 8];
+  t_modifier mod;
 
-  get(); // gets past the data type
+  get(); 
   if(tok == CONST){
     constant = 1;
     get();
   }
+
+  data.smod = MOD_SIGNED; // set as signed by default
+  while(tok == SIGNED || tok == UNSIGNED || tok == LONG){
+    if(tok == SIGNED) data.smod = MOD_SIGNED;
+    else if(tok == UNSIGNED) data.smod = MOD_UNSIGNED;
+    else if(tok == LONG) data.lmod = MOD_LONG;
+    get();
+  }
   
-  dt = get_data_type_from_tok(tok);
+  data.type = get_data_type_from_tok(tok);
 
   do{
     if(global_var_tos == MAX_GLOBAL_VARS) error(EXCEEDED_GLOBAL_VAR_LIMIT);
@@ -2391,12 +2403,12 @@ void declare_global(void){
     }
 // *********************************************************************************************
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
-    if(dt == DT_VOID && ind_level == 0) error(INVALID_TYPE_IN_VARIABLE);
+    if(data.type == DT_VOID && ind_level == 0) error(INVALID_TYPE_IN_VARIABLE);
 
     // checks if there is another global variable with the same name
     if(find_global_var(token) != -1) error(DUPLICATE_GLOBAL_VARIABLE);
     
-    global_variables[global_var_tos].data.type = dt;
+    global_variables[global_var_tos].data.type = data.type;
     global_variables[global_var_tos].data.ind_level = ind_level;
     strcpy(global_variables[global_var_tos].var_name, token);
 
@@ -2418,7 +2430,7 @@ void declare_global(void){
     }
 
     // _data section for var is emmitted if:
-    // ind_level == 1 && dt_char
+    // ind_level == 1 && data.type_char
     // var is a matrix (dims > 0)
     // checks for variable initialization
     if(tok == ASSIGNMENT){
@@ -2428,7 +2440,7 @@ void declare_global(void){
         expect(OPENING_BRACE, OPENING_BRACE_EXPECTED);
         sprintf(temp, "%s_data: \n", global_variables[global_var_tos].var_name);
         emit_data(temp);
-        emit_data_dbdw(ind_level, dim, dt);
+        emit_data_dbdw(ind_level, dim, data.type);
         j = 0;
         do{
           get();
@@ -2451,7 +2463,7 @@ void declare_global(void){
           get();
           if(j % 30 == 0){ // split into multiple lines due to TASM limitation of how many items per .dw directive
             emit_data("\n");
-            emit_data_dbdw(ind_level, dim, dt);
+            emit_data_dbdw(ind_level, dim, data.type);
           }
         } while(tok == COMMA);
         // fill in the remaining unitialized array values with 0's 
@@ -2463,11 +2475,11 @@ void declare_global(void){
       }
       else{
         get();
-        switch(dt){
+        switch(data.type){
           case DT_VOID:
             sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
             emit_data(temp);
-            emit_data_dbdw(ind_level, dim, dt);
+            emit_data_dbdw(ind_level, dim, data.type);
             sprintf(temp, "%u, ", atoi(token));
             emit_data(temp);
             break;
@@ -2476,7 +2488,7 @@ void declare_global(void){
               if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
               sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
               emit_data(temp);
-              emit_data_dbdw(ind_level, dim, dt);
+              emit_data_dbdw(ind_level, dim, data.type);
               sprintf(temp, "%s, 0\n", token); // TODO: do not require char pointer initialization to be a string only!
               emit_data(temp);
               sprintf(temp, "%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
@@ -2485,7 +2497,7 @@ void declare_global(void){
             else{
               sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
               emit_data(temp);
-              emit_data_dbdw(ind_level, dim, dt);
+              emit_data_dbdw(ind_level, dim, data.type);
               if(tok_type == CHAR_CONST){
                 sprintf(temp, "'%c'\n", string_const[0]);
                 emit_data(temp);
@@ -2499,7 +2511,7 @@ void declare_global(void){
           case DT_INT:
             sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
             emit_data(temp);
-            emit_data_dbdw(ind_level, dim, dt);
+            emit_data_dbdw(ind_level, dim, data.type);
             if(ind_level > 0){
                 sprintf(temp, "%u\n", atoi(token));
                 emit_data(temp);
@@ -2593,7 +2605,6 @@ t_data_type get_data_type_from_tok(t_token t){
 }
 
 void declare_local(void){                        
-  t_data_type dt;
   t_var new_var;
   char *temp_prog;
   
@@ -2604,12 +2615,19 @@ void declare_local(void){
     get();
   }
   else new_var.constant = 0;
-  dt = get_data_type_from_tok(tok);
+
+  new_var.data.smod = MOD_SIGNED; // set as signed by default
+  while(tok == SIGNED || tok == UNSIGNED || tok == LONG){
+    if(tok == SIGNED) new_var.data.smod = MOD_SIGNED;
+    else if(tok == UNSIGNED) new_var.data.smod = MOD_UNSIGNED;
+    else if(tok == LONG) new_var.data.lmod = MOD_LONG;
+    get();
+  }
+  new_var.data.type = get_data_type_from_tok(tok);
   do{
     if(function_table[current_func_id].local_var_tos == MAX_LOCAL_VARS) error(LOCAL_VAR_LIMIT_REACHED);
     new_var.is_parameter = 0;
     new_var.function_id = current_func_id; // set variable owner function
-    new_var.data.type = dt;
 // **************** checks whether this is a pointer declaration *******************************
     new_var.data.ind_level = 0;
     get();

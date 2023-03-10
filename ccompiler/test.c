@@ -1,32 +1,9 @@
 #inc_asm "lib/stdio.asm"
 
-int m1[10] = {123, 111, 123};
-int m2[10] = {0, 1, 2};
-
 int main() {
 
-  int i1, i2, i3, i4;
-  i1=1;
-  i2=1;
-  i3=1;
-  i4=1;
+  signed int i;
 
-  printn(--i1);
-  print("\n");
-  printn(i1);
-  print("\n");
-  printn(++i2);
-  print("\n");
-  printn(i2);
-  print("\n");
-  printn(i3--);
-  print("\n");
-  printn(i3);
-  print("\n");
-  printn(i4++);
-  print("\n");
-  printn(i4);
-  print("\n");
 
 	return;
 

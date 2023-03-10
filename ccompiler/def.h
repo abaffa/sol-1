@@ -80,12 +80,12 @@ typedef enum {
 } t_data_type;
 
 typedef enum {
-  MOD_SIGNED = 1, MOD_UNSIGNED, MOD_SHORT, MOD_LONG
+  MOD_UNSIGNED, MOD_SIGNED, MOD_LONG
 } t_modifier;
 
 typedef struct {
   t_data_type type;
-  t_modifier smod, lmod0, lmod1;
+  t_modifier smod, lmod;
   t_value value;
   int ind_level; // holds the pointer indirection level
 } t_data;
@@ -132,6 +132,10 @@ struct _keyword_table{
   "double",   DOUBLE,
 
   "const",    CONST,
+  "signed",   SIGNED,
+  "unsigned", UNSIGNED,
+  "long",     LONG,
+
   "enum",     ENUM,
   "struct",   STRUCT,
   "sizeof",   SIZEOF,
