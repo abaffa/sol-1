@@ -1,4 +1,4 @@
-; --- FILENAME: life2.c
+; --- FILENAME: test.c
 .include "lib/kernel.exp"
 .org PROC_TEXT_ORG
 
@@ -7,983 +7,166 @@
 main:
   push bp
   mov bp, sp
-  sub sp, 2 ; i
-  sub sp, 2 ; j
-  sub sp, 2 ; n
-_for1_init:
-  mov b, 0
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-_for1_cond:
-  mov b, [bp + -1] ; i
-  push a
-  mov a, b
-  mov b, 40
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for1_exit
-_for1_block:
-_for2_init:
-  mov b, 0
-  push a
-  mov a, b
-  mov [bp + -3], a ; j
-  pop a
-_for2_cond:
-  mov b, [bp + -3] ; j
-  push a
-  mov a, b
-  mov b, 40
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for2_exit
-_for2_block:
-  mov b, [nextState]
-  mov d, b
-  push d
-  mov b, [bp + -1] ; i
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + -3] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  push d
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -1] ; i
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + -3] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  pop d
-  mov al, bl
-  mov [d], al
-_for2_update:
-  mov b, [bp + -3] ; j
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -3], a ; j
-  pop a
-  mov b, a
-  jmp _for2_cond
-_for2_exit:
-_for1_update:
-  mov b, [bp + -1] ; i
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-  mov b, a
-  jmp _for1_cond
-_for1_exit:
-_for3_init:
-_for3_cond:
-_for3_block:
-_for4_init:
+  sub sp, 2 ; i1
+  sub sp, 2 ; i2
+  sub sp, 2 ; i3
+  sub sp, 2 ; i4
   mov b, 1
   push a
   mov a, b
-  mov [bp + -1], a ; i
+  mov [bp + -1], a ; i1
   pop a
-_for4_cond:
-  mov b, [bp + -1] ; i
-  push a
-  mov a, b
-  mov b, 40
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for4_exit
-_for4_block:
-_for5_init:
   mov b, 1
   push a
   mov a, b
-  mov [bp + -3], a ; j
+  mov [bp + -3], a ; i2
   pop a
-_for5_cond:
-  mov b, [bp + -3] ; j
-  push a
-  mov a, b
-  mov b, 40
-  push a
-  mov a, b
   mov b, 1
-  sub a, b
-  mov b, a
+  push a
+  mov a, b
+  mov [bp + -5], a ; i3
   pop a
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
+  mov b, 1
+  push a
+  mov a, b
+  mov [bp + -7], a ; i4
   pop a
-  cmp b, 0
-  je _for5_exit
-_for5_block:
-  mov b, [bp + -1] ; i
+  mov b, [bp + -1] ; i1
+  dec b
+  push a
+  mov a, b
+  mov [bp + -1], a ; i1
+  pop a
   swp b
   push b
-  mov b, [bp + -3] ; j
+  call printn
+  add sp, 2
+  mov b, _string_0 ; "\n"
   swp b
   push b
-  call neighbours
-  add sp, 4
+  call print
+  add sp, 2
+  mov b, [bp + -1] ; i1
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, _string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, [bp + -3] ; i2
+  inc b
   push a
   mov a, b
-  mov [bp + -5], a ; n
+  mov [bp + -3], a ; i2
   pop a
-_if6_cond:
-  mov b, [bp + -5] ; n
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, _string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, [bp + -3] ; i2
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, _string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, [bp + -5] ; i3
+  mov a, b
+  dec b
   push a
   mov a, b
-  mov b, 2
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
+  mov [bp + -5], a ; i3
+  pop a
   mov b, a
-  pop a
-  push a
-  mov a, b
-  mov b, [bp + -5] ; n
-  push a
-  mov a, b
-  mov b, 3
-  cmp a, b
-  lodflgs
-  and al, %00000011
-  cmp al, 0
-  lodflgs
-  mov ah, 0
-  mov b, a
-  pop a
-  or a, b
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if6_else
-_if6_true:
-  mov b, [nextState]
-  mov d, b
-  push d
-  mov b, [bp + -1] ; i
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + -3] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  push d
-  mov b, ' '
-  pop d
-  mov al, bl
-  mov [d], al
-  jmp _if6_exit
-_if6_else:
-_if7_cond:
-  mov b, [bp + -5] ; n
-  push a
-  mov a, b
-  mov b, 3
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if7_exit
-_if7_true:
-  mov b, [nextState]
-  mov d, b
-  push d
-  mov b, [bp + -1] ; i
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + -3] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  push d
-  mov b, '@'
-  pop d
-  mov al, bl
-  mov [d], al
-  jmp _if7_exit
-_if7_exit:
-_if6_exit:
-_for5_update:
-  mov b, [bp + -3] ; j
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, _string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, [bp + -5] ; i3
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, _string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, [bp + -7] ; i4
   mov a, b
   inc b
   push a
   mov a, b
-  mov [bp + -3], a ; j
+  mov [bp + -7], a ; i4
   pop a
   mov b, a
-  jmp _for5_cond
-_for5_exit:
-_for4_update:
-  mov b, [bp + -1] ; i
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-  mov b, a
-  jmp _for4_cond
-_for4_exit:
-_for8_init:
-  mov b, 1
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-_for8_cond:
-  mov b, [bp + -1] ; i
-  push a
-  mov a, b
-  mov b, 40
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for8_exit
-_for8_block:
-_for9_init:
-  mov b, 1
-  push a
-  mov a, b
-  mov [bp + -3], a ; j
-  pop a
-_for9_cond:
-  mov b, [bp + -3] ; j
-  push a
-  mov a, b
-  mov b, 40
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for9_exit
-_for9_block:
-  mov b, [currState]
-  mov d, b
-  push d
-  mov b, [bp + -1] ; i
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + -3] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  push d
-  mov b, [nextState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -1] ; i
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + -3] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  pop d
-  mov al, bl
-  mov [d], al
-_for9_update:
-  mov b, [bp + -3] ; j
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -3], a ; j
-  pop a
-  mov b, a
-  jmp _for9_cond
-_for9_exit:
-_for8_update:
-  mov b, [bp + -1] ; i
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-  mov b, a
-  jmp _for8_cond
-_for8_exit:
-  call show
-_for3_update:
-  jmp _for3_cond
-_for3_exit:
-  mov b, 0
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, _string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, [bp + -7] ; i4
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, _string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
   leave
   syscall sys_terminate_proc
 
-show:
+scann:
   push bp
   mov bp, sp
-  sub sp, 2 ; i
-  sub sp, 2 ; j
-_for10_init:
-  mov b, 0
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-_for10_cond:
-  mov b, [bp + -1] ; i
-  push a
-  mov a, b
-  mov b, 40
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for10_exit
-_for10_block:
-_for11_init:
-  mov b, 0
-  push a
-  mov a, b
-  mov [bp + -3], a ; j
-  pop a
-_for11_cond:
-  mov b, [bp + -3] ; j
-  push a
-  mov a, b
-  mov b, 40
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for11_exit
-_for11_block:
-_ternary12_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -1] ; i
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + -3] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _ternary12_false
-_ternary12_true:
-  mov b, _string_0 ; "@ "
-  swp b
+  sub sp, 2 ; m
+
+; --- BEGIN INLINE ASM BLOCK
+  call scan_u16d
+  mov [bp + -1], a
+; --- END INLINE ASM BLOCK
+
+  lea d, [bp + 5] ; n
+  mov b, [d]
   push b
-  call print
-  add sp, 2
-  jmp _ternary12_exit
-_ternary12_false:
-  mov b, _string_1 ; ". "
-  swp b
-  push b
-  call print
-  add sp, 2
-_ternary12_exit:
-_for11_update:
-  mov b, [bp + -3] ; j
+  mov b, [bp + -1] ; m
+  pop d
   mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -3], a ; j
-  pop a
-  mov b, a
-  jmp _for11_cond
-_for11_exit:
-  mov b, 10
-  push bl
-  call _putchar
-  add sp, 1
-_for10_update:
-  mov b, [bp + -1] ; i
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-  mov b, a
-  jmp _for10_cond
-_for10_exit:
+  mov [d], a
   leave
   ret
 
-alive:
+printn:
   push bp
   mov bp, sp
-_if13_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + 7] ; i
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + 5] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if13_else
-_if13_true:
-  mov b, 1
-  leave
-  ret
-  jmp _if13_exit
-_if13_else:
-  mov b, 0
-  leave
-  ret
-_if13_exit:
 
-neighbours:
-  push bp
-  mov bp, sp
-  sub sp, 2 ; count
-  mov b, 0
-  push a
-  mov a, b
-  mov [bp + -1], a ; count
-  pop a
-_if14_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + 7] ; i
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + 5] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if14_exit
-_if14_true:
-  mov b, [bp + -1] ; count
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; count
-  pop a
-  mov b, a
-  jmp _if14_exit
-_if14_exit:
-_if15_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + 7] ; i
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + 5] ; j
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if15_exit
-_if15_true:
-  mov b, [bp + -1] ; count
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; count
-  pop a
-  mov b, a
-  jmp _if15_exit
-_if15_exit:
-_if16_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + 7] ; i
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + 5] ; j
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if16_exit
-_if16_true:
-  mov b, [bp + -1] ; count
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; count
-  pop a
-  mov b, a
-  jmp _if16_exit
-_if16_exit:
-_if17_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + 7] ; i
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + 5] ; j
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if17_exit
-_if17_true:
-  mov b, [bp + -1] ; count
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; count
-  pop a
-  mov b, a
-  jmp _if17_exit
-_if17_exit:
-_if18_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + 7] ; i
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + 5] ; j
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if18_exit
-_if18_true:
-  mov b, [bp + -1] ; count
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; count
-  pop a
-  mov b, a
-  jmp _if18_exit
-_if18_exit:
-_if19_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + 7] ; i
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + 5] ; j
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if19_exit
-_if19_true:
-  mov b, [bp + -1] ; count
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; count
-  pop a
-  mov b, a
-  jmp _if19_exit
-_if19_exit:
-_if20_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + 7] ; i
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + 5] ; j
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if20_exit
-_if20_true:
-  mov b, [bp + -1] ; count
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; count
-  pop a
-  mov b, a
-  jmp _if20_exit
-_if20_exit:
-_if21_cond:
-  mov b, [currState]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + 7] ; i
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 40
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + 5] ; j
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  mov bl, [d]
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  mov b, '@'
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if21_exit
-_if21_true:
-  mov b, [bp + -1] ; count
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; count
-  pop a
-  mov b, a
-  jmp _if21_exit
-_if21_exit:
-  mov b, [bp + -1] ; count
+; --- BEGIN INLINE ASM BLOCK
+  mov a, [bp + 5]
+  call print_u16d
+; --- END INLINE ASM BLOCK
+
   leave
   ret
 
@@ -999,56 +182,18 @@ print:
 
   leave
   ret
-
-_putchar:
-  push bp
-  mov bp, sp
-
-; --- BEGIN INLINE ASM BLOCK
-  mov al, [bp + 5]
-  mov ah, al
-  call putchar
-; --- END INLINE ASM BLOCK
-
-  leave
-  ret
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
-nextState_data: .fill 1600, 0
-nextState: .dw nextState_data
-currState_data: 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '@', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', '@', ' ', '@', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', '@', '@', ' ', ' ', ' ', ' ', ' ', ' ', '@', '@', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '@', '@', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '@', ' ', ' ', ' ', '@', ' ', ' ', ' ', ' ', '@', '@', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', '@', '@', ' ', ' ', ' ', ' ', '@', '@', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '@', ' ', ' ', ' ', ' ', ' ', '@', 
-.db ' ', ' ', ' ', '@', '@', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '@', '@', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', '@', ' ', ' ', ' ', '@', ' ', '@', '@', ' ', ' ', ' ', ' ', '@', ' ', '@', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '@', ' ', ' ', ' ', ' ', ' ', '@', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '@', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '@', ' ', ' ', ' ', '@', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', '@', '@', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.db ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
-.fill 800, 0
-currState: .dw currState_data
-_string_0: .db "@ ", 0
-_string_1: .db ". ", 0
+m1_data: 
+.dw 123,111,123,
+.fill 14, 0
+m1: .dw m1_data
+m2_data: 
+.dw 0,1,2,
+.fill 14, 0
+m2: .dw m2_data
+_string_0: .db "\n", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK

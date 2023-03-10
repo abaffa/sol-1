@@ -85,7 +85,7 @@ typedef enum {
 
 typedef struct {
   t_data_type type;
-  t_modifier smodf, lmodf, modf3;
+  t_modifier smod, lmod0, lmod1;
   t_value value;
   int ind_level; // holds the pointer indirection level
 } t_data;
