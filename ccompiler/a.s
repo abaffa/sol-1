@@ -1829,7 +1829,7 @@ _for30_update:
   mov b, a
   jmp _for30_cond
 _for30_exit:
-  call times
+  call dividedby
   mov b, 2
   mov [__datumpos], b
 _for31_init:
@@ -2191,296 +2191,6 @@ _for36_update:
   mov b, a
   jmp _for36_cond
 _for36_exit:
-  call dividedby
-  mov b, 2
-  mov [__datumpos], b
-_for37_init:
-  mov b, [__datumpos] ; datumpos
-  push a
-  mov a, b
-  mov b, 6
-  mul a, b
-  pop a
-  mov [__pos], b
-_for37_cond:
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, [__datumpos] ; datumpos
-  push a
-  mov a, b
-  mov b, 6
-  mul a, b
-  pop a
-  push a
-  mov a, b
-  mov b, 6
-  add a, b
-  mov b, a
-  pop a
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for37_exit
-_for37_block:
-  mov b, [__datum]
-  mov d, b
-  push d
-  mov b, [__pos] ; pos
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, [__cnarr]
-  push a
-  mov d, b
-  push d
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, [__datumpos] ; datumpos
-  push a
-  mov a, b
-  mov b, 6
-  mul a, b
-  pop a
-  sub a, b
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  mov b, 2
-  mul a, b
-  pop a
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  push a
-  mov a, b
-  mov b, 100
-  mul a, b
-  pop a
-  push a
-  mov a, b
-  mov b, [__cnarr]
-  push a
-  mov d, b
-  push d
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, [__datumpos] ; datumpos
-  push a
-  mov a, b
-  mov b, 6
-  mul a, b
-  pop a
-  sub a, b
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  mov b, 2
-  mul a, b
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  add a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, b
-  mov [d], a
-_for37_update:
-  mov b, [__pos] ; pos
-  mov a, b
-  inc b
-  mov [__pos], b
-  mov b, a
-  jmp _for37_cond
-_for37_exit:
-_for38_init:
-  mov b, 18
-  mov [__pos], b
-_for38_cond:
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, 12
-  cmp a, b
-  lodflgs
-  and al, %00000011
-  cmp al, 0
-  lodflgs
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for38_exit
-_for38_block:
-_if39_cond:
-  mov b, [__datum]
-  push a
-  mov d, b
-  push d
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  push a
-  mov a, b
-  mov b, 1000
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if39_exit
-_if39_true:
-  mov b, 0
-  swp b
-  push b
-  call prnnum
-  add sp, 2
-  jmp _if39_exit
-_if39_exit:
-_if40_cond:
-  mov b, [__datum]
-  push a
-  mov d, b
-  push d
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  push a
-  mov a, b
-  mov b, 100
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if40_exit
-_if40_true:
-  mov b, 0
-  swp b
-  push b
-  call prnnum
-  add sp, 2
-  jmp _if40_exit
-_if40_exit:
-_if41_cond:
-  mov b, [__datum]
-  push a
-  mov d, b
-  push d
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  push a
-  mov a, b
-  mov b, 10
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if41_exit
-_if41_true:
-  mov b, 0
-  swp b
-  push b
-  call prnnum
-  add sp, 2
-  jmp _if41_exit
-_if41_exit:
-  mov b, [__datum]
-  push a
-  mov d, b
-  push d
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  swp b
-  push b
-  call prnnumspace
-  add sp, 2
-_for38_update:
-  mov b, [__pos] ; pos
-  mov a, b
-  dec b
-  mov [__pos], b
-  mov b, a
-  jmp _for38_cond
-_for38_exit:
-  call prnnl
   leave
   syscall sys_terminate_proc
 
@@ -2560,7 +2270,7 @@ fixsignin:
   mov [__bsign], b
   mov b, 0
   mov [__csign], b
-_if42_cond:
+_if37_cond:
   mov b, [__anarr]
   push a
   mov d, b
@@ -2584,8 +2294,8 @@ _if42_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if42_exit
-_if42_true:
+  je _if37_exit
+_if37_true:
   mov b, [__anarr]
   push a
   mov d, b
@@ -2642,9 +2352,9 @@ _if42_true:
   mov [d], a
   mov b, 1
   mov [__asign], b
-  jmp _if42_exit
-_if42_exit:
-_if43_cond:
+  jmp _if37_exit
+_if37_exit:
+_if38_cond:
   mov b, [__bnarr]
   push a
   mov d, b
@@ -2668,8 +2378,8 @@ _if43_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if43_exit
-_if43_true:
+  je _if38_exit
+_if38_true:
   mov b, [__bnarr]
   push a
   mov d, b
@@ -2726,15 +2436,15 @@ _if43_true:
   mov [d], a
   mov b, 1
   mov [__bsign], b
-  jmp _if43_exit
-_if43_exit:
+  jmp _if38_exit
+_if38_exit:
   leave
   ret
 
 fixsignout:
   push bp
   mov bp, sp
-_if44_cond:
+_if39_cond:
   mov b, [__csign] ; csign
   push a
   mov a, b
@@ -2746,8 +2456,8 @@ _if44_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if44_exit
-_if44_true:
+  je _if39_exit
+_if39_true:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -2779,8 +2489,8 @@ _if44_true:
   mov [d], a
   mov b, 0
   mov [__csign], b
-  jmp _if44_exit
-_if44_exit:
+  jmp _if39_exit
+_if39_exit:
   leave
   ret
 
@@ -2789,10 +2499,10 @@ fixcsizezero:
   mov bp, sp
   mov b, 1
   mov [__allzeroes], b
-_for45_init:
+_for40_init:
   mov b, 1
   mov [__pos], b
-_for45_cond:
+_for40_cond:
   mov b, [__pos] ; pos
   push a
   mov a, b
@@ -2805,9 +2515,9 @@ _for45_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for45_exit
-_for45_block:
-_if46_cond:
+  je _for40_exit
+_for40_block:
+_if41_cond:
   mov b, [__cnarr]
   push a
   mov d, b
@@ -2830,22 +2540,22 @@ _if46_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if46_exit
-_if46_true:
+  je _if41_exit
+_if41_true:
   mov b, 0
   mov [__allzeroes], b
-  jmp _for45_exit ; for break
-  jmp _if46_exit
-_if46_exit:
-_for45_update:
+  jmp _for40_exit ; for break
+  jmp _if41_exit
+_if41_exit:
+_for40_update:
   mov b, [__pos] ; pos
   mov a, b
   inc b
   mov [__pos], b
   mov b, a
-  jmp _for45_cond
-_for45_exit:
-_if47_cond:
+  jmp _for40_cond
+_for40_exit:
+_if42_cond:
   mov b, [__allzeroes] ; allzeroes
   push a
   mov a, b
@@ -2857,13 +2567,13 @@ _if47_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if47_exit
-_if47_true:
+  je _if42_exit
+_if42_true:
   mov b, 0
   mov [__csign], b
-  jmp _if47_exit
-_if47_exit:
-_if48_cond:
+  jmp _if42_exit
+_if42_exit:
+_if43_cond:
   mov b, [__cnarr]
   push a
   mov d, b
@@ -2887,14 +2597,14 @@ _if48_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if48_exit
-_if48_true:
+  je _if43_exit
+_if43_true:
   mov b, 0
   mov [__csign], b
-_for49_init:
+_for44_init:
   mov b, 1
   mov [__pos], b
-_for49_cond:
+_for44_cond:
   mov b, [__pos] ; pos
   push a
   mov a, b
@@ -2907,8 +2617,8 @@ _for49_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for49_exit
-_for49_block:
+  je _for44_exit
+_for44_block:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -2922,26 +2632,26 @@ _for49_block:
   pop d
   mov a, b
   mov [d], a
-_for49_update:
+_for44_update:
   mov b, [__pos] ; pos
   mov a, b
   inc b
   mov [__pos], b
   mov b, a
-  jmp _for49_cond
-_for49_exit:
-  jmp _if48_exit
-_if48_exit:
+  jmp _for44_cond
+_for44_exit:
+  jmp _if43_exit
+_if43_exit:
   leave
   ret
 
 swapab:
   push bp
   mov bp, sp
-_for50_init:
+_for45_init:
   mov b, 0
   mov [__swappos], b
-_for50_cond:
+_for45_cond:
   mov b, [__swappos] ; swappos
   push a
   mov a, b
@@ -2954,8 +2664,8 @@ _for50_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for50_exit
-_for50_block:
+  je _for45_exit
+_for45_block:
   mov b, [__anarr]
   mov d, b
   push d
@@ -3073,14 +2783,14 @@ _for50_block:
   pop d
   mov a, b
   mov [d], a
-_for50_update:
+_for45_update:
   mov b, [__swappos] ; swappos
   mov a, b
   inc b
   mov [__swappos], b
   mov b, a
-  jmp _for50_cond
-_for50_exit:
+  jmp _for45_cond
+_for45_exit:
   leave
   ret
 
@@ -3099,10 +2809,10 @@ checkabsabsize:
   mov [__aeqb], b
   mov b, 0
   mov [__aneqb], b
-_for51_init:
+_for46_init:
   mov b, 12
   mov [__psizepos], b
-_for51_cond:
+_for46_cond:
   mov b, [__psizepos] ; psizepos
   push a
   mov a, b
@@ -3116,8 +2826,8 @@ _for51_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for51_exit
-_for51_block:
+  je _for46_exit
+_for46_block:
   mov b, [__psizepos] ; psizepos
   push a
   mov a, b
@@ -3126,7 +2836,7 @@ _for51_block:
   mov b, a
   pop a
   mov [__sizepos], b
-_if52_cond:
+_if47_cond:
   mov b, [__anarr]
   push a
   mov d, b
@@ -3160,17 +2870,17 @@ _if52_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if52_exit
-_if52_true:
+  je _if47_exit
+_if47_true:
   mov b, 1
   mov [__aneqb], b
   mov b, 1
   mov [__agtb], b
   mov b, 1
   mov [__ageb], b
-  jmp _if52_exit
-_if52_exit:
-_if53_cond:
+  jmp _if47_exit
+_if47_exit:
+_if48_cond:
   mov b, [__anarr]
   push a
   mov d, b
@@ -3203,17 +2913,17 @@ _if53_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if53_exit
-_if53_true:
+  je _if48_exit
+_if48_true:
   mov b, 1
   mov [__aneqb], b
   mov b, 1
   mov [__bgta], b
   mov b, 1
   mov [__bgea], b
-  jmp _if53_exit
-_if53_exit:
-_if54_cond:
+  jmp _if48_exit
+_if48_exit:
+_if49_cond:
   mov b, [__aneqb] ; aneqb
   push a
   mov a, b
@@ -3225,20 +2935,20 @@ _if54_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if54_exit
-_if54_true:
-  jmp _for51_exit ; for break
-  jmp _if54_exit
-_if54_exit:
-_for51_update:
+  je _if49_exit
+_if49_true:
+  jmp _for46_exit ; for break
+  jmp _if49_exit
+_if49_exit:
+_for46_update:
   mov b, [__psizepos] ; psizepos
   mov a, b
   dec b
   mov [__psizepos], b
   mov b, a
-  jmp _for51_cond
-_for51_exit:
-_if55_cond:
+  jmp _for46_cond
+_for46_exit:
+_if50_cond:
   mov b, [__aneqb] ; aneqb
   push a
   mov a, b
@@ -3250,16 +2960,16 @@ _if55_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if55_exit
-_if55_true:
+  je _if50_exit
+_if50_true:
   mov b, 1
   mov [__aeqb], b
   mov b, 1
   mov [__ageb], b
   mov b, 1
   mov [__bgea], b
-  jmp _if55_exit
-_if55_exit:
+  jmp _if50_exit
+_if50_exit:
   leave
   ret
 
@@ -3268,10 +2978,10 @@ protoplus:
   mov bp, sp
   mov b, 0
   mov [__carry], b
-_for56_init:
+_for51_init:
   mov b, 0
   mov [__pos], b
-_for56_cond:
+_for51_cond:
   mov b, [__pos] ; pos
   push a
   mov a, b
@@ -3284,8 +2994,8 @@ _for56_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for56_exit
-_for56_block:
+  je _for51_exit
+_for51_block:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -3333,7 +3043,7 @@ _for56_block:
   mov [d], a
   mov b, 0
   mov [__carry], b
-_if57_cond:
+_if52_cond:
   mov b, [__cnarr]
   push a
   mov d, b
@@ -3357,8 +3067,8 @@ _if57_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if57_exit
-_if57_true:
+  je _if52_exit
+_if52_true:
   mov b, 1
   mov [__carry], b
   mov b, [__cnarr]
@@ -3390,16 +3100,16 @@ _if57_true:
   pop d
   mov a, b
   mov [d], a
-  jmp _if57_exit
-_if57_exit:
-_for56_update:
+  jmp _if52_exit
+_if52_exit:
+_for51_update:
   mov b, [__pos] ; pos
   mov a, b
   inc b
   mov [__pos], b
   mov b, a
-  jmp _for56_cond
-_for56_exit:
+  jmp _for51_cond
+_for51_exit:
   leave
   ret
 
@@ -3408,10 +3118,10 @@ protominus:
   mov bp, sp
   mov b, 0
   mov [__carry], b
-_for58_init:
+_for53_init:
   mov b, 0
   mov [__pos], b
-_for58_cond:
+_for53_cond:
   mov b, [__pos] ; pos
   push a
   mov a, b
@@ -3424,11 +3134,11 @@ _for58_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for58_exit
-_for58_block:
+  je _for53_exit
+_for53_block:
   mov b, 0
   mov [__nextcarry], b
-_if59_cond:
+_if54_cond:
   mov b, [__bnarr]
   push a
   mov d, b
@@ -3468,8 +3178,8 @@ _if59_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if59_exit
-_if59_true:
+  je _if54_exit
+_if54_true:
   mov b, [__anarr]
   mov d, b
   push d
@@ -3501,8 +3211,8 @@ _if59_true:
   mov [d], a
   mov b, 1
   mov [__nextcarry], b
-  jmp _if59_exit
-_if59_exit:
+  jmp _if54_exit
+_if54_exit:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -3550,15 +3260,15 @@ _if59_exit:
   mov [d], a
   mov b, [__nextcarry] ; nextcarry
   mov [__carry], b
-_for58_update:
+_for53_update:
   mov b, [__pos] ; pos
   mov a, b
   inc b
   mov [__pos], b
   mov b, a
-  jmp _for58_cond
-_for58_exit:
-_if60_cond:
+  jmp _for53_cond
+_for53_exit:
+_if55_cond:
   mov b, [__carry] ; carry
   push a
   mov a, b
@@ -3570,24 +3280,24 @@ _if60_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if60_exit
-_if60_true:
+  je _if55_exit
+_if55_true:
   mov b, 1
   mov [__csign], b
   mov b, 0
   mov [__carry], b
-  jmp _if60_exit
-_if60_exit:
+  jmp _if55_exit
+_if55_exit:
   leave
   ret
 
 pminus:
   push bp
   mov bp, sp
-_for61_init:
+_for56_init:
   mov b, 0
   mov [__divi], b
-_for61_cond:
+_for56_cond:
   mov b, [__divi] ; divi
   push a
   mov a, b
@@ -3600,8 +3310,8 @@ _for61_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for61_exit
-_for61_block:
+  je _for56_exit
+_for56_block:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -3615,16 +3325,16 @@ _for61_block:
   pop d
   mov a, b
   mov [d], a
-_for61_update:
+_for56_update:
   mov b, [__divi] ; divi
   mov a, b
   inc b
   mov [__divi], b
   mov b, a
-  jmp _for61_cond
-_for61_exit:
+  jmp _for56_cond
+_for56_exit:
   call checkabsabsize
-_if62_cond:
+_if57_cond:
   mov b, [__asign] ; asign
   push a
   mov a, b
@@ -3640,6 +3350,305 @@ _if62_cond:
   cmp a, 0
   lodflgs
   mov b, [__aeqb] ; aeqb
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  cmp b, 0
+  je _if57_exit
+_if57_true:
+  mov b, 0
+  mov [__csign], b
+_for58_init:
+  mov b, 1
+  mov [__pos], b
+_for58_cond:
+  mov b, [__pos] ; pos
+  push a
+  mov a, b
+  mov b, 12
+  cmp a, b
+  lodflgs
+  and al, %00000010 ; <
+  shr al
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for58_exit
+_for58_block:
+  mov b, [__cnarr]
+  mov d, b
+  push d
+  mov b, [__pos] ; pos
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, b
+  mov [d], a
+_for58_update:
+  mov b, [__pos] ; pos
+  mov a, b
+  inc b
+  mov [__pos], b
+  mov b, a
+  jmp _for58_cond
+_for58_exit:
+  jmp _if57_exit
+_if57_exit:
+_if59_cond:
+  mov b, [__asign] ; asign
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bsign] ; bsign
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__ageb] ; ageb
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  cmp b, 0
+  je _if59_exit
+_if59_true:
+  mov b, 0
+  mov [__csign], b
+  call protominus
+  jmp _if59_exit
+_if59_exit:
+_if60_cond:
+  mov b, [__asign] ; asign
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bsign] ; bsign
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bgta] ; bgta
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  cmp b, 0
+  je _if60_exit
+_if60_true:
+  mov b, 1
+  mov [__csign], b
+  call swapab
+  call protominus
+  jmp _if60_exit
+_if60_exit:
+_if61_cond:
+  mov b, [__asign] ; asign
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bsign] ; bsign
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__ageb] ; ageb
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  cmp b, 0
+  je _if61_exit
+_if61_true:
+  mov b, 1
+  mov [__csign], b
+  call protominus
+  jmp _if61_exit
+_if61_exit:
+_if62_cond:
+  mov b, [__asign] ; asign
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bsign] ; bsign
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bgta] ; bgta
   push a
   mov a, b
   mov b, 1
@@ -3663,48 +3672,11 @@ _if62_cond:
 _if62_true:
   mov b, 0
   mov [__csign], b
-_for63_init:
-  mov b, 1
-  mov [__pos], b
-_for63_cond:
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, 12
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for63_exit
-_for63_block:
-  mov b, [__cnarr]
-  mov d, b
-  push d
-  mov b, [__pos] ; pos
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, b
-  mov [d], a
-_for63_update:
-  mov b, [__pos] ; pos
-  mov a, b
-  inc b
-  mov [__pos], b
-  mov b, a
-  jmp _for63_cond
-_for63_exit:
+  call swapab
+  call protominus
   jmp _if62_exit
 _if62_exit:
-_if64_cond:
+_if63_cond:
   mov b, [__asign] ; asign
   push a
   mov a, b
@@ -3722,7 +3694,7 @@ _if64_cond:
   mov b, [__bsign] ; bsign
   push a
   mov a, b
-  mov b, 0
+  mov b, 1
   cmp a, b
   lodflgs
   and al, %00000001 ; ==
@@ -3738,14 +3710,33 @@ _if64_cond:
   mov bl, al
   mov bh, 0
   pop a
+  cmp b, 0
+  je _if63_exit
+_if63_true:
+  mov b, 0
+  mov [__csign], b
+  call protoplus
+  jmp _if63_exit
+_if63_exit:
+_if64_cond:
+  mov b, [__asign] ; asign
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
   push a
   mov a, b
   cmp a, 0
   lodflgs
-  mov b, [__ageb] ; ageb
+  mov b, [__bsign] ; bsign
   push a
   mov a, b
-  mov b, 1
+  mov b, 0
   cmp a, b
   lodflgs
   and al, %00000001 ; ==
@@ -3764,292 +3755,11 @@ _if64_cond:
   cmp b, 0
   je _if64_exit
 _if64_true:
-  mov b, 0
+  mov b, 1
   mov [__csign], b
-  call protominus
+  call protoplus
   jmp _if64_exit
 _if64_exit:
-_if65_cond:
-  mov b, [__asign] ; asign
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bsign] ; bsign
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bgta] ; bgta
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  cmp b, 0
-  je _if65_exit
-_if65_true:
-  mov b, 1
-  mov [__csign], b
-  call swapab
-  call protominus
-  jmp _if65_exit
-_if65_exit:
-_if66_cond:
-  mov b, [__asign] ; asign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bsign] ; bsign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__ageb] ; ageb
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  cmp b, 0
-  je _if66_exit
-_if66_true:
-  mov b, 1
-  mov [__csign], b
-  call protominus
-  jmp _if66_exit
-_if66_exit:
-_if67_cond:
-  mov b, [__asign] ; asign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bsign] ; bsign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bgta] ; bgta
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  cmp b, 0
-  je _if67_exit
-_if67_true:
-  mov b, 0
-  mov [__csign], b
-  call swapab
-  call protominus
-  jmp _if67_exit
-_if67_exit:
-_if68_cond:
-  mov b, [__asign] ; asign
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bsign] ; bsign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  cmp b, 0
-  je _if68_exit
-_if68_true:
-  mov b, 0
-  mov [__csign], b
-  call protoplus
-  jmp _if68_exit
-_if68_exit:
-_if69_cond:
-  mov b, [__asign] ; asign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bsign] ; bsign
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  cmp b, 0
-  je _if69_exit
-_if69_true:
-  mov b, 1
-  mov [__csign], b
-  call protoplus
-  jmp _if69_exit
-_if69_exit:
   leave
   ret
 
@@ -4066,10 +3776,10 @@ minus:
 pplus:
   push bp
   mov bp, sp
-_for70_init:
+_for65_init:
   mov b, 0
   mov [__divi], b
-_for70_cond:
+_for65_cond:
   mov b, [__divi] ; divi
   push a
   mov a, b
@@ -4082,8 +3792,8 @@ _for70_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for70_exit
-_for70_block:
+  je _for65_exit
+_for65_block:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -4097,16 +3807,16 @@ _for70_block:
   pop d
   mov a, b
   mov [d], a
-_for70_update:
+_for65_update:
   mov b, [__divi] ; divi
   mov a, b
   inc b
   mov [__divi], b
   mov b, a
-  jmp _for70_cond
-_for70_exit:
+  jmp _for65_cond
+_for65_exit:
   call checkabsabsize
-_if71_cond:
+_if66_cond:
   mov b, [__asign] ; asign
   push a
   mov a, b
@@ -4145,6 +3855,249 @@ _if71_cond:
   cmp a, 0
   lodflgs
   mov b, [__aeqb] ; aeqb
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  cmp b, 0
+  je _if66_exit
+_if66_true:
+  mov b, 0
+  mov [__asign], b
+  mov b, 0
+  mov [__bsign], b
+  mov b, 0
+  mov [__csign], b
+_for67_init:
+  mov b, 1
+  mov [__pos], b
+_for67_cond:
+  mov b, [__pos] ; pos
+  push a
+  mov a, b
+  mov b, 12
+  cmp a, b
+  lodflgs
+  and al, %00000010 ; <
+  shr al
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for67_exit
+_for67_block:
+  mov b, [__cnarr]
+  mov d, b
+  push d
+  mov b, [__pos] ; pos
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, b
+  mov [d], a
+_for67_update:
+  mov b, [__pos] ; pos
+  mov a, b
+  inc b
+  mov [__pos], b
+  mov b, a
+  jmp _for67_cond
+_for67_exit:
+  leave
+  ret
+  jmp _if66_exit
+_if66_exit:
+_if68_cond:
+  mov b, [__asign] ; asign
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bsign] ; bsign
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__aeqb] ; aeqb
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  cmp b, 0
+  je _if68_exit
+_if68_true:
+  mov b, 0
+  mov [__asign], b
+  mov b, 0
+  mov [__bsign], b
+  mov b, 0
+  mov [__csign], b
+_for69_init:
+  mov b, 1
+  mov [__pos], b
+_for69_cond:
+  mov b, [__pos] ; pos
+  push a
+  mov a, b
+  mov b, 12
+  cmp a, b
+  lodflgs
+  and al, %00000010 ; <
+  shr al
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for69_exit
+_for69_block:
+  mov b, [__cnarr]
+  mov d, b
+  push d
+  mov b, [__pos] ; pos
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, b
+  mov [d], a
+_for69_update:
+  mov b, [__pos] ; pos
+  mov a, b
+  inc b
+  mov [__pos], b
+  mov b, a
+  jmp _for69_cond
+_for69_exit:
+  leave
+  ret
+  jmp _if68_exit
+_if68_exit:
+_if70_cond:
+  mov b, [__asign] ; asign
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bsign] ; bsign
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  cmp b, 0
+  je _if70_exit
+_if70_true:
+  mov b, 0
+  mov [__asign], b
+  mov b, 0
+  mov [__bsign], b
+  mov b, 0
+  mov [__csign], b
+  call protoplus
+  leave
+  ret
+  jmp _if70_exit
+_if70_exit:
+_if71_cond:
+  mov b, [__asign] ; asign
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bsign] ; bsign
   push a
   mov a, b
   mov b, 1
@@ -4170,56 +4123,18 @@ _if71_true:
   mov [__asign], b
   mov b, 0
   mov [__bsign], b
-  mov b, 0
-  mov [__csign], b
-_for72_init:
   mov b, 1
-  mov [__pos], b
-_for72_cond:
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, 12
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for72_exit
-_for72_block:
-  mov b, [__cnarr]
-  mov d, b
-  push d
-  mov b, [__pos] ; pos
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, b
-  mov [d], a
-_for72_update:
-  mov b, [__pos] ; pos
-  mov a, b
-  inc b
-  mov [__pos], b
-  mov b, a
-  jmp _for72_cond
-_for72_exit:
+  mov [__csign], b
+  call protoplus
   leave
   ret
   jmp _if71_exit
 _if71_exit:
-_if73_cond:
+_if72_cond:
   mov b, [__asign] ; asign
   push a
   mov a, b
-  mov b, 1
+  mov b, 0
   cmp a, b
   lodflgs
   and al, %00000001 ; ==
@@ -4233,7 +4148,7 @@ _if73_cond:
   mov b, [__bsign] ; bsign
   push a
   mov a, b
-  mov b, 0
+  mov b, 1
   cmp a, b
   lodflgs
   and al, %00000001 ; ==
@@ -4253,7 +4168,78 @@ _if73_cond:
   mov a, b
   cmp a, 0
   lodflgs
-  mov b, [__aeqb] ; aeqb
+  mov b, [__agtb] ; agtb
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  cmp b, 0
+  je _if72_exit
+_if72_true:
+  mov b, 0
+  mov [__asign], b
+  mov b, 0
+  mov [__bsign], b
+  mov b, 0
+  mov [__csign], b
+  call protominus
+  leave
+  ret
+  jmp _if72_exit
+_if72_exit:
+_if73_cond:
+  mov b, [__asign] ; asign
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bsign] ; bsign
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bgta] ; bgta
   push a
   mov a, b
   mov b, 1
@@ -4279,56 +4265,19 @@ _if73_true:
   mov [__asign], b
   mov b, 0
   mov [__bsign], b
-  mov b, 0
-  mov [__csign], b
-_for74_init:
   mov b, 1
-  mov [__pos], b
-_for74_cond:
-  mov b, [__pos] ; pos
-  push a
-  mov a, b
-  mov b, 12
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for74_exit
-_for74_block:
-  mov b, [__cnarr]
-  mov d, b
-  push d
-  mov b, [__pos] ; pos
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, b
-  mov [d], a
-_for74_update:
-  mov b, [__pos] ; pos
-  mov a, b
-  inc b
-  mov [__pos], b
-  mov b, a
-  jmp _for74_cond
-_for74_exit:
+  mov [__csign], b
+  call swapab
+  call protominus
   leave
   ret
   jmp _if73_exit
 _if73_exit:
-_if75_cond:
+_if74_cond:
   mov b, [__asign] ; asign
   push a
   mov a, b
-  mov b, 0
+  mov b, 1
   cmp a, b
   lodflgs
   and al, %00000001 ; ==
@@ -4343,6 +4292,101 @@ _if75_cond:
   push a
   mov a, b
   mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__agtb] ; agtb
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  cmp b, 0
+  je _if74_exit
+_if74_true:
+  mov b, 1
+  mov [__csign], b
+  call swapab
+  mov b, 0
+  mov [__asign], b
+  mov b, 0
+  mov [__bsign], b
+  call pminus
+  leave
+  ret
+  jmp _if74_exit
+_if74_exit:
+_if75_cond:
+  mov b, [__asign] ; asign
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bsign] ; bsign
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  push al
+  cmp b, 0
+  lodflgs
+  pop bl
+  or al, bl
+  xor al, %00000001
+  mov bl, al
+  mov bh, 0
+  pop a
+  push a
+  mov a, b
+  cmp a, 0
+  lodflgs
+  mov b, [__bgta] ; bgta
+  push a
+  mov a, b
+  mov b, 1
   cmp a, b
   lodflgs
   and al, %00000001 ; ==
@@ -4367,346 +4411,12 @@ _if75_true:
   mov [__bsign], b
   mov b, 0
   mov [__csign], b
-  call protoplus
+  call swapab
+  call protominus
   leave
   ret
   jmp _if75_exit
 _if75_exit:
-_if76_cond:
-  mov b, [__asign] ; asign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bsign] ; bsign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  cmp b, 0
-  je _if76_exit
-_if76_true:
-  mov b, 0
-  mov [__asign], b
-  mov b, 0
-  mov [__bsign], b
-  mov b, 1
-  mov [__csign], b
-  call protoplus
-  leave
-  ret
-  jmp _if76_exit
-_if76_exit:
-_if77_cond:
-  mov b, [__asign] ; asign
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bsign] ; bsign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__agtb] ; agtb
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  cmp b, 0
-  je _if77_exit
-_if77_true:
-  mov b, 0
-  mov [__asign], b
-  mov b, 0
-  mov [__bsign], b
-  mov b, 0
-  mov [__csign], b
-  call protominus
-  leave
-  ret
-  jmp _if77_exit
-_if77_exit:
-_if78_cond:
-  mov b, [__asign] ; asign
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bsign] ; bsign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bgta] ; bgta
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  cmp b, 0
-  je _if78_exit
-_if78_true:
-  mov b, 0
-  mov [__asign], b
-  mov b, 0
-  mov [__bsign], b
-  mov b, 1
-  mov [__csign], b
-  call swapab
-  call protominus
-  leave
-  ret
-  jmp _if78_exit
-_if78_exit:
-_if79_cond:
-  mov b, [__asign] ; asign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bsign] ; bsign
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__agtb] ; agtb
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  cmp b, 0
-  je _if79_exit
-_if79_true:
-  mov b, 1
-  mov [__csign], b
-  call swapab
-  mov b, 0
-  mov [__asign], b
-  mov b, 0
-  mov [__bsign], b
-  call pminus
-  leave
-  ret
-  jmp _if79_exit
-_if79_exit:
-_if80_cond:
-  mov b, [__asign] ; asign
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bsign] ; bsign
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  push a
-  mov a, b
-  cmp a, 0
-  lodflgs
-  mov b, [__bgta] ; bgta
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop a
-  cmp b, 0
-  je _if80_exit
-_if80_true:
-  mov b, 0
-  mov [__asign], b
-  mov b, 0
-  mov [__bsign], b
-  mov b, 0
-  mov [__csign], b
-  call swapab
-  call protominus
-  leave
-  ret
-  jmp _if80_exit
-_if80_exit:
   leave
   ret
 
@@ -4723,7 +4433,7 @@ plus:
 normmulres:
   push bp
   mov bp, sp
-_if81_cond:
+_if76_cond:
   mov b, [__mulres]
   push a
   mov d, b
@@ -4747,8 +4457,8 @@ _if81_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if81_exit
-_if81_true:
+  je _if76_exit
+_if76_true:
   mov b, [__mulres]
   push a
   mov d, b
@@ -4803,11 +4513,11 @@ _if81_true:
   pop d
   mov a, b
   mov [d], a
-  jmp _if81_exit
-_if81_exit:
+  jmp _if76_exit
+_if76_exit:
   mov b, 0
   mov [__normal], b
-_while82_cond:
+_while77_cond:
   mov b, [__normal] ; normal
   push a
   mov a, b
@@ -4819,14 +4529,14 @@ _while82_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _while82_exit
-_while82_block:
+  je _while77_exit
+_while77_block:
   mov b, 1
   mov [__normal], b
-_for83_init:
+_for78_init:
   mov b, 0
   mov [__protopos], b
-_for83_cond:
+_for78_cond:
   mov b, [__protopos] ; protopos
   push a
   mov a, b
@@ -4839,8 +4549,8 @@ _for83_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for83_exit
-_for83_block:
+  je _for78_exit
+_for78_block:
   mov b, 22
   push a
   mov a, b
@@ -4849,7 +4559,7 @@ _for83_block:
   mov b, a
   pop a
   mov [__pos], b
-_if84_cond:
+_if79_cond:
   mov b, [__mulres]
   push a
   mov d, b
@@ -4873,8 +4583,8 @@ _if84_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if84_exit
-_if84_true:
+  je _if79_exit
+_if79_true:
   mov b, 0
   mov [__normal], b
   mov b, [__mulres]
@@ -4972,19 +4682,19 @@ _if84_true:
   pop d
   mov a, b
   mov [d], a
-  jmp _if84_exit
-_if84_exit:
-_for83_update:
+  jmp _if79_exit
+_if79_exit:
+_for78_update:
   mov b, [__protopos] ; protopos
   mov a, b
   inc b
   mov [__protopos], b
   mov b, a
-  jmp _for83_cond
-_for83_exit:
-  jmp _while82_cond
-_while82_exit:
-_if85_cond:
+  jmp _for78_cond
+_for78_exit:
+  jmp _while77_cond
+_while77_exit:
+_if80_cond:
   mov b, [__mulres]
   push a
   mov d, b
@@ -5008,8 +4718,8 @@ _if85_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if85_exit
-_if85_true:
+  je _if80_exit
+_if80_true:
   mov b, [__mulres]
   push a
   mov d, b
@@ -5064,18 +4774,18 @@ _if85_true:
   pop d
   mov a, b
   mov [d], a
-  jmp _if85_exit
-_if85_exit:
+  jmp _if80_exit
+_if80_exit:
   leave
   ret
 
 prototimes:
   push bp
   mov bp, sp
-_for86_init:
+_for81_init:
   mov b, 0
   mov [__divi], b
-_for86_cond:
+_for81_cond:
   mov b, [__divi] ; divi
   push a
   mov a, b
@@ -5088,8 +4798,8 @@ _for86_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for86_exit
-_for86_block:
+  je _for81_exit
+_for81_block:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -5103,18 +4813,18 @@ _for86_block:
   pop d
   mov a, b
   mov [d], a
-_for86_update:
+_for81_update:
   mov b, [__divi] ; divi
   mov a, b
   inc b
   mov [__divi], b
   mov b, a
-  jmp _for86_cond
-_for86_exit:
-_for87_init:
+  jmp _for81_cond
+_for81_exit:
+_for82_init:
   mov b, 0
   mov [__divi], b
-_for87_cond:
+_for82_cond:
   mov b, [__divi] ; divi
   push a
   mov a, b
@@ -5127,8 +4837,8 @@ _for87_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for87_exit
-_for87_block:
+  je _for82_exit
+_for82_block:
   mov b, [__mulres]
   mov d, b
   push d
@@ -5142,18 +4852,18 @@ _for87_block:
   pop d
   mov a, b
   mov [d], a
-_for87_update:
+_for82_update:
   mov b, [__divi] ; divi
   mov a, b
   inc b
   mov [__divi], b
   mov b, a
-  jmp _for87_cond
-_for87_exit:
-_for88_init:
+  jmp _for82_cond
+_for82_exit:
+_for83_init:
   mov b, 0
   mov [__mulpos1], b
-_for88_cond:
+_for83_cond:
   mov b, [__mulpos1] ; mulpos1
   push a
   mov a, b
@@ -5166,12 +4876,12 @@ _for88_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for88_exit
-_for88_block:
-_for89_init:
+  je _for83_exit
+_for83_block:
+_for84_init:
   mov b, 0
   mov [__mulpos2], b
-_for89_cond:
+_for84_cond:
   mov b, [__mulpos2] ; mulpos2
   push a
   mov a, b
@@ -5184,8 +4894,8 @@ _for89_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for89_exit
-_for89_block:
+  je _for84_exit
+_for84_block:
   mov b, [__mulres]
   mov d, b
   push d
@@ -5252,23 +4962,23 @@ _for89_block:
   pop d
   mov a, b
   mov [d], a
-_for89_update:
+_for84_update:
   mov b, [__mulpos2] ; mulpos2
   mov a, b
   inc b
   mov [__mulpos2], b
   mov b, a
-  jmp _for89_cond
-_for89_exit:
+  jmp _for84_cond
+_for84_exit:
   call normmulres
-_for88_update:
+_for83_update:
   mov b, [__mulpos1] ; mulpos1
   mov a, b
   inc b
   mov [__mulpos1], b
   mov b, a
-  jmp _for88_cond
-_for88_exit:
+  jmp _for83_cond
+_for83_exit:
   leave
   ret
 
@@ -5287,10 +4997,10 @@ protodividedby:
   mov [__segmentcounter], b
   mov b, 1
   mov [__allzeroes], b
-_for90_init:
+_for85_init:
   mov b, 0
   mov [__divi], b
-_for90_cond:
+_for85_cond:
   mov b, [__divi] ; divi
   push a
   mov a, b
@@ -5303,8 +5013,8 @@ _for90_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for90_exit
-_for90_block:
+  je _for85_exit
+_for85_block:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -5331,7 +5041,7 @@ _for90_block:
   pop d
   mov a, b
   mov [d], a
-_if91_cond:
+_if86_cond:
   mov b, [__bnarr]
   push a
   mov d, b
@@ -5354,21 +5064,21 @@ _if91_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if91_exit
-_if91_true:
+  je _if86_exit
+_if86_true:
   mov b, 0
   mov [__allzeroes], b
-  jmp _if91_exit
-_if91_exit:
-_for90_update:
+  jmp _if86_exit
+_if86_exit:
+_for85_update:
   mov b, [__divi] ; divi
   mov a, b
   inc b
   mov [__divi], b
   mov b, a
-  jmp _for90_cond
-_for90_exit:
-_if92_cond:
+  jmp _for85_cond
+_for85_exit:
+_if87_cond:
   mov b, [__allzeroes] ; allzeroes
   push a
   mov a, b
@@ -5380,13 +5090,13 @@ _if92_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if92_exit
-_if92_true:
+  je _if87_exit
+_if87_true:
   leave
   ret
-  jmp _if92_exit
-_if92_exit:
-_if93_cond:
+  jmp _if87_exit
+_if87_exit:
+_if88_cond:
   mov b, [__bnarr]
   push a
   mov d, b
@@ -5409,12 +5119,12 @@ _if93_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if93_exit
-_if93_true:
-_for94_init:
+  je _if88_exit
+_if88_true:
+_for89_init:
   mov b, 0
   mov [__divi], b
-_for94_cond:
+_for89_cond:
   mov b, [__divi] ; divi
   push a
   mov a, b
@@ -5427,8 +5137,8 @@ _for94_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for94_exit
-_for94_block:
+  je _for89_exit
+_for89_block:
   mov b, [__bnarr]
   mov d, b
   push d
@@ -5458,14 +5168,14 @@ _for94_block:
   pop d
   mov a, b
   mov [d], a
-_for94_update:
+_for89_update:
   mov b, [__divi] ; divi
   mov a, b
   inc b
   mov [__divi], b
   mov b, a
-  jmp _for94_cond
-_for94_exit:
+  jmp _for89_cond
+_for89_exit:
   mov b, 1
   mov [__brshift], b
   mov b, [__bnarr]
@@ -5481,14 +5191,200 @@ _for94_exit:
   pop d
   mov a, b
   mov [d], a
-  jmp _if93_exit
-_if93_exit:
-_while95_cond:
+  jmp _if88_exit
+_if88_exit:
+_while90_cond:
   mov b, [__bnarr]
   push a
   mov d, b
   push d
   mov b, 10
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  mov b, [d]
+  pop a
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _while90_exit
+_while90_block:
+_for91_init:
+  mov b, 0
+  mov [__divi], b
+_for91_cond:
+  mov b, [__divi] ; divi
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000010 ; <
+  shr al
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for91_exit
+_for91_block:
+  mov b, [__bnarr]
+  mov d, b
+  push d
+  mov b, 10
+  push a
+  mov a, b
+  mov b, [__divi] ; divi
+  sub a, b
+  mov b, a
+  pop a
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, [__bnarr]
+  push a
+  mov d, b
+  push d
+  mov b, 10
+  push a
+  mov a, b
+  mov b, [__divi] ; divi
+  sub a, b
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  mov b, 1
+  sub a, b
+  mov b, a
+  pop a
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  mov b, [d]
+  pop a
+  pop d
+  mov a, b
+  mov [d], a
+_for91_update:
+  mov b, [__divi] ; divi
+  mov a, b
+  inc b
+  mov [__divi], b
+  mov b, a
+  jmp _for91_cond
+_for91_exit:
+  mov b, [__bnarr]
+  mov d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, b
+  mov [d], a
+  mov b, [__blshift] ; blshift
+  mov a, b
+  inc b
+  mov [__blshift], b
+  mov b, a
+  jmp _while90_cond
+_while90_exit:
+  mov b, 1
+  mov [__allzeroes], b
+_for92_init:
+  mov b, 0
+  mov [__divi], b
+_for92_cond:
+  mov b, [__divi] ; divi
+  push a
+  mov a, b
+  mov b, 12
+  cmp a, b
+  lodflgs
+  and al, %00000010 ; <
+  shr al
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for92_exit
+_for92_block:
+_if93_cond:
+  mov b, [__anarr]
+  push a
+  mov d, b
+  push d
+  mov b, [__divi] ; divi
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  mov b, [d]
+  pop a
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001
+  xor al, %00000001 ; !=
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if93_exit
+_if93_true:
+  mov b, 0
+  mov [__allzeroes], b
+  jmp _if93_exit
+_if93_exit:
+_for92_update:
+  mov b, [__divi] ; divi
+  mov a, b
+  inc b
+  mov [__divi], b
+  mov b, a
+  jmp _for92_cond
+_for92_exit:
+_if94_cond:
+  mov b, [__allzeroes] ; allzeroes
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if94_exit
+_if94_true:
+  leave
+  ret
+  jmp _if94_exit
+_if94_exit:
+_while95_cond:
+  mov b, [__anarr]
+  push a
+  mov d, b
+  push d
+  mov b, 11
   pop d
   mov a, 2
   mul a, b
@@ -5514,7 +5410,7 @@ _for96_cond:
   mov b, [__divi] ; divi
   push a
   mov a, b
-  mov b, 10
+  mov b, 12
   cmp a, b
   lodflgs
   and al, %00000010 ; <
@@ -5525,10 +5421,10 @@ _for96_cond:
   cmp b, 0
   je _for96_exit
 _for96_block:
-  mov b, [__bnarr]
+  mov b, [__anarr]
   mov d, b
   push d
-  mov b, 10
+  mov b, 11
   push a
   mov a, b
   mov b, [__divi] ; divi
@@ -5540,11 +5436,11 @@ _for96_block:
   mul a, b
   add d, b
   push d
-  mov b, [__bnarr]
+  mov b, [__anarr]
   push a
   mov d, b
   push d
-  mov b, 10
+  mov b, 11
   push a
   mov a, b
   mov b, [__divi] ; divi
@@ -5574,192 +5470,6 @@ _for96_update:
   mov b, a
   jmp _for96_cond
 _for96_exit:
-  mov b, [__bnarr]
-  mov d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, b
-  mov [d], a
-  mov b, [__blshift] ; blshift
-  mov a, b
-  inc b
-  mov [__blshift], b
-  mov b, a
-  jmp _while95_cond
-_while95_exit:
-  mov b, 1
-  mov [__allzeroes], b
-_for97_init:
-  mov b, 0
-  mov [__divi], b
-_for97_cond:
-  mov b, [__divi] ; divi
-  push a
-  mov a, b
-  mov b, 12
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for97_exit
-_for97_block:
-_if98_cond:
-  mov b, [__anarr]
-  push a
-  mov d, b
-  push d
-  mov b, [__divi] ; divi
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  xor al, %00000001 ; !=
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if98_exit
-_if98_true:
-  mov b, 0
-  mov [__allzeroes], b
-  jmp _if98_exit
-_if98_exit:
-_for97_update:
-  mov b, [__divi] ; divi
-  mov a, b
-  inc b
-  mov [__divi], b
-  mov b, a
-  jmp _for97_cond
-_for97_exit:
-_if99_cond:
-  mov b, [__allzeroes] ; allzeroes
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if99_exit
-_if99_true:
-  leave
-  ret
-  jmp _if99_exit
-_if99_exit:
-_while100_cond:
-  mov b, [__anarr]
-  push a
-  mov d, b
-  push d
-  mov b, 11
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _while100_exit
-_while100_block:
-_for101_init:
-  mov b, 0
-  mov [__divi], b
-_for101_cond:
-  mov b, [__divi] ; divi
-  push a
-  mov a, b
-  mov b, 12
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for101_exit
-_for101_block:
-  mov b, [__anarr]
-  mov d, b
-  push d
-  mov b, 11
-  push a
-  mov a, b
-  mov b, [__divi] ; divi
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, [__anarr]
-  push a
-  mov d, b
-  push d
-  mov b, 11
-  push a
-  mov a, b
-  mov b, [__divi] ; divi
-  sub a, b
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  pop d
-  mov a, b
-  mov [d], a
-_for101_update:
-  mov b, [__divi] ; divi
-  mov a, b
-  inc b
-  mov [__divi], b
-  mov b, a
-  jmp _for101_cond
-_for101_exit:
   mov b, [__anarr]
   mov d, b
   push d
@@ -5778,13 +5488,13 @@ _for101_exit:
   inc b
   mov [__alshift], b
   mov b, a
-  jmp _while100_cond
-_while100_exit:
+  jmp _while95_cond
+_while95_exit:
   mov b, 0
   mov [__segmentcounter], b
   mov b, 0
   mov [__divcounter], b
-_while102_cond:
+_while97_cond:
   mov b, [__segmentcounter] ; segmentcounter
   push a
   mov a, b
@@ -5797,9 +5507,9 @@ _while102_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _while102_exit
-_while102_block:
-_while103_cond:
+  je _while97_exit
+_while97_block:
+_while98_cond:
   mov b, [__anarr]
   push a
   mov d, b
@@ -5822,14 +5532,203 @@ _while103_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _while103_exit
-_while103_block:
+  je _while98_exit
+_while98_block:
   call pminus
   mov b, [__divcounter] ; divcounter
   mov a, b
   inc b
   mov [__divcounter], b
   mov b, a
+_for99_init:
+  mov b, 0
+  mov [__divi], b
+_for99_cond:
+  mov b, [__divi] ; divi
+  push a
+  mov a, b
+  mov b, 12
+  cmp a, b
+  lodflgs
+  and al, %00000010 ; <
+  shr al
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for99_exit
+_for99_block:
+  mov b, [__anarr]
+  mov d, b
+  push d
+  mov b, [__divi] ; divi
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, [__cnarr]
+  push a
+  mov d, b
+  push d
+  mov b, [__divi] ; divi
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  mov b, [d]
+  pop a
+  pop d
+  mov a, b
+  mov [d], a
+  mov b, [__cnarr]
+  mov d, b
+  push d
+  mov b, [__divi] ; divi
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, b
+  mov [d], a
+_for99_update:
+  mov b, [__divi] ; divi
+  mov a, b
+  inc b
+  mov [__divi], b
+  mov b, a
+  jmp _for99_cond
+_for99_exit:
+  jmp _while98_cond
+_while98_exit:
+  mov b, [__divres]
+  mov d, b
+  push d
+  mov b, 11
+  push a
+  mov a, b
+  mov b, [__segmentcounter] ; segmentcounter
+  sub a, b
+  mov b, a
+  pop a
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, [__divcounter] ; divcounter
+  pop d
+  mov a, b
+  mov [d], a
+  mov b, 0
+  mov [__divcounter], b
+  mov b, [__segmentcounter] ; segmentcounter
+  mov a, b
+  inc b
+  mov [__segmentcounter], b
+  mov b, a
+  mov b, 1
+  mov [__allzeroes], b
+_for100_init:
+  mov b, 0
+  mov [__divi], b
+_for100_cond:
+  mov b, [__divi] ; divi
+  push a
+  mov a, b
+  mov b, 12
+  cmp a, b
+  lodflgs
+  and al, %00000010 ; <
+  shr al
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for100_exit
+_for100_block:
+_if101_cond:
+  mov b, [__anarr]
+  push a
+  mov d, b
+  push d
+  mov b, [__divi] ; divi
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  mov b, [d]
+  pop a
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001
+  xor al, %00000001 ; !=
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if101_exit
+_if101_true:
+  mov b, 0
+  mov [__allzeroes], b
+  jmp _if101_exit
+_if101_exit:
+_for100_update:
+  mov b, [__divi] ; divi
+  mov a, b
+  inc b
+  mov [__divi], b
+  mov b, a
+  jmp _for100_cond
+_for100_exit:
+_if102_cond:
+  mov b, [__allzeroes] ; allzeroes
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if102_exit
+_if102_true:
+  leave
+  ret
+  jmp _if102_exit
+_if102_exit:
+_while103_cond:
+  mov b, [__anarr]
+  push a
+  mov d, b
+  push d
+  mov b, 11
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  mov b, [d]
+  pop a
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _while103_exit
+_while103_block:
 _for104_init:
   mov b, 0
   mov [__divi], b
@@ -5851,36 +5750,41 @@ _for104_block:
   mov b, [__anarr]
   mov d, b
   push d
+  mov b, 11
+  push a
+  mov a, b
   mov b, [__divi] ; divi
+  sub a, b
+  mov b, a
+  pop a
   pop d
   mov a, 2
   mul a, b
   add d, b
   push d
-  mov b, [__cnarr]
+  mov b, [__anarr]
   push a
   mov d, b
   push d
+  mov b, 11
+  push a
+  mov a, b
   mov b, [__divi] ; divi
+  sub a, b
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  mov b, 1
+  sub a, b
+  mov b, a
+  pop a
   pop d
   mov a, 2
   mul a, b
   add d, b
   mov b, [d]
   pop a
-  pop d
-  mov a, b
-  mov [d], a
-  mov b, [__cnarr]
-  mov d, b
-  push d
-  mov b, [__divi] ; divi
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 0
   pop d
   mov a, b
   mov [d], a
@@ -5892,8 +5796,43 @@ _for104_update:
   mov b, a
   jmp _for104_cond
 _for104_exit:
-  jmp _while103_cond
-_while103_exit:
+  mov b, [__anarr]
+  mov d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, b
+  mov [d], a
+_if105_cond:
+  mov b, [__anarr]
+  push a
+  mov d, b
+  push d
+  mov b, 11
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  mov b, [d]
+  pop a
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if105_exit
+_if105_true:
   mov b, [__divres]
   mov d, b
   push d
@@ -5909,23 +5848,101 @@ _while103_exit:
   mul a, b
   add d, b
   push d
-  mov b, [__divcounter] ; divcounter
+  mov b, 0
   pop d
   mov a, b
   mov [d], a
+  mov b, [__anarr]
+  mov d, b
+  push d
   mov b, 0
-  mov [__divcounter], b
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, b
+  mov [d], a
   mov b, [__segmentcounter] ; segmentcounter
   mov a, b
   inc b
   mov [__segmentcounter], b
   mov b, a
-  mov b, 1
-  mov [__allzeroes], b
-_for105_init:
+_if106_cond:
+  mov b, [__segmentcounter] ; segmentcounter
+  push a
+  mov a, b
+  mov b, 12
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if106_exit
+_if106_true:
+  leave
+  ret
+  jmp _if106_exit
+_if106_exit:
+  jmp _if105_exit
+_if105_exit:
+  jmp _while103_cond
+_while103_exit:
+  jmp _while97_cond
+_while97_exit:
+  leave
+  ret
+
+normdivres:
+  push bp
+  mov bp, sp
+_for107_init:
+  mov b, 12
+  mov [__divi], b
+_for107_cond:
+  mov b, [__divi] ; divi
+  push a
+  mov a, b
+  mov b, 24
+  cmp a, b
+  lodflgs
+  and al, %00000010 ; <
+  shr al
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for107_exit
+_for107_block:
+  mov b, [__mulres]
+  mov d, b
+  push d
+  mov b, [__divi] ; divi
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, b
+  mov [d], a
+_for107_update:
+  mov b, [__divi] ; divi
+  mov a, b
+  inc b
+  mov [__divi], b
+  mov b, a
+  jmp _for107_cond
+_for107_exit:
+_for108_init:
   mov b, 0
   mov [__divi], b
-_for105_cond:
+_for108_cond:
   mov b, [__divi] ; divi
   push a
   mov a, b
@@ -5938,10 +5955,18 @@ _for105_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for105_exit
-_for105_block:
-_if106_cond:
-  mov b, [__anarr]
+  je _for108_exit
+_for108_block:
+  mov b, [__mulres]
+  mov d, b
+  push d
+  mov b, [__divi] ; divi
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, [__divres]
   push a
   mov d, b
   push d
@@ -5952,81 +5977,26 @@ _if106_cond:
   add d, b
   mov b, [d]
   pop a
-  push a
+  pop d
   mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  xor al, %00000001 ; !=
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if106_exit
-_if106_true:
-  mov b, 0
-  mov [__allzeroes], b
-  jmp _if106_exit
-_if106_exit:
-_for105_update:
+  mov [d], a
+_for108_update:
   mov b, [__divi] ; divi
   mov a, b
   inc b
   mov [__divi], b
   mov b, a
-  jmp _for105_cond
-_for105_exit:
-_if107_cond:
-  mov b, [__allzeroes] ; allzeroes
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if107_exit
-_if107_true:
-  leave
-  ret
-  jmp _if107_exit
-_if107_exit:
-_while108_cond:
-  mov b, [__anarr]
-  push a
-  mov d, b
-  push d
-  mov b, 11
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _while108_exit
-_while108_block:
+  jmp _for108_cond
+_for108_exit:
+  call normmulres
 _for109_init:
   mov b, 0
-  mov [__divi], b
+  mov [__divshift], b
 _for109_cond:
-  mov b, [__divi] ; divi
+  mov b, [__divshift] ; divshift
   push a
   mov a, b
-  mov b, 12
+  mov b, 11
   cmp a, b
   lodflgs
   and al, %00000010 ; <
@@ -6037,10 +6007,28 @@ _for109_cond:
   cmp b, 0
   je _for109_exit
 _for109_block:
-  mov b, [__anarr]
+_for110_init:
+  mov b, 0
+  mov [__divi], b
+_for110_cond:
+  mov b, [__divi] ; divi
+  push a
+  mov a, b
+  mov b, 24
+  cmp a, b
+  lodflgs
+  and al, %00000010 ; <
+  shr al
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _for110_exit
+_for110_block:
+  mov b, [__mulres]
   mov d, b
   push d
-  mov b, 11
+  mov b, 23
   push a
   mov a, b
   mov b, [__divi] ; divi
@@ -6052,11 +6040,11 @@ _for109_block:
   mul a, b
   add d, b
   push d
-  mov b, [__anarr]
+  mov b, [__mulres]
   push a
   mov d, b
   push d
-  mov b, 11
+  mov b, 23
   push a
   mov a, b
   mov b, [__divi] ; divi
@@ -6075,164 +6063,42 @@ _for109_block:
   add d, b
   mov b, [d]
   pop a
+  pop d
+  mov a, b
+  mov [d], a
+_for110_update:
+  mov b, [__divi] ; divi
+  mov a, b
+  inc b
+  mov [__divi], b
+  mov b, a
+  jmp _for110_cond
+_for110_exit:
+  mov b, [__mulres]
+  mov d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  push d
+  mov b, 0
   pop d
   mov a, b
   mov [d], a
 _for109_update:
-  mov b, [__divi] ; divi
+  mov b, [__divshift] ; divshift
   mov a, b
   inc b
-  mov [__divi], b
+  mov [__divshift], b
   mov b, a
   jmp _for109_cond
 _for109_exit:
-  mov b, [__anarr]
-  mov d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, b
-  mov [d], a
-_if110_cond:
-  mov b, [__anarr]
-  push a
-  mov d, b
-  push d
-  mov b, 11
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if110_exit
-_if110_true:
-  mov b, [__divres]
-  mov d, b
-  push d
-  mov b, 11
-  push a
-  mov a, b
-  mov b, [__segmentcounter] ; segmentcounter
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, b
-  mov [d], a
-  mov b, [__anarr]
-  mov d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, b
-  mov [d], a
-  mov b, [__segmentcounter] ; segmentcounter
-  mov a, b
-  inc b
-  mov [__segmentcounter], b
-  mov b, a
-_if111_cond:
-  mov b, [__segmentcounter] ; segmentcounter
-  push a
-  mov a, b
-  mov b, 12
-  cmp a, b
-  lodflgs
-  and al, %00000001 ; ==
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _if111_exit
-_if111_true:
-  leave
-  ret
-  jmp _if111_exit
-_if111_exit:
-  jmp _if110_exit
-_if110_exit:
-  jmp _while108_cond
-_while108_exit:
-  jmp _while102_cond
-_while102_exit:
-  leave
-  ret
-
-normdivres:
-  push bp
-  mov bp, sp
-_for112_init:
-  mov b, 12
-  mov [__divi], b
-_for112_cond:
-  mov b, [__divi] ; divi
-  push a
-  mov a, b
-  mov b, 24
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for112_exit
-_for112_block:
-  mov b, [__mulres]
-  mov d, b
-  push d
-  mov b, [__divi] ; divi
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, b
-  mov [d], a
-_for112_update:
-  mov b, [__divi] ; divi
-  mov a, b
-  inc b
-  mov [__divi], b
-  mov b, a
-  jmp _for112_cond
-_for112_exit:
-_for113_init:
+_for111_init:
   mov b, 0
   mov [__divi], b
-_for113_cond:
+_for111_cond:
   mov b, [__divi] ; divi
   push a
   mov a, b
@@ -6245,164 +6111,8 @@ _for113_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for113_exit
-_for113_block:
-  mov b, [__mulres]
-  mov d, b
-  push d
-  mov b, [__divi] ; divi
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, [__divres]
-  push a
-  mov d, b
-  push d
-  mov b, [__divi] ; divi
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  pop d
-  mov a, b
-  mov [d], a
-_for113_update:
-  mov b, [__divi] ; divi
-  mov a, b
-  inc b
-  mov [__divi], b
-  mov b, a
-  jmp _for113_cond
-_for113_exit:
-  call normmulres
-_for114_init:
-  mov b, 0
-  mov [__divshift], b
-_for114_cond:
-  mov b, [__divshift] ; divshift
-  push a
-  mov a, b
-  mov b, 11
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for114_exit
-_for114_block:
-_for115_init:
-  mov b, 0
-  mov [__divi], b
-_for115_cond:
-  mov b, [__divi] ; divi
-  push a
-  mov a, b
-  mov b, 24
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for115_exit
-_for115_block:
-  mov b, [__mulres]
-  mov d, b
-  push d
-  mov b, 23
-  push a
-  mov a, b
-  mov b, [__divi] ; divi
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, [__mulres]
-  push a
-  mov d, b
-  push d
-  mov b, 23
-  push a
-  mov a, b
-  mov b, [__divi] ; divi
-  sub a, b
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  pop d
-  mov a, b
-  mov [d], a
-_for115_update:
-  mov b, [__divi] ; divi
-  mov a, b
-  inc b
-  mov [__divi], b
-  mov b, a
-  jmp _for115_cond
-_for115_exit:
-  mov b, [__mulres]
-  mov d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, b
-  mov [d], a
-_for114_update:
-  mov b, [__divshift] ; divshift
-  mov a, b
-  inc b
-  mov [__divshift], b
-  mov b, a
-  jmp _for114_cond
-_for114_exit:
-_for116_init:
-  mov b, 0
-  mov [__divi], b
-_for116_cond:
-  mov b, [__divi] ; divi
-  push a
-  mov a, b
-  mov b, 12
-  cmp a, b
-  lodflgs
-  and al, %00000010 ; <
-  shr al
-  mov ah, 0
-  mov b, a
-  pop a
-  cmp b, 0
-  je _for116_exit
-_for116_block:
+  je _for111_exit
+_for111_block:
   mov b, [__divres]
   mov d, b
   push d
@@ -6432,14 +6142,14 @@ _for116_block:
   pop d
   mov a, b
   mov [d], a
-_for116_update:
+_for111_update:
   mov b, [__divi] ; divi
   mov a, b
   inc b
   mov [__divi], b
   mov b, a
-  jmp _for116_cond
-_for116_exit:
+  jmp _for111_cond
+_for111_exit:
   leave
   ret
 
@@ -6449,7 +6159,7 @@ times:
   call fixsignin
   mov b, 0
   mov [__csign], b
-_if117_cond:
+_if112_cond:
   mov b, [__asign] ; asign
   push a
   mov a, b
@@ -6462,12 +6172,12 @@ _if117_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if117_exit
-_if117_true:
+  je _if112_exit
+_if112_true:
   mov b, 1
   mov [__csign], b
-  jmp _if117_exit
-_if117_exit:
+  jmp _if112_exit
+_if112_exit:
   mov b, 0
   mov [__asign], b
   mov b, 0
@@ -6475,10 +6185,10 @@ _if117_exit:
   call prototimes
   mov b, 1
   mov [__allzeroes], b
-_for118_init:
+_for113_init:
   mov b, 15
   mov [__pos], b
-_for118_cond:
+_for113_cond:
   mov b, [__pos] ; pos
   push a
   mov a, b
@@ -6491,9 +6201,9 @@ _for118_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for118_exit
-_for118_block:
-_if119_cond:
+  je _for113_exit
+_for113_block:
+_if114_cond:
   mov b, [__mulres]
   push a
   mov d, b
@@ -6516,21 +6226,21 @@ _if119_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if119_exit
-_if119_true:
+  je _if114_exit
+_if114_true:
   mov b, 0
   mov [__allzeroes], b
-  jmp _if119_exit
-_if119_exit:
-_for118_update:
+  jmp _if114_exit
+_if114_exit:
+_for113_update:
   mov b, [__pos] ; pos
   mov a, b
   inc b
   mov [__pos], b
   mov b, a
-  jmp _for118_cond
-_for118_exit:
-_if120_cond:
+  jmp _for113_cond
+_for113_exit:
+_if115_cond:
   mov b, [__allzeroes] ; allzeroes
   push a
   mov a, b
@@ -6542,12 +6252,12 @@ _if120_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if120_exit
-_if120_true:
-_for121_init:
+  je _if115_exit
+_if115_true:
+_for116_init:
   mov b, 4
   mov [__pos], b
-_for121_cond:
+_for116_cond:
   mov b, [__pos] ; pos
   push a
   mov a, b
@@ -6560,8 +6270,8 @@ _for121_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for121_exit
-_for121_block:
+  je _for116_exit
+_for116_block:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -6591,17 +6301,17 @@ _for121_block:
   pop d
   mov a, b
   mov [d], a
-_for121_update:
+_for116_update:
   mov b, [__pos] ; pos
   mov a, b
   inc b
   mov [__pos], b
   mov b, a
-  jmp _for121_cond
-_for121_exit:
-  jmp _if120_exit
-_if120_exit:
-_if122_cond:
+  jmp _for116_cond
+_for116_exit:
+  jmp _if115_exit
+_if115_exit:
+_if117_cond:
   mov b, [__cnarr]
   push a
   mov d, b
@@ -6625,12 +6335,12 @@ _if122_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if122_exit
-_if122_true:
-_for123_init:
+  je _if117_exit
+_if117_true:
+_for118_init:
   mov b, 0
   mov [__pos], b
-_for123_cond:
+_for118_cond:
   mov b, [__pos] ; pos
   push a
   mov a, b
@@ -6643,8 +6353,8 @@ _for123_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for123_exit
-_for123_block:
+  je _for118_exit
+_for118_block:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -6658,16 +6368,16 @@ _for123_block:
   pop d
   mov a, b
   mov [d], a
-_for123_update:
+_for118_update:
   mov b, [__pos] ; pos
   mov a, b
   inc b
   mov [__pos], b
   mov b, a
-  jmp _for123_cond
-_for123_exit:
-  jmp _if122_exit
-_if122_exit:
+  jmp _for118_cond
+_for118_exit:
+  jmp _if117_exit
+_if117_exit:
   call fixcsizezero
   call fixsignout
   leave
@@ -6679,7 +6389,7 @@ dividedby:
   call fixsignin
   mov b, 0
   mov [__csign], b
-_if124_cond:
+_if119_cond:
   mov b, [__asign] ; asign
   push a
   mov a, b
@@ -6692,12 +6402,12 @@ _if124_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if124_exit
-_if124_true:
+  je _if119_exit
+_if119_true:
   mov b, 1
   mov [__csign], b
-  jmp _if124_exit
-_if124_exit:
+  jmp _if119_exit
+_if119_exit:
   mov b, 0
   mov [__asign], b
   mov b, 0
@@ -6706,7 +6416,7 @@ _if124_exit:
   mov [__bkpcsign], b
   call protodividedby
   call normdivres
-_if125_cond:
+_if120_cond:
   mov b, [__blshift] ; blshift
   push a
   mov a, b
@@ -6732,8 +6442,8 @@ _if125_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if125_exit
-_if125_true:
+  je _if120_exit
+_if120_true:
   mov b, [__blshift] ; blshift
   push a
   mov a, b
@@ -6762,10 +6472,10 @@ _if125_true:
   mov b, a
   pop a
   mov [__divi], b
-_for126_init:
+_for121_init:
   mov b, 0
   mov [__pos], b
-_for126_cond:
+_for121_cond:
   mov b, [__pos] ; pos
   push a
   mov a, b
@@ -6778,9 +6488,9 @@ _for126_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _for126_exit
-_for126_block:
-_if127_cond:
+  je _for121_exit
+_for121_block:
+_if122_cond:
   mov b, [__pos] ; pos
   push a
   mov a, b
@@ -6799,8 +6509,8 @@ _if127_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if127_exit
-_if127_true:
+  je _if122_exit
+_if122_true:
   mov b, [__cnarr]
   mov d, b
   push d
@@ -6830,18 +6540,18 @@ _if127_true:
   pop d
   mov a, b
   mov [d], a
-  jmp _if127_exit
-_if127_exit:
-_for126_update:
+  jmp _if122_exit
+_if122_exit:
+_for121_update:
   mov b, [__pos] ; pos
   mov a, b
   inc b
   mov [__pos], b
   mov b, a
-  jmp _for126_cond
-_for126_exit:
-  jmp _if125_exit
-_if125_exit:
+  jmp _for121_cond
+_for121_exit:
+  jmp _if120_exit
+_if120_exit:
   mov b, [__bkpcsign] ; bkpcsign
   mov [__csign], b
   call fixcsizezero
