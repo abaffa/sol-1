@@ -1288,13 +1288,13 @@ t_data parse_assignment(){
     get();
     if(tok == OPENING_BRACKET){ // matrix operations
       t_var *matrix; // pointer to the matrix variable
-      int i;
-      int data_size; // matrix data size
-      int dims;
+      int i, data_size, dims;
+
       matrix = get_var_pointer(var_name); // gets a pointer to the variable holding the matrix address
       data_size = get_data_size(&matrix->data);
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
       expr_out = emit_var_into_b(var_name); // in 'b'. emit the base address of the matrix or pointer
+      emitln("  push a"); // needed because for loop below will modify 'a'. But 'a' is used by functions such as parse_terms, so keep previous results. so we cannot overwrite 'a' here.
       emitln("  mov d, b");
       for(i = 0; i < dims; i++){
         emitln("  push d"); // save 'd'. this is the matrix base address. save because indexing expr below could use 'd' and overwrite it
@@ -1325,17 +1325,16 @@ t_data parse_assignment(){
         get();
         if(tok != OPENING_BRACKET) break;
       }
+      emitln("  pop a");
       // we are past the '=' sign here
       emitln("  push d"); // save 'd'. this is the matrix base address. save because expr below could use 'd' and overwrite it
       parse_expr(); // evaluate expression, result in 'b'
       emitln("  pop d"); 
       if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
-        emitln("  mov a, b");
-        emitln("  mov [d], a");
+        emitln("  mov [d], b");
       }
       else if(matrix->data.type == DT_CHAR){
-        emitln("  mov al, bl");
-        emitln("  mov [d], al");
+        emitln("  mov [d], bl");
       }
       return expr_out;
     }
@@ -1854,20 +1853,24 @@ t_data parse_atom(void){
     get();
     if(tok == INCREMENT){  // post increment. get value first, then do assignment
       expr_in = emit_var_into_b(temp_name); // into 'b'
+      emitln("  push a"); // save 'a' since functions such as parse_terms use 'a' and we can't overwrite it here.
       emitln("  mov a, b"); // TODO: inefficient, needs changing later. emit var directly into 'a' instead by adding regsel parameter to emitter function?
       if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  inc b");
       else emitln("  inc b"); // treating as int as an experiment
       emit_var_assignment(temp_name);
       emitln("  mov b, a"); // TODO: inefficient, needs changing later. emit var directly into 'a' instead by adding regsel parameter to emitter function?
+      emitln("  pop a");
       expr_out = expr_in;
     }    
     else if(tok == DECREMENT){ // post decrement. get value first, then do assignment
       expr_in = emit_var_into_b(temp_name); // into 'b'
+      emitln("  push a"); // save 'a' since functions such as parse_terms use 'a' and we can't overwrite it here.
       emitln("  mov a, b"); // TODO: inefficient, needs changing later. emit var directly into 'a' instead by adding regsel parameter to emitter function?
       if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  dec b");
       else emitln("  dec b"); // treating as int as an experiment
       emit_var_assignment(temp_name);
       emitln("  mov b, a"); // TODO: inefficient, needs changing later. emit var directly into 'a' instead by adding regsel parameter to emitter function?
+      emitln("  pop a");
       expr_out = expr_in;
     }    
     else if(tok == OPENING_PAREN){ // function call      
@@ -1898,7 +1901,7 @@ t_data parse_atom(void){
       data_size = get_data_size(&matrix->data);
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
       expr_out = emit_var_into_b(temp_name); // emit the base address of the matrix or pointer into 'b'
-      emitln("  push a");
+      emitln("  push a"); // needed because for loop below will modify 'a'. But 'a' is used by functions such as parse_terms, so keep previous results. so we cannot overwrite 'a' here.
       emitln("  mov d, b");
       for(i = 0; i < dims; i++){
         emitln("  push d"); // save 'd' in case the expressions inside brackets use 'd' for addressing (likely)

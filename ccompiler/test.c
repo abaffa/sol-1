@@ -1,23 +1,20 @@
 #inc_asm "lib/stdio.asm"
 
-int i = 5;
-int *p;
-int **pp;
+int m[10];
 
 int main() {
 
-  printn(8 && 1);
+  m[0] = 2;
+  m[1] = 1;
+
+  m[m[0]] = 55;
+  m[m[0] + m[1]] = 77;
+
+  printn(m[m[0]]);
   print("\n");
-  printn(0 && 1);
+  printn(m[m[0] + m[1]]);
   print("\n");
-  printn(0 && 0);
-  print("\n");
-  printn(8 && 0);
-  print("\n");
-  printn(8 && 2);
-  print("\n");
-  printn(98 && 4);
-  print("\n");
+
 
 	return;
 
