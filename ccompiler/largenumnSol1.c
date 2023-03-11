@@ -758,7 +758,7 @@ void main() {
     bnarr[pos] = bnarrbkp[pos];
   }
 
-  dividedby();
+  times();
 
   datumpos = 2;
 
@@ -784,7 +784,7 @@ void main() {
     anarr[pos] = anarrbkp[pos];
     bnarr[pos] = bnarrbkp[pos];
   }
-/*
+
   dividedby();
 
   datumpos = 2;
@@ -806,6 +806,6 @@ void main() {
     prnnumspace(datum[pos-1]);
   }
   prnnl();
-*/
+
   return;
 }
