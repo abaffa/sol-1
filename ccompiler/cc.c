@@ -582,7 +582,7 @@ void emit_c_var(char *var_name){
     }
   }
   else if(global_var_exists(var_name) != -1){  // is a global variable
-    emit("[");
+    emit("[__");
     emit(var_name);
     emit("]");
   }
@@ -629,7 +629,7 @@ void parse_for_break(void){
 void parse_for(void){
   char s_label[64];
   char *update_loc;
-  
+
   break_type_stack[break_type_tos] = current_break_type;
   break_type_tos++;
   current_break_type = FOR_BREAK;
@@ -1706,7 +1706,7 @@ t_data parse_atom(void){
     string_id = find_string(string_const);
     if(string_id == -1) string_id = add_string_data(string_const);
     // now emit the reference to this string into the ASM
-    sprintf(temp, "  mov b, _string_%d ; \"%s\"", string_id, string_const);
+    sprintf(temp, "  mov b, __string_%d ; \"%s\"", string_id, string_const);
     emitln(temp);
     expr_out.type = DT_CHAR;
     expr_out.ind_level = 1;
@@ -2032,7 +2032,7 @@ void emit_string_table_data(void){
 
   for(i = 0; string_table[i][0]; i++){
       // emit the declaration of this string, into the data block
-      sprintf(temp, "_string_%d", i);
+      sprintf(temp, "__string_%d", i);
       emit_data(temp);
       emit_data(": .db \"");
       emit_data(string_table[i]);
@@ -2438,7 +2438,7 @@ void declare_global(void){
       if(is_matrix(&global_variables[global_var_tos])){
         get();
         expect(OPENING_BRACE, OPENING_BRACE_EXPECTED);
-        sprintf(temp, "%s_data: \n", global_variables[global_var_tos].var_name);
+        sprintf(temp, "__%s_data: \n", global_variables[global_var_tos].var_name);
         emit_data(temp);
         emit_data_dbdw(ind_level, dim, data.type);
         j = 0;
@@ -2455,7 +2455,7 @@ void declare_global(void){
           else if(tok_type == STRING_CONST){
             int string_id;
             string_id = add_string_data(string_const);
-            sprintf(temp, "_string_%u, ", string_id);
+            sprintf(temp, "__string_%u, ", string_id);
             emit_data(temp);
           }
           else error(UNKNOWN_DATA_TYPE);
@@ -2469,7 +2469,7 @@ void declare_global(void){
         // fill in the remaining unitialized array values with 0's 
         sprintf(temp, "\n.fill %u, 0\n", get_total_var_size(&global_variables[global_var_tos]) - j * get_data_size(&global_variables[global_var_tos].data));
         emit_data(temp);
-        sprintf(temp, "%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
+        sprintf(temp, "__%s: .dw __%s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
         emit_data(temp);
         expect(CLOSING_BRACE, CLOSING_BRACE_EXPECTED);
       }
@@ -2477,7 +2477,7 @@ void declare_global(void){
         get();
         switch(data.type){
           case DT_VOID:
-            sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
+            sprintf(temp, "__%s: ", global_variables[global_var_tos].var_name);
             emit_data(temp);
             emit_data_dbdw(ind_level, dim, data.type);
             sprintf(temp, "%u, ", atoi(token));
@@ -2486,16 +2486,16 @@ void declare_global(void){
           case DT_CHAR:
             if(ind_level > 0){ // if is a string
               if(tok_type != STRING_CONST) error(STRING_CONSTANT_EXPECTED);
-              sprintf(temp, "%s_data: ", global_variables[global_var_tos].var_name);
+              sprintf(temp, "__%s_data: ", global_variables[global_var_tos].var_name);
               emit_data(temp);
               emit_data_dbdw(ind_level, dim, data.type);
               sprintf(temp, "%s, 0\n", token); // TODO: do not require char pointer initialization to be a string only!
               emit_data(temp);
-              sprintf(temp, "%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
+              sprintf(temp, "__%s: .dw __%s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
               emit_data(temp);
             }
             else{
-              sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
+              sprintf(temp, "__%s: ", global_variables[global_var_tos].var_name);
               emit_data(temp);
               emit_data_dbdw(ind_level, dim, data.type);
               if(tok_type == CHAR_CONST){
@@ -2509,7 +2509,7 @@ void declare_global(void){
             }
             break;
           case DT_INT:
-            sprintf(temp, "%s: ", global_variables[global_var_tos].var_name);
+            sprintf(temp, "__%s: ", global_variables[global_var_tos].var_name);
             emit_data(temp);
             emit_data_dbdw(ind_level, dim, data.type);
             if(ind_level > 0){
@@ -2527,13 +2527,13 @@ void declare_global(void){
     }
     else{ // no assignment!
       if(dim > 0){
-        sprintf(temp, "%s_data: .fill %u, 0\n", global_variables[global_var_tos].var_name, get_total_var_size(&global_variables[global_var_tos]));
+        sprintf(temp, "__%s_data: .fill %u, 0\n", global_variables[global_var_tos].var_name, get_total_var_size(&global_variables[global_var_tos]));
         emit_data(temp);
-        sprintf(temp, "%s: .dw %s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
+        sprintf(temp, "__%s: .dw __%s_data\n", global_variables[global_var_tos].var_name, global_variables[global_var_tos].var_name);
         emit_data(temp);
       }
       else{
-        sprintf(temp, "%s: .fill %u, 0\n", global_variables[global_var_tos].var_name, get_total_var_size(&global_variables[global_var_tos]));
+        sprintf(temp, "__%s: .fill %u, 0\n", global_variables[global_var_tos].var_name, get_total_var_size(&global_variables[global_var_tos]));
         emit_data(temp);
       }
     }
@@ -2665,11 +2665,6 @@ void declare_local(void){
       error(LOCAL_ASSIGNMENT);
     }
     else{
-      /*
-      int ii;
-      for(ii=0;ii<get_total_var_size(&new_var);ii++){
-          emitln("  push byte 'A'");
-      }*/
       sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
       emitln(asm_line);
     }
@@ -2680,9 +2675,6 @@ void declare_local(void){
 
   if(tok != SEMICOLON) error(SEMICOLON_EXPECTED);
 } // declare_local
-
-
-
 
 
 t_var *get_var(char *var_name){

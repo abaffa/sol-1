@@ -1,25 +1,45 @@
 #inc_asm "lib/stdio.asm"
 
-int matrix[20];
+int j=2;
+char *s = "Hello";
 
 int main() {
   int i;
-  int j;
-  int m[10];
 
-  for(i=0;i<20;i++){
-    matrix[i] = i;
-  }
+  printn(1 == 1);
+  print("\n");
+  printn(10 == 1);
+  print("\n");
+  printn(1 != 1);
+  print("\n");
+  printn(10 != 1);
+  print("\n");
 
-  j = 0;
-  m[5] = 1;
-  m[6] = 1;
+  printn(1 < 10);
+  print("\n");
+  printn(20 < 10);
+  print("\n");
+  printn(1 <= 10);
+  print("\n");
+  printn(10 <= 10);
+  print("\n");
+  printn(20 <= 10);
+  print("\n");
 
 
-  for(i=1;i<=20;i++){
-    printn(matrix[i-1 + j + m[5] - m[6]]);
-    print("\n");
-  }
+  printn(10 >1);
+  print("\n");
+  printn(1 > 10);
+  print("\n");
+  printn(10 >= 1);
+  print("\n");
+  printn(10 >= 10);
+  print("\n");
+  printn(1 >= 10);
+  print("\n");
+
+
+  print("HEllo");
 
 	return;
 

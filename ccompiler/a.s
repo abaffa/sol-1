@@ -8,19 +8,88 @@ main:
   push bp
   mov bp, sp
   sub sp, 2 ; i
-  sub sp, 2 ; j
-  sub sp, 20 ; m
-_for1_init:
-  mov b, 0
+  mov b, 1
   push a
   mov a, b
-  mov [bp + -1], a ; i
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
   pop a
-_for1_cond:
-  mov b, [bp + -1] ; i
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 10
   push a
   mov a, b
-  mov b, 20
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001
+  xor al, %00000001 ; !=
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 10
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000001
+  xor al, %00000001 ; !=
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 10
   cmp a, b
   lodflgs
   and al, %00000010 ; <
@@ -28,77 +97,39 @@ _for1_cond:
   mov ah, 0
   mov b, a
   pop a
-  cmp b, 0
-  je _for1_exit
-_for1_block:
-  mov b, [matrix]
-  mov d, b
-  push d
-  mov b, [bp + -1] ; i
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + -1] ; i
-  pop d
-  mov a, b
-  mov [d], a
-_for1_update:
-  mov b, [bp + -1] ; i
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-  mov b, a
-  jmp _for1_cond
-_for1_exit:
-  mov b, 0
-  push a
-  mov a, b
-  mov [bp + -3], a ; j
-  pop a
-  lea d, [bp + -23] ; m_data
-  mov b, d
-  mov d, b
-  push d
-  mov b, 5
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 1
-  pop d
-  mov a, b
-  mov [d], a
-  lea d, [bp + -23] ; m_data
-  mov b, d
-  mov d, b
-  push d
-  mov b, 6
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  push d
-  mov b, 1
-  pop d
-  mov a, b
-  mov [d], a
-_for2_init:
-  mov b, 1
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-_for2_cond:
-  mov b, [bp + -1] ; i
-  push a
-  mov a, b
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
   mov b, 20
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000010 ; <
+  shr al
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 10
   cmp a, b
   lodflgs
   and al, %00000011 ; <=
@@ -108,86 +139,175 @@ _for2_cond:
   mov ah, 0
   mov b, a
   pop a
-  cmp b, 0
-  je _for2_exit
-_for2_block:
-  mov b, [matrix]
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -1] ; i
-  push a
-  mov a, b
-  mov b, 1
-  sub a, b
-  mov b, a
-  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 10
   push a
   mov a, b
-  mov b, [bp + -3] ; j
-  add a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000011 ; <=
+  cmp al, 0
+  lodflgs
+  xor al, %00000001
+  mov ah, 0
   mov b, a
-  pop a
-  push a
-  mov a, b
-  lea d, [bp + -23] ; m_data
-  mov b, d
-  push a
-  mov d, b
-  push d
-  mov b, 5
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  add a, b
-  mov b, a
-  pop a
-  push a
-  mov a, b
-  lea d, [bp + -23] ; m_data
-  mov b, d
-  push a
-  mov d, b
-  push d
-  mov b, 6
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  sub a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
   pop a
   swp b
   push b
   call printn
   add sp, 2
-  mov b, _string_0 ; "\n"
+  mov b, __string_0 ; "\n"
   swp b
   push b
   call print
   add sp, 2
-_for2_update:
-  mov b, [bp + -1] ; i
-  mov a, b
-  inc b
+  mov b, 20
   push a
   mov a, b
-  mov [bp + -1], a ; i
-  pop a
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000011 ; <=
+  cmp al, 0
+  lodflgs
+  xor al, %00000001
+  mov ah, 0
   mov b, a
-  jmp _for2_cond
-_for2_exit:
+  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 10
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000011
+  cmp al, 0
+  lodflgs
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000011
+  cmp al, 0
+  lodflgs
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 10
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000011
+  xor al, %00000010 ; >=
+  cmp al, 0
+  lodflgs
+  xor al, %00000001
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 10
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000011
+  xor al, %00000010 ; >=
+  cmp al, 0
+  lodflgs
+  xor al, %00000001
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 10
+  cmp a, b
+  lodflgs
+  and al, %00000011
+  xor al, %00000010 ; >=
+  cmp al, 0
+  lodflgs
+  xor al, %00000001
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call printn
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, __string_1 ; "HEllo"
+  swp b
+  push b
+  call print
+  add sp, 2
   leave
   syscall sys_terminate_proc
 
@@ -238,9 +358,11 @@ print:
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
-matrix_data: .fill 40, 0
-matrix: .dw matrix_data
-_string_0: .db "\n", 0
+__j: .dw 2
+__s_data: .db "Hello", 0
+__s: .dw __s_data
+__string_0: .db "\n", 0
+__string_1: .db "HEllo", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
