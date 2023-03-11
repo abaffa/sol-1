@@ -1,5 +1,6 @@
 #inc_asm "lib/stdio.asm"
 
+enum e1 {E1, E2, E3};
 int j=2;
 char *s = "Hello";
 
