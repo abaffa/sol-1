@@ -422,11 +422,8 @@ print_u16d:
 	mov b, 10
 	div a, b
 	call print_number
-	mov a, b
-	add al, $30
-	mov ah, al
-	mov al, 0
-	syscall sys_io	; print coeff
+	mov al, bl
+	call print_number
 	pop b
 	pop a
 	ret

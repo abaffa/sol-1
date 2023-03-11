@@ -1,9 +1,25 @@
 #inc_asm "lib/stdio.asm"
 
-  int i;
+int matrix[20];
+
 int main() {
+  int i;
+  int j;
+  int m[10];
+
+  for(i=0;i<20;i++){
+    matrix[i] = i;
+  }
+
+  j = 0;
+  m[5] = 1;
+  m[6] = 1;
 
 
+  for(i=1;i<=20;i++){
+    printn(matrix[i-1 + j + m[5] - m[6]]);
+    print("\n");
+  }
 
 	return;
 

@@ -3,22 +3,22 @@
 char *ss = "\n";
 char *sp = " ";
 
-int ionum[6] = {0,0,0,0,0,0};
+int ionum[6];
 int ionr = 0;
 int ioshift = 0;
 
-int datum[36] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+int datum[36];
 int datumpos = 0;
 
-int anarr[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-int bnarr[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+int anarr[12];
+int bnarr[12];
 
-int anarrbkp[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-int bnarrbkp[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+int anarrbkp[12];
+int bnarrbkp[12];
 
-int cnarr[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-int mulres[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-int divres[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+int cnarr[12];
+int mulres[24];
+int divres[12];
 int asign = 0;
 int bsign = 0;
 int csign = 0;
