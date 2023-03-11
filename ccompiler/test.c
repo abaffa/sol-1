@@ -1,11 +1,10 @@
 #inc_asm "lib/stdio.asm"
 
-int m[10];
+int m1[10] = {1,1,1,1,1,1,1,1,1,1};
+int m2[10];
 
 int main() {
-
-
-  m[m[0] + m[1]] = 77;
+  int divi;
 
 
 

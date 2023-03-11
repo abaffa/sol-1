@@ -1458,9 +1458,9 @@ t_data parse_logical_and(void){
   if(tok == LOGICAL_AND){
     while(tok == LOGICAL_AND){
       temp_tok = tok;
-      emitln("  push a");
-      emitln("  mov a, b");
-      emitln("  cmp a, 0");
+      emitln("  push al");
+      //emitln("  mov a, b");
+      emitln("  cmp b, 0");
       emitln("  lodflgs");
       //emitln("  xor al, %00000001"); 
       data2 = parse_bitwise_or();
@@ -1469,13 +1469,13 @@ t_data parse_logical_and(void){
       emitln("  lodflgs");
       //emitln("  xor al, %00000001");
 
-      emitln("  pop bl"); // popping into bl rather than al so we don't need an extra 'mov bl, al'
+      emitln("  pop bl ; matches previous 'pop al'"); // popping into bl rather than al so we don't need an extra 'mov bl, al'
       emitln("  or al, bl"); 
       emitln("  xor al, %00000001"); // instead of ~A & ~B, doing ~(A | B) to save one opcode
       emitln("  mov bl, al"); 
       emitln("  mov bh, 0");  // bh needs to be set to 0 since the logical result still needs to be 16bit 
                               //(an if/while/do/for condition always tests whether a whole 16bit number could be 0 or 1, since conditions can be 16bit numbers as well)
-      emitln("  pop a");
+      emitln("  pop al");
     }
     expr_out.ind_level = 0; // if is a logical operation then result is an integer with ind_level = 0
     expr_out.type = DT_INT;
@@ -1518,8 +1518,7 @@ t_data parse_bitwise_xor(void){
     emitln("  push a");
     emitln("  mov a, b");
     data2 = parse_bitwise_and();
-    emitln("  xor a, b");
-    emitln("  mov b, a");
+    emitln("  xor b, a");
     emitln("  pop a");
   }
   expr_out = cast(data1, data2);

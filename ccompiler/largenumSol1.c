@@ -3,22 +3,22 @@
 char *ss = "\n";
 char *sp = " ";
 
-int ionum[6];
+int ionum[6] = {0,0,0,0,0,0};
 int ionr = 0;
 int ioshift = 0;
 
-int datum[36];
+int datum[36] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 int datumpos = 0;
 
-int anarr[12];
-int bnarr[12];
+int anarr[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+int bnarr[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
 
-int anarrbkp[12];
-int bnarrbkp[12];
+int anarrbkp[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+int bnarrbkp[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
 
-int cnarr[12];
-int mulres[24];
-int divres[12];
+int cnarr[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+int mulres[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+int divres[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
 int asign = 0;
 int bsign = 0;
 int csign = 0;
@@ -455,7 +455,7 @@ void protodividedby() {
     return;
   }
   while (anarr[11] == 0) {
-    for (divi = 0; divi < 12; divi++) {
+    for (divi = 0; divi < 11; divi++) {
       anarr[11-divi] = anarr[11-divi-1];
     }
     anarr[0] = 0;
@@ -490,7 +490,7 @@ void protodividedby() {
     }
 
     while (anarr[11] == 0) {
-      for (divi = 0; divi < 12; divi++) {
+      for (divi = 0; divi < 11; divi++) {
         anarr[11-divi] = anarr[11-divi-1];
       }
       anarr[0] = 0;
@@ -519,7 +519,7 @@ void normdivres() {
   normmulres();
 
   for (divshift = 0; divshift < 11; divshift++) {
-    for (divi = 0; divi < 24; divi++) {
+    for (divi = 0; divi < 23; divi++) {
       mulres[23-divi] = mulres[23-divi-1];
     }
     mulres[0] = 0;
