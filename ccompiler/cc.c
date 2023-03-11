@@ -1229,17 +1229,17 @@ void emit_var_assignment(char *var_name){
   else if(global_var_exists(var_name) != -1){  // is a global variable
     var_id = global_var_exists(var_name);
     if(global_variables[var_id].data.ind_level > 0){ // is a pointer
-      emit("  mov [");
+      emit("  mov [__");
       emit(global_variables[var_id].var_name);
       emitln("], b");
     }
     else if(global_variables[var_id].data.type == DT_CHAR){
-        emit("  mov [");
+        emit("  mov [__");
         emit(global_variables[var_id].var_name);
         emitln("], bl");
     }
     else if(global_variables[var_id].data.type == DT_INT){
-        emit("  mov [");
+        emit("  mov [__");
         emit(global_variables[var_id].var_name);
         emitln("], b");
     }
@@ -1754,7 +1754,6 @@ t_data parse_atom(void){
       emitln("  mov bl, [d]"); 
       emitln("  mov bh, 0");
     }
-    //need to PARSE VARIABLE HERE TO SEE IF IS LOCAL OR GLOBAL SO THAT WE CAN SWP OR NOT
     back();
     expr_out.type = expr_in.type;
     expr_out.ind_level = expr_in.ind_level - 1;
@@ -1774,7 +1773,7 @@ t_data parse_atom(void){
       }
     else if(global_var_exists(token) != -1){  // is a global variable
       var_id = global_var_exists(token);
-      emit("  mov b, ");
+      emit("  mov b, __");
       emitln(global_variables[var_id].var_name);
       expr_out = global_variables[var_id].data;
       expr_out.ind_level++;
@@ -1819,8 +1818,6 @@ t_data parse_atom(void){
     emitln("  mov bl, al");
     emitln("  mov bh, 0");
     emitln("  pop al");
-    //if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  not b");
-    //else emitln("  not b"); // treating as int as an experiment
     expr_out = expr_in;
     back();
   }
@@ -1939,7 +1936,7 @@ t_data parse_atom(void){
     else if(enum_element_exists(temp_name) != -1){
       back();
       sprintf(asm_line, "  mov b, %d; %s", get_enum_val(temp_name), temp_name);
-      emit(asm_line);
+      emitln(asm_line);
       expr_out.ind_level = 0;
       expr_out.type = DT_INT;
     }
@@ -2165,14 +2162,14 @@ t_data emit_var_into_b(char *var_name){
   else if(global_var_exists(var_name) != -1){  // is a global variable
     var_id = global_var_exists(var_name);
     if(is_matrix(&global_variables[var_id])){
-      emit("  mov b, [");
+      emit("  mov b, [__");
       emit(global_variables[var_id].var_name);
       emitln("]");
       expr_out.type = global_variables[var_id].data.type;
       expr_out.ind_level = global_variables[var_id].data.ind_level + 1;
     }
     else if(global_variables[var_id].data.ind_level > 0){
-      emit("  mov b, [");
+      emit("  mov b, [__");
       emit(global_variables[var_id].var_name);
       emit("] ; ");
       emitln(var_name);
@@ -2180,7 +2177,7 @@ t_data emit_var_into_b(char *var_name){
       expr_out.ind_level = global_variables[var_id].data.ind_level;
     }
     else if(global_variables[var_id].data.type == DT_INT){
-      emit("  mov b, [");
+      emit("  mov b, [__");
       emit(global_variables[var_id].var_name);
       emit("] ; ");
       emitln(var_name);
@@ -2188,7 +2185,7 @@ t_data emit_var_into_b(char *var_name){
       expr_out.ind_level = global_variables[var_id].data.ind_level;
     }
     else if(global_variables[var_id].data.type == DT_CHAR){
-      emit("  mov bl, [");
+      emit("  mov bl, [__");
       emit(global_variables[var_id].var_name);
       emit("] ; ");
       emitln(var_name);
@@ -2584,9 +2581,6 @@ int local_var_exists(char *var_name){
   
   return -1;
 }
-
-
-
 
 
 t_data_type get_data_type_from_tok(t_token t){

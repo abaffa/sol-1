@@ -1,46 +1,16 @@
 #inc_asm "lib/stdio.asm"
 
-enum e1 {E1, E2, E3};
-int j=2;
-char *s = "Hello";
+int i = 5;
+int *p;
+int **pp;
 
 int main() {
-  int i;
 
-  printn(1 == 1);
-  print("\n");
-  printn(10 == 1);
-  print("\n");
-  printn(1 != 1);
-  print("\n");
-  printn(10 != 1);
-  print("\n");
+  p = &i;
+  pp = &p;
 
-  printn(1 < 10);
-  print("\n");
-  printn(20 < 10);
-  print("\n");
-  printn(1 <= 10);
-  print("\n");
-  printn(10 <= 10);
-  print("\n");
-  printn(20 <= 10);
-  print("\n");
+  printn(**pp);
 
-
-  printn(10 >1);
-  print("\n");
-  printn(1 > 10);
-  print("\n");
-  printn(10 >= 1);
-  print("\n");
-  printn(10 >= 10);
-  print("\n");
-  printn(1 >= 10);
-  print("\n");
-
-
-  print("HEllo");
 
 	return;
 
