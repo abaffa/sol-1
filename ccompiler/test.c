@@ -4,16 +4,9 @@ int m[10];
 
 int main() {
 
-  m[0] = 2;
-  m[1] = 1;
 
-  m[m[0]] = 55;
   m[m[0] + m[1]] = 77;
 
-  printn(m[m[0]]);
-  print("\n");
-  printn(m[m[0] + m[1]]);
-  print("\n");
 
 
 	return;
