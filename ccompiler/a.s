@@ -11,58 +11,6 @@ main:
   push a
   mov d, b
   push d
-  mov b, 0
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  push d
-  mov b, 2
-  pop d
-  mov [d], b
-  mov b, [__m]
-  push a
-  mov d, b
-  push d
-  mov b, 1
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  push d
-  mov b, 1
-  pop d
-  mov [d], b
-  mov b, [__m]
-  push a
-  mov d, b
-  push d
-  mov b, [__m]
-  push a
-  mov d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  push d
-  mov b, 55
-  pop d
-  mov [d], b
-  mov b, [__m]
-  push a
-  mov d, b
-  push d
   mov b, [__m]
   push a
   mov d, b
@@ -99,82 +47,6 @@ main:
   mov b, 77
   pop d
   mov [d], b
-  mov b, [__m]
-  push a
-  mov d, b
-  push d
-  mov b, [__m]
-  push a
-  mov d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  swp b
-  push b
-  call printn
-  add sp, 2
-  mov b, __string_0 ; "\n"
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, [__m]
-  push a
-  mov d, b
-  push d
-  mov b, [__m]
-  push a
-  mov d, b
-  push d
-  mov b, 0
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  push a
-  mov a, b
-  mov b, [__m]
-  push a
-  mov d, b
-  push d
-  mov b, 1
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  add a, b
-  mov b, a
-  pop a
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  mov b, [d]
-  pop a
-  swp b
-  push b
-  call printn
-  add sp, 2
-  mov b, __string_0 ; "\n"
-  swp b
-  push b
-  call print
-  add sp, 2
   leave
   syscall sys_terminate_proc
 
@@ -227,7 +99,6 @@ print:
 ; --- BEGIN DATA BLOCK
 __m_data: .fill 20, 0
 __m: .dw __m_data
-__string_0: .db "\n", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
