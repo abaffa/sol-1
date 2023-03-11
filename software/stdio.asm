@@ -408,11 +408,11 @@ print_u16d:
 	push a
 	push b
 	mov b, 10000
-	div a, b			; get 10000 coeff.
+	div a, b			; get 10000's coeff.
 	call print_number
 	mov a, b
 	mov b, 1000
-	div a, b			; get 10000 coeff.
+	div a, b			; get 1000's coeff.
 	call print_number
 	mov a, b
 	mov b, 100
@@ -422,16 +422,14 @@ print_u16d:
 	mov b, 10
 	div a, b
 	call print_number
-	mov al, bl
+	mov al, bl			; 1's coeff in bl
 	call print_number
 	pop b
 	pop a
 	ret
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; if A == 0, print space
-; else print A
+; print AL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 print_number:
 	add al, $30

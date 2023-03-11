@@ -6,11 +6,18 @@ int **pp;
 
 int main() {
 
-  p = &i;
-  pp = &p;
-
-  printn(**pp);
-
+  printn(8 && 1);
+  print("\n");
+  printn(0 && 1);
+  print("\n");
+  printn(0 && 0);
+  print("\n");
+  printn(8 && 0);
+  print("\n");
+  printn(8 && 2);
+  print("\n");
+  printn(98 && 4);
+  print("\n");
 
 	return;
 

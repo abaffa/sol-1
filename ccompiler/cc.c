@@ -1463,14 +1463,17 @@ t_data parse_logical_and(void){
       emitln("  mov a, b");
       emitln("  cmp a, 0");
       emitln("  lodflgs");
-      emitln("  xor al, %00000001"); 
+      //emitln("  xor al, %00000001"); 
       data2 = parse_bitwise_or();
       emitln("  push al");
       emitln("  cmp b, 0");
       emitln("  lodflgs");
-      emitln("  xor al, %00000001"); 
+      //emitln("  xor al, %00000001");
 
       emitln("  pop bl"); // popping into bl rather than al so we don't need an extra 'mov bl, al'
+      emitln("  or al, bl"); 
+      emitln("  xor al, %00000001"); // instead of ~A & ~B, doing ~(A | B) to save one opcode
+      emitln("  mov bl, al"); 
       emitln("  mov bh, 0");  // bh needs to be set to 0 since the logical result still needs to be 16bit 
                               //(an if/while/do/for condition always tests whether a whole 16bit number could be 0 or 1, since conditions can be 16bit numbers as well)
       emitln("  pop a");
@@ -1553,7 +1556,7 @@ t_data parse_relational(void){
   if(tok == EQUAL || tok == NOT_EQUAL || tok == LESS_THAN
   || tok == LESS_THAN_OR_EQUAL || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
     while(tok == EQUAL || tok == NOT_EQUAL || tok == LESS_THAN
-      || tok == LESS_THAN_OR_EQUAL || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
+    || tok == LESS_THAN_OR_EQUAL || tok == GREATER_THAN || tok == GREATER_THAN_OR_EQUAL){
       temp_tok = tok;
       emitln("  push a");
       emitln("  mov a, b");
