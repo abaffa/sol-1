@@ -592,49 +592,52 @@ void emit_c_var(char *var_name){
 }
 
 void parse_break(void){
-  if(current_break_type == FOR_BREAK) parse_for_break();
-  else if(current_break_type == WHILE_BREAK) parse_while_break();
-  else if(current_break_type == DO_BREAK) parse_do_break();
-  else if(current_break_type == SWITCH_BREAK) parse_case_break();
+  char s_label[64];
+
+  if(current_loop_type == FOR_LOOP){
+    sprintf(s_label, "  jmp _for%d_exit ; for break", current_label_index_for);
+    emitln(s_label);
+  }
+  else if(current_loop_type == WHILE_LOOP){
+    sprintf(s_label, "  jmp _while%d_exit ; while break", current_label_index_while);
+    emitln(s_label);
+  }
+  else if(current_loop_type == DO_LOOP){
+    sprintf(s_label, "  jmp _do%d_exit ; do break", current_label_index_do);
+    emitln(s_label);
+  }
+  else if(current_loop_type == SWITCH_CONSTRUCT){
+    sprintf(s_label, "  jmp _switch%d_exit ; case break", current_label_index_switch);
+    emitln(s_label);
+  }
   get();
 }
 
-void parse_case_break(void){
+void parse_continue(void){
   char s_label[64];
-  
-  sprintf(s_label, "  jmp _switch%d_exit ; case break", current_label_index_switch);
-  emitln(s_label);
-}
 
-void parse_while_break(void){
-  char s_label[64];
-  
-  sprintf(s_label, "  jmp _while%d_exit ; while break", current_label_index_while);
-  emitln(s_label);
+  if(current_loop_type == FOR_LOOP){
+    sprintf(s_label, "  jmp _for%d_cond ; for continue", current_label_index_for);
+    emitln(s_label);
+  }
+  else if(current_loop_type == WHILE_LOOP){
+    sprintf(s_label, "  jmp _while%d_cond ; while continue", current_label_index_while);
+    emitln(s_label);
+  }
+  else if(current_loop_type == DO_LOOP){
+    sprintf(s_label, "  jmp _do%d_cond ; do continue", current_label_index_do);
+    emitln(s_label);
+  }
+  get();
 }
-
-void parse_do_break(void){
-  char s_label[64];
-  
-  sprintf(s_label, "  jmp _do%d_exit ; do break", current_label_index_do);
-  emitln(s_label);
-}
-
-void parse_for_break(void){
-  char s_label[64];
-  
-  sprintf(s_label, "  jmp _for%d_exit ; for break", current_label_index_for);
-  emitln(s_label);
-}
-
 
 void parse_for(void){
   char s_label[64];
   char *update_loc;
 
-  break_type_stack[break_type_tos] = current_break_type;
-  break_type_tos++;
-  current_break_type = FOR_BREAK;
+  loop_type_stack[loop_type_tos] = current_loop_type;
+  loop_type_tos++;
+  current_loop_type = FOR_LOOP;
   highest_label_index++;
   label_stack_for[label_tos_for] = current_label_index_for;
   label_tos_for++;
@@ -702,17 +705,17 @@ void parse_for(void){
 
   label_tos_for--;
   current_label_index_for = label_stack_for[label_tos_for];
-  break_type_tos--;
-  current_break_type = break_type_stack[break_type_tos];
+  loop_type_tos--;
+  current_loop_type = loop_type_stack[loop_type_tos];
 }
 
 
 void parse_while(void){
   char s_label[64];
 
-  break_type_stack[break_type_tos] = current_break_type;
-  break_type_tos++;
-  current_break_type = WHILE_BREAK;
+  loop_type_stack[loop_type_tos] = current_loop_type;
+  loop_type_tos++;
+  current_loop_type = WHILE_LOOP;
   highest_label_index++;
   label_stack_while[label_tos_while] = current_label_index_while;
   label_tos_while++;
@@ -737,17 +740,17 @@ void parse_while(void){
 
   label_tos_while--;
   current_label_index_while = label_stack_while[label_tos_while];
-  break_type_tos--;
-  current_break_type = break_type_stack[break_type_tos];
+  loop_type_tos--;
+  current_loop_type = loop_type_stack[loop_type_tos];
 }
 
 
 void parse_do(void){
   char s_label[64];
 
-  break_type_stack[break_type_tos] = current_break_type;
-  break_type_tos++;
-  current_break_type = DO_BREAK;
+  loop_type_stack[loop_type_tos] = current_loop_type;
+  loop_type_tos++;
+  current_loop_type = DO_LOOP;
   highest_label_index++;
   label_stack_do[label_tos_do] = current_label_index_do;
   label_tos_do++;
@@ -776,8 +779,8 @@ void parse_do(void){
 
   label_tos_do--;
   current_label_index_do = label_stack_do[label_tos_do];
-  break_type_tos--;
-  current_break_type = break_type_stack[break_type_tos];
+  loop_type_tos--;
+  current_loop_type = loop_type_stack[loop_type_tos];
 }
 
 /*
@@ -853,9 +856,9 @@ void parse_switch(void){
   char *temp_p;
   int current_case_nbr;
 
-  break_type_stack[break_type_tos] = current_break_type;
-  break_type_tos++;
-  current_break_type = SWITCH_BREAK;
+  loop_type_stack[loop_type_tos] = current_loop_type;
+  loop_type_tos++;
+  current_loop_type = SWITCH_CONSTRUCT;
   highest_label_index++;
   label_stack_switch[label_tos_switch] = current_label_index_switch;
   label_tos_switch++;
@@ -950,8 +953,8 @@ void parse_switch(void){
 
   label_tos_switch--;
   current_label_index_switch = label_stack_switch[label_tos_switch];
-  break_type_tos--;
-  current_break_type = break_type_stack[break_type_tos];
+  loop_type_tos--;
+  current_loop_type = loop_type_stack[loop_type_tos];
 }
 
 
@@ -1080,6 +1083,9 @@ void parse_block(void){
         break;
       case BREAK:
         parse_break();
+        break;
+      case CONTINUE:
+        parse_continue();
         break;
       case OPENING_BRACE:
         braces++;

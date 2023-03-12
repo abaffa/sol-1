@@ -46,8 +46,8 @@ typedef enum{
 } t_var_scope;
 
 typedef enum{
-  FOR_BREAK, WHILE_BREAK, DO_BREAK, SWITCH_BREAK
-} t_break_type;
+  FOR_LOOP, WHILE_LOOP, DO_LOOP, SWITCH_CONSTRUCT
+} t_loop_type;
 
 typedef enum {
   DELIMITER = 1,
@@ -298,9 +298,9 @@ char includes_list_asm[1024];         // keeps a list of all included files
 char data_block_asm[1024*32];
 char *data_block_p;
 
-t_break_type current_break_type;      // is it a for, while, or switch?
-t_break_type break_type_stack[64];
-int break_type_tos;
+t_loop_type current_loop_type;      // is it a for, while, do, or switch?
+t_loop_type loop_type_stack[64];
+int loop_type_tos;
 
 int highest_label_index; // keeps the highest label index and always increases
 int current_label_index_if; 
@@ -390,13 +390,13 @@ void parse_if(void);
 void parse_switch(void);
 void parse_while(void);
 void parse_do(void);
+
+void parse_continue(void);
 void parse_break(void);
-void parse_case_break(void);
-void parse_while_break(void);
-void parse_do_break(void);
-void parse_for_break(void);
-void parse_asm(void);
+
 int switch_has_default(void);
+
+void parse_asm(void);
 
 
 void parse_function_arguments(int func_index);
