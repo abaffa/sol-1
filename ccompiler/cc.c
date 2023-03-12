@@ -1303,27 +1303,11 @@ t_data parse_assignment(){
         parse_expr(); // result in 'b'
         emitln("  pop d"); // retrieve 'b' from before, into 'd'. This is the destination address so we can write to it
         if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
-        // if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
-        if(i < dims - 1){
-          sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix) * data_size);
-          emitln(asm_line);
-          emitln("  mul a, b");
-          emitln("  add d, b");
-          expr_out.ind_level--;
-        }
-        // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
-        else if(i == dims - 1){
-          // need to do this to get the correct data size in the last index
-          // not ideal, but ok for now
-          sprintf(asm_line, "  mov a, %d", data_size);
-          emitln(asm_line);
-          emitln("  mul a, b");           
-          emitln("  add d, b");
-          // here we have the final address of the referenced matrix item.
-          // the code is similar to the matrix handling code in parse_atom,
-          // except that the corresponding section which would be hereis deleted
-          // since we only need the address and not the value at this matrix position.
-        }
+        sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix));
+        emitln(asm_line);
+        emitln("  mul a, b");
+        emitln("  add d, b");
+        expr_out.ind_level--;
         get();
         if(tok != OPENING_BRACKET) break;
       }
@@ -1906,7 +1890,7 @@ t_data parse_atom(void){
       int i, dims, data_size; // matrix data size
       t_var *matrix; // pointer to the matrix variable
       t_data var;
-      &(var);
+
       matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
       data_size = get_data_size(&matrix->data);
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
@@ -1918,22 +1902,11 @@ t_data parse_atom(void){
         parse_expr(); // result in 'b'
         emitln("  pop d");
         if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
-        // if not evaluating the final dimension, it keeps returning pointers to the current position within the matrix
-        if(i < dims - 1){
-          sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix) * data_size);
-          emitln(asm_line);
-          emitln("  mul a, b");
-          emitln("  add d, b");
-          expr_out.ind_level--;
-        }
-        // if it has reached the last dimension, it gets the final value at that address, which is one of the basic data types
-        else if(i == dims - 1){
-          expr_out.ind_level--;
-          sprintf(asm_line, "  mov a, %d", data_size);
-          emitln(asm_line);
-          emitln("  mul a, b");           
-          emitln("  add d, b");
-        }
+        sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix));
+        emitln(asm_line);
+        emitln("  mul a, b");
+        emitln("  add d, b");
+        expr_out.ind_level--;
         get();
         if(tok != OPENING_BRACKET){
           back();
@@ -2238,10 +2211,12 @@ int get_matrix_offset(char dim, t_var *matrix){
   int i;
   int offset = 1;
   
+  if(dim == matrix_dim_count(matrix) - 1) return get_data_size(&matrix->data);
+
   for(i = dim + 1; i < matrix_dim_count(matrix); i++)
     offset = offset * matrix -> dims[i];
   
-  return offset;
+  return offset * get_data_size(&matrix->data);
 }
 
 
