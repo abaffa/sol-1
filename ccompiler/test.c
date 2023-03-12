@@ -1,23 +1,16 @@
 #inc_asm "lib/stdio.asm"
 
-int anarr[10] = {1,1,1,1,1,1,1,1,1,1};
-int bnarr[10] = {2,2,2,2,2,2,2,2,2,2};
+int aarr[10] = {1,1,1,1,1,1,1,1,1,1};
+int barr[10] = {2,2,2,2,2,2,2,2,2,2};
 
 int main() {
-  int swappos;
-for (swappos = 0; swappos < 10; swappos++) {
-  anarr[swappos] = anarr[swappos] + bnarr[swappos];
-  bnarr[swappos] = anarr[swappos] - bnarr[swappos];
-  anarr[swappos] = anarr[swappos] - bnarr[swappos];
-}
+  int a, b, c;
+  a = 1;
+  b = 100;
 
+  c = b - (a * 10);
 
-for (swappos = 0; swappos < 10; swappos++) {
-  printn(anarr[swappos]);
-  print(" : ");
-  printn(bnarr[swappos]);
-  print("\n");
-}
+  printn(c);
 
 	return;
 

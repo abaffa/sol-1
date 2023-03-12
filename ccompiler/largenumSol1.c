@@ -213,6 +213,8 @@ void protominus() {
       nextcarry = 1;
     }
     cnarr[pos] = anarr[pos] - bnarr[pos] - carry;
+    printn(cnarr[pos]);
+    print("\n");
     carry = nextcarry;
   }
   if (carry == 1) {
@@ -482,8 +484,11 @@ void protodividedby() {
   divcounter = 0;
 
   while (segmentcounter < 12) {
+    asm{
+      ; -------------------------- START
+    }
     while (anarr[11] != 0) {
-     // pminus();
+      pminus();
       divcounter++;
       for (divi = 0; divi < 12; divi++) {
         anarr[divi] = cnarr[divi];
