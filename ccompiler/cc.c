@@ -1773,7 +1773,8 @@ t_data parse_atom(void){
     else if(global_var_exists(token) != -1){  // is a global variable
       var_id = global_var_exists(token);
       emit("  mov b, __");
-      emitln(global_variables[var_id].var_name);
+      emit(global_variables[var_id].var_name);
+      if(is_matrix(&global_variables[var_id])) emitln("_data");
       expr_out = global_variables[var_id].data;
       expr_out.ind_level++;
     }
@@ -2119,7 +2120,7 @@ t_data emit_var_into_b(char *var_name){
       emit(temp);
       emit("] ; ");
       emit(var_name);
-      emitln("_data");
+      emitln(" beginning on the stack");
       emitln("  mov b, d");
       expr_out.type = function_table[current_func_id].local_vars[var_id].data.type;
       expr_out.ind_level = function_table[current_func_id].local_vars[var_id].data.ind_level + 1; // +1 because a matrix reference is a pointer even though it can have ind_level = 0
@@ -2159,7 +2160,8 @@ t_data emit_var_into_b(char *var_name){
     if(is_matrix(&global_variables[var_id])){
       emit("  mov b, [__");
       emit(global_variables[var_id].var_name);
-      emitln("]");
+      emit("] ; ");
+      emitln(var_name);
       expr_out.type = global_variables[var_id].data.type;
       expr_out.ind_level = global_variables[var_id].data.ind_level + 1;
     }
