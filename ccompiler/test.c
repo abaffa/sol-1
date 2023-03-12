@@ -1,12 +1,23 @@
 #inc_asm "lib/stdio.asm"
 
-int m1[10] = {1,1,1,1,1,1,1,1,1,1};
-int m2[10];
+int anarr[10] = {1,1,1,1,1,1,1,1,1,1};
+int bnarr[10] = {2,2,2,2,2,2,2,2,2,2};
 
 int main() {
-  int divi;
+  int swappos;
+for (swappos = 0; swappos < 10; swappos++) {
+  anarr[swappos] = anarr[swappos] + bnarr[swappos];
+  bnarr[swappos] = anarr[swappos] - bnarr[swappos];
+  anarr[swappos] = anarr[swappos] - bnarr[swappos];
+}
 
 
+for (swappos = 0; swappos < 10; swappos++) {
+  printn(anarr[swappos]);
+  print(" : ");
+  printn(bnarr[swappos]);
+  print("\n");
+}
 
 	return;
 

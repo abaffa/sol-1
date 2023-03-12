@@ -3,22 +3,22 @@
 char *ss = "\n";
 char *sp = " ";
 
-int ionum[6] = {0,0,0,0,0,0};
+int ionum[6];
 int ionr = 0;
 int ioshift = 0;
 
-int datum[36] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+int datum[36];
 int datumpos = 0;
 
-int anarr[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-int bnarr[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+int anarr[12];
+int bnarr[12];
 
-int anarrbkp[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-int bnarrbkp[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+int anarrbkp[12];
+int bnarrbkp[12];
 
-int cnarr[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
-int mulres[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-int divres[12] = {0,0,0,0,0,0,0,0,0,0,0,0};
+int cnarr[12];
+int mulres[24];
+int divres[12];
 int asign = 0;
 int bsign = 0;
 int csign = 0;
@@ -411,6 +411,22 @@ void prototimes() {
   return;
 }
 
+void printn(int n){
+  asm{
+    mov a, @n
+    call print_u16d
+  }
+  return;
+}
+
+void print(char *s){
+    asm{
+        mov a, @s
+        mov d, a
+        call puts
+    }
+    return;
+}
 void protodividedby() {
   brshift = 0;
   blshift = 0;
@@ -467,7 +483,7 @@ void protodividedby() {
 
   while (segmentcounter < 12) {
     while (anarr[11] != 0) {
-      pminus();
+     // pminus();
       divcounter++;
       for (divi = 0; divi < 12; divi++) {
         anarr[divi] = cnarr[divi];

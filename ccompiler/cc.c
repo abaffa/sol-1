@@ -1461,7 +1461,7 @@ t_data parse_logical_and(void){
       emitln("  push al");
       //emitln("  mov a, b");
       emitln("  cmp b, 0");
-      emitln("  lodflgs");
+      emitln("  lodflgs ; transform condition into a single bit");
       //emitln("  xor al, %00000001"); 
       data2 = parse_bitwise_or();
       emitln("  push al");
@@ -1469,7 +1469,7 @@ t_data parse_logical_and(void){
       emitln("  lodflgs");
       //emitln("  xor al, %00000001");
 
-      emitln("  pop bl ; matches previous 'pop al'"); // popping into bl rather than al so we don't need an extra 'mov bl, al'
+      emitln("  pop bl ; matches previous 'push al'"); // popping into bl rather than al so we don't need an extra 'mov bl, al'
       emitln("  or al, bl"); 
       emitln("  xor al, %00000001"); // instead of ~A & ~B, doing ~(A | B) to save one opcode
       emitln("  mov bl, al"); 
