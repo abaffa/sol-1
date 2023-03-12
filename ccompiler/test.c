@@ -11,108 +11,89 @@ void assert(int i){
   return;
 }
 
+    int matrix1[3][3] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int matrix2[3][3] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+    int result1[3][3];
+    int result2[3][3];
+    int result3[3][3];
 int main() {
-    // Test variables
-    int a;
-    a = 5;
-    int b;
-    b = 10;
-    int c;
-    c = 0;
-    char d;
-    d = 'X';
+    int i, j, k;
 
-    // Test arithmetic operators
-    assert(a + b == 15);
-    assert(b - a == 5);
-    assert(a * b == 50);
-    assert(b / a == 2);
+    // Print matrix1
+    print("Matrix1:\n");
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            printn(" ", matrix1[i][j]);
+        }
+        print("\n");
+    }
+    print("\n");
 
-    // Test comparison operators
-    assert(a < b);
-    assert(b > a);
-    assert(a <= 5);
-    assert(b >= 10);
-    assert(a == 5);
-    assert(b != 5);
+    // Print matrix2
+    print("Matrix2:\n");
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            printn(" ", matrix2[i][j]);
+        }
+        print("\n");
+    }
+    print("\n");
 
-    // Test logical operators
-    assert(a && b);
-    assert(a || c);
-    assert(!c);
-    // Test bitwise operators
-    assert((a & b) == 0);
-    assert((a | b) == 15);
-    assert((a ^ b) == 15);
-    assert(~a == -6);
-    assert((a << 1) == 10);
-    assert((b >> 1) == 5);
-
-    // Test assignment operators
-    c = a;
-    assert(c == 5);
-    c = c+ a;
-    assert(c == 10);
-    c = c + a;
-    assert(c == 15);
-    c = c * a;
-    assert(c == 75);
-    c = c / a;
-    assert(c == 15);
-    c = c % a;
-    assert(c == 0);
-    c = c << 1;
-    assert(c == 0);
-    c = c | 1;
-    assert(c == 1);
-
-    // Test if-else statements
-    if (a < b) {
-        assert(1);
-    } else {
-        assert(0);
+    // Multiply matrix1 and matrix2
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            result1[i][j] = 0;
+            for (k = 0; k < 3; k++) {
+                result1[i][j] = result1[i][j] + matrix1[i][k] * matrix2[k][j];
+            }
+        }
     }
 
-    // Test switch statements
-    switch (d) {
-        case 'X':
-            assert(1);
-            break;
-        case 'Y':
-            assert(0);
-            break;
-        default:
-            assert(0);
-            break;
+    // Add matrix1 and matrix2
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            result2[i][j] = matrix1[i][j] + matrix2[i][j];
+        }
     }
 
-    // Test while loops
-    int i;
-    i = 0;
-    while (i < 5) {
-        i++;
-    }
-    assert(i == 5);
-
-    // Test do-while loops
-    int j;
-    j = 0;
-    do {
-        j++;
-    } while (j < 5);
-    assert(j == 5);
-
-    // Test for loops
-    int k;
-    for (k = 0; k < 5; k++) {
-        assert(k >= 0 && k < 5);
+    // Subtract matrix1 from matrix2
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            result3[i][j] = matrix2[i][j] - matrix1[i][j];
+        }
     }
 
-    assert(add(a, b) == 15);
+    // Print the results
+    print("Result1 (matrix1 * matrix2):\n");
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            printn(" ", result1[i][j]);
+        }
+        print("\n");
+    }
+    print("\n");
 
+    print("Result2 (matrix1 + matrix2):\n");
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            printn(" ", result2[i][j]);
+        }
+        print("\n");
+    }
+    print("\n");
+
+    print("Result3 (matrix2 - matrix1):\n");
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            printn(" ", result3[i][j]);
+        }
+        print("\n");
+    }
+    print("\n");
 
     return 0;
 }
+
 
 // Test functions
 int add(int x, int y) {

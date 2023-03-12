@@ -261,15 +261,15 @@ void pre_processor(void){
         include_asm_lib(token);
         continue;
       }
-      else if(tok == DEFINE){
+      /*else if(tok == DEFINE){
         declare_define();
         continue;
       }
       else{
         prog = tp;
-      }
+      }*/
     }
-
+/*
     prog = tp;
     get();
     if(tok_type == IDENTIFIER){
@@ -297,6 +297,7 @@ void pre_processor(void){
       strcat(c_preproc_out, token);
     }
     strcat(c_preproc_out, " ");
+*/
   } while(tok_type != END);
 }
 
@@ -311,7 +312,8 @@ int find_define(char *name){
 void pre_scan(void){
   char *tp;
   
-  prog = c_preproc_out;
+  //prog = c_preproc_out;
+  prog = c_in;
   do{
     tp = prog;
     get();
@@ -1931,13 +1933,6 @@ t_data parse_atom(void){
           emitln(asm_line);
           emitln("  mul a, b");           
           emitln("  add d, b");
-          if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
-            emitln("  mov b, [d]");
-          }
-          else if(matrix->data.type == DT_CHAR){
-            emitln("  mov bl, [d]");
-            emitln("  mov bh, 0"); // treating as an int as an experiment
-          }
         }
         get();
         if(tok != OPENING_BRACKET){
@@ -1946,6 +1941,16 @@ t_data parse_atom(void){
         }
       }
       emitln("  pop a");
+      if(i == dims - 1){
+        if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
+          emitln("  mov b, [d]"); // last dimension, so return value
+        }
+        else if(matrix->data.type == DT_CHAR){
+          emitln("  mov bl, [d]");
+          emitln("  mov bh, 0"); // treating as an int as an experiment
+        }
+      }
+      else emitln("  mov b, d");
     }
     else if(enum_element_exists(temp_name) != -1){
       back();
