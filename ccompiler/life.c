@@ -1,10 +1,10 @@
 #inc_asm "lib/stdio.asm"
 //#include <stdio.h>
 
-#define SIZE 40
+int SIZE = 40;
 
 // Global arrays to hold the current and next states of the game grid
-int curr_state[SIZE][SIZE] = {
+int curr_state[40][40] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -27,7 +27,7 @@ int curr_state[SIZE][SIZE] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 };
 
-int next_state[SIZE][SIZE];
+int next_state[40][40];
 
 void print(char *s){
 //    printf("%s", s);

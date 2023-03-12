@@ -19,6 +19,8 @@ void assert(int i){
 int main() {
     int i, j, k;
 
+    matrix1[0];
+
     // Print matrix1
     print("Matrix1:\n");
     for (i = 0; i < 3; i++) {

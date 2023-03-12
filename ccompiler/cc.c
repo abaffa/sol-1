@@ -1316,12 +1316,15 @@ t_data parse_assignment(){
       emitln("  push d"); // save 'd'. this is the matrix base address. save because expr below could use 'd' and overwrite it
       parse_expr(); // evaluate expression, result in 'b'
       emitln("  pop d"); 
-      if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
-        emitln("  mov [d], b");
+      if(i == dims - 1){
+        if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
+          emitln("  mov [d], b");
+        }
+        else if(matrix->data.type == DT_CHAR){
+          emitln("  mov [d], bl");
+        }
       }
-      else if(matrix->data.type == DT_CHAR){
-        emitln("  mov [d], bl");
-      }
+      else error(INVALID_MATRIX_ASSIGNMENT);
       return expr_out;
     }
     else if(tok == ASSIGNMENT){

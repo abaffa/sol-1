@@ -10,6 +10,17 @@ main:
   sub sp, 2 ; i
   sub sp, 2 ; j
   sub sp, 2 ; k
+  mov b, [__matrix1]
+  push a
+  mov d, b
+  push d
+  mov b, 0
+  pop d
+  mov a, 6
+  mul a, b
+  add d, b
+  pop a
+  mov b, d
   mov b, __string_0 ; "Matrix1:\n"
   swp b
   push b
