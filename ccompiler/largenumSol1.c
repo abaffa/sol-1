@@ -213,8 +213,6 @@ void protominus() {
       nextcarry = 1;
     }
     cnarr[pos] = anarr[pos] - bnarr[pos] - carry;
-    printn(cnarr[pos]);
-    print("\n");
     carry = nextcarry;
   }
   if (carry == 1) {
@@ -271,102 +269,6 @@ void pminus() {
   return;
 }
 
-void minus() {
-  fixsignin();
-  pminus();
-  fixcsizezero();
-  fixsignout();
-  return;
-}
-
-void pplus() {
-
-  for (divi = 0; divi < 12; divi++) {
-    cnarr[divi] = 0;
-  }
-  checkabsabsize();
-  if (((asign == 0) && (bsign == 1)) && (aeqb == 1)) {
-    asign = 0;
-    bsign = 0;
-    csign = 0;
-    for (pos = 1; pos < 12; pos++) {
-      cnarr[pos] = 0;
-    }
-    return;
-  }
-
-  if (((asign == 1) && (bsign == 0)) && (aeqb == 1)) {
-    asign = 0;
-    bsign = 0;
-    csign = 0;
-    for (pos = 1; pos < 12; pos++) {
-      cnarr[pos] = 0;
-    }
-    return;
-  }
-
-  if ((asign == 0) && (bsign == 0)) {
-    asign = 0;
-    bsign = 0;
-    csign = 0;
-    protoplus();
-    return;
-  }
-
-  if ((asign == 1) && (bsign == 1)) {
-    asign = 0;
-    bsign = 0;
-    csign = 1;
-    protoplus();
-    return;
-  }
-
-  if ((asign == 0) && (bsign == 1) && (agtb == 1)) {
-    asign = 0;
-    bsign = 0;
-    csign = 0;
-    protominus();
-    return;
-  }
-
-  if ((asign == 0) && (bsign == 1) && (bgta == 1)) {
-    asign = 0;
-    bsign = 0;
-    csign = 1;
-    swapab();
-    protominus();
-    return;
-  }
-
-  if ((asign == 1) && (bsign == 0) && (agtb == 1)) {
-    csign = 1;
-    swapab();
-    asign = 0;
-    bsign = 0;
-    pminus();
-    return;
-  }
-
-  if ((asign == 1) && (bsign == 0) && (bgta == 1)) {
-    asign = 0;
-    bsign = 0;
-    csign = 0;
-    swapab();
-    protominus();
-    return;
-  }
-  return;
-}
-
-void plus() {
-  fixsignin();
-  pplus();
-  fixcsizezero();
-  fixsignout();
-  return;
-}
-
-
 void normmulres() {
   if (mulres[23] > 99) {
     toolarge = mulres[23]/100;
@@ -396,23 +298,6 @@ void normmulres() {
   return;
 }
 
-void prototimes() {
-  for (divi = 0; divi < 12; divi++) {
-    cnarr[divi] = 0;
-  }
-  for (divi = 0; divi < 24; divi++) {
-    mulres[divi] = 0;
-  }
-  for (mulpos1 = 0; mulpos1 < 12; mulpos1++) {
-    for (mulpos2 = 0; mulpos2 < 12; mulpos2++) {
-      mulres[mulpos1+mulpos2] = mulres[mulpos1+mulpos2] + (bnarr[mulpos2]*anarr[mulpos1]);
-    }
-
-    normmulres();
-  }
-  return;
-}
-
 void printn(int n){
   asm{
     mov a, @n
@@ -429,6 +314,7 @@ void print(char *s){
     }
     return;
 }
+
 void protodividedby() {
   brshift = 0;
   blshift = 0;
@@ -553,41 +439,6 @@ void normdivres() {
   return;
 }
 
-void times() {
-
-  fixsignin();
-
-  csign = 0;
-  if (asign != bsign) {
-    csign = 1;
-  }
-  asign = 0;
-  bsign = 0;
-
-  prototimes();
-
-  allzeroes = 1;
-  for (pos = 15; pos < 24; pos++) {
-    if (mulres[pos] != 0) {
-      allzeroes = 0;
-    }
-  }
-
-  if (allzeroes == 1) {
-    for (pos = 4; pos < 15; pos++) {
-      cnarr[pos-4] = mulres[pos];
-    }
-  }
-  if (cnarr[11] > 9) {
-    for (pos = 0; pos < 10; pos++) {
-      cnarr[pos] = 0;
-    }
-  }
-
-  fixcsizezero();
-  fixsignout();
-  return;
-}
 
 void dividedby() {
   fixsignin();
@@ -723,89 +574,7 @@ void main() {
   }
   prnnl();
 
-
-
-  plus();
-
-  datumpos = 2;
-
-  for (pos = datumpos*6; pos < (datumpos*6) + 6; pos++) {
-    datum[pos] = (cnarr[(pos - (datumpos*6))*2+1]) * 100 + cnarr[(pos - (datumpos*6))*2];
-  }
-
-  for (pos = 18; pos > 12; pos--) {
-    if (datum[pos-1] < 1000) {
-      prnnum(0);
-    }
-    if (datum[pos-1] < 100) {
-      prnnum(0);
-    }
-    if (datum[pos-1] < 10) {
-      prnnum(0);
-    }
-    prnnumspace(datum[pos-1]);
-  }
-  prnnl();
-
-  for (pos = 0; pos < 12; pos++) {
-    anarr[pos] = anarrbkp[pos];
-    bnarr[pos] = bnarrbkp[pos];
-  }
-
-  minus();
-
-  datumpos = 2;
-
-  for (pos = datumpos*6; pos < (datumpos*6) + 6; pos++) {
-    datum[pos] = (cnarr[(pos - (datumpos*6))*2+1]) * 100 + cnarr[(pos - (datumpos*6))*2];
-  }
-
-  for (pos = 18; pos > 12; pos--) {
-    if (datum[pos-1] < 1000) {
-      prnnum(0);
-    }
-    if (datum[pos-1] < 100) {
-      prnnum(0);
-    }
-    if (datum[pos-1] < 10) {
-      prnnum(0);
-    }
-    prnnumspace(datum[pos-1]);
-  }
-  prnnl();
-
-  for (pos = 0; pos < 12; pos++) {
-    anarr[pos] = anarrbkp[pos];
-    bnarr[pos] = bnarrbkp[pos];
-  }
-
-  times();
-
-  datumpos = 2;
-
-  for (pos = datumpos*6; pos < (datumpos*6) + 6; pos++) {
-    datum[pos] = (cnarr[(pos - (datumpos*6))*2+1]) * 100 + cnarr[(pos - (datumpos*6))*2];
-  }
-
-  for (pos = 18; pos > 12; pos--) {
-    if (datum[pos-1] < 1000) {
-      prnnum(0);
-    }
-    if (datum[pos-1] < 100) {
-      prnnum(0);
-    }
-    if (datum[pos-1] < 10) {
-      prnnum(0);
-    }
-    prnnumspace(datum[pos-1]);
-  }
-  prnnl();
-
-  for (pos = 0; pos < 12; pos++) {
-    anarr[pos] = anarrbkp[pos];
-    bnarr[pos] = bnarrbkp[pos];
-  }
-
+  print("***** DIVIDE *****\n");
   dividedby();
 
   datumpos = 2;

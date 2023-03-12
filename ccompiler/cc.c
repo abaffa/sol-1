@@ -1345,21 +1345,25 @@ t_data parse_assignment(){
     }
   }
   else if(tok == STAR){ // tests if this is a pointer assignment
-    expr_in = parse_atom(); // parte what comes after '*' (considered a pointer)
-    emitln("  push b"); // pointer given in 'b'. push 'd' into stack to save it. we will retrieve it below into 'd' for the assognment address
+    expr_in = parse_atom(); // parse what comes after '*' (considered a pointer)
+    emitln("  push b"); // pointer given in 'b'. push 'd' into stack to save it. we will retrieve it below into 'd' for the assignment address
     //emitln("  mov d, b"); // pointer given in 'b', so mov 'b' into 'd'
     // after evaluating the address expression, the token will be a "="
     if(tok != ASSIGNMENT) error(SYNTAX);
-    parse_ternary_op(); // evaluates the value to be assigned to the address, result in 'b'
+    parse_expr(); // evaluates the value to be assigned to the address, result in 'b'
     emitln("  pop d"); // now pop 'b' from before into 'd' so that we can recover the address for the assignment
     switch(expr_in.type){
       case DT_CHAR:
+        emitln("  push al"); // pushing a/al as this function cLL could have come after a 'mov a, b' in parse_terms etc
         emitln("  mov al, bl");
         emitln("  mov [d], al");
+        emitln("  pop al");
         break;
       case DT_INT:
+        emitln("  push a"); // pushing a/al as this function cLL could have come after a 'mov a, b' in parse_terms etc
         emitln("  mov a, b");
         emitln("  mov [d], a");
+        emitln("  pop a");
         break;
       default: error(INVALID_POINTER);
     }
@@ -1499,7 +1503,8 @@ t_data parse_bitwise_or(void){
     emitln("  push a");
     emitln("  mov a, b");
     data2 = parse_bitwise_xor();
-    emitln("  or b, a");
+    emitln("  or a, b");
+    emitln("  mov b, a");
     emitln("  pop a");
   }
   expr_out = cast(data1, data2);
@@ -1518,7 +1523,8 @@ t_data parse_bitwise_xor(void){
     emitln("  push a");
     emitln("  mov a, b");
     data2 = parse_bitwise_and();
-    emitln("  xor b, a");
+    emitln("  xor a, b");
+    emitln("  mov b, a");
     emitln("  pop a");
   }
   expr_out = cast(data1, data2);
@@ -1537,7 +1543,8 @@ t_data parse_bitwise_and(void){
     emitln("  push a");
     emitln("  mov a, b");
     data2 = parse_relational();
-    emitln("  and b, a");
+    emitln("  and a, b");
+    emitln("  mov b, a");
     emitln("  pop a");
   }
   expr_out = cast(data1, data2);
@@ -1631,10 +1638,12 @@ t_data parse_bitwise_shift(void){
     emitln("  push a");
     emitln("  mov a, b");
     data2 = parse_terms();
-    emitln("  mov cl, bl"); // only using bl since shifts only use cl
+    emitln("  push c"); // for safety. not sure if needed yet
+    emitln("  mov c, b"); // using 16bit values even though only cl is needed, because 'mov cl, bl' is not implemented as an opcode
     emitln("  mov b, a");
     if(temp_tok == BITWISE_SHL) emitln("  shl b, cl");
     else if(temp_tok == BITWISE_SHR) emitln("  shr b, cl");
+    emitln("  pop c");
     emitln("  pop a");
   }
   expr_out = cast(data1, data2);
@@ -2447,7 +2456,7 @@ void declare_global(void){
         do{
           get();
           if(tok_type == CHAR_CONST){
-            sprintf(temp, "'%c', ", string_const[0]);
+            sprintf(temp, "$%x, ", string_const[0]);
             emit_data(temp);
           }
           else if(tok_type == INTEGER_CONST){
@@ -2501,7 +2510,7 @@ void declare_global(void){
               emit_data(temp);
               emit_data_dbdw(ind_level, dim, data.type);
               if(tok_type == CHAR_CONST){
-                sprintf(temp, "'%c'\n", string_const[0]);
+                sprintf(temp, "$%x\n", string_const[0]);
                 emit_data(temp);
               }
               else if(tok_type == INTEGER_CONST){
