@@ -1906,7 +1906,7 @@ t_data parse_atom(void){
       int i, dims, data_size; // matrix data size
       t_var *matrix; // pointer to the matrix variable
       t_data var;
-
+      &(var);
       matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
       data_size = get_data_size(&matrix->data);
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
