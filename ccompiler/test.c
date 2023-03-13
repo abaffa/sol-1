@@ -1,51 +1,11 @@
 #inc_asm "lib/stdio.asm"
 
 int main() {
-  int i; 
-  for (i = 100; i >= 0; i--) {
-    print_num(i);
-    print("\n");
-  }
-  return;
-    printn(12);
-    print("\n");
-    printn(1126);
-    print("\n");
-    printn(65535);
-    print("\n");
-/*
-    printn(126);
-    print("\n");
-    printn(65535);
-    print("\n");
-    printn(0);
-    print("\n");
-*/
-    return 0;
-}
+  signed int i;
+  i = 1;
+  i << 2;
 
-void printn(int number) {
-  char buffer[5]; // Maximum size needed for a 16-bit decimal number
-  int index;
-  int i;
-if (number == 0) {
-    _putchar('0');
-    return;
-  }
-
-  index = 0;
-
-  // Convert the number to a string in reverse order
-  while (number > 0) {
-    buffer[index++] = (number % 10) + '0';
-    number = number / 10;
-  }
-
-  // Print the string in the correct order
-  for (i = index - 1; i >= 0; i--) {
-    _putchar(buffer[i]);
-  }
-    return;
+  return 0;
 }
 
 void print_num(int num) {
@@ -74,8 +34,6 @@ void _putchar(char c){
   return;
 }
 
-
-
 void scann(int *n){
   int m;
   asm{
@@ -85,8 +43,6 @@ void scann(int *n){
   *n = m;
   return;
 }
-
-
 
 void print(char *s){
     asm{

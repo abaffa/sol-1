@@ -1637,8 +1637,14 @@ t_data parse_bitwise_shift(void){
     emitln("  push c"); // for safety. not sure if needed yet
     emitln("  mov c, b"); // using 16bit values even though only cl is needed, because 'mov cl, bl' is not implemented as an opcode
     emitln("  mov b, a");
-    if(temp_tok == BITWISE_SHL) emitln("  shl b, cl");
-    else if(temp_tok == BITWISE_SHR) emitln("  shr b, cl");
+    if(temp_tok == BITWISE_SHL){
+      if(data1.smod == MOD_SIGNED) emitln("  ashl b, cl");
+      else emitln("  shl b, cl");
+    }
+    else if(temp_tok == BITWISE_SHR){
+      if(data1.smod == MOD_SIGNED) emitln("  ashr b, cl");
+      else emitln("  shr b, cl");
+    }
     emitln("  pop c");
     emitln("  pop a");
   }
