@@ -1,27 +1,77 @@
 #inc_asm "lib/stdio.asm"
 
-
-int ackermann(int m, int n) {
-    if (m == 0) {
-        return n + 1;
-    } else if (n == 0) {
-        return ackermann(m - 1, 1);
-    } else {
-        return ackermann(m - 1, ackermann(m, n - 1));
-    }
+int main() {
+  int i; 
+  for (i = 100; i >= 0; i--) {
+    print_num(i);
+    print("\n");
+  }
+  return;
+    printn(12);
+    print("\n");
+    printn(1126);
+    print("\n");
+    printn(65535);
+    print("\n");
+/*
+    printn(126);
+    print("\n");
+    printn(65535);
+    print("\n");
+    printn(0);
+    print("\n");
+*/
+    return 0;
 }
 
-int main() {
-    int m; m = 4;
-    int n; n = 3;
-    int result;
+void printn(int number) {
+  char buffer[5]; // Maximum size needed for a 16-bit decimal number
+  int index;
+  int i;
+if (number == 0) {
+    _putchar('0');
+    return;
+  }
 
-    result = ackermann(m, n);
+  index = 0;
 
-    printn("The result is: ", result);
-    print("\n");
+  // Convert the number to a string in reverse order
+  while (number > 0) {
+    buffer[index++] = (number % 10) + '0';
+    number = number / 10;
+  }
 
-    return 0;
+  // Print the string in the correct order
+  for (i = index - 1; i >= 0; i--) {
+    _putchar(buffer[i]);
+  }
+    return;
+}
+
+void print_num(int num) {
+    char digits[5];
+    int i;
+    i = 0;
+    while (num > 0) {
+        digits[i] = '0' + (num % 10);
+        num = num / 10;
+        i++;
+    }
+    // Print the digits in reverse order using putchar()
+    while (i > 0) {
+        i--;
+        _putchar(digits[i]);
+    }
+    return;
+}
+
+void _putchar(char c){
+  asm{
+    mov al, @c
+    mov ah, al
+    call putchar
+  }
+  return;
 }
 
 
@@ -37,14 +87,6 @@ void scann(int *n){
 }
 
 
-void printn(char *s, int n){
-  print(s);
-  asm{
-    mov a, @n
-    call print_u16d
-  }
-  return;
-}
 
 void print(char *s){
     asm{

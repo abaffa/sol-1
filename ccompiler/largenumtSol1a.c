@@ -1,6 +1,5 @@
 #inc_asm "lib/stdio.asm"
 
-char *ss = "\n";
 char *sp = " ";
 
 int ionum[6];
@@ -8,12 +7,11 @@ int ionr = 0;
 int ioshift = 0;
 
 int datum[36];
-int datumpos = 0;
+int datumpos ;
 
 int anarr[12];
 int bnarr[12];
-
-int anarrbkp[12];
+int anarrbkp[12] ;
 int bnarrbkp[12];
 
 int cnarr[12];
@@ -57,6 +55,15 @@ int divshift = 0;
 int subi = 0;
 int posflag = 0;
 
+void print(char *s){
+    asm{
+        mov a, @s
+        mov d, a
+        call puts
+    }
+    return;
+}
+
 int readint() {
   int n;
   asm{
@@ -67,40 +74,42 @@ int readint() {
 }
 
 void prnnumspace(int n){
-  asm{
-    mov a, @n
-    call print_u16d
-    mov a, @sp
-    mov d, a
-    call puts
-  }
+  prnnum(n);
+  print(" ");
   return;
 }
 
-void prnnum(int n){
-  asm{
-    mov a, @n
-    call print_u16d
+void prnnum(int number) {
+if (number == 0) {
+    _putchar('0');
+    return;
   }
-  return;
+
+  char buffer[6]; // Maximum size needed for a 16-bit decimal number
+  int index;
+  index = 0;
+
+  // Convert the number to a string in reverse order
+  while (number > 0) {
+    buffer[index++] = (number % 10) + '0';
+    number = number / 10;
+  }
+
+  int i;
+  // Print the string in the correct order
+  for (i = index - 1; i >= 0; i--) {
+    _putchar(buffer[i]);
+  }
+    return;
 }
 
-void prnnl(){
+void _putchar(char c){
   asm{
-    mov a, @ss
-    mov d, a
-    call puts
+    mov al, @c
+    mov ah, al
+    call putchar
   }
-  return;
-}
-
-void prnsp(){
-  asm{
-    mov a, @sp
-    mov d, a
-    call puts
-  }
-  return;
+    return;
 }
 
 
@@ -281,11 +290,11 @@ void minus() {
 }
 
 void pplus() {
-
   for (divi = 0; divi < 12; divi++) {
     cnarr[divi] = 0;
   }
   checkabsabsize();
+
   if (((asign == 0) && (bsign == 1)) && (aeqb == 1)) {
     asign = 0;
     bsign = 0;
@@ -428,6 +437,7 @@ void aincrease() {
   anarr[0] = anarr[0] * 10;
   anarr[0] = subi - anarr[0];
   anarr[0] = anarr[0] * 10;
+  return;
 }
 
 void bincrease() {
@@ -444,6 +454,7 @@ void bincrease() {
   bnarr[0] = bnarr[0] * 10;
   bnarr[0] = subi - bnarr[0];
   bnarr[0] = bnarr[0] * 10;
+  return;
 }
 
 void adecrease() {
@@ -455,17 +466,19 @@ void adecrease() {
     anarr[divi] = subi + (anarr[divi]/10);
   }
   anarr[11] = anarr[11]/10;
+  return;
 }
 
 void bdecrease() {
-    for (divi = 0; divi < 11; divi++) {
-      subi = bnarr[divi+1]/10;
-      subi = subi * 10;
-      subi = bnarr[divi+1] - subi;
-      subi = subi * 10;
-      bnarr[divi] = subi + (bnarr[divi]/10);
-    }
-    bnarr[11] = bnarr[11]/10;
+  for (divi = 0; divi < 11; divi++) {
+    subi = bnarr[divi+1]/10;
+    subi = subi * 10;
+    subi = bnarr[divi+1] - subi;
+    subi = subi * 10;
+    bnarr[divi] = subi + (bnarr[divi]/10);
+  }
+  bnarr[11] = bnarr[11]/10;
+  return;
 }
 
 void protodividedby() {
@@ -507,6 +520,7 @@ void protodividedby() {
   if (allzeroes == 1) {
     return;
   }
+
   while (anarr[11] == 0) {
     for (divi = 0; divi < 11; divi++) {
       anarr[11-divi] = anarr[11-divi-1];
@@ -529,24 +543,24 @@ void protodividedby() {
   divcounter1 = 0;
   divcounter2 = 0;
 
-  checkabsabsize();
-  if (ageb == 0) {
-    brshift++;
-    bdecrease();
+  posflag = 0;
+  if (anarr[11] > bnarr[11]*10) {
+    blshift++;
+    adecrease();
   }
 
-  posflag = 0;
   while (segmentcounter < 12) {
 
     checkabsabsize();
 
     while (ageb == 1) {
-      pminus();
+      protominus();
       divcounter1++;
       for (divi = 0; divi < 12; divi++) {
         anarr[divi] = cnarr[divi];
         cnarr[divi] = 0;
       }
+
       checkabsabsize();
     }
 
@@ -583,6 +597,7 @@ void protodividedby() {
 }
 
 void normdivres() {
+
 
   for (divi = 12; divi < 24; divi++) {
     mulres[divi] = 0;
@@ -680,12 +695,13 @@ void dividedby() {
   return;
 }
 
+
 void main() {
 
   for (pos = 0; pos < 60; pos++) {
     prnnum(0);
   }
-  prnnl();
+  print("\n");
 
 
 
@@ -707,7 +723,7 @@ void main() {
       }
       prnnum(ionum[datumpos-1]);
     }
-    prnnl();
+  print("\n");
   }
 
   datumpos = 0;
@@ -721,7 +737,7 @@ void main() {
   for (pos = 0; pos < 60; pos++) {
     prnnum(0);
   }
-  prnnl();
+  print("\n");
 
 
 
@@ -743,7 +759,7 @@ void main() {
       }
       prnnum(ionum[datumpos-1]);
     }
-    prnnl();
+  print("\n");
   }
 
   datumpos = 1;
@@ -780,7 +796,7 @@ void main() {
   for (pos = 0; pos < 60; pos++) {
     prnnum(0);
   }
-  prnnl();
+  print("\n");
 
 
 
@@ -804,7 +820,7 @@ void main() {
     }
     prnnumspace(datum[pos-1]);
   }
-  prnnl();
+  print("\n");
 
   for (pos = 0; pos < 12; pos++) {
     anarr[pos] = anarrbkp[pos];
@@ -831,7 +847,7 @@ void main() {
     }
     prnnumspace(datum[pos-1]);
   }
-  prnnl();
+  print("\n");
 
   for (pos = 0; pos < 12; pos++) {
     anarr[pos] = anarrbkp[pos];
@@ -858,7 +874,7 @@ void main() {
     }
     prnnumspace(datum[pos-1]);
   }
-  prnnl();
+  print("\n");
 
   for (pos = 0; pos < 12; pos++) {
     anarr[pos] = anarrbkp[pos];
@@ -885,7 +901,7 @@ void main() {
     }
     prnnumspace(datum[pos-1]);
   }
-  prnnl();
+  print("\n");
 
   return;
 }
