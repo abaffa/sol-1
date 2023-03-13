@@ -79,28 +79,27 @@ void prnnumspace(int n){
   return;
 }
 
-void prnnum(int number) {
-if (number == 0) {
+void prnnum(int num) {
+  char digits[5];
+  int i;
+  i = 0;
+
+  if(num == 0){
     _putchar('0');
     return;
   }
 
-  char buffer[6]; // Maximum size needed for a 16-bit decimal number
-  int index;
-  index = 0;
-
-  // Convert the number to a string in reverse order
-  while (number > 0) {
-    buffer[index++] = (number % 10) + '0';
-    number = number / 10;
+  while (num > 0) {
+      digits[i] = '0' + (num % 10);
+      num = num / 10;
+      i++;
   }
-
-  int i;
-  // Print the string in the correct order
-  for (i = index - 1; i >= 0; i--) {
-    _putchar(buffer[i]);
+  // Print the digits in reverse order using putchar()
+  while (i > 0) {
+      i--;
+      _putchar(digits[i]);
   }
-    return;
+  return;
 }
 
 void _putchar(char c){
