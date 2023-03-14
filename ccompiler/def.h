@@ -80,12 +80,17 @@ typedef enum {
 } t_data_type;
 
 typedef enum {
-  MOD_UNSIGNED, MOD_SIGNED, MOD_LONG
-} t_modifier;
+  LNESS_NORMAL, LNESS_LONG
+} t_longness;
+
+typedef enum {
+  SNESS_SIGNED, SNESS_UNSIGNED
+} t_signedness;
 
 typedef struct {
   t_data_type type;
-  t_modifier smod, lmod;
+  t_signedness signedness;
+  t_longness longness;
   t_value value;
   int ind_level; // holds the pointer indirection level
 } t_data;

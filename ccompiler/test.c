@@ -2,8 +2,10 @@
 
 int main() {
   signed int i;
-  i = 1;
-  i << 2;
+  signed char c;
+
+  i + c;
+
 
   return 0;
 }

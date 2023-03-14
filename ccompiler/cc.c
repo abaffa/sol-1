@@ -21,6 +21,15 @@
 
 
 int main(int argc, char *argv[]){
+  short signed int i1;
+  short unsigned int i2;
+  short signed int i3;
+
+  i1=65535;
+  i2=60000;
+  i3=i1+i2;
+  printf("%d", (unsigned short)(i1+i2));
+  return 0;
   char header[256];
 
   if(argc > 1) load_program(argv[1]);  
@@ -1638,11 +1647,11 @@ t_data parse_bitwise_shift(void){
     emitln("  mov c, b"); // using 16bit values even though only cl is needed, because 'mov cl, bl' is not implemented as an opcode
     emitln("  mov b, a");
     if(temp_tok == BITWISE_SHL){
-      if(data1.smod == MOD_SIGNED) emitln("  ashl b, cl");
+      if(data1.signedness == SNESS_SIGNED) emitln("  shl b, cl"); // there is no ashl, since it is equal to shl
       else emitln("  shl b, cl");
     }
     else if(temp_tok == BITWISE_SHR){
-      if(data1.smod == MOD_SIGNED) emitln("  ashr b, cl");
+      if(data1.signedness == SNESS_SIGNED) emitln("  ashr b, cl");
       else emitln("  shr b, cl");
     }
     emitln("  pop c");
@@ -2380,7 +2389,6 @@ void declare_global(void){
   int ind_level;
   char constant = 0;
   char temp[512 + 8];
-  t_modifier mod;
 
   get(); 
   if(tok == CONST){
@@ -2388,11 +2396,11 @@ void declare_global(void){
     get();
   }
 
-  data.smod = MOD_SIGNED; // set as signed by default
+  data.signedness = SNESS_SIGNED; // set as signed by default
   while(tok == SIGNED || tok == UNSIGNED || tok == LONG){
-    if(tok == SIGNED) data.smod = MOD_SIGNED;
-    else if(tok == UNSIGNED) data.smod = MOD_UNSIGNED;
-    else if(tok == LONG) data.lmod = MOD_LONG;
+    if(tok == SIGNED) data.signedness = SNESS_SIGNED;
+    else if(tok == UNSIGNED) data.signedness = SNESS_UNSIGNED;
+    else if(tok == LONG) data.longness = LNESS_LONG;
     get();
   }
   
@@ -2622,11 +2630,11 @@ void declare_local(void){
   }
   else new_var.constant = 0;
 
-  new_var.data.smod = MOD_SIGNED; // set as signed by default
+  new_var.data.signedness = SNESS_SIGNED; // set as signed by default
   while(tok == SIGNED || tok == UNSIGNED || tok == LONG){
-    if(tok == SIGNED) new_var.data.smod = MOD_SIGNED;
-    else if(tok == UNSIGNED) new_var.data.smod = MOD_UNSIGNED;
-    else if(tok == LONG) new_var.data.lmod = MOD_LONG;
+    if(tok == SIGNED) new_var.data.signedness = SNESS_SIGNED;
+    else if(tok == UNSIGNED) new_var.data.signedness = SNESS_UNSIGNED;
+    else if(tok == LONG) new_var.data.longness = LNESS_LONG;
     get();
   }
   new_var.data.type = get_data_type_from_tok(tok);

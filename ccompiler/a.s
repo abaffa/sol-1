@@ -8,20 +8,14 @@ main:
   push bp
   mov bp, sp
   sub sp, 2 ; i
-  mov b, 1
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
+  sub sp, 1 ; c
   mov b, [bp + -1] ; i
   push a
   mov a, b
-  mov b, 2
-  push c
-  mov c, b
+  mov bl, [bp + -2] ; c
+  mov bh, 0
+  add a, b
   mov b, a
-  shl b, cl
-  pop c
   pop a
   mov b, 0
   leave
