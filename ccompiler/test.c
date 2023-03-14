@@ -2,10 +2,8 @@
 
 int main() {
   signed int i;
-  signed char c;
 
-  i + c;
-
+  -1 < 0;
 
   return 0;
 }
