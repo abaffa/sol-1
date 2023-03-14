@@ -1582,6 +1582,7 @@ t_data parse_relational(void){
       emitln("  push a");
       emitln("  mov a, b");
       data2 = parse_bitwise_shift();
+      expr_out = cast(data1, data2); // convert to a common type
       switch(temp_tok){
         case EQUAL:
           emitln("  cmp a, b");
@@ -1595,10 +1596,20 @@ t_data parse_relational(void){
           emitln("  xor al, %00000001 ; !="); // invert the condition
           break;
         case LESS_THAN:
-          emitln("  cmp a, b");
-          emitln("  lodflgs");
-          emitln("  and al, %00000010 ; <"); // isolate CF only. therefore if CF==1 then A < B
-          emitln("  shr al"); // move to 0th position
+          if(expr_out.ind_level > 0 || expr_out.signedness == SNESS_UNSIGNED){
+            emitln("  cmp a, b");
+            emitln("  lodflgs");
+            emitln("  and al, %00000010 ; <"); // isolate CF only. therefore if CF==1 then A < B
+            emitln("  shr al"); // move to 0th position
+          }
+          else{
+            emitln("  cmp a, b");
+            emitln("  lodflgs");
+            emitln("  and al, %00001000 ; <"); // isolate OF only. therefore if OF==1 then A < B
+            emitln("  cmp al, 0");
+            emitln("  lodflgs");
+            emitln("  xor al, %00000001");
+          }
           break;
         case LESS_THAN_OR_EQUAL:
           emitln("  cmp a, b");
@@ -1632,8 +1643,9 @@ t_data parse_relational(void){
       emitln("  mov b, a");
       emitln("  pop a");
     }
-    expr_out.ind_level = 0; // if is a relational operation then result is an integer with ind_level = 0
     expr_out.type = DT_INT;
+    expr_out.ind_level = 0; // if is a relational operation then result is an integer with ind_level = 0
+    expr_out.signedness = SNESS_UNSIGNED;
   }
   else{
     expr_out.type = data1.type;

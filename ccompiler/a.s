@@ -8,13 +8,18 @@ main:
   push bp
   mov bp, sp
   sub sp, 2 ; i
-  sub sp, 1 ; c
-  mov b, [bp + -1] ; i
+  mov b, 1
+  neg b
   push a
   mov a, b
-  mov bl, [bp + -2] ; c
-  mov bh, 0
-  add a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00001000 ; <
+  cmp al, 0
+  lodflgs
+  xor al, %00000001
+  mov ah, 0
   mov b, a
   pop a
   mov b, 0
