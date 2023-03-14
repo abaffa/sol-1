@@ -19,17 +19,13 @@
     specially when they are used in conditional expressions such as in while loops
 */
 
+/*
+signed    char + signed int   = signed int + signed int = signed int
+unsigned  char + signed int   = signed int + signed int = signed int
+unsigned char  + unsigned int = 
+*/
 
 int main(int argc, char *argv[]){
-  short signed int i1;
-  short unsigned int i2;
-  short signed int i3;
-
-  i1=65535;
-  i2=60000;
-  i3=i1+i2;
-  printf("%d", (unsigned short)(i1+i2));
-  return 0;
   char header[256];
 
   if(argc > 1) load_program(argv[1]);  
