@@ -17,9 +17,7 @@
     if the data type is char, then we just make the high byte of the register = 0
     this makes it easier in places where matrices or pointers are used to dereference chars,
     specially when they are used in conditional expressions such as in while loops
-*/
 
-/*
 +---------------+---------------+---------------+
 | Operand 1     | Operand 2     | Result        |
 +---------------+---------------+---------------+
@@ -1744,6 +1742,7 @@ t_data parse_atom(void){
     emitln(temp);
     expr_out.type = DT_CHAR;
     expr_out.ind_level = 1;
+    expr_out.signedness = SNESS_SIGNED;
   }
   else if(tok == SIZEOF){
     get();
@@ -1775,6 +1774,7 @@ t_data parse_atom(void){
     get();
     expr_out.type = DT_INT;
     expr_out.ind_level = 0;
+    expr_out.signedness = SNESS_SIGNED;
     expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
   }
   else if(tok == STAR){ // is a pointer operator
@@ -1791,6 +1791,7 @@ t_data parse_atom(void){
     back();
     expr_out.type = expr_in.type;
     expr_out.ind_level = expr_in.ind_level - 1;
+    expr_out.signedness = expr_in.signedness;
   }
   else if(tok == AMPERSAND){ // TODO: gather expr type
     get(); // get variable name
@@ -1816,32 +1817,38 @@ t_data parse_atom(void){
     //printf("ind_level: %d, type: %d\n", expr_out.ind_level, expr_out.type);
   }
   else if(tok_type == INTEGER_CONST){
+    int i;
     emit("  mov b, ");
     emitln(token);
+    i = atoi(token);
     expr_out.type = DT_INT;
     expr_out.ind_level = 0;
+    expr_out.signedness = i > 32767 ? SNESS_UNSIGNED : SNESS_SIGNED;
   }
   else if(tok_type == CHAR_CONST){
     emit("  mov b, ");
     emitln(token);
     expr_out.type = DT_INT; // considering it an INT as an experiment for now
     expr_out.ind_level = 0;
-    //emitln("  mov bh, 0"); // not sure why i set bh to 0 here, but removing as doesnt seem to be needed
+    expr_out.signedness = SNESS_UNSIGNED;
   }
+  // -127, -128, -255, -32768, -32767, -65535
   else if(tok == MINUS){
     expr_in = parse_atom(); // TODO: add error if type is pointer since cant neg a pointer?
     if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  neg b");
     else emitln("  neg b"); // treating as int as experiment
     back();
-    expr_out.type = expr_in.type;
-    expr_out.ind_level = expr_in.ind_level;
+    expr_out.type = DT_INT; // convert to int
+    expr_out.ind_level = 0;
+    expr_out.signedness = expr_in.signedness;
   }
   else if(tok == BITWISE_NOT){
     expr_in = parse_atom(); // in 'b'
     if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  not b");
     else emitln("  not b"); // treating as int as an experiment
-    expr_out.type = expr_in.type;
-    expr_out.ind_level = expr_in.ind_level;
+    expr_out.type = DT_INT;
+    expr_out.ind_level = 0;
+    expr_out.signedness = expr_in.signedness;
     back();
   }
   else if(tok == LOGICAL_NOT){
@@ -1853,15 +1860,17 @@ t_data parse_atom(void){
     emitln("  mov bl, al");
     emitln("  mov bh, 0");
     emitln("  pop al");
-    expr_out = expr_in;
     back();
+    expr_out.type = DT_INT;
+    expr_out.ind_level = 0;
+    expr_out.signedness = SNESS_UNSIGNED;
   }
   else if(tok == OPENING_PAREN){
     expr_in = parse_expr();  // parses expression between parenthesis and result will be in B
     expr_out = expr_in;
     if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
   }
-  else if(tok == INCREMENT){  // pre increment. do assignment first
+  else if(tok == INCREMENT){  // pre increment. do increment first
     get();
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
     strcpy(temp_name, token);
@@ -1871,7 +1880,7 @@ t_data parse_atom(void){
     emit_var_assignment(temp_name);
     expr_out = expr_in;
   }    
-  else if(tok == DECREMENT){ // pre decrement. do assignment first
+  else if(tok == DECREMENT){ // pre decrement. do decrement first
     get();
     if(tok_type != IDENTIFIER) error(IDENTIFIER_EXPECTED);
     strcpy(temp_name, token);
@@ -2180,6 +2189,7 @@ t_data emit_var_into_b(char *var_name){
       emitln("  mov b, [d]");
       expr_out.type = function_table[current_func_id].local_vars[var_id].data.type;
       expr_out.ind_level = function_table[current_func_id].local_vars[var_id].data.ind_level + 1; // +1 because a matrix reference is a pointer even though it can have ind_level = 0
+      expr_out.signedness = function_table[current_func_id].local_vars[var_id].data.signedness; 
     }
     else if(is_matrix(&function_table[current_func_id].local_vars[var_id])){
       emit("  lea d, [");
@@ -2191,6 +2201,7 @@ t_data emit_var_into_b(char *var_name){
       emitln("  mov b, d");
       expr_out.type = function_table[current_func_id].local_vars[var_id].data.type;
       expr_out.ind_level = function_table[current_func_id].local_vars[var_id].data.ind_level + 1; // +1 because a matrix reference is a pointer even though it can have ind_level = 0
+      expr_out.signedness = function_table[current_func_id].local_vars[var_id].data.signedness; 
     }
     else if(function_table[current_func_id].local_vars[var_id].data.ind_level > 0){
       emit("  lea d, [");
@@ -2201,6 +2212,7 @@ t_data emit_var_into_b(char *var_name){
       emitln("  mov b, [d]");
       expr_out.type = function_table[current_func_id].local_vars[var_id].data.type;
       expr_out.ind_level = function_table[current_func_id].local_vars[var_id].data.ind_level;
+      expr_out.signedness = function_table[current_func_id].local_vars[var_id].data.signedness; 
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_INT){
       emit("  mov b, [");
@@ -2210,6 +2222,7 @@ t_data emit_var_into_b(char *var_name){
       emitln(var_name);
       expr_out.type = DT_INT;
       expr_out.ind_level = 0;
+      expr_out.signedness = function_table[current_func_id].local_vars[var_id].data.signedness; 
     }
     else if(function_table[current_func_id].local_vars[var_id].data.type == DT_CHAR){
       emit("  mov bl, [");
@@ -2220,6 +2233,7 @@ t_data emit_var_into_b(char *var_name){
       emitln("  mov bh, 0");
       expr_out.type = DT_CHAR;
       expr_out.ind_level = 0;
+      expr_out.signedness = function_table[current_func_id].local_vars[var_id].data.signedness; 
     }
   }
   else if(global_var_exists(var_name) != -1){  // is a global variable
@@ -2231,6 +2245,7 @@ t_data emit_var_into_b(char *var_name){
       emitln(var_name);
       expr_out.type = global_variables[var_id].data.type;
       expr_out.ind_level = global_variables[var_id].data.ind_level + 1;
+      expr_out.signedness = global_variables[var_id].data.signedness;
     }
     else if(global_variables[var_id].data.ind_level > 0){
       emit("  mov b, [__");
@@ -2239,6 +2254,7 @@ t_data emit_var_into_b(char *var_name){
       emitln(var_name);
       expr_out.type = global_variables[var_id].data.type;
       expr_out.ind_level = global_variables[var_id].data.ind_level;
+      expr_out.signedness = global_variables[var_id].data.signedness;
     }
     else if(global_variables[var_id].data.type == DT_INT){
       emit("  mov b, [__");
@@ -2247,6 +2263,7 @@ t_data emit_var_into_b(char *var_name){
       emitln(var_name);
       expr_out.type = global_variables[var_id].data.type;
       expr_out.ind_level = global_variables[var_id].data.ind_level;
+      expr_out.signedness = global_variables[var_id].data.signedness;
     }
     else if(global_variables[var_id].data.type == DT_CHAR){
       emit("  mov bl, [__");
@@ -2256,6 +2273,7 @@ t_data emit_var_into_b(char *var_name){
       emit("  mov bh, 0");
       expr_out.type = global_variables[var_id].data.type;
       expr_out.ind_level = global_variables[var_id].data.ind_level;
+      expr_out.signedness = global_variables[var_id].data.signedness;
     }
   }
   else error(UNDECLARED_IDENTIFIER);

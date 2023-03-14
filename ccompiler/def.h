@@ -84,7 +84,7 @@ typedef enum {
 } t_longness;
 
 typedef enum {
-  SNESS_SIGNED, SNESS_UNSIGNED
+  SNESS_SIGNED = 0, SNESS_UNSIGNED
 } t_signedness;
 
 typedef struct {
