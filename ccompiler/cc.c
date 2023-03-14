@@ -1977,8 +1977,9 @@ t_data parse_atom(void){
       back();
       sprintf(asm_line, "  mov b, %d; %s", get_enum_val(temp_name), temp_name);
       emitln(asm_line);
-      expr_out.ind_level = 0;
       expr_out.type = DT_INT;
+      expr_out.ind_level = 0;
+      expr_out.signedness = SNESS_SIGNED; // TODO: check enums can always be signed...
     }
     else{
       back();
