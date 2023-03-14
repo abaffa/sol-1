@@ -1989,27 +1989,41 @@ t_data cast(t_data t1, t_data t2){
   t_data data;
 
 // TODO: check for matrix type
-  data.ind_level = 0; // initialize to zero in case both t1 and t2 are not pointers
   switch(t1.type){
     case DT_CHAR:
       switch(t2.type){
         case DT_CHAR:
-          data.type = DT_CHAR;
-          if(t1.ind_level > 0) data.ind_level = t1.ind_level;
-          else if(t2.ind_level > 0) data.ind_level = t2.ind_level;
+          if(t1.ind_level > 0){
+            data.type = DT_CHAR;
+            data.ind_level = t1.ind_level;
+            data.signedness = t1.signedness;
+          }
+          else if(t2.ind_level > 0){
+            data.type = DT_CHAR;
+            data.ind_level = t2.ind_level;
+            data.signedness = t2.signedness;
+          }
+          else{
+            data.type = DT_INT;
+            data.ind_level = 0;
+            data.signedness = SNESS_SIGNED;
+          }
           break;
         case DT_INT:
           if(t1.ind_level > 0){
             data.type = DT_CHAR;
             data.ind_level = t1.ind_level;
+            data.signedness = t1.signedness;
           }
           else if(t2.ind_level > 0){
             data.type = DT_INT;
             data.ind_level = t2.ind_level;
+            data.signedness = t2.signedness;
           }
           else{
             data.type = DT_INT;
             data.ind_level = 0;
+            data.signedness = t2.signedness; // assign whatever the int's signedness is
           }
       }
       break;
@@ -2019,20 +2033,38 @@ t_data cast(t_data t1, t_data t2){
           if(t1.ind_level > 0){
             data.type = DT_INT;
             data.ind_level = t1.ind_level;
+            data.signedness = t1.signedness; // assign whatever the int's signednss is
           }
           else if(t2.ind_level > 0){
             data.type = DT_CHAR;
             data.ind_level = t2.ind_level;
+            data.signedness = t2.signedness; // assign whatever the char* signedness is
           }
           else{
             data.type = DT_INT;
             data.ind_level = 0;
+            data.signedness = t1.signedness; // assign whatever the int's signedness is
           }
           break;
         case DT_INT:
-          data.type = DT_INT;
-          if(t1.ind_level > 0) data.ind_level = t1.ind_level;
-          else if(t2.ind_level > 0) data.ind_level = t2.ind_level;
+          if(t1.ind_level > 0){
+            data.type = DT_INT;
+            data.ind_level = t1.ind_level;
+            data.signedness = t1.signedness;
+          }
+          else if(t2.ind_level > 0){
+            data.type = DT_INT;
+            data.ind_level = t2.ind_level;
+            data.signedness = t2.signedness;
+          }
+          else{
+            data.type = DT_INT;
+            data.ind_level = 0;
+            if(t1.signedness == SNESS_UNSIGNED || t2.signedness == SNESS_UNSIGNED)
+              data.signedness = SNESS_UNSIGNED;
+            else
+              data.signedness = SNESS_SIGNED;
+          }
       }
   }
   return data;
