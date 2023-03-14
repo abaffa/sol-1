@@ -20,9 +20,26 @@
 */
 
 /*
-signed    char + signed int   = signed int + signed int = signed int
-unsigned  char + signed int   = signed int + signed int = signed int
-unsigned char  + unsigned int = 
++---------------+---------------+---------------+
+| Operand 1     | Operand 2     | Result        |
++---------------+---------------+---------------+
+| signed char   | signed char   | signed int    |
+| signed char   | unsigned char | signed int    |
+| signed char   | signed int    | signed int    |
+| signed char   | unsigned int  | unsigned int  |
+| unsigned char | signed char   | signed int    |
+| unsigned char | unsigned char | unsigned int  |
+| unsigned char | signed int    | signed int    |
+| unsigned char | unsigned int  | unsigned int  |
+| signed int    | signed char   | signed int    |
+| signed int    | unsigned char | signed int    |
+| signed int    | signed int    | signed int    |
+| signed int    | unsigned int  | unsigned int  |
+| unsigned int  | signed char   | unsigned int  |
+| unsigned int  | unsigned char | unsigned int  |
+| unsigned int  | signed int    | unsigned int  |
+| unsigned int  | unsigned int  | unsigned int  |
++---------------+---------------+---------------+
 */
 
 int main(int argc, char *argv[]){
