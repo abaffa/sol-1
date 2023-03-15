@@ -7,24 +7,58 @@
 main:
   push bp
   mov bp, sp
-  mov b, -2
+  sub sp, 2 ; i
+_while1_cond:
+  mov b, 1
+  cmp b, 0
+  je _while1_exit
+_while1_block:
+  mov b, __string_0 ; "Number: "
+  swp b
+  push b
+  call print
+  add sp, 2
+  call scann
   push a
   mov a, b
-  mov b, -1
+  mov [bp + -1], a ; i
+  pop a
+_if2_cond:
+  mov b, [bp + -1] ; i
+  push a
+  mov a, b
+  mov b, 0
   cmp a, b
   lodflgs
-  mov bl, al
-  shr al, 3
-  shr bl, 2
-  and bl, %00000001
-  xor al, bl
+  and al, %00000001 ; ==
   mov ah, 0
   mov b, a
   pop a
+  cmp b, 0
+  je _if2_else
+_if2_true:
+  mov b, 0
+  leave
+  syscall sys_terminate_proc
+  jmp _if2_exit
+_if2_else:
+  mov b, [bp + -1] ; i
+  swp b
+  push b
+  call integer_square_root
+  add sp, 2
   swp b
   push b
   call print_num
   add sp, 2
+_if2_exit:
+  mov b, __string_1 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  jmp _while1_cond
+_while1_exit:
   mov b, 0
   leave
   syscall sys_terminate_proc
@@ -39,7 +73,7 @@ print_num:
   mov a, b
   mov [bp + -6], a ; i
   pop a
-_if1_cond:
+_if3_cond:
   mov b, [bp + 5] ; num
   push a
   mov a, b
@@ -51,17 +85,17 @@ _if1_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if1_exit
-_if1_true:
+  je _if3_exit
+_if3_true:
   mov b, '0'
   push bl
   call _putchar
   add sp, 1
   leave
   ret
-  jmp _if1_exit
-_if1_exit:
-_while2_cond:
+  jmp _if3_exit
+_if3_exit:
+_while4_cond:
   mov b, [bp + 5] ; num
   push a
   mov a, b
@@ -75,8 +109,8 @@ _while2_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _while2_exit
-_while2_block:
+  je _while4_exit
+_while4_block:
   lea d, [bp + -4] ; digits beginning on the stack
   mov b, d
   push a
@@ -126,9 +160,9 @@ _while2_block:
   pop a
   mov b, a
   pop a
-  jmp _while2_cond
-_while2_exit:
-_while3_cond:
+  jmp _while4_cond
+_while4_exit:
+_while5_cond:
   mov b, [bp + -6] ; i
   push a
   mov a, b
@@ -142,8 +176,8 @@ _while3_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _while3_exit
-_while3_block:
+  je _while5_exit
+_while5_block:
   mov b, [bp + -6] ; i
   push a
   mov a, b
@@ -170,15 +204,15 @@ _while3_block:
   push bl
   call _putchar
   add sp, 1
-  jmp _while3_cond
-_while3_exit:
+  jmp _while5_cond
+_while5_exit:
   leave
   ret
 
 integer_square_root:
   push bp
   mov bp, sp
-_if4_cond:
+_if6_cond:
   mov b, [bp + 5] ; n
   push a
   mov a, b
@@ -193,13 +227,13 @@ _if4_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _if4_exit
-_if4_true:
+  je _if6_exit
+_if6_true:
   mov b, [bp + 5] ; n
   leave
   ret
-  jmp _if4_exit
-_if4_exit:
+  jmp _if6_exit
+_if6_exit:
   sub sp, 2 ; x
   sub sp, 2 ; y
   mov b, [bp + 5] ; n
@@ -234,7 +268,7 @@ _if4_exit:
   mov a, b
   mov [bp + -3], a ; y
   pop a
-_while5_cond:
+_while7_cond:
   mov b, [bp + -3] ; y
   push a
   mov a, b
@@ -250,8 +284,8 @@ _while5_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _while5_exit
-_while5_block:
+  je _while7_exit
+_while7_block:
   mov b, [bp + -3] ; y
   push a
   mov a, b
@@ -284,8 +318,8 @@ _while5_block:
   mov a, b
   mov [bp + -3], a ; y
   pop a
-  jmp _while5_cond
-_while5_exit:
+  jmp _while7_cond
+_while7_exit:
   mov b, [bp + -1] ; x
   leave
   ret
@@ -313,15 +347,7 @@ scann:
   mov [bp + -1], a
 ; --- END INLINE ASM BLOCK
 
-  lea d, [bp + 5] ; n
-  mov b, [d]
-  push b
   mov b, [bp + -1] ; m
-  pop d
-  push a
-  mov a, b
-  mov [d], a
-  pop a
   leave
   ret
 
@@ -340,6 +366,8 @@ print:
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
+__string_0: .db "Number: ", 0
+__string_1: .db "\n", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK

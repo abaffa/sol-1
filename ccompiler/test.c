@@ -1,8 +1,17 @@
 #inc_asm "lib/stdio.asm"
 
 int main() {
-
-  print_num(-2 < -1);
+  int i;
+  while(1){
+    print("Number: ");
+    i = scann();
+    if(i == 0)
+      return 0;
+    else
+      print_num(integer_square_root(i));
+    
+    print("\n");
+  }
 
   return 0;
 }
@@ -55,14 +64,14 @@ void _putchar(char c){
   return;
 }
 
-void scann(int *n){
+int scann(){
   int m;
   asm{
     call scan_u16d
     mov @m, a
   }
-  *n = m;
-  return;
+  
+  return m;
 }
 
 void print(char *s){
