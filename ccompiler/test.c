@@ -1,15 +1,8 @@
 #inc_asm "lib/stdio.asm"
 
 int main() {
-  signed int i;
 
-  print("\n");
-  print_num(-1 < 0);
-  print("\n");
-  print_num(1 < 0);
-  print("\n");
-  print_num(0 < 1);
-  print("\n");
+  print_num(-2 < -1);
 
   return 0;
 }

@@ -7,77 +7,23 @@
 main:
   push bp
   mov bp, sp
-  sub sp, 2 ; i
-  mov b, __string_0 ; "\n"
-  swp b
-  push b
-  call print
-  add sp, 2
+  mov b, -2
+  push a
+  mov a, b
   mov b, -1
-  push a
-  mov a, b
-  mov b, 0
   cmp a, b
   lodflgs
-  and al, %00001000 ; <
-  cmp al, 0
-  lodflgs
-  xor al, %00000001
+  mov bl, al
+  shr al, 3
+  shr bl, 2
+  and bl, %00000001
+  xor al, bl
   mov ah, 0
   mov b, a
   pop a
   swp b
   push b
   call print_num
-  add sp, 2
-  mov b, __string_0 ; "\n"
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, 1
-  push a
-  mov a, b
-  mov b, 0
-  cmp a, b
-  lodflgs
-  and al, %00001000 ; <
-  cmp al, 0
-  lodflgs
-  xor al, %00000001
-  mov ah, 0
-  mov b, a
-  pop a
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_0 ; "\n"
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, 0
-  push a
-  mov a, b
-  mov b, 1
-  cmp a, b
-  lodflgs
-  and al, %00001000 ; <
-  cmp al, 0
-  lodflgs
-  xor al, %00000001
-  mov ah, 0
-  mov b, a
-  pop a
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_0 ; "\n"
-  swp b
-  push b
-  call print
   add sp, 2
   mov b, 0
   leave
@@ -295,10 +241,11 @@ _while5_cond:
   mov b, [bp + -1] ; x
   cmp a, b
   lodflgs
-  and al, %00001000 ; <
-  cmp al, 0
-  lodflgs
-  xor al, %00000001
+  mov bl, al
+  shr al, 3
+  shr bl, 2
+  and bl, %00000001
+  xor al, bl
   mov ah, 0
   mov b, a
   pop a
@@ -393,7 +340,6 @@ print:
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
-__string_0: .db "\n", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK

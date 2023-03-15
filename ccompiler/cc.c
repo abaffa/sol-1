@@ -1606,10 +1606,11 @@ t_data parse_relational(void){
             // SF ^ OF means 'less than'
             emitln("  cmp a, b");
             emitln("  lodflgs");
-            emitln("  and al, %00001000 ; <"); // isolate OF only. therefore if OF==1 then A < B
-            emitln("  cmp al, 0");
-            emitln("  lodflgs");
-            emitln("  xor al, %00000001");
+            emitln("  mov bl, al");
+            emitln("  shr al, 3"); // move OF to bit0 position
+            emitln("  shr bl, 2"); // move SF to bit0 position
+            emitln("  and bl, %00000001"); // mask out OF
+            emitln("  xor al, bl"); // OF ^ SF
           }
           break;
         case LESS_THAN_OR_EQUAL:
