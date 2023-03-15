@@ -8,8 +8,12 @@ main:
   push bp
   mov bp, sp
   sub sp, 2 ; i
-  mov b, 1
-  neg b
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, -1
   push a
   mov a, b
   mov b, 0
@@ -22,6 +26,59 @@ main:
   mov ah, 0
   mov b, a
   pop a
+  swp b
+  push b
+  call print_num
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00001000 ; <
+  cmp al, 0
+  lodflgs
+  xor al, %00000001
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call print_num
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, 0
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00001000 ; <
+  cmp al, 0
+  lodflgs
+  xor al, %00000001
+  mov ah, 0
+  mov b, a
+  pop a
+  swp b
+  push b
+  call print_num
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
   mov b, 0
   leave
   syscall sys_terminate_proc
@@ -36,7 +93,29 @@ print_num:
   mov a, b
   mov [bp + -6], a ; i
   pop a
-_while1_cond:
+_if1_cond:
+  mov b, [bp + 5] ; num
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if1_exit
+_if1_true:
+  mov b, '0'
+  push bl
+  call _putchar
+  add sp, 1
+  leave
+  ret
+  jmp _if1_exit
+_if1_exit:
+_while2_cond:
   mov b, [bp + 5] ; num
   push a
   mov a, b
@@ -50,8 +129,8 @@ _while1_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _while1_exit
-_while1_block:
+  je _while2_exit
+_while2_block:
   lea d, [bp + -4] ; digits beginning on the stack
   mov b, d
   push a
@@ -101,9 +180,9 @@ _while1_block:
   pop a
   mov b, a
   pop a
-  jmp _while1_cond
-_while1_exit:
-_while2_cond:
+  jmp _while2_cond
+_while2_exit:
+_while3_cond:
   mov b, [bp + -6] ; i
   push a
   mov a, b
@@ -117,8 +196,8 @@ _while2_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _while2_exit
-_while2_block:
+  je _while3_exit
+_while3_block:
   mov b, [bp + -6] ; i
   push a
   mov a, b
@@ -145,8 +224,122 @@ _while2_block:
   push bl
   call _putchar
   add sp, 1
-  jmp _while2_cond
-_while2_exit:
+  jmp _while3_cond
+_while3_exit:
+  leave
+  ret
+
+integer_square_root:
+  push bp
+  mov bp, sp
+_if4_cond:
+  mov b, [bp + 5] ; n
+  push a
+  mov a, b
+  mov b, 1
+  cmp a, b
+  lodflgs
+  and al, %00000011 ; <=
+  cmp al, 0
+  lodflgs
+  xor al, %00000001
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if4_exit
+_if4_true:
+  mov b, [bp + 5] ; n
+  leave
+  ret
+  jmp _if4_exit
+_if4_exit:
+  sub sp, 2 ; x
+  sub sp, 2 ; y
+  mov b, [bp + 5] ; n
+  push a
+  mov a, b
+  mov [bp + -1], a ; x
+  pop a
+  mov b, [bp + -1] ; x
+  push a
+  mov a, b
+  mov b, [bp + 5] ; n
+  push a
+  mov a, b
+  mov b, [bp + -1] ; x
+  div a, b
+  mov g, a
+  mov a, b
+  mov b, g
+  pop a
+  add a, b
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  mov b, 2
+  div a, b
+  mov g, a
+  mov a, b
+  mov b, g
+  pop a
+  push a
+  mov a, b
+  mov [bp + -3], a ; y
+  pop a
+_while5_cond:
+  mov b, [bp + -3] ; y
+  push a
+  mov a, b
+  mov b, [bp + -1] ; x
+  cmp a, b
+  lodflgs
+  and al, %00001000 ; <
+  cmp al, 0
+  lodflgs
+  xor al, %00000001
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _while5_exit
+_while5_block:
+  mov b, [bp + -3] ; y
+  push a
+  mov a, b
+  mov [bp + -1], a ; x
+  pop a
+  mov b, [bp + -1] ; x
+  push a
+  mov a, b
+  mov b, [bp + 5] ; n
+  push a
+  mov a, b
+  mov b, [bp + -1] ; x
+  div a, b
+  mov g, a
+  mov a, b
+  mov b, g
+  pop a
+  add a, b
+  mov b, a
+  pop a
+  push a
+  mov a, b
+  mov b, 2
+  div a, b
+  mov g, a
+  mov a, b
+  mov b, g
+  pop a
+  push a
+  mov a, b
+  mov [bp + -3], a ; y
+  pop a
+  jmp _while5_cond
+_while5_exit:
+  mov b, [bp + -1] ; x
   leave
   ret
 
@@ -200,6 +393,7 @@ print:
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
+__string_0: .db "\n", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK

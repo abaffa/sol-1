@@ -1603,6 +1603,7 @@ t_data parse_relational(void){
             emitln("  shr al"); // move to 0th position
           }
           else{
+            // SF ^ OF means 'less than'
             emitln("  cmp a, b");
             emitln("  lodflgs");
             emitln("  and al, %00001000 ; <"); // isolate OF only. therefore if OF==1 then A < B
@@ -2921,7 +2922,8 @@ void get(void){
     *t = '\0';
     convert_constant(); // converts this string token qith quotation marks to a non quotation marks string, and also converts escape sequences to their real bytes
   }
-  else if(isdigit(*prog)){
+  else if(isdigit(*prog) || (*prog == '-' && isdigit(*(prog + 1)))){
+    if(*prog == '-') *t++ = *prog++;
     while(isdigit(*prog)) *t++ = *prog++;
     tok_type = INTEGER_CONST;
   }
