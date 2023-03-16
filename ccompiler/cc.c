@@ -1960,23 +1960,27 @@ t_data parse_atom(void){
       else error(UNDECLARED_FUNC);
     }
     // parse matrix
+    // p[2]
+    // (p+i)[3]
     else if(tok == OPENING_BRACKET){ // matrix operations
       t_var *matrix;
       int last_dim, dims;
       matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
-      expr_in = emit_matrix_arithmetic(matrix, &last_dim);
-      dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      if(last_dim == dims - 1){
-        if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
-          emitln("  mov b, [d]"); // last dimension, so return value
+      if(is_matrix(matrix)){
+        expr_in = emit_matrix_arithmetic(matrix, &last_dim);
+        dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
+        if(last_dim == dims - 1){
+          if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
+            emitln("  mov b, [d]"); // last dimension, so return value
+          }
+          else if(matrix->data.type == DT_CHAR){
+            emitln("  mov bl, [d]");
+            emitln("  mov bh, 0"); // treating as an int as an experiment
+          }
         }
-        else if(matrix->data.type == DT_CHAR){
-          emitln("  mov bl, [d]");
-          emitln("  mov bh, 0"); // treating as an int as an experiment
-        }
+        else emitln("  mov b, d");
+        expr_out = expr_in;
       }
-      else emitln("  mov b, d");
-      expr_out = expr_in;
     }
     else if(enum_element_exists(temp_name) != -1){
       back();
@@ -1999,9 +2003,6 @@ t_data parse_atom(void){
   return expr_out;
 }
 
-  // p[2]
-  // (p+i)[3]
-  // 
 t_data emit_matrix_arithmetic(t_var *matrix, int *last_dim){
   t_data expr_out;
 
