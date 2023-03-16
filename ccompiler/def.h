@@ -216,7 +216,8 @@ typedef enum {
   UNDECLARED_IDENTIFIER,
   MAX_STRINGS,
   LOCAL_ASSIGNMENT,
-  UNKNOWN_DATA_TYPE
+  UNKNOWN_DATA_TYPE,
+  INVALID_INDEXING
 } t_errorCode;
 
 // variable declaration
@@ -276,8 +277,9 @@ char *error_table[] = {
   "undeclared enum element",
   "undeclared identifier",
   "maximum number of strings reached",
-  "Assignment of local variables is not possible yet",
-  "Unknown data type in array initialization"
+  "assignment of local variables is not possible yet",
+  "unknown data type in array initialization",
+  "invalid indexing attempt"
 };
 
 char string_table[STRING_TABLE_SIZE][STRING_CONST_SIZE];

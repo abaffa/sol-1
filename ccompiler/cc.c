@@ -1963,17 +1963,17 @@ t_data parse_atom(void){
     // p[2]
     // (p+i)[3]
     else if(tok == OPENING_BRACKET){ // matrix operations
-      t_var *matrix;
+      t_var *var;
       int last_dim, dims;
-      matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
-      if(is_matrix(matrix)){
-        expr_in = emit_matrix_arithmetic(matrix, &last_dim);
-        dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
+      var = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
+      if(is_matrix(var)){
+        expr_in = emit_matrix_arithmetic(var, &last_dim);
+        dims = matrix_dim_count(var); // gets the number of dimensions for this matrix
         if(last_dim == dims - 1){
-          if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
+          if(var->data.ind_level > 0 || var->data.type == DT_INT){
             emitln("  mov b, [d]"); // last dimension, so return value
           }
-          else if(matrix->data.type == DT_CHAR){
+          else if(var->data.type == DT_CHAR){
             emitln("  mov bl, [d]");
             emitln("  mov bh, 0"); // treating as an int as an experiment
           }
@@ -1981,6 +1981,10 @@ t_data parse_atom(void){
         else emitln("  mov b, d");
         expr_out = expr_in;
       }
+      else if(var->data.ind_level > 0){
+        
+      }
+      else error(INVALID_INDEXING);
     }
     else if(enum_element_exists(temp_name) != -1){
       back();
