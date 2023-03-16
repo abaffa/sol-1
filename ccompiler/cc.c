@@ -1627,13 +1627,13 @@ t_data parse_relational(void){
             emitln("  cmp a, b");
             emitln("  lodflgs");
             emitln("  mov bl, al");
-            emitln("  mov g, a"); // for saving ZF
             emitln("  shr al, 3"); // move OF to bit0 position
             emitln("  shr bl, 2"); // move SF to bit0 position
             emitln("  and bl, %00000001"); // mask out OF
             emitln("  xor al, bl"); // OF ^ SF
-            emitln("  mov b, g");
-            emitln("  and bl, %00000001"); // isolate ZF
+            emitln("  mov bl, al");
+            emitln("  lodflgs");
+            emitln("  and al, %00000001"); // isolate ZF
             emitln("  or al, bl ; <= (signed)"); // OR result with ZF
           }
           break;
