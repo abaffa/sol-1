@@ -322,6 +322,7 @@ void pre_processor(void){
   } while(tok_type != END);
 }
 
+
 int find_define(char *name){
   int i;
   for(i = 0; i < defines_tos; i++){
@@ -329,6 +330,7 @@ int find_define(char *name){
   }
   return -1;
 }
+
 
 void pre_scan(void){
   char *tp;
@@ -528,6 +530,7 @@ int get_param_size(void){
   return data_size;
 }
 
+
 int get_total_func_param_size(void){
   int total_bytes;
   int data_size;
@@ -612,6 +615,7 @@ void emit_c_var(char *var_name){
   else error(UNDECLARED_VARIABLE);
 }
 
+
 void parse_break(void){
   char s_label[64];
 
@@ -634,6 +638,7 @@ void parse_break(void){
   get();
 }
 
+
 void parse_continue(void){
   char s_label[64];
 
@@ -651,6 +656,7 @@ void parse_continue(void){
   }
   get();
 }
+
 
 void parse_for(void){
   char s_label[64];
@@ -1182,9 +1188,6 @@ void skip_statements(void){
 }
 
 
-
-
-
 void skip_block(void){
   int braces = 0;
   
@@ -1196,6 +1199,7 @@ void skip_block(void){
 
   if(braces && tok_type == END) error(CLOSING_BRACE_EXPECTED);
 }
+
 
 void skip_matrix_bracket(void){
   int brackets = 0;
@@ -1507,6 +1511,7 @@ t_data parse_logical_and(void){
   return expr_out;
 }
 
+
 t_data parse_bitwise_or(void){
   char temp_tok;
   t_data data1, data2, expr_out;
@@ -1527,6 +1532,7 @@ t_data parse_bitwise_or(void){
   return expr_out;
 }
 
+
 t_data parse_bitwise_xor(void){
   char temp_tok;
   t_data data1, data2, expr_out;
@@ -1546,6 +1552,7 @@ t_data parse_bitwise_xor(void){
   expr_out = cast(data1, data2);
   return expr_out;
 }
+
 
 t_data parse_bitwise_and(void){
   char temp_tok;
@@ -1603,14 +1610,13 @@ t_data parse_relational(void){
             emitln("  shr al"); // move to 0th position
           }
           else{
-            // SF ^ OF means 'less than'
             emitln("  cmp a, b");
             emitln("  lodflgs");
             emitln("  mov bl, al");
             emitln("  shr al, 3"); // move OF to bit0 position
             emitln("  shr bl, 2"); // move SF to bit0 position
             emitln("  and bl, %00000001"); // mask out OF
-            emitln("  xor al, bl ; < (signed)"); // OF ^ SF
+            emitln("  xor al, bl ; < (signed)"); // OF ^ SF (less than)
           }
           break;
         case LESS_THAN_OR_EQUAL:
@@ -1623,37 +1629,64 @@ t_data parse_relational(void){
             emitln("  xor al, %00000001");
           }
           else{
-            // SF ^ OF means 'less than'
+            emitln("  cmp a, b");
+            emitln("  lodflgs");
+            emitln("  mov bl, al");
+            emitln("  mov g, a"); // save flags temporarily
+            emitln("  shr al, 3"); // move OF to bit0 position
+            emitln("  shr bl, 2"); // move SF to bit0 position
+            emitln("  and bl, %00000001"); // mask out OF
+            emitln("  xor al, bl"); // OF ^ SF (less than)
+            emitln("  mov b, g");
+            emitln("  and bl, %00000001"); // isolate ZF
+            emitln("  or al, bl ; <= (signed)"); // OR result with ZF
+          }
+          break;
+        case GREATER_THAN_OR_EQUAL:
+          if(expr_out.ind_level > 0 || expr_out.signedness == SNESS_UNSIGNED){
+            emitln("  cmp a, b");
+            emitln("  lodflgs");
+            emitln("  and al, %00000011"); 
+            emitln("  xor al, %00000010 ; >="); 
+            emitln("  cmp al, 0");
+            emitln("  lodflgs");
+            emitln("  xor al, %00000001");
+          }
+          else{
+            // same as LT, but invert at the end so that ~LT = GTE
             emitln("  cmp a, b");
             emitln("  lodflgs");
             emitln("  mov bl, al");
             emitln("  shr al, 3"); // move OF to bit0 position
             emitln("  shr bl, 2"); // move SF to bit0 position
             emitln("  and bl, %00000001"); // mask out OF
-            emitln("  xor al, bl"); // OF ^ SF
-            emitln("  mov bl, al");
-            emitln("  lodflgs");
-            emitln("  and al, %00000001"); // isolate ZF
-            emitln("  or al, bl ; <= (signed)"); // OR result with ZF
+            emitln("  xor al, bl"); // OF ^ SF (less than)
+            emitln("  xor al, %00000001 ; >= (signed)"); // invert, hence ~LT = GTE
           }
           break;
-        case GREATER_THAN_OR_EQUAL:
-          emitln("  cmp a, b");
-          emitln("  lodflgs");
-          emitln("  and al, %00000011"); 
-          emitln("  xor al, %00000010 ; >="); 
-          emitln("  cmp al, 0");
-          emitln("  lodflgs");
-          emitln("  xor al, %00000001");
-          //emitln("  and al, %00000001 ; transform relational logical condition result into a single bit"); 
-          break;
         case GREATER_THAN:
-          emitln("  cmp a, b");
-          emitln("  lodflgs");
-          emitln("  and al, %00000011"); 
-          emitln("  cmp al, 0"); 
-          emitln("  lodflgs");
-          //emitln("  and al, %00000001 ; >"); 
+          if(expr_out.ind_level > 0 || expr_out.signedness == SNESS_UNSIGNED){
+            emitln("  cmp a, b");
+            emitln("  lodflgs");
+            emitln("  and al, %00000011"); 
+            emitln("  cmp al, 0"); 
+            emitln("  lodflgs");
+          }
+          else{
+            // same as LTE, but invert at the end so that ~LTE = GT
+            emitln("  cmp a, b");
+            emitln("  lodflgs");
+            emitln("  mov bl, al");
+            emitln("  mov g, a"); // save flags temporarily
+            emitln("  shr al, 3"); // move OF to bit0 position
+            emitln("  shr bl, 2"); // move SF to bit0 position
+            emitln("  and bl, %00000001"); // mask out OF
+            emitln("  xor al, bl"); // OF ^ SF (less than)
+            emitln("  mov b, g");
+            emitln("  and bl, %00000001"); // isolate ZF
+            emitln("  or al, bl"); // OR result with ZF
+            emitln("  xor al, %00000001 ; > (signed)"); // invert, hence ~LTE = GT
+          }
           break;
       }
       emitln("  mov ah, 0");
@@ -1852,7 +1885,7 @@ t_data parse_atom(void){
     i = atoi(token);
     expr_out.type = DT_INT;
     expr_out.ind_level = 0;
-    expr_out.signedness = i > 32767 ? SNESS_UNSIGNED : SNESS_SIGNED;
+    expr_out.signedness = i > 32767 || i < -32768 ? SNESS_UNSIGNED : SNESS_SIGNED;
   }
   else if(tok_type == CHAR_CONST){
     emit("  mov b, ");
@@ -1863,7 +1896,7 @@ t_data parse_atom(void){
   }
   // -127, -128, -255, -32768, -32767, -65535
   else if(tok == MINUS){
-    expr_in = parse_atom(); // TODO: add error if type is pointer since cant neg a pointer?
+    expr_in = parse_atom(); // TODO: add error if type is pointer since cant neg a pointer
     if(expr_in.ind_level > 0 || expr_in.type == DT_INT) emitln("  neg b");
     else emitln("  neg b"); // treating as int as experiment
     back();

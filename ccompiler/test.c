@@ -1,17 +1,19 @@
 #inc_asm "lib/stdio.asm"
 
 int main() {
-  int i;
-  while(1){
-    print("Number: ");
-    i = scann();
-    if(i == 0)
-      return 0;
-    else
-      print_num(integer_square_root(i));
-    
     print("\n");
-  }
+    print_num(1 > 0);
+    print("\n");
+    print_num(32767 > 0);
+    print("\n");
+    print_num(1 > 1);
+    print("\n");
+    print_num(1 > 10);
+    print("\n");
+    print_num(1 > 2);
+    print("\n");
+    print_num(1 > 10);
+    print("\n");
 
   return 0;
 }
