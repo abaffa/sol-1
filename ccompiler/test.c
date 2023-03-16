@@ -1,22 +1,61 @@
 #inc_asm "lib/stdio.asm"
 
+void bubble_sort(char arr[100], int n) {
+    int i, j;
+    char temp;
+
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+    return;
+}
+
+void _gets(char *s){
+  asm{
+    mov a, @s
+    mov d, a
+    call gets
+  }
+  return;
+}
+
+int _strlen(char str[100]) {
+    int length;
+    length = 0;
+    
+    while (str[length] != 0) {
+        length++;
+    }
+    
+    return length;
+}
 int main() {
-    print("\n");
-    print_num(1 > 0);
-    print("\n");
-    print_num(32767 > 0);
-    print("\n");
-    print_num(1 > 1);
-    print("\n");
-    print_num(1 > 10);
-    print("\n");
-    print_num(1 > 2);
-    print("\n");
-    print_num(1 > 10);
+    int n, i;
+
+    char s[100];
+    print("Enter the elements of the array as a string: ");
+    _gets(s);
+    print("OK.\n");
+
+    n = _strlen(s);
+    print("Now sorting...\n");
+    bubble_sort(s, n);
+
+    print("Sorted array: ");
+    for (i = 0; i < n; i++) {
+        _putchar(s[i]);
+    }
     print("\n");
 
-  return 0;
+    return 0;
 }
+
 
 void print_num(int num) {
   char digits[5];
