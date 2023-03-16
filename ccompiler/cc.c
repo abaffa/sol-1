@@ -2588,7 +2588,7 @@ void declare_global(void){
         do{
           get();
           if(tok_type == CHAR_CONST){
-            sprintf(temp, "$%x, ", string_const[0]);
+            sprintf(temp, "$%x,", string_const[0]);
             emit_data(temp);
           }
           else if(tok_type == INTEGER_CONST){
