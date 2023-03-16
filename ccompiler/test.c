@@ -1,6 +1,6 @@
 #inc_asm "lib/stdio.asm"
 
-void bubble_sort(char arr[100], int n) {
+void bubble_sort(char arr[1], int n) {
     int i, j;
     char temp;
 
@@ -25,7 +25,7 @@ void _gets(char *s){
   return;
 }
 
-int _strlen(char str[100]) {
+int _strlen(char str[1]) {
     int length;
     length = 0;
     

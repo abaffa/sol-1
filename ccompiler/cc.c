@@ -18,26 +18,6 @@
     this makes it easier in places where matrices or pointers are used to dereference chars,
     specially when they are used in conditional expressions such as in while loops
 
-+---------------+---------------+---------------+
-| Operand 1     | Operand 2     | Result        |
-+---------------+---------------+---------------+
-| signed char   | signed char   | signed int    |
-| signed char   | unsigned char | signed int    |
-| signed char   | signed int    | signed int    |
-| signed char   | unsigned int  | unsigned int  |
-| unsigned char | signed char   | signed int    |
-| unsigned char | unsigned char | unsigned int  |
-| unsigned char | signed int    | signed int    |
-| unsigned char | unsigned int  | unsigned int  |
-| signed int    | signed char   | signed int    |
-| signed int    | unsigned char | signed int    |
-| signed int    | signed int    | signed int    |
-| signed int    | unsigned int  | unsigned int  |
-| unsigned int  | signed char   | unsigned int  |
-| unsigned int  | unsigned char | unsigned int  |
-| unsigned int  | signed int    | unsigned int  |
-| unsigned int  | unsigned int  | unsigned int  |
-+---------------+---------------+---------------+
 */
 
 int main(int argc, char *argv[]){
@@ -1320,34 +1300,17 @@ t_data parse_assignment(){
     strcpy(var_name, token);
     get();
     if(tok == OPENING_BRACKET){ // matrix operations
-      t_var *matrix; // pointer to the matrix variable
-      int i, data_size, dims;
-
+      t_var *matrix;
+      int last_dim, dims;
       matrix = get_var_pointer(var_name); // gets a pointer to the variable holding the matrix address
-      data_size = get_data_size(&matrix->data);
+      expr_in = emit_matrix_arithmetic(matrix, &last_dim);
+      expr_out = expr_in;
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      expr_out = emit_var_into_b(var_name); // in 'b'. emit the base address of the matrix or pointer
-      emitln("  push a"); // needed because for loop below will modify 'a'. But 'a' is used by functions such as parse_terms, so keep previous results. so we cannot overwrite 'a' here.
-      emitln("  mov d, b");
-      for(i = 0; i < dims; i++){
-        emitln("  push d"); // save 'd'. this is the matrix base address. save because indexing expr below could use 'd' and overwrite it
-        parse_expr(); // result in 'b'
-        emitln("  pop d"); // retrieve 'b' from before, into 'd'. This is the destination address so we can write to it
-        if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
-        sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix));
-        emitln(asm_line);
-        emitln("  mul a, b");
-        emitln("  add d, b");
-        expr_out.ind_level--;
-        get();
-        if(tok != OPENING_BRACKET) break;
-      }
-      emitln("  pop a");
-      // we are past the '=' sign here
+      get(); // get the '=' sign
       emitln("  push d"); // save 'd'. this is the matrix base address. save because expr below could use 'd' and overwrite it
       parse_expr(); // evaluate expression, result in 'b'
       emitln("  pop d"); 
-      if(i == dims - 1){
+      if(last_dim == dims - 1){
         if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
           emitln("  mov [d], b");
         }
@@ -1996,35 +1959,14 @@ t_data parse_atom(void){
       }
       else error(UNDECLARED_FUNC);
     }
+    // parse matrix
     else if(tok == OPENING_BRACKET){ // matrix operations
-      int i, dims, data_size; // matrix data size
-      t_var *matrix; // pointer to the matrix variable
-      t_data var;
-
+      t_var *matrix;
+      int last_dim, dims;
       matrix = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
-      data_size = get_data_size(&matrix->data);
+      expr_in = emit_matrix_arithmetic(matrix, &last_dim);
       dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
-      expr_out = emit_var_into_b(temp_name); // emit the base address of the matrix or pointer into 'b'
-      emitln("  push a"); // needed because for loop below will modify 'a'. But 'a' is used by functions such as parse_terms, so keep previous results. so we cannot overwrite 'a' here.
-      emitln("  mov d, b");
-      for(i = 0; i < dims; i++){
-        emitln("  push d"); // save 'd' in case the expressions inside brackets use 'd' for addressing (likely)
-        parse_expr(); // result in 'b'
-        emitln("  pop d");
-        if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
-        sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix));
-        emitln(asm_line);
-        emitln("  mul a, b");
-        emitln("  add d, b");
-        expr_out.ind_level--;
-        get();
-        if(tok != OPENING_BRACKET){
-          back();
-          break;
-        }
-      }
-      emitln("  pop a");
-      if(i == dims - 1){
+      if(last_dim == dims - 1){
         if(matrix->data.ind_level > 0 || matrix->data.type == DT_INT){
           emitln("  mov b, [d]"); // last dimension, so return value
         }
@@ -2034,6 +1976,7 @@ t_data parse_atom(void){
         }
       }
       else emitln("  mov b, d");
+      expr_out = expr_in;
     }
     else if(enum_element_exists(temp_name) != -1){
       back();
@@ -2056,7 +1999,63 @@ t_data parse_atom(void){
   return expr_out;
 }
 
+  // p[2]
+  // (p+i)[3]
+  // 
+t_data emit_matrix_arithmetic(t_var *matrix, int *last_dim){
+  t_data expr_out;
 
+  int i, dims, data_size; // matrix data size
+
+  data_size = get_data_size(&matrix->data);
+  dims = matrix_dim_count(matrix); // gets the number of dimensions for this matrix
+  expr_out = emit_var_into_b(matrix->var_name); // emit the base address of the matrix or pointer into 'b'
+  emitln("  push a"); // needed because for loop below will modify 'a'. But 'a' is used by functions such as parse_terms, so keep previous results. so we cannot overwrite 'a' here.
+  emitln("  mov d, b");
+  for(i = 0; i < dims; i++){
+    emitln("  push d"); // save 'd' in case the expressions inside brackets use 'd' for addressing (likely)
+    parse_expr(); // result in 'b'
+    emitln("  pop d");
+    if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+    sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix));
+    emitln(asm_line);
+    emitln("  mul a, b");
+    emitln("  add d, b");
+    expr_out.ind_level--;
+    get();
+    if(tok != OPENING_BRACKET){
+      back();
+      break;
+    }
+  }
+  emitln("  pop a");
+  
+  *last_dim = i; // return the last dimension index found
+
+  return expr_out;
+}
+/*
++---------------+---------------+---------------+
+| Operand 1     | Operand 2     | Result        |
++---------------+---------------+---------------+
+| signed char   | signed char   | signed int    |
+| signed char   | unsigned char | signed int    |
+| signed char   | signed int    | signed int    |
+| signed char   | unsigned int  | unsigned int  |
+| unsigned char | signed char   | signed int    |
+| unsigned char | unsigned char | unsigned int  |
+| unsigned char | signed int    | signed int    |
+| unsigned char | unsigned int  | unsigned int  |
+| signed int    | signed char   | signed int    |
+| signed int    | unsigned char | signed int    |
+| signed int    | signed int    | signed int    |
+| signed int    | unsigned int  | unsigned int  |
+| unsigned int  | signed char   | unsigned int  |
+| unsigned int  | unsigned char | unsigned int  |
+| unsigned int  | signed int    | unsigned int  |
+| unsigned int  | unsigned int  | unsigned int  |
++---------------+---------------+---------------+
+*/
 t_data cast(t_data t1, t_data t2){
   t_data data;
 

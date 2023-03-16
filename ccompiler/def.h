@@ -355,6 +355,7 @@ void emit_data(char *data);
 void emit_data_block();
 void emit_data_dbdw(int ind_level, int dims, t_data_type dt);
 void emit_string_table_data(void);
+t_data emit_matrix_arithmetic(t_var *matrix, int *last_dim);
 
 void skip_statements(void);
 void skip_block(void);
