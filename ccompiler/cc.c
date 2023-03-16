@@ -1599,7 +1599,7 @@ t_data parse_relational(void){
           if(expr_out.ind_level > 0 || expr_out.signedness == SNESS_UNSIGNED){
             emitln("  cmp a, b");
             emitln("  lodflgs");
-            emitln("  and al, %00000010 ; <"); // isolate CF only. therefore if CF==1 then A < B
+            emitln("  and al, %00000010 ; < (unsigned)"); // isolate CF only. therefore if CF==1 then A < B
             emitln("  shr al"); // move to 0th position
           }
           else{
@@ -1610,17 +1610,32 @@ t_data parse_relational(void){
             emitln("  shr al, 3"); // move OF to bit0 position
             emitln("  shr bl, 2"); // move SF to bit0 position
             emitln("  and bl, %00000001"); // mask out OF
-            emitln("  xor al, bl"); // OF ^ SF
+            emitln("  xor al, bl ; < (signed)"); // OF ^ SF
           }
           break;
         case LESS_THAN_OR_EQUAL:
-          emitln("  cmp a, b");
-          emitln("  lodflgs");
-          emitln("  and al, %00000011 ; <="); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
-          emitln("  cmp al, 0");
-          emitln("  lodflgs");
-          emitln("  xor al, %00000001");
-          //emitln("  and al, %00000001 ; transform relational logical condition result into a single bit"); 
+          if(expr_out.ind_level > 0 || expr_out.signedness == SNESS_UNSIGNED){
+            emitln("  cmp a, b");
+            emitln("  lodflgs");
+            emitln("  and al, %00000011 ; <= (unsigned)"); // isolate both ZF and CF. therefore if CF==1 or ZF==1 then A <= B
+            emitln("  cmp al, 0");
+            emitln("  lodflgs");
+            emitln("  xor al, %00000001");
+          }
+          else{
+            // SF ^ OF means 'less than'
+            emitln("  cmp a, b");
+            emitln("  lodflgs");
+            emitln("  mov bl, al");
+            emitln("  mov g, a"); // for saving ZF
+            emitln("  shr al, 3"); // move OF to bit0 position
+            emitln("  shr bl, 2"); // move SF to bit0 position
+            emitln("  and bl, %00000001"); // mask out OF
+            emitln("  xor al, bl"); // OF ^ SF
+            emitln("  mov b, g");
+            emitln("  and bl, %00000001"); // isolate ZF
+            emitln("  or al, bl ; <= (signed)"); // OR result with ZF
+          }
           break;
         case GREATER_THAN_OR_EQUAL:
           emitln("  cmp a, b");

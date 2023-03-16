@@ -219,10 +219,15 @@ _if6_cond:
   mov b, 1
   cmp a, b
   lodflgs
-  and al, %00000011 ; <=
-  cmp al, 0
-  lodflgs
-  xor al, %00000001
+  mov bl, al
+  mov g, a
+  shr al, 3
+  shr bl, 2
+  and bl, %00000001
+  xor al, bl
+  mov b, g
+  and bl, %00000001
+  or al, bl ; <= (signed)
   mov ah, 0
   mov b, a
   pop a
@@ -279,7 +284,7 @@ _while7_cond:
   shr al, 3
   shr bl, 2
   and bl, %00000001
-  xor al, bl
+  xor al, bl ; < (signed)
   mov ah, 0
   mov b, a
   pop a
