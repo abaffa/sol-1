@@ -1967,8 +1967,8 @@ t_data parse_atom(void){
       int last_dim, dims;
       var = get_var_pointer(temp_name); // gets a pointer to the variable holding the matrix address
       if(is_matrix(var)){
-        expr_in = emit_matrix_arithmetic(var, &last_dim);
         dims = matrix_dim_count(var); // gets the number of dimensions for this matrix
+        expr_in = emit_matrix_arithmetic(var, &last_dim); // emit matrix final address in 'd'
         if(last_dim == dims - 1){
           if(var->data.ind_level > 0 || var->data.type == DT_INT){
             emitln("  mov b, [d]"); // last dimension, so return value
@@ -1981,8 +1981,31 @@ t_data parse_atom(void){
         else emitln("  mov b, d");
         expr_out = expr_in;
       }
+      // pointer indexing
       else if(var->data.ind_level > 0){
-        
+        emitln("  push a");
+        expr_in = emit_var_into_b(temp_name); // pointer variable value into 'b'
+        emitln("  mov d, b");
+        emitln("  push d"); // save 'd' in case the expressions inside brackets use 'd' for addressing (likely)
+        parse_atom(); // parse index expression, result in B
+        emitln("  pop d");
+        if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
+        emitln("  mov a, b");
+        sprintf(temp, "  mov b, %u", get_data_size(&var->data));
+        emitln(temp);
+        emitln("  mul a, b");
+        emitln("  add d, b");
+        if(var->data.type == DT_INT || var->data.ind_level > 1){
+          emitln("  mov b, [d]"); 
+        }
+        else if(var->data.type == DT_CHAR){
+          emitln("  mov bl, [d]"); 
+          emitln("  mov bh, 0");
+        }
+        emitln("  pop a");
+        expr_out.type = expr_in.type;
+        expr_out.ind_level = expr_in.ind_level - 1; // indexing reduces ind_level by 1
+        expr_out.signedness = expr_in.signedness;
       }
       else error(INVALID_INDEXING);
     }
@@ -2407,9 +2430,9 @@ int matrix_dim_count(t_var *var){
 
 
 int get_data_size(t_data *data){
-  if(data -> ind_level > 0) return 2;
+  if(data->ind_level > 0) return 2;
   else
-    switch(data -> type){
+    switch(data->type){
       case DT_CHAR:
         return 1;
       case DT_INT:

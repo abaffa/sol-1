@@ -7,19 +7,29 @@
 main:
   push bp
   mov bp, sp
-
-; --- BEGIN INLINE ASM BLOCK
-  mov word[__aa], $FFFF
-  mov a, [__aa]
-  call print_u16d
-  mov word[__aa], $5555
-  mov a, [__aa]
-  call print_u16d
-  mov word[__aa], $AAAA
-  mov a, [__aa]
-  call print_u16d
-; --- END INLINE ASM BLOCK
-
+  sub sp, 2 ; p
+  mov b, [__m] ; m
+  push a
+  mov a, b
+  mov [bp + -1], a ; p
+  pop a
+  push a
+  lea d, [bp + -1] ; p
+  mov b, [d]
+  mov d, b
+  push d
+  mov b, 2
+  pop d
+  mov a, b
+  mov b, 2
+  mul a, b
+  add d, b
+  mov b, [d]
+  pop a
+  swp b
+  push b
+  call print_num
+  add sp, 2
   mov b, 0
   leave
   syscall sys_terminate_proc
@@ -291,7 +301,10 @@ print:
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
-__aa: .fill 2, 0
+__m_data: 
+.dw 55,66,77,
+.fill 194, 0
+__m: .dw __m_data
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
