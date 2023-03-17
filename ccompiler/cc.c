@@ -916,6 +916,19 @@ void parse_switch(void){
       skip_case();
       back();
     }
+    else if(tok_type == IDENTIFIER){
+      if(enum_element_exists(token) != -1){
+        sprintf(asm_line, "  cmp b, %d", get_enum_val(token));
+        sprintf(s_label, "_switch%d_case%d", current_label_index_switch, current_case_nbr);
+        strcpy(asm_line, "  je ");
+        strcat(asm_line, s_label);
+        emitln(asm_line);
+        get();
+        if(tok != COLON) error(COLON_EXPECTED);
+        skip_case();
+        back();
+      }
+    }
     else error(CONSTANT_EXPECTED);
     current_case_nbr++;
   } while(tok == CASE);
@@ -950,6 +963,7 @@ void parse_switch(void){
     emitln(s_label);
     parse_case();
   }
+  else back();
 
   get(); // get the final '}'
   if(tok != CLOSING_BRACE) error(CLOSING_BRACE_EXPECTED);
@@ -1851,8 +1865,8 @@ t_data parse_atom(void){
     expr_out.signedness = i > 32767 || i < -32768 ? SNESS_UNSIGNED : SNESS_SIGNED;
   }
   else if(tok_type == CHAR_CONST){
-    emit("  mov b, ");
-    emitln(token);
+    sprintf(temp, "  mov b, %u", atoi(token));
+    emitln(temp);
     expr_out.type = DT_INT; // considering it an INT as an experiment for now
     expr_out.ind_level = 0;
     expr_out.signedness = SNESS_UNSIGNED;
