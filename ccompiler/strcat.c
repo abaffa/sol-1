@@ -1,10 +1,9 @@
 #inc_asm "lib/stdio.asm"
 
-char s1[50] = {'H','e','l','l','o',0};
+char s1[50] = {'H','e','l','l','o', 0};
 char *s2 = ". My name is Sol-1.";
 
 int main() {
-
 
     print("Destination: ");
     print(s1);

@@ -1,12 +1,11 @@
 #inc_asm "lib/stdio.asm"
 
-int m[100] = {55, 66, 77};
 
 int main() {
-  int *p;
-  p = m;
-
-  print_num(p[2]);
+  int i;
+  i=100;
+  i=i - 1;
+  print_num(i);
 
   return 0;
 }

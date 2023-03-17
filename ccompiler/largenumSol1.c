@@ -697,6 +697,7 @@ void dividedby() {
 
 void main() {
 
+
   for (pos = 0; pos < 60; pos++) {
     prnnum(0);
   }

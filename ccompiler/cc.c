@@ -1959,9 +1959,6 @@ t_data parse_atom(void){
       }
       else error(UNDECLARED_FUNC);
     }
-    // parse matrix
-    // p[2]
-    // (p+i)[3]
     else if(tok == OPENING_BRACKET){ // matrix operations
       t_var *var;
       int last_dim, dims;
@@ -2044,7 +2041,6 @@ t_data emit_matrix_arithmetic(t_var *matrix, int *last_dim){
     emitln("  push d"); // save 'd' in case the expressions inside brackets use 'd' for addressing (likely)
     parse_expr(); // result in 'b'
     emitln("  pop d");
-    if(tok != CLOSING_BRACKET) error(CLOSING_BRACKET_EXPECTED);
     sprintf(asm_line, "  mov a, %d", get_matrix_offset(i, matrix));
     emitln(asm_line);
     emitln("  mul a, b");
@@ -2998,8 +2994,7 @@ void get(void){
     *t = '\0';
     convert_constant(); // converts this string token qith quotation marks to a non quotation marks string, and also converts escape sequences to their real bytes
   }
-  else if(isdigit(*prog) || (*prog == '-' && isdigit(*(prog + 1)))){
-    if(*prog == '-') *t++ = *prog++;
+  else if(isdigit(*prog)){
     while(isdigit(*prog)) *t++ = *prog++;
     tok_type = INTEGER_CONST;
   }
