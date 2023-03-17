@@ -1,19 +1,10 @@
 #inc_asm "lib/stdio.asm"
 
-int aa;
-int main() {
 
-  asm{
-    mov word[__aa], $FFFF
-    mov a, [__aa]
-    call print_u16d
-    mov word[__aa], $5555
-    mov a, [__aa]
-    call print_u16d
-    mov word[__aa], $AAAA
-    mov a, [__aa]
-    call print_u16d
-  }
+int main() {
+  char s;
+
+
 
   return 0;
 }
