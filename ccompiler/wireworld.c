@@ -73,6 +73,7 @@ int main() {
     grid[6][7] = CONDUCTOR;
 
     while (1) {
+        _putchar('o');
         print_grid();
         iterate();
     }
@@ -87,23 +88,4 @@ void _putchar(char c){
     call putchar
   }
   return;
-}
-
-int scann(){
-  int m;
-  asm{
-    call scan_u16d
-    mov @m, a
-  }
-  
-  return m;
-}
-
-void print(char *s){
-    asm{
-        mov a, @s
-        mov d, a
-        call puts
-    }
-    return;
 }
