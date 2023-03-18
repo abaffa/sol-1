@@ -5,12 +5,15 @@
 #include "def.h"
 
 /* 
+  DONE:
+    * fix logical value comparisons: remove ah half
+    * add data types to expressions as return values 
+    * implement signed numbers. conditions such as i >= 0 
+      when i decreases will always evaluate to true since after 0  we get 65535 which is > 0!
+  
   TODO:
-    * fix logical value comparisons: remove ah half (DONE)
-    * add data types to expressions as return values (DONE)
     * add automatic return to function ends when final } met
     * implement 'goto'
-    * implement signed numbers. conditions such as i >= 0 when i decreases will always evaluate to true since after 0 we get 65535 which is > 0!
 
   COMMENTS:
     for char data types, we still put them in a 16bit register.
