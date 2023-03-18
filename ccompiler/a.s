@@ -107,6 +107,106 @@ main:
   mov b, 1; CONDUCTOR
   pop d
   mov [d], b
+  mov b, [__grid] ; grid
+  push a
+  mov d, b
+  push d
+  mov b, 5
+  pop d
+  mov a, 80
+  mul a, b
+  add d, b
+  push d
+  mov b, 5
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  pop a
+  push d
+  mov b, 1; CONDUCTOR
+  pop d
+  mov [d], b
+  mov b, [__grid] ; grid
+  push a
+  mov d, b
+  push d
+  mov b, 6
+  pop d
+  mov a, 80
+  mul a, b
+  add d, b
+  push d
+  mov b, 5
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  pop a
+  push d
+  mov b, 2; ELECTRON_HEAD
+  pop d
+  mov [d], b
+  mov b, [__grid] ; grid
+  push a
+  mov d, b
+  push d
+  mov b, 7
+  pop d
+  mov a, 80
+  mul a, b
+  add d, b
+  push d
+  mov b, 5
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  pop a
+  push d
+  mov b, 1; CONDUCTOR
+  pop d
+  mov [d], b
+  mov b, [__grid] ; grid
+  push a
+  mov d, b
+  push d
+  mov b, 6
+  pop d
+  mov a, 80
+  mul a, b
+  add d, b
+  push d
+  mov b, 6
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  pop a
+  push d
+  mov b, 3; ELECTRON_TAIL
+  pop d
+  mov [d], b
+  mov b, [__grid] ; grid
+  push a
+  mov d, b
+  push d
+  mov b, 6
+  pop d
+  mov a, 80
+  mul a, b
+  add d, b
+  push d
+  mov b, 7
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  pop a
+  push d
+  mov b, 1; CONDUCTOR
+  pop d
+  mov [d], b
 _while1_cond:
   mov b, 1
   cmp b, 0
@@ -193,33 +293,37 @@ _switch4_expr:
   pop a
   mov b, [d]
 _switch4_comparisons:
+  cmp b, 0
   je _switch4_case0
+  cmp b, 1
   je _switch4_case1
+  cmp b, 2
   je _switch4_case2
+  cmp b, 3
   je _switch4_case3
 _switch4_case0:
-  mov b, 0
+  mov b, $20
   push al
   mov al, bl
   mov [bp + -4], al ; c
   pop al
   jmp _switch4_exit ; case break
 _switch4_case1:
-  mov b, 0
+  mov b, $2e
   push al
   mov al, bl
   mov [bp + -4], al ; c
   pop al
   jmp _switch4_exit ; case break
 _switch4_case2:
-  mov b, 0
+  mov b, $40
   push al
   mov al, bl
   mov [bp + -4], al ; c
   pop al
   jmp _switch4_exit ; case break
 _switch4_case3:
-  mov b, 0
+  mov b, $23
   push al
   mov al, bl
   mov [bp + -4], al ; c
@@ -240,7 +344,7 @@ _for3_update:
   pop a
   jmp _for3_cond
 _for3_exit:
-  mov b, 0
+  mov b, $a
   push bl
   call _putchar
   add sp, 1
@@ -619,9 +723,13 @@ _switch11_expr:
   pop a
   mov b, [d]
 _switch11_comparisons:
+  cmp b, 0
   je _switch11_case0
+  cmp b, 1
   je _switch11_case1
+  cmp b, 2
   je _switch11_case2
+  cmp b, 3
   je _switch11_case3
 _switch11_case0:
   mov b, [__new_grid] ; new_grid
@@ -646,24 +754,7 @@ _switch11_case0:
   mov [d], b
   jmp _switch11_exit ; case break
 _switch11_case1:
-  mov b, [__new_grid] ; new_grid
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -3] ; y
-  pop d
-  mov a, 80
-  mul a, b
-  add d, b
-  push d
-  mov b, [bp + -1] ; x
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  push d
-_ternary12_cond:
+_if12_cond:
   mov b, [bp + -13] ; head_count
   push a
   mov a, b
@@ -690,15 +781,51 @@ _ternary12_cond:
   mov b, a
   pop a
   cmp b, 0
-  je _ternary12_false
-_ternary12_true:
+  je _if12_else
+_if12_true:
+  mov b, [__new_grid] ; new_grid
+  push a
+  mov d, b
+  push d
+  mov b, [bp + -3] ; y
+  pop d
+  mov a, 80
+  mul a, b
+  add d, b
+  push d
+  mov b, [bp + -1] ; x
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  pop a
+  push d
   mov b, 2; ELECTRON_HEAD
-  jmp _ternary12_exit
-_ternary12_false:
-  mov b, 1; CONDUCTOR
-_ternary12_exit:
   pop d
   mov [d], b
+  jmp _if12_exit
+_if12_else:
+  mov b, [__new_grid] ; new_grid
+  push a
+  mov d, b
+  push d
+  mov b, [bp + -3] ; y
+  pop d
+  mov a, 80
+  mul a, b
+  add d, b
+  push d
+  mov b, [bp + -1] ; x
+  pop d
+  mov a, 2
+  mul a, b
+  add d, b
+  pop a
+  push d
+  mov b, 1; CONDUCTOR
+  pop d
+  mov [d], b
+_if12_exit:
   jmp _switch11_exit ; case break
 _switch11_case2:
   mov b, [__new_grid] ; new_grid
@@ -881,30 +1008,163 @@ _putchar:
   leave
   ret
 
-scann:
+print_num:
   push bp
   mov bp, sp
-  sub sp, 2 ; m
-
-; --- BEGIN INLINE ASM BLOCK
-  call scan_u16d
-  mov [bp + -1], a
-; --- END INLINE ASM BLOCK
-
-  mov b, [bp + -1] ; m
+  sub sp, 5 ; digits
+  sub sp, 2 ; i
+  mov b, 0
+  push a
+  mov a, b
+  mov [bp + -6], a ; i
+  pop a
+_if15_cond:
+  mov b, [bp + 5] ; num
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  and al, %00000001 ; ==
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _if15_exit
+_if15_true:
+  mov b, $30
+  push bl
+  call _putchar
+  add sp, 1
   leave
   ret
-
-print:
-  push bp
-  mov bp, sp
-
-; --- BEGIN INLINE ASM BLOCK
-  mov a, [bp + 5]
-  mov d, a
-  call puts
-; --- END INLINE ASM BLOCK
-
+  jmp _if15_exit
+_if15_exit:
+_while16_cond:
+  mov b, [bp + 5] ; num
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  mov bl, al
+  mov g, a
+  shr al, 3
+  shr bl, 2
+  and bl, %00000001
+  xor al, bl
+  mov b, g
+  and bl, %00000001
+  or al, bl
+  xor al, %00000001 ; > (signed)
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _while16_exit
+_while16_block:
+  lea d, [bp + -4] ; digits beginning on the stack
+  mov b, d
+  push a
+  mov d, b
+  push d
+  mov b, [bp + -6] ; i
+  pop d
+  mov a, 1
+  mul a, b
+  add d, b
+  pop a
+  push d
+  mov b, $30
+  push a
+  mov a, b
+  mov b, [bp + 5] ; num
+  push a
+  mov a, b
+  mov b, 10
+  div a, b
+  pop a
+  add a, b
+  mov b, a
+  pop a
+  pop d
+  mov [d], bl
+  mov b, [bp + 5] ; num
+  push a
+  mov a, b
+  mov b, 10
+  div a, b
+  mov g, a
+  mov a, b
+  mov b, g
+  pop a
+  push a
+  mov a, b
+  mov [bp + 5], a ; num
+  pop a
+  mov b, [bp + -6] ; i
+  push a
+  mov a, b
+  inc b
+  push a
+  mov a, b
+  mov [bp + -6], a ; i
+  pop a
+  mov b, a
+  pop a
+  jmp _while16_cond
+_while16_exit:
+_while17_cond:
+  mov b, [bp + -6] ; i
+  push a
+  mov a, b
+  mov b, 0
+  cmp a, b
+  lodflgs
+  mov bl, al
+  mov g, a
+  shr al, 3
+  shr bl, 2
+  and bl, %00000001
+  xor al, bl
+  mov b, g
+  and bl, %00000001
+  or al, bl
+  xor al, %00000001 ; > (signed)
+  mov ah, 0
+  mov b, a
+  pop a
+  cmp b, 0
+  je _while17_exit
+_while17_block:
+  mov b, [bp + -6] ; i
+  push a
+  mov a, b
+  dec b
+  push a
+  mov a, b
+  mov [bp + -6], a ; i
+  pop a
+  mov b, a
+  pop a
+  lea d, [bp + -4] ; digits beginning on the stack
+  mov b, d
+  push a
+  mov d, b
+  push d
+  mov b, [bp + -6] ; i
+  pop d
+  mov a, 1
+  mul a, b
+  add d, b
+  pop a
+  mov bl, [d]
+  mov bh, 0
+  push bl
+  call _putchar
+  add sp, 1
+  jmp _while17_cond
+_while17_exit:
   leave
   ret
 ; --- END TEXT BLOCK

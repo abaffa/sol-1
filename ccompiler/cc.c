@@ -894,9 +894,7 @@ void parse_switch(void){
     if(tok_type == INTEGER_CONST){
       emit("  cmp b, ");
       emitln(token);
-      sprintf(s_label, "_switch%d_case%d", current_label_index_switch, current_case_nbr);
-      strcpy(asm_line, "  je ");
-      strcat(asm_line, s_label);
+      sprintf(s_label, "  je _switch%d_case%d", current_label_index_switch, current_case_nbr);
       emitln(asm_line);
       get();
       if(tok != COLON) error(COLON_EXPECTED);
@@ -907,9 +905,7 @@ void parse_switch(void){
       emit("  cmp bl, '");
       emit(string_const);
       emitln("'");
-      sprintf(s_label, "_switch%d_case%d", current_label_index_switch, current_case_nbr);
-      strcpy(asm_line, "  je ");
-      strcat(asm_line, s_label);
+      sprintf(asm_line, "  je _switch%d_case%d", current_label_index_switch, current_case_nbr);
       emitln(asm_line);
       get();
       if(tok != COLON) error(COLON_EXPECTED);
@@ -919,9 +915,8 @@ void parse_switch(void){
     else if(tok_type == IDENTIFIER){
       if(enum_element_exists(token) != -1){
         sprintf(asm_line, "  cmp b, %d", get_enum_val(token));
-        sprintf(s_label, "_switch%d_case%d", current_label_index_switch, current_case_nbr);
-        strcpy(asm_line, "  je ");
-        strcat(asm_line, s_label);
+        emitln(asm_line);
+        sprintf(asm_line, "  je _switch%d_case%d", current_label_index_switch, current_case_nbr);
         emitln(asm_line);
         get();
         if(tok != COLON) error(COLON_EXPECTED);
@@ -1865,7 +1860,7 @@ t_data parse_atom(void){
     expr_out.signedness = i > 32767 || i < -32768 ? SNESS_UNSIGNED : SNESS_SIGNED;
   }
   else if(tok_type == CHAR_CONST){
-    sprintf(temp, "  mov b, %u", atoi(token));
+    sprintf(temp, "  mov b, $%x", string_const[0]);
     emitln(temp);
     expr_out.type = DT_INT; // considering it an INT as an experiment for now
     expr_out.ind_level = 0;

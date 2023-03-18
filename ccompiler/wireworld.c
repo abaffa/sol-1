@@ -29,27 +29,33 @@ void print_grid() {
     return;
 }
 
-void iterate() {
+void iterate(){
     int x, y, dx, dy;
     int nx, ny;
     int head_count;
-    for (y = 0; y < 20; ++y) {
-        for (x = 0; x < 40; ++x) {
+    for (y = 0; y < 20; ++y){
+        for (x = 0; x < 40; ++x){
             head_count = 0;
-            for (dy = -1; dy <= 1; ++dy) {
+            for (dy = -1; dy <= 1; ++dy){
                 for (dx = -1; dx <= 1; ++dx) {
                     if (dx == 0 && dy == 0) continue;
                     nx = x + dx;
                     ny = y + dy;
-                    if (nx >= 0 && nx < 40 && ny >= 0 && ny < 20 && grid[ny][nx] == ELECTRON_HEAD) {
-                        ++head_count;
+                    if (nx >= 0 && nx < 40 && ny >= 0 && ny < 20 && grid[ny][nx] == ELECTRON_HEAD){
+                      ++head_count;
                     }
                 }
             }
 
             switch (grid[y][x]) {
                 case EMPTY: new_grid[y][x] = EMPTY; break;
-                case CONDUCTOR: new_grid[y][x] = (head_count == 1 || head_count == 2) ? ELECTRON_HEAD : CONDUCTOR; break;
+                case CONDUCTOR:
+                     
+                    if(head_count == 1 || head_count == 2)
+                        new_grid[y][x] = ELECTRON_HEAD;
+                    else
+                        new_grid[y][x] = CONDUCTOR;
+                    break;
                 case ELECTRON_HEAD: new_grid[y][x] = ELECTRON_TAIL; break;
                 case ELECTRON_TAIL: new_grid[y][x] = CONDUCTOR; break;
             }
@@ -72,8 +78,14 @@ int main() {
     grid[6][6] = ELECTRON_TAIL;
     grid[6][7] = CONDUCTOR;
 
+    // Add an oscillator
+    grid[5][5] = CONDUCTOR;
+    grid[6][5] = ELECTRON_HEAD;
+    grid[7][5] = CONDUCTOR;
+    grid[6][6] = ELECTRON_TAIL;
+    grid[6][7] = CONDUCTOR;
+
     while (1) {
-        _putchar('o');
         print_grid();
         iterate();
     }
@@ -86,6 +98,27 @@ void _putchar(char c){
     mov al, @c
     mov ah, al
     call putchar
+  }
+  return;
+}
+
+void print_num(int num) {
+  char digits[5];
+  int i;
+  i = 0;
+  if(num == 0){
+    _putchar('0');
+    return;
+  }
+  while (num > 0) {
+      digits[i] = '0' + (num % 10);
+      num = num / 10;
+      i++;
+  }
+  // Print the digits in reverse order using putchar()
+  while (i > 0) {
+      i--;
+      _putchar(digits[i]);
   }
   return;
 }
