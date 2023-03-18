@@ -346,37 +346,7 @@ _if5_exit:
   mov a, b
   mov [bp + -13], a ; y2
   pop a
-  mov b, [bp + 11] ; y
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_0 ; ", "
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, [bp + 7] ; depth
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_0 ; ", "
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, [bp + -3] ; length_factor
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_0 ; ", "
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, [bp + 9] ; angle
+  mov b, [bp + -11] ; x2
   swp b
   push b
   call print_num
@@ -390,16 +360,6 @@ _if5_exit:
   swp b
   push b
   call print_num
-  add sp, 2
-  mov b, __string_0 ; ", "
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, __string_1 ; "\n"
-  swp b
-  push b
-  call print
   add sp, 2
 _if6_cond:
   mov b, [bp + -11] ; x2
@@ -478,6 +438,11 @@ _if6_cond:
   cmp b, 0
   je _if6_exit
 _if6_true:
+  mov b, __string_1 ; "exit"
+  swp b
+  push b
+  call print
+  add sp, 2
   leave
   ret
   jmp _if6_exit
@@ -510,6 +475,11 @@ _for7_cond:
   cmp b, 0
   je _for7_exit
 _for7_block:
+  mov b, __string_2 ; "OK"
+  swp b
+  push b
+  call print
+  add sp, 2
   mov b, [bp + 13] ; x
   push a
   mov a, b
@@ -778,6 +748,8 @@ _for7_exit:
   push b
   call draw_tree
   add sp, 10
+  leave
+  ret
 
 print:
   push bp
@@ -808,13 +780,13 @@ _putchar:
 print_num:
   push bp
   mov bp, sp
-  sub sp, 20 ; digits
+  sub sp, 10 ; digits
   sub sp, 2 ; i
   sub sp, 2 ; j
   mov b, 0
   push a
   mov a, b
-  mov [bp + -21], a ; i
+  mov [bp + -11], a ; i
   pop a
 _if9_cond:
   mov b, [bp + 5] ; num
@@ -891,12 +863,12 @@ _while11_cond:
   cmp b, 0
   je _while11_exit
 _while11_block:
-  lea d, [bp + -19] ; digits beginning on the stack
+  lea d, [bp + -9] ; digits beginning on the stack
   mov b, d
   push a
   mov d, b
   push d
-  mov b, [bp + -21] ; i
+  mov b, [bp + -11] ; i
   pop d
   mov a, 2
   mul a, b
@@ -924,20 +896,20 @@ _while11_block:
   mov a, b
   mov [bp + 5], a ; num
   pop a
-  mov b, [bp + -21] ; i
+  mov b, [bp + -11] ; i
   push a
   mov a, b
   inc b
   push a
   mov a, b
-  mov [bp + -21], a ; i
+  mov [bp + -11], a ; i
   pop a
   mov b, a
   pop a
   jmp _while11_cond
 _while11_exit:
 _for12_init:
-  mov b, [bp + -21] ; i
+  mov b, [bp + -11] ; i
   push a
   mov a, b
   mov b, 1
@@ -946,10 +918,10 @@ _for12_init:
   pop a
   push a
   mov a, b
-  mov [bp + -23], a ; j
+  mov [bp + -13], a ; j
   pop a
 _for12_cond:
-  mov b, [bp + -23] ; j
+  mov b, [bp + -13] ; j
   push a
   mov a, b
   mov b, 0
@@ -967,12 +939,12 @@ _for12_cond:
   cmp b, 0
   je _for12_exit
 _for12_block:
-  lea d, [bp + -19] ; digits beginning on the stack
+  lea d, [bp + -9] ; digits beginning on the stack
   mov b, d
   push a
   mov d, b
   push d
-  mov b, [bp + -23] ; j
+  mov b, [bp + -13] ; j
   pop d
   mov a, 2
   mul a, b
@@ -989,25 +961,28 @@ _for12_block:
   call _putchar
   add sp, 1
 _for12_update:
-  mov b, [bp + -23] ; j
+  mov b, [bp + -13] ; j
   push a
   mov a, b
   dec b
   push a
   mov a, b
-  mov [bp + -23], a ; j
+  mov [bp + -13], a ; j
   pop a
   mov b, a
   pop a
   jmp _for12_cond
 _for12_exit:
+  leave
+  ret
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
 __canvas_data: .fill 1760, 0
 __canvas: .dw __canvas_data
 __string_0: .db ", ", 0
-__string_1: .db "\n", 0
+__string_1: .db "exit", 0
+__string_2: .db "OK", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
