@@ -55,7 +55,6 @@ void scann(int *n){
   return;
 }
 
-
 void printn(int n){
   asm{
     mov a, @n

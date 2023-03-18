@@ -3,7 +3,7 @@
 void main(){
     int n;
     int result;
-
+    
     print("Factorial of: ");
     n = getn();
 
