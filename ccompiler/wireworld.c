@@ -9,11 +9,12 @@ enum CellState {
 
 int grid[20][40];
 int new_grid[20][40];
+int x, y, dx, dy;
+int nx, ny;
+int head_count;
+char c;
 
 void print_grid() {
-    int y;
-    int x;
-    char c;
     for (y = 0; y < 20; ++y) {
         for (x = 0; x < 40; ++x) {
             switch (grid[y][x]) {
@@ -30,9 +31,6 @@ void print_grid() {
 }
 
 void iterate(){
-    int x, y, dx, dy;
-    int nx, ny;
-    int head_count;
     for (y = 0; y < 20; ++y){
         for (x = 0; x < 40; ++x){
             head_count = 0;
@@ -46,7 +44,7 @@ void iterate(){
                     }
                 }
             }
-
+            
             switch (grid[y][x]) {
                 case EMPTY: new_grid[y][x] = EMPTY; break;
                 case CONDUCTOR:
@@ -78,12 +76,6 @@ int main() {
     grid[6][6] = ELECTRON_TAIL;
     grid[6][7] = CONDUCTOR;
 
-    // Add an oscillator
-    grid[5][5] = CONDUCTOR;
-    grid[6][5] = ELECTRON_HEAD;
-    grid[7][5] = CONDUCTOR;
-    grid[6][6] = ELECTRON_TAIL;
-    grid[6][7] = CONDUCTOR;
 
     while (1) {
         print_grid();

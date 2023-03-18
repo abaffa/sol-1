@@ -623,7 +623,7 @@ void parse_continue(void){
   char s_label[64];
 
   if(current_loop_type == FOR_LOOP){
-    sprintf(s_label, "  jmp _for%d_cond ; for continue", current_label_index_for);
+    sprintf(s_label, "  jmp _for%d_update ; for continue", current_label_index_for);
     emitln(s_label);
   }
   else if(current_loop_type == WHILE_LOOP){
@@ -2365,7 +2365,7 @@ t_data emit_var_into_b(char *var_name){
       emit(global_variables[var_id].var_name);
       emit("] ; ");
       emitln(var_name);
-      emit("  mov bh, 0");
+      emitln("  mov bh, 0");
       expr_out.type = global_variables[var_id].data.type;
       expr_out.ind_level = global_variables[var_id].data.ind_level;
       expr_out.signedness = global_variables[var_id].data.signedness;

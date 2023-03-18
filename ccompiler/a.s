@@ -107,106 +107,6 @@ main:
   mov b, 1; CONDUCTOR
   pop d
   mov [d], b
-  mov b, [__grid] ; grid
-  push a
-  mov d, b
-  push d
-  mov b, 5
-  pop d
-  mov a, 80
-  mul a, b
-  add d, b
-  push d
-  mov b, 5
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  push d
-  mov b, 1; CONDUCTOR
-  pop d
-  mov [d], b
-  mov b, [__grid] ; grid
-  push a
-  mov d, b
-  push d
-  mov b, 6
-  pop d
-  mov a, 80
-  mul a, b
-  add d, b
-  push d
-  mov b, 5
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  push d
-  mov b, 2; ELECTRON_HEAD
-  pop d
-  mov [d], b
-  mov b, [__grid] ; grid
-  push a
-  mov d, b
-  push d
-  mov b, 7
-  pop d
-  mov a, 80
-  mul a, b
-  add d, b
-  push d
-  mov b, 5
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  push d
-  mov b, 1; CONDUCTOR
-  pop d
-  mov [d], b
-  mov b, [__grid] ; grid
-  push a
-  mov d, b
-  push d
-  mov b, 6
-  pop d
-  mov a, 80
-  mul a, b
-  add d, b
-  push d
-  mov b, 6
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  push d
-  mov b, 3; ELECTRON_TAIL
-  pop d
-  mov [d], b
-  mov b, [__grid] ; grid
-  push a
-  mov d, b
-  push d
-  mov b, 6
-  pop d
-  mov a, 80
-  mul a, b
-  add d, b
-  push d
-  mov b, 7
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  push d
-  mov b, 1; CONDUCTOR
-  pop d
-  mov [d], b
 _while1_cond:
   mov b, 1
   cmp b, 0
@@ -223,17 +123,11 @@ _while1_exit:
 print_grid:
   push bp
   mov bp, sp
-  sub sp, 2 ; y
-  sub sp, 2 ; x
-  sub sp, 1 ; c
 _for2_init:
   mov b, 0
-  push a
-  mov a, b
-  mov [bp + -1], a ; y
-  pop a
+  mov [__y], b
 _for2_cond:
-  mov b, [bp + -1] ; y
+  mov b, [__y] ; y
   push a
   mov a, b
   mov b, 20
@@ -252,12 +146,9 @@ _for2_cond:
 _for2_block:
 _for3_init:
   mov b, 0
-  push a
-  mov a, b
-  mov [bp + -3], a ; x
-  pop a
+  mov [__x], b
 _for3_cond:
-  mov b, [bp + -3] ; x
+  mov b, [__x] ; x
   push a
   mov a, b
   mov b, 40
@@ -279,13 +170,13 @@ _switch4_expr:
   push a
   mov d, b
   push d
-  mov b, [bp + -1] ; y
+  mov b, [__y] ; y
   pop d
   mov a, 80
   mul a, b
   add d, b
   push d
-  mov b, [bp + -3] ; x
+  mov b, [__x] ; x
   pop d
   mov a, 2
   mul a, b
@@ -303,45 +194,30 @@ _switch4_comparisons:
   je _switch4_case3
 _switch4_case0:
   mov b, $20
-  push al
-  mov al, bl
-  mov [bp + -4], al ; c
-  pop al
+  mov [__c], bl
   jmp _switch4_exit ; case break
 _switch4_case1:
   mov b, $2e
-  push al
-  mov al, bl
-  mov [bp + -4], al ; c
-  pop al
+  mov [__c], bl
   jmp _switch4_exit ; case break
 _switch4_case2:
   mov b, $40
-  push al
-  mov al, bl
-  mov [bp + -4], al ; c
-  pop al
+  mov [__c], bl
   jmp _switch4_exit ; case break
 _switch4_case3:
   mov b, $23
-  push al
-  mov al, bl
-  mov [bp + -4], al ; c
-  pop al
+  mov [__c], bl
   jmp _switch4_exit ; case break
 _switch4_exit:
-  mov bl, [bp + -4] ; c
+  mov bl, [__c] ; c
   mov bh, 0
   push bl
   call _putchar
   add sp, 1
 _for3_update:
-  mov b, [bp + -3] ; x
+  mov b, [__x] ; x
   inc b
-  push a
-  mov a, b
-  mov [bp + -3], a ; x
-  pop a
+  mov [__x], b
   jmp _for3_cond
 _for3_exit:
   mov b, $a
@@ -349,12 +225,9 @@ _for3_exit:
   call _putchar
   add sp, 1
 _for2_update:
-  mov b, [bp + -1] ; y
+  mov b, [__y] ; y
   inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; y
-  pop a
+  mov [__y], b
   jmp _for2_cond
 _for2_exit:
   leave
@@ -363,21 +236,11 @@ _for2_exit:
 iterate:
   push bp
   mov bp, sp
-  sub sp, 2 ; x
-  sub sp, 2 ; y
-  sub sp, 2 ; dx
-  sub sp, 2 ; dy
-  sub sp, 2 ; nx
-  sub sp, 2 ; ny
-  sub sp, 2 ; head_count
 _for5_init:
   mov b, 0
-  push a
-  mov a, b
-  mov [bp + -3], a ; y
-  pop a
+  mov [__y], b
 _for5_cond:
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   push a
   mov a, b
   mov b, 20
@@ -396,12 +259,9 @@ _for5_cond:
 _for5_block:
 _for6_init:
   mov b, 0
-  push a
-  mov a, b
-  mov [bp + -1], a ; x
-  pop a
+  mov [__x], b
 _for6_cond:
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   push a
   mov a, b
   mov b, 40
@@ -419,19 +279,13 @@ _for6_cond:
   je _for6_exit
 _for6_block:
   mov b, 0
-  push a
-  mov a, b
-  mov [bp + -13], a ; head_count
-  pop a
+  mov [__head_count], b
 _for7_init:
   mov b, 1
   neg b
-  push a
-  mov a, b
-  mov [bp + -7], a ; dy
-  pop a
+  mov [__dy], b
 _for7_cond:
-  mov b, [bp + -7] ; dy
+  mov b, [__dy] ; dy
   push a
   mov a, b
   mov b, 1
@@ -455,12 +309,9 @@ _for7_block:
 _for8_init:
   mov b, 1
   neg b
-  push a
-  mov a, b
-  mov [bp + -5], a ; dx
-  pop a
+  mov [__dx], b
 _for8_cond:
-  mov b, [bp + -5] ; dx
+  mov b, [__dx] ; dx
   push a
   mov a, b
   mov b, 1
@@ -482,7 +333,7 @@ _for8_cond:
   je _for8_exit
 _for8_block:
 _if9_cond:
-  mov b, [bp + -5] ; dx
+  mov b, [__dx] ; dx
   push a
   mov a, b
   mov b, 0
@@ -495,7 +346,7 @@ _if9_cond:
   push al
   cmp b, 0
   lodflgs ; transform condition into a single bit
-  mov b, [bp + -7] ; dy
+  mov b, [__dy] ; dy
   push a
   mov a, b
   mov b, 0
@@ -517,33 +368,27 @@ _if9_cond:
   cmp b, 0
   je _if9_exit
 _if9_true:
-  jmp _for8_cond ; for continue
+  jmp _for8_update ; for continue
   jmp _if9_exit
 _if9_exit:
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   push a
   mov a, b
-  mov b, [bp + -5] ; dx
+  mov b, [__dx] ; dx
   add a, b
   mov b, a
   pop a
+  mov [__nx], b
+  mov b, [__y] ; y
   push a
   mov a, b
-  mov [bp + -9], a ; nx
-  pop a
-  mov b, [bp + -3] ; y
-  push a
-  mov a, b
-  mov b, [bp + -7] ; dy
+  mov b, [__dy] ; dy
   add a, b
   mov b, a
   pop a
-  push a
-  mov a, b
-  mov [bp + -11], a ; ny
-  pop a
+  mov [__ny], b
 _if10_cond:
-  mov b, [bp + -9] ; nx
+  mov b, [__nx] ; nx
   push a
   mov a, b
   mov b, 0
@@ -561,7 +406,7 @@ _if10_cond:
   push al
   cmp b, 0
   lodflgs ; transform condition into a single bit
-  mov b, [bp + -9] ; nx
+  mov b, [__nx] ; nx
   push a
   mov a, b
   mov b, 40
@@ -587,7 +432,7 @@ _if10_cond:
   push al
   cmp b, 0
   lodflgs ; transform condition into a single bit
-  mov b, [bp + -11] ; ny
+  mov b, [__ny] ; ny
   push a
   mov a, b
   mov b, 0
@@ -614,7 +459,7 @@ _if10_cond:
   push al
   cmp b, 0
   lodflgs ; transform condition into a single bit
-  mov b, [bp + -11] ; ny
+  mov b, [__ny] ; ny
   push a
   mov a, b
   mov b, 20
@@ -644,13 +489,13 @@ _if10_cond:
   push a
   mov d, b
   push d
-  mov b, [bp + -11] ; ny
+  mov b, [__ny] ; ny
   pop d
   mov a, 80
   mul a, b
   add d, b
   push d
-  mov b, [bp + -9] ; nx
+  mov b, [__nx] ; nx
   pop d
   mov a, 2
   mul a, b
@@ -678,29 +523,32 @@ _if10_cond:
   cmp b, 0
   je _if10_exit
 _if10_true:
-  mov b, [bp + -13] ; head_count
-  inc b
+  mov b, [__head_count] ; head_count
   push a
   mov a, b
-  mov [bp + -13], a ; head_count
+  inc b
+  mov [__head_count], b
+  mov b, a
   pop a
   jmp _if10_exit
 _if10_exit:
 _for8_update:
-  mov b, [bp + -5] ; dx
-  inc b
+  mov b, [__dx] ; dx
   push a
   mov a, b
-  mov [bp + -5], a ; dx
+  inc b
+  mov [__dx], b
+  mov b, a
   pop a
   jmp _for8_cond
 _for8_exit:
 _for7_update:
-  mov b, [bp + -7] ; dy
-  inc b
+  mov b, [__dy] ; dy
   push a
   mov a, b
-  mov [bp + -7], a ; dy
+  inc b
+  mov [__dy], b
+  mov b, a
   pop a
   jmp _for7_cond
 _for7_exit:
@@ -709,13 +557,13 @@ _switch11_expr:
   push a
   mov d, b
   push d
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   pop d
   mov a, 80
   mul a, b
   add d, b
   push d
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   pop d
   mov a, 2
   mul a, b
@@ -736,13 +584,13 @@ _switch11_case0:
   push a
   mov d, b
   push d
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   pop d
   mov a, 80
   mul a, b
   add d, b
   push d
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   pop d
   mov a, 2
   mul a, b
@@ -755,7 +603,7 @@ _switch11_case0:
   jmp _switch11_exit ; case break
 _switch11_case1:
 _if12_cond:
-  mov b, [bp + -13] ; head_count
+  mov b, [__head_count] ; head_count
   push a
   mov a, b
   mov b, 1
@@ -767,7 +615,7 @@ _if12_cond:
   pop a
   push a
   mov a, b
-  mov b, [bp + -13] ; head_count
+  mov b, [__head_count] ; head_count
   push a
   mov a, b
   mov b, 2
@@ -787,13 +635,13 @@ _if12_true:
   push a
   mov d, b
   push d
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   pop d
   mov a, 80
   mul a, b
   add d, b
   push d
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   pop d
   mov a, 2
   mul a, b
@@ -809,13 +657,13 @@ _if12_else:
   push a
   mov d, b
   push d
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   pop d
   mov a, 80
   mul a, b
   add d, b
   push d
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   pop d
   mov a, 2
   mul a, b
@@ -832,13 +680,13 @@ _switch11_case2:
   push a
   mov d, b
   push d
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   pop d
   mov a, 80
   mul a, b
   add d, b
   push d
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   pop d
   mov a, 2
   mul a, b
@@ -854,13 +702,13 @@ _switch11_case3:
   push a
   mov d, b
   push d
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   pop d
   mov a, 80
   mul a, b
   add d, b
   push d
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   pop d
   mov a, 2
   mul a, b
@@ -873,31 +721,22 @@ _switch11_case3:
   jmp _switch11_exit ; case break
 _switch11_exit:
 _for6_update:
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; x
-  pop a
+  mov [__x], b
   jmp _for6_cond
 _for6_exit:
 _for5_update:
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   inc b
-  push a
-  mov a, b
-  mov [bp + -3], a ; y
-  pop a
+  mov [__y], b
   jmp _for5_cond
 _for5_exit:
 _for13_init:
   mov b, 0
-  push a
-  mov a, b
-  mov [bp + -3], a ; y
-  pop a
+  mov [__y], b
 _for13_cond:
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   push a
   mov a, b
   mov b, 20
@@ -916,12 +755,9 @@ _for13_cond:
 _for13_block:
 _for14_init:
   mov b, 0
-  push a
-  mov a, b
-  mov [bp + -1], a ; x
-  pop a
+  mov [__x], b
 _for14_cond:
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   push a
   mov a, b
   mov b, 40
@@ -942,13 +778,13 @@ _for14_block:
   push a
   mov d, b
   push d
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   pop d
   mov a, 80
   mul a, b
   add d, b
   push d
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   pop d
   mov a, 2
   mul a, b
@@ -959,13 +795,13 @@ _for14_block:
   push a
   mov d, b
   push d
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   pop d
   mov a, 80
   mul a, b
   add d, b
   push d
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   pop d
   mov a, 2
   mul a, b
@@ -975,21 +811,15 @@ _for14_block:
   pop d
   mov [d], b
 _for14_update:
-  mov b, [bp + -1] ; x
+  mov b, [__x] ; x
   inc b
-  push a
-  mov a, b
-  mov [bp + -1], a ; x
-  pop a
+  mov [__x], b
   jmp _for14_cond
 _for14_exit:
 _for13_update:
-  mov b, [bp + -3] ; y
+  mov b, [__y] ; y
   inc b
-  push a
-  mov a, b
-  mov [bp + -3], a ; y
-  pop a
+  mov [__y], b
   jmp _for13_cond
 _for13_exit:
   leave
@@ -1174,6 +1004,14 @@ __grid_data: .fill 1600, 0
 __grid: .dw __grid_data
 __new_grid_data: .fill 1600, 0
 __new_grid: .dw __new_grid_data
+__x: .fill 2, 0
+__y: .fill 2, 0
+__dx: .fill 2, 0
+__dy: .fill 2, 0
+__nx: .fill 2, 0
+__ny: .fill 2, 0
+__head_count: .fill 2, 0
+__c: .fill 1, 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
