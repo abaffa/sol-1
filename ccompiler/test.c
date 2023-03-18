@@ -2,12 +2,9 @@
 
 
 int main() {
-  int i;
-  i=100;
-  i=i - 1;
-  print_num(i);
 
-  return 0;
+
+
 }
 
 void _gets(char *s){

@@ -20,7 +20,6 @@
     if the data type is char, then we just make the high byte of the register = 0
     this makes it easier in places where matrices or pointers are used to dereference chars,
     specially when they are used in conditional expressions such as in while loops
-
 */
 
 int main(int argc, char *argv[]){
@@ -208,7 +207,13 @@ void parse_functions(void){
       emitln(":");
       emitln("  push bp");
       emitln("  mov bp, sp");
+      last_executed_keyword = 0; // reset this before entering the function. if we then find a return as the last token, we do not emit a return when finding the last '}'
       parse_block(); // starts parsing the function block;
+
+      if(last_executed_keyword != RETURN){ // generate code for a 'return'
+        emitln("  leave");
+        emitln("  syscall sys_terminate_proc");
+      }
       break;
     }
 
@@ -225,7 +230,12 @@ void parse_functions(void){
       emitln(":");
       emitln("  push bp");
       emitln("  mov bp, sp");
+      last_executed_keyword = 0; // reset this before entering the function. if we then find a return as the last token, we do not emit a return when finding the last '}'
       parse_block(); // starts parsing the function block;
+      if(last_executed_keyword != RETURN){ // generate code for a 'return'
+        emitln("  leave");
+        emitln("  ret");
+      }
     }
 }
 
@@ -1044,6 +1054,7 @@ void parse_return(void){
   else{
     emitln("  ret");
   }
+  last_executed_keyword = RETURN;
 }
 
 

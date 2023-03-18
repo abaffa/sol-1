@@ -291,6 +291,8 @@ int global_var_tos;
 int enum_table_tos;
 int defines_tos;
 
+t_token last_executed_keyword;
+
 char token[CONST_LEN + 2];            // string token representation
 char string_const[STRING_CONST_SIZE];  // holds string and char constants without quotes and with escape sequences converted into the correct bytes
 char *prog;                           // pointer to the current program position
