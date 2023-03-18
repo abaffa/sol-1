@@ -36,13 +36,13 @@ void iterate(){
     for (y = 0; y < 20; ++y){
         for (x = 0; x < 40; ++x){
             head_count = 0;
-            for (dy = -1; dy <= 1; ++dy){
-                for (dx = -1; dx <= 1; ++dx) {
+            for (dy = -1; dy <= 1; dy++){
+                for (dx = -1; dx <= 1; dx++) {
                     if (dx == 0 && dy == 0) continue;
                     nx = x + dx;
                     ny = y + dy;
                     if (nx >= 0 && nx < 40 && ny >= 0 && ny < 20 && grid[ny][nx] == ELECTRON_HEAD){
-                      ++head_count;
+                      head_count++;
                     }
                 }
             }
