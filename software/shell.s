@@ -314,7 +314,7 @@ cmd_fg:
   call get_token
   mov al, [tokstr]
   sub al, $30
-  syscall sys_resumeproc
+  syscall sys_resume_proc
   ret
 
 commands:     .db "mkfs", 0

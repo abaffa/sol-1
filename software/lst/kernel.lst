@@ -146,8 +146,8 @@
 0146   0020             ;; SYSTEM CALL VECTOR TABLE
 0147   0020             ;; starts at address $0020
 0148   0020             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0149   0020 AF 08       .dw trap_breakpoint
-0150   0022 CE 09       .dw rtc_services
+0149   0020 AF 08       .dw syscall_breakpoint
+0150   0022 CE 09       .dw syscall_rtc
 0151   0024 F1 0A       .dw ide_services
 0152   0026 B1 0B       .dw io_services
 0153   0028 3D 0C       .dw file_system
@@ -1556,8 +1556,8 @@
 0178   0787             sys_list      			.equ 6
 0179   0787             sys_datetime    		.equ 7
 0180   0787             sys_reboot      		.equ 8
-0181   0787             sys_pauseproc    		.equ 9
-0182   0787             sys_resumeproc    	.equ 10
+0181   0787             sys_pause_proc  		.equ 9
+0182   0787             sys_resume_proc    	.equ 10
 0183   0787             sys_terminate_proc  .equ 11
 0184   0787             sys_system      		.equ 12
 0185   0787             sys_boot_install  	.equ 13
@@ -1572,8 +1572,8 @@
 0194   0787             .export sys_rtc
 0195   0787             .export sys_datetime
 0196   0787             .export sys_reboot
-0197   0787             .export sys_pauseproc
-0198   0787             .export sys_resumeproc
+0197   0787             .export sys_pause_proc
+0198   0787             .export sys_resume_proc
 0199   0787             .export sys_terminate_proc
 0200   0787             .export sys_system
 0201   0787             .export sys_boot_install
@@ -1808,26 +1808,26 @@
 0430   08AF             ; IMPORTANT: values in the stack are being pushed in big endian. i.e.: MSB at low address
 0431   08AF             ; and LSB at high address. *** NEED TO CORRECT THIS IN THE MICROCODE and make it little endian again ***
 0432   08AF             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0433   08AF             trap_breakpoint:
+0433   08AF             syscall_breakpoint:
 0434   08AF 4B            pusha
-0435   08B0             trap_break_prompt:
+0435   08B0             syscall_break_prompt:
 0436   08B0 3B 6A 09      mov d, s_break1
 0437   08B3 07 88 02      call puts
 0438   08B6 07 35 02      call printnl
 0439   08B9 07 82 03      call scan_u16d
 0440   08BC AF 00 00      cmp a, 0
-0441   08BF C6 CA 08      je trap_break_regs
+0441   08BF C6 CA 08      je syscall_break_regs
 0442   08C2 AF 01 00      cmp a, 1
-0443   08C5 C6 ED 08      je trap_break_mem
-0444   08C8             trap_break_end:  
+0443   08C5 C6 ED 08      je syscall_break_mem
+0444   08C8             syscall_break_end:  
 0445   08C8 4C            popa
 0446   08C9 06            sysret
-0447   08CA             trap_break_regs:
+0447   08CA             syscall_break_regs:
 0448   08CA 48            mov a, sp
 0449   08CB 53 0E 00      add a, 14  ; back-track 7 registers
 0450   08CE 3C            mov d, a
 0451   08CF 3A 07         mov cl, 7
-0452   08D1             trap_regs_L0:
+0452   08D1             syscall_regs_L0:
 0453   08D1 2A            mov b, [d]
 0454   08D2 FD AB         swp b
 0455   08D4 07 E0 02      call print_u16x  ; print register value
@@ -1835,11 +1835,11 @@
 0457   08DA 63 02 00      sub d, 2
 0458   08DD 71 01         sub cl, 1
 0459   08DF C3 00         cmp cl, 0
-0460   08E1 C7 D1 08      jne trap_regs_L0
-0461   08E4 0A B0 08      jmp trap_break_prompt
+0460   08E1 C7 D1 08      jne syscall_regs_L0
+0461   08E4 0A B0 08      jmp syscall_break_prompt
 0462   08E7 07 35 02      call printnl
-0463   08EA 0A B0 08      jmp trap_break_prompt
-0464   08ED             trap_break_mem:
+0463   08EA 0A B0 08      jmp syscall_break_prompt
+0464   08ED             syscall_break_mem:
 0465   08ED 07 35 02      call printnl
 0466   08F0 07 02 03      call scan_u16x
 0467   08F3 4D            mov si, a      ; data source from user space
@@ -1868,7 +1868,7 @@
 0490   091C C2 00 02      cmp c, 512
 0491   091F C7 02 09      jne dump_loop
 0492   0922 07 35 02      call printnl
-0493   0925 0A B0 08      jmp trap_break_prompt  ; go to trap_breakpoint return point
+0493   0925 0A B0 08      jmp syscall_break_prompt  ; go to syscall_breakpoint return point
 0494   0928             print_ascii:
 0495   0928 10 00 20      mov a, $2000
 0496   092B 05 03         syscall sys_io
@@ -1958,12 +1958,12 @@
 0561   09CE             ; al = 0..6 -> get
 0562   09CE             ; al = 7..D -> set
 0563   09CE             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0564   09CE             rtc_services:
+0564   09CE             syscall_rtc:
 0565   09CE DB            push al
 0566   09CF DA            push d
 0567   09D0 B9 06         cmp al, 6
-0568   09D2 D1 E7 09      jgu rtc_set
-0569   09D5             rtc_get:
+0568   09D2 D1 E7 09      jgu syscall_rtc_set
+0569   09D5             syscall_rtc_get:
 0570   09D5 6A A9         add al, $A9      ; generate RTC address to get to address A9 of clock
 0571   09D7 22 FF         mov ah, $FF    
 0572   09D9 3C            mov d, a        ; get to FFA9 + offset
@@ -1974,7 +1974,7 @@
 0577   09E4 E7            pop d
 0578   09E5 E8            pop al
 0579   09E6 06            sysret
-0580   09E7             rtc_set:
+0580   09E7             syscall_rtc_set:
 0581   09E7 DD            push bl
 0582   09E8 99            mov bl, ah    ; set data asIDE
 0583   09E9 6A A2         add al, $A2    ; generate RTC address to get to address A9 of clock

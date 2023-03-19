@@ -146,8 +146,8 @@ ROOT_dirID:        			.equ FST_LBA_START
 ;; SYSTEM CALL VECTOR TABLE
 ;; starts at address $0020
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-.dw trap_breakpoint
-.dw rtc_services
+.dw syscall_breakpoint
+.dw syscall_rtc
 .dw ide_services
 .dw io_services
 .dw file_system
@@ -430,26 +430,26 @@ trap_privilege:
 ; IMPORTANT: values in the stack are being pushed in big endian. i.e.: MSB at low address
 ; and LSB at high address. *** NEED TO CORRECT THIS IN THE MICROCODE and make it little endian again ***
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-trap_breakpoint:
+syscall_breakpoint:
   pusha
-trap_break_prompt:
+syscall_break_prompt:
   mov d, s_break1
   call puts
   call printnl
   call scan_u16d
   cmp a, 0
-  je trap_break_regs
+  je syscall_break_regs
   cmp a, 1
-  je trap_break_mem
-trap_break_end:  
+  je syscall_break_mem
+syscall_break_end:  
   popa
   sysret
-trap_break_regs:
+syscall_break_regs:
   mov a, sp
   add a, 14  ; back-track 7 registers
   mov d, a
   mov cl, 7
-trap_regs_L0:
+syscall_regs_L0:
   mov b, [d]
   swp b
   call print_u16x  ; print register value
@@ -457,11 +457,11 @@ trap_regs_L0:
   sub d, 2
   sub cl, 1
   cmp cl, 0
-  jne trap_regs_L0
-  jmp trap_break_prompt
+  jne syscall_regs_L0
+  jmp syscall_break_prompt
   call printnl
-  jmp trap_break_prompt
-trap_break_mem:
+  jmp syscall_break_prompt
+syscall_break_mem:
   call printnl
   call scan_u16x
   mov si, a      ; data source from user space
@@ -490,7 +490,7 @@ back1:
   cmp c, 512
   jne dump_loop
   call printnl
-  jmp trap_break_prompt  ; go to trap_breakpoint return point
+  jmp syscall_break_prompt  ; go to syscall_breakpoint return point
 print_ascii:
   mov a, $2000
   syscall sys_io
@@ -561,12 +561,12 @@ undefined_opcode:
 ; al = 0..6 -> get
 ; al = 7..D -> set
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-rtc_services:
+syscall_rtc:
   push al
   push d
   cmp al, 6
-  jgu rtc_set
-rtc_get:
+  jgu syscall_rtc_set
+syscall_rtc_get:
   add al, $A9      ; generate RTC address to get to address A9 of clock
   mov ah, $FF    
   mov d, a        ; get to FFA9 + offset
@@ -577,7 +577,7 @@ rtc_get:
   pop d
   pop al
   sysret
-rtc_set:
+syscall_rtc_set:
   push bl
   mov bl, ah    ; set data asIDE
   add al, $A2    ; generate RTC address to get to address A9 of clock
