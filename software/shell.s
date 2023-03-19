@@ -28,27 +28,13 @@ shell_main:
   call read_config  
   mov d, PATH
   call puts
+
 ; open config file
-; home = /usr/home/guest;
 ; read home directory config entry
-  mov d, s_prompt_homedir
-  call puts
   mov d, s_etc_config        ; '/etc/sh.conf'
   mov si, s_home          ; config entry name is "home"
   mov di, homedir          ; config value destination is the var that holds the home directory path
   call read_config  
-  mov d, homedir
-  call puts
-; open config file
-; read manpage directory path
-  mov d, s_prompt_manpages
-  call puts
-  mov d, s_etc_config        ; '/etc/sh.conf'
-  mov si, s_man          ; config entry name is "man"
-  mov di, manpath        ; config value destination is the var that holds the man pages directory path
-  call read_config
-  mov d, manpath
-  call puts
 
   mov a, s_etc_profile
   mov [prog], a
@@ -365,29 +351,6 @@ cmd_drtoggle:
   
   ret
 
-cmd_man:
-  mov d, s_telnet_clear
-  call puts
-  mov si, manpath
-  mov di, temp_data
-  call strcpy        ; complete path with command name
-  mov si, s_fslash
-  mov di, temp_data
-  call strcat        ; add '/' to the end
-  call get_token
-  mov si, tokstr
-  mov di, temp_data
-  call strcat        ; complete path with command name
-  mov d, temp_data
-  mov di, shell_transient_area
-  mov al, 20
-  syscall sys_fileio
-  mov d, shell_transient_area
-  call puts
-  call printnl
-cmd_man_fail:
-  ret
-
 cmd_fg:
   call get_token
   mov al, [tokstr]
@@ -395,38 +358,33 @@ cmd_fg:
   syscall sys_resumeproc
   ret
 
-commands:    .db "mkfs", 0
-        .db "cd", 0
-        .db "sdate", 0
-        .db "reboot", 0
-        .db "shutdown", 0
-        .db "drtoggle", 0
-        .db "man", 0
-        .db "fg", 0
-        .db "ssh", 0
-        .db 0
+commands: .db "mkfs", 0
+          .db "cd", 0
+          .db "sdate", 0
+          .db "reboot", 0
+          .db "shutdown", 0
+          .db "drtoggle", 0
+          .db "fg", 0
+          .db "ssh", 0
+          .db 0
 
-keyword_ptrs:  .dw cmd_mkfs
-        .dw cmd_cd
-        .dw cmd_setdate
-        .dw cmd_reboot
-        .dw cmd_shutdown
-        .dw cmd_drtoggle
-        .dw cmd_man
-        .dw cmd_fg
-        .dw cmd_ssh
+keyword_ptrs: .dw cmd_mkfs
+              .dw cmd_cd
+              .dw cmd_setdate
+              .dw cmd_reboot
+              .dw cmd_shutdown
+              .dw cmd_drtoggle
+              .dw cmd_fg
+              .dw cmd_ssh
 
 homedir:    .fill 128, 0
-manpath:    .fill 128, 0    ; man path
 PATH:      .fill 128, 0    ; $PATH environment variable (for now just one path)
 
 s_etc_profile:  .db "/etc/profile", 0
 s_etc_config:  .db "/etc/sh.conf", 0
 s_home:      .db "home", 0
-s_man:      .db "man", 0
 s_PATH:      .db "PATH", 0
 
-s_prompt_manpages:  .db "\nmanpages directory=", 0
 s_prompt_homedir:  .db "\nhome directory=", 0
 s_prompt_PATH:    .db "PATH=", 0
 s_prompt_config:  .db "\nreading \'/etc/sh.conf\' configuration file\n", 0
