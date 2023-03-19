@@ -1913,9 +1913,27 @@ t_data parse_atom(void){
     expr_out.signedness = SNESS_UNSIGNED;
   }
   else if(tok == OPENING_PAREN){
-    expr_in = parse_expr();  // parses expression between parenthesis and result will be in B
-    expr_out = expr_in;
-    if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
+    get();
+    if(tok == INT){
+      get();
+      expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
+      expr_in = parse_expr();
+      expr_out = expr_in;
+      back();
+    }
+    else if(tok == CHAR){
+      get();
+      expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
+      expr_in = parse_expr();
+      expr_out = expr_in;
+      back();
+    }
+    else{
+      back();
+      expr_in = parse_expr();  // parses expression between parenthesis and result will be in B
+      expr_out = expr_in;
+      if(tok != CLOSING_PAREN) error(CLOSING_PAREN_EXPECTED);
+    }
   }
   else if(tok == INCREMENT){  // pre increment. do increment first
     get();

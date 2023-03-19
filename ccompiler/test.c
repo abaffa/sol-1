@@ -2,7 +2,9 @@
 
 
 int main() {
-
+  int i;
+  i = 55;
+  print_num((int)i);
 }
 
 void _gets(char *s){
