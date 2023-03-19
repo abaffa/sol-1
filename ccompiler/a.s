@@ -7,6 +7,18 @@
 main:
   push bp
   mov bp, sp
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 1
+  add a, b
+  mov b, a
+  pop a
+  mov b, 10
+  swp b
+  push b
+  call print_num
+  add sp, 2
   sub sp, 2 ; i
   mov b, 55
   push a
