@@ -327,7 +327,7 @@ padding_L1:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EXEC/OPEN PROGRAM/FILE
-;; 'filename' maps to '/usr/bin/filename'
+;; 'filename' maps to '$path/filename'
 ;; './file' or '/a/directory/file' loads a file directly
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 cmd_exec:
@@ -363,8 +363,8 @@ cmd_exec_L0:
   jne cmd_exec_PATH_exists
   call get_token
   cmp byte[tok], TOK_SEMI
-  je cmd_exec_abs    ; if file not found as $PATH/filename, then try to load it without using $PATH
-  jmp cmd_exec_L0    ; if not ';' at the end, then token must be a separator. so try another path
+  jne cmd_exec_L0    ; if not ';' at the end, then token must be a separator. so try another path
+  jmp cmd_exec_unknown
 cmd_exec_PATH_exists:
   pop a        ; retrieve token pointer which points to the arguments given
   mov [prog], a
@@ -382,7 +382,9 @@ cmd_exec_abs:  ; execute as absolute path
   syscall sys_fork
 cmd_exec_ret:
   ret
-
+cmd_exec_unknown:
+  pop a
+  ret
 
 cmd_shutdown:
   mov al, 1
