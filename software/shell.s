@@ -169,49 +169,6 @@ cmd_ssh:
 
   call printnl
   ret
-  
-; ************************************************************
-; GET HEX FILE
-; di = destination address
-; return length in bytes in C
-; ************************************************************
-;load_hex:
-;  push bp
-;  mov bp, sp
-;  push a
-;  push b
-;  push d
-;  push si
-;  push di
-;  sub sp, $6000        ; string data block
-;  mov c, 0
-;  
-;  mov a, sp
-;  inc a
-;  mov d, a        ; start of string data block
-;  call gets        ; get program string
-;  mov si, a
-;load_hex_loop:
-;  lodsb          ; load from [SI] to AL
-;  cmp al, 0        ; check if ASCII 0
-;  jz load_hex_ret
-;  mov bh, al
-;  lodsb
-;  mov bl, al
-;  call atoi        ; convert ASCII byte in B to int (to AL)
-;  stosb          ; store AL to [DI]
-;  inc c
-;  jmp load_hex_loop
-;load_hex_ret:
-;  add sp, $6000
-;  pop di
-;  pop si
-;  pop d
-;  pop b
-;  pop a
-;  mov sp, bp
-;  pop bp
-;  ret
 
 cmd_setdate:
   mov al, 1      ; set datetime
