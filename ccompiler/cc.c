@@ -1955,15 +1955,18 @@ t_data parse_atom(void){
       get();
       expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
       expr_in = parse_expr();
+      emitln("  snex b"); // sign extend b
       expr_out = expr_in;
-      //expr_out.
+      expr_out.type = DT_INT;
       back();
     }
     else if(tok == CHAR){
       get();
       expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
       expr_in = parse_expr();
+      emitln("  mov bh, 0"); // zero out bh to make it a char
       expr_out = expr_in;
+      expr_out.type = DT_CHAR;
       back();
     }
     else{
