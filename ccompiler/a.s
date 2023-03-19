@@ -9,7 +9,7 @@ main:
   mov bp, sp
   sub sp, 2 ; i
   lea d, [sp + 1]
-  mov a, $7b
+  mov a, $ffff
   mov [d], a
   sub sp, 2 ; i2
   lea d, [sp + 1]
@@ -24,40 +24,11 @@ main:
   mov al, $42
   mov [d], al
   mov b, [bp + -1] ; i
+  mov bh, 0
   swp b
   push b
   call print_num
   add sp, 2
-  mov b, __string_0 ; "\n"
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, [bp + -3] ; i2
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_0 ; "\n"
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov bl, [bp + -4] ; c
-  mov bh, 0
-  push bl
-  call _putchar
-  add sp, 1
-  mov b, __string_0 ; "\n"
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov bl, [bp + -5] ; c2
-  mov bh, 0
-  push bl
-  call _putchar
-  add sp, 1
   mov b, __string_0 ; "\n"
   swp b
   push b

@@ -2,19 +2,12 @@
 #include "stdio.c"
 
 int main() {
-  int i = 123;
+  int i = 65535;
   int i2 = 'A';
   char c = 72;
   char c2 = 'B';
 
-  print_num(i);
-  print("\n");
-  print_num(i2);
-  print("\n");
-
-  _putchar(c);
-  print("\n");
-  _putchar(c2);
+  print_num((char)i);
   print("\n");
 }
 
