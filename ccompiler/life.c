@@ -55,7 +55,6 @@ void show(void){
 		}
 		_putchar(10);
 	}
-	return;
 }
 
 int alive(int i, int j){
@@ -86,7 +85,6 @@ void print(char *s){
         mov d, a
         call puts
     }
-    return;
 }
 
 void _putchar(char c){
@@ -95,7 +93,6 @@ void _putchar(char c){
         mov ah, al
         call putchar
     }
-    return;
 }
 
 int main(void){
@@ -124,5 +121,4 @@ int main(void){
 		show();
 
 	}
-	return 0;
 }

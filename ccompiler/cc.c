@@ -207,10 +207,9 @@ void parse_functions(void){
       emitln(":");
       emitln("  push bp");
       emitln("  mov bp, sp");
-      last_executed_keyword = 0; // reset this before entering the function. if we then find a return as the last token, we do not emit a return when finding the last '}'
       parse_block(); // starts parsing the function block;
 
-      if(last_executed_keyword != RETURN){ // generate code for a 'return'
+      if(return_is_last_statement != RETURN){ // generate code for a 'return'
         emitln("  leave");
         emitln("  syscall sys_terminate_proc");
       }
@@ -230,9 +229,8 @@ void parse_functions(void){
       emitln(":");
       emitln("  push bp");
       emitln("  mov bp, sp");
-      last_executed_keyword = 0; // reset this before entering the function. if we then find a return as the last token, we do not emit a return when finding the last '}'
       parse_block(); // starts parsing the function block;
-      if(last_executed_keyword != RETURN){ // generate code for a 'return'
+      if(return_is_last_statement != RETURN){ // generate code for a 'return'
         emitln("  leave");
         emitln("  ret");
       }
@@ -1054,7 +1052,6 @@ void parse_return(void){
   else{
     emitln("  ret");
   }
-  last_executed_keyword = RETURN;
 }
 
 
@@ -1082,6 +1079,7 @@ void parse_block(void){
   
   do{
     get();
+    if(tok != CLOSING_BRACE) return_is_last_statement = 0;
     switch(tok){
       case SIGNED:
       case UNSIGNED:
@@ -1125,6 +1123,7 @@ void parse_block(void){
         break;
       case RETURN:
         parse_return();
+        return_is_last_statement = RETURN;
         break;
       default:
         if(tok_type == END) error(CLOSING_BRACE_EXPECTED);

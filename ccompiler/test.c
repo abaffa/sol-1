@@ -3,8 +3,6 @@
 
 int main() {
 
-
-
 }
 
 void _gets(char *s){
@@ -13,7 +11,6 @@ void _gets(char *s){
     mov d, a
     call gets
   }
-  return;
 }
 
 int _strlen(char str[1]) {
@@ -45,7 +42,6 @@ void print_num(int num) {
       i--;
       _putchar(digits[i]);
   }
-  return;
 }
 
 void _putchar(char c){
@@ -54,7 +50,6 @@ void _putchar(char c){
     mov ah, al
     call putchar
   }
-  return;
 }
 
 int scann(){
@@ -73,7 +68,6 @@ void print(char *s){
         mov d, a
         call puts
     }
-    return;
 }
 
 
