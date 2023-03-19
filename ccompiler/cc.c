@@ -1950,23 +1950,34 @@ t_data parse_atom(void){
     expr_out.signedness = SNESS_UNSIGNED;
   }
   else if(tok == OPENING_PAREN){
+    int ind_level = 0;
     get();
     if(tok == INT){
       get();
+      while(tok == STAR){
+        ind_level++;
+        get();
+      }
       expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
       expr_in = parse_expr();
       emitln("  snex b"); // sign extend b
       expr_out = expr_in;
       expr_out.type = DT_INT;
+      expr_out.ind_level = ind_level;
       back();
     }
     else if(tok == CHAR){
       get();
+      while(tok == STAR){
+        ind_level++;
+        get();
+      }
       expect(CLOSING_PAREN, CLOSING_PAREN_EXPECTED);
       expr_in = parse_expr();
-      emitln("  mov bh, 0"); // zero out bh to make it a char
+      if(ind_level == 0) emitln("  mov bh, 0"); // zero out bh to make it a char
       expr_out = expr_in;
       expr_out.type = DT_CHAR;
+      expr_out.ind_level = ind_level;
       back();
     }
     else{

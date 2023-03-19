@@ -24,7 +24,6 @@ main:
   mov al, $42
   mov [d], al
   mov b, [bp + -1] ; i
-  mov bh, 0
   swp b
   push b
   call print_num

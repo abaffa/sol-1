@@ -7,7 +7,7 @@ int main() {
   char c = 72;
   char c2 = 'B';
 
-  print_num((char)i);
+  print_num((char*)i);
   print("\n");
 }
 
