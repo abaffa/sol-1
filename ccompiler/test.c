@@ -2,12 +2,20 @@
 
 
 int main() {
-  int i = -55;
-  char c = 'A';
-  char d = -1;
-  int e = 'B';
+  print_num(10000 >> 2);
 }
 
+int mod_exp(int base, int exp, int mod) {
+    int result = 1;
+    while (exp > 0) {
+        if (exp & 1) {
+            result = (result * base) % mod;
+        }
+        exp = exp >> 1;
+        base = (base * base) % mod;
+    }
+    return result;
+}
 void _gets(char *s){
   asm{
     mov a, @s

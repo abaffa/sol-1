@@ -2876,6 +2876,7 @@ void declare_local(void){
         isneg = 1;
         get();
       }
+      // TODO: temporary solutuon due to error in push word, @ instruction
       if(tok_type != CHAR_CONST && tok_type != INTEGER_CONST) error(LOCALVAR_INITIALIZATION_TO_NONCONSTANT);
       if(new_var.data.type == DT_CHAR){
         if(tok_type == DT_CHAR)
@@ -2885,11 +2886,17 @@ void declare_local(void){
         emitln(temp);
       }
       else if(new_var.data.type == DT_INT || new_var.data.ind_level > 0){
-        if(tok_type == DT_CHAR)
-          sprintf(temp, "  push word $%x", string_const[0]);
-        else
-          sprintf(temp, "  push word %d", (isneg ? -atoi(token) : atoi(token)));
-        emitln(temp);
+        if(tok_type == DT_CHAR){
+          sprintf(temp, "  push byte $%x", string_const[0]);
+          emitln(temp);
+          emitln("  push byte 0");
+        }
+        else{
+          sprintf(temp, "  push byte $%x", 0xFF & (isneg ? -atoi(token) : atoi(token)));
+          emitln(temp);
+          sprintf(temp, "  push byte $%x", (0xFF00 & (isneg ? -atoi(token) : atoi(token))) >> 8);
+          emitln(temp);
+        }
       }
       get(); // get ';'
     }

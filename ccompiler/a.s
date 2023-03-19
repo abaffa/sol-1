@@ -76,315 +76,156 @@ main:
   mov a, b
   mov [bp + -11], a ; d
   pop a
-  mov b, __string_0 ; "Public Key: ("
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, [bp + -5] ; n
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_1 ; ", "
-  swp b
-  push b
-  call print
-  add sp, 2
+  sub sp, 2 ; exp
+  sub sp, 2 ; base
+  sub sp, 2 ; mod
+  sub sp, 2 ; result
   mov b, [bp + -9] ; e
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_2 ; ")\n"
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, __string_3 ; "Private Key: ("
-  swp b
-  push b
-  call print
-  add sp, 2
+  push a
+  mov a, b
+  mov [bp + -13], a ; exp
+  pop a
+  mov b, $48
+  push a
+  mov a, b
+  mov [bp + -15], a ; base
+  pop a
   mov b, [bp + -5] ; n
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_1 ; ", "
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, [bp + -11] ; d
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_2 ; ")\n"
-  swp b
-  push b
-  call print
-  add sp, 2
-  sub sp, 100 ; input_str
-  mov b, __string_4 ; "Enter a string: "
-  swp b
-  push b
-  call print
-  add sp, 2
-  lea d, [bp + -111] ; input_str beginning on the stack
-  mov b, d
-  swp b
-  push b
-  call _gets
-  add sp, 2
-  sub sp, 200 ; encrypted_chars
-  push word 0
-  mov b, __string_5 ; "Encrypted text: "
-  swp b
-  push b
-  call print
-  add sp, 2
-  sub sp, 2 ; i
-_for1_init:
+  push a
+  mov a, b
+  mov [bp + -17], a ; mod
+  pop a
+  mov b, 1
+  push a
+  mov a, b
+  mov [bp + -19], a ; result
+  pop a
+_while1_cond:
+  mov b, [bp + -13] ; exp
+  push a
+  mov a, b
   mov b, 0
-  push a
-  mov a, b
-  mov [bp + -315], a ; i
-  pop a
-_for1_cond:
-  lea d, [bp + -111] ; input_str beginning on the stack
-  mov b, d
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -315] ; i
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  pop a
-  mov bl, [d]
-  mov bh, 0
-  push a
-  mov a, b
-  mov b, $0
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  xor al, %00000001 ; !=
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs ; transform condition into a single bit
-  lea d, [bp + -111] ; input_str beginning on the stack
-  mov b, d
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -315] ; i
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  pop a
-  mov bl, [d]
-  mov bh, 0
-  push a
-  mov a, b
-  mov b, $a
-  cmp a, b
-  lodflgs
-  and al, %00000001
-  xor al, %00000001 ; !=
-  mov ah, 0
-  mov b, a
-  pop a
-  push al
-  cmp b, 0
-  lodflgs
-  pop bl ; matches previous 'push al'
-  or al, bl
-  xor al, %00000001
-  mov bl, al
-  mov bh, 0
-  pop al
-  cmp b, 0
-  je _for1_exit
-_for1_block:
-  lea d, [bp + -311] ; encrypted_chars beginning on the stack
-  mov b, d
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -315] ; i
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  push d
-  lea d, [bp + -111] ; input_str beginning on the stack
-  mov b, d
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -315] ; i
-  pop d
-  mov a, 1
-  mul a, b
-  add d, b
-  pop a
-  mov bl, [d]
-  mov bh, 0
-  swp b
-  push b
-  mov b, [bp + -9] ; e
-  swp b
-  push b
-  mov b, [bp + -5] ; n
-  swp b
-  push b
-  call mod_exp
-  add sp, 6
-  pop d
-  mov [d], b
-  lea d, [bp + -311] ; encrypted_chars beginning on the stack
-  mov b, d
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -315] ; i
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  mov b, [d]
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_6 ; " "
-  swp b
-  push b
-  call print
-  add sp, 2
-  mov b, [bp + -313] ; encrypted_chars_len
-  push a
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -313], a ; encrypted_chars_len
-  pop a
-  mov b, a
-  pop a
-_for1_update:
-  mov b, [bp + -315] ; i
-  push a
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -315], a ; i
-  pop a
-  mov b, a
-  pop a
-  jmp _for1_cond
-_for1_exit:
-  mov b, __string_7 ; "\n"
-  swp b
-  push b
-  call print
-  add sp, 2
-  sub sp, 2 ; decrypted_char
-  sub sp, 1 ; c
-  mov b, __string_8 ; "Decrypted text: "
-  swp b
-  push b
-  call print
-  add sp, 2
-_for2_init:
-  mov b, 0
-  push a
-  mov a, b
-  mov [bp + -315], a ; i
-  pop a
-_for2_cond:
-  mov b, [bp + -315] ; i
-  push a
-  mov a, b
-  mov b, [bp + -313] ; encrypted_chars_len
   cmp a, b
   lodflgs
   mov bl, al
+  mov g, a
   shr al, 3
   shr bl, 2
   and bl, %00000001
-  xor al, bl ; < (signed)
+  xor al, bl
+  mov b, g
+  and bl, %00000001
+  or al, bl
+  xor al, %00000001 ; > (signed)
   mov ah, 0
   mov b, a
   pop a
   cmp b, 0
-  je _for2_exit
-_for2_block:
-  lea d, [bp + -311] ; encrypted_chars beginning on the stack
-  mov b, d
-  push a
-  mov d, b
-  push d
-  mov b, [bp + -315] ; i
-  pop d
-  mov a, 2
-  mul a, b
-  add d, b
-  pop a
-  mov b, [d]
-  swp b
-  push b
-  mov b, [bp + -11] ; d
-  swp b
-  push b
-  mov b, [bp + -5] ; n
-  swp b
-  push b
-  call mod_exp
-  add sp, 6
+  je _while1_exit
+_while1_block:
+_if2_cond:
+  mov b, [bp + -13] ; exp
   push a
   mov a, b
-  mov [bp + -317], a ; decrypted_char
+  mov b, 1
+  and a, b
+  mov b, a
   pop a
-  mov b, [bp + -317] ; decrypted_char
-  push al
-  mov al, bl
-  mov [bp + -318], al ; c
-  pop al
-  lea d, [bp + -318]
-  mov b, d
+  cmp b, 0
+  je _if2_exit
+_if2_true:
+  mov b, [bp + -19] ; result
+  swp b
+  push b
+  call print_num
+  add sp, 2
+  mov b, __string_0 ; "\n"
   swp b
   push b
   call print
   add sp, 2
-_for2_update:
-  mov b, [bp + -315] ; i
-  push a
-  mov a, b
-  inc b
-  push a
-  mov a, b
-  mov [bp + -315], a ; i
-  pop a
-  mov b, a
-  pop a
-  jmp _for2_cond
-_for2_exit:
-  mov b, __string_7 ; "\n"
+  mov b, [bp + -15] ; base
+  swp b
+  push b
+  call print_num
+  add sp, 2
+  mov b, __string_0 ; "\n"
   swp b
   push b
   call print
+  add sp, 2
+  mov b, [bp + -17] ; mod
+  swp b
+  push b
+  call print_num
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  mov b, [bp + -19] ; result
+  push a
+  mov a, b
+  mov b, [bp + -15] ; base
+  mul a, b
+  pop a
+  push a
+  mov a, b
+  mov b, [bp + -17] ; mod
+  div a, b
+  pop a
+  push a
+  mov a, b
+  mov [bp + -19], a ; result
+  pop a
+  mov b, [bp + -19] ; result
+  swp b
+  push b
+  call print_num
+  add sp, 2
+  mov b, __string_0 ; "\n"
+  swp b
+  push b
+  call print
+  add sp, 2
+  jmp _if2_exit
+_if2_exit:
+  mov b, [bp + -13] ; exp
+  push a
+  mov a, b
+  mov b, 1
+  push c
+  mov c, b
+  mov b, a
+  ashr b, cl
+  pop c
+  pop a
+  push a
+  mov a, b
+  mov [bp + -13], a ; exp
+  pop a
+  mov b, [bp + -15] ; base
+  push a
+  mov a, b
+  mov b, [bp + -15] ; base
+  mul a, b
+  pop a
+  push a
+  mov a, b
+  mov b, [bp + -17] ; mod
+  div a, b
+  pop a
+  push a
+  mov a, b
+  mov [bp + -15], a ; base
+  pop a
+  jmp _while1_cond
+_while1_exit:
+  mov b, [bp + -19] ; result
+  swp b
+  push b
+  call print_num
   add sp, 2
   mov b, 0
   leave
@@ -444,7 +285,12 @@ _if3_exit:
 mod_exp:
   push bp
   mov bp, sp
-  push word 1
+  sub sp, 2 ; result
+  mov b, 1
+  push a
+  mov a, b
+  mov [bp + -1], a ; result
+  pop a
 _while4_cond:
   mov b, [bp + 7] ; exp
   push a
@@ -863,15 +709,7 @@ _for11_exit:
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
-__string_0: .db "Public Key: (", 0
-__string_1: .db ", ", 0
-__string_2: .db ")\n", 0
-__string_3: .db "Private Key: (", 0
-__string_4: .db "Enter a string: ", 0
-__string_5: .db "Encrypted text: ", 0
-__string_6: .db " ", 0
-__string_7: .db "\n", 0
-__string_8: .db "Decrypted text: ", 0
+__string_0: .db "\n", 0
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
