@@ -21,7 +21,7 @@ bootloader_installer:
   call puts
 	mov d, kernel_filename
 	mov al, 6               ; mkbin
-	syscall sys_fileio      ; create the binary file for the kernel
+	syscall sys_filesystem      ; create the binary file for the kernel
                           ; we need to be on '/boot' here
 
   mov si, kernel_filename
@@ -29,7 +29,7 @@ bootloader_installer:
   call strcat             ; form full pathname for the kernel file
 	mov d, kernel_fullpath
 	mov al, 19
-	syscall sys_fileio		; obtain dirID for kernel file, in A
+	syscall sys_filesystem		; obtain dirID for kernel file, in A
 	inc a					; increment LBA because data starts after the header sector
 	syscall sys_boot_install
 

@@ -19,7 +19,7 @@ cmd_chmod:
 	mov bl, al					; save permission in bl
 	call get_token				; get filename. D already points to tokstr
 	mov al, 14
-	syscall sys_fileio			; call kernel to set permission
+	syscall sys_filesystem			; call kernel to set permission
 
 	syscall sys_terminate_proc
 

@@ -7,7 +7,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		
 cmd_pwd:
 	mov al, 7
-	syscall sys_fileio
+	syscall sys_filesystem
 	syscall sys_terminate_proc
 
 

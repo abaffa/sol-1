@@ -21,7 +21,7 @@ cmd_man:
   mov d, temp_data
   mov di, transient_area
   mov al, 20
-  syscall sys_fileio
+  syscall sys_filesystem
   mov d, transient_area
   call puts
   call printnl

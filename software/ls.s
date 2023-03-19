@@ -18,16 +18,16 @@ cmd_ls_arg_given:
 	call get_path
 	mov d, tokstr
 	mov al, 19
-	syscall sys_fileio	; get dirID in A
+	syscall sys_filesystem	; get dirID in A
 	mov b, a
 	mov al, 4
-	syscall sys_fileio
+	syscall sys_filesystem
 	syscall sys_terminate_proc
 cmd_ls_current:
 	mov al, 17
-	syscall sys_fileio		; get current dirID in B
+	syscall sys_filesystem		; get current dirID in B
 	mov al, 4
-	syscall sys_fileio
+	syscall sys_filesystem
 
 	syscall sys_terminate_proc
 

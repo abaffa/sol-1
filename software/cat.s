@@ -20,7 +20,7 @@ cmd_cat_read:
 	mov d, tokstr
 	mov di, transient_area
 	mov al, 20
-	syscall sys_fileio				; read textfile into shell buffer
+	syscall sys_filesystem				; read textfile into shell buffer
 	mov d, transient_area
 	call puts					; print textfile to stdout
 	call get_token
@@ -40,7 +40,7 @@ cmd_cat_write:
 	call gettxt
 	mov d, transient_area
 	mov al, 5
-	syscall sys_fileio
+	syscall sys_filesystem
 	syscall sys_terminate_proc
 
 

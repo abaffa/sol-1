@@ -17,7 +17,7 @@ cmd_mkdir_L0:
 ; execute mkdir command
 	mov d, tokstr
 	mov al, 2
-	syscall sys_fileio
+	syscall sys_filesystem
 	jmp cmd_mkdir_L0
 cmd_mkdir_end:
 	call putback		; if token was not an identifier, then put it back

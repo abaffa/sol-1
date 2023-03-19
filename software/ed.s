@@ -30,7 +30,7 @@ ed_main:
 	mov d, tokstr
 	mov di, text_buffer		; pointer to write buffer
 	mov al, 20
-	syscall sys_fileio		; read textfile into buffer
+	syscall sys_filesystem		; read textfile into buffer
 	mov d, text_buffer
 	call strlen
 	mov a, c				; find size of buffer
@@ -254,7 +254,7 @@ cmd_open:
 	mov d, tokstr
 	mov di, text_buffer		; pointer to write buffer
 	mov al, 20
-	syscall sys_fileio		; read textfile into buffer
+	syscall sys_filesystem		; read textfile into buffer
 	mov d, text_buffer
 	call strlen
 	mov a, c				; find size of buffer
@@ -283,7 +283,7 @@ cmd_save:
 
 	mov d, transient_data	; pass data to kernel. starting at 512 byte header. text_buffer follows the header in mem.
 	mov al, 5
-	syscall sys_fileio
+	syscall sys_filesystem
 
 	mov d, text_buffer
 	call strlen

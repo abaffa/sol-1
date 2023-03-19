@@ -14,7 +14,7 @@ cmd_wc:
 	mov d, tokstr
 	mov di, transient_data	; pointer to write buffer
 	mov al, 20
-	syscall sys_fileio		; read textfile into buffer	
+	syscall sys_filesystem		; read textfile into buffer	
 	
 	mov a, transient_data
 	mov [prog], a

@@ -17,7 +17,7 @@ cmd_rm_L0:
 ; execute rm command
 	mov d, tokstr
 	mov al, 10
-	syscall sys_fileio
+	syscall sys_filesystem
 	jmp cmd_rm_L0
 cmd_rm_end:
 	call putback		; if token was not an identifier, then put it back

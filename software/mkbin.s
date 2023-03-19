@@ -14,7 +14,7 @@ cmd_mkbin:
 	call puts
 	mov d, tokstr
 	mov al, 6
-	syscall sys_fileio
+	syscall sys_filesystem
 
 	syscall sys_terminate_proc
 

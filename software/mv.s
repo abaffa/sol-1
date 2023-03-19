@@ -20,7 +20,7 @@ cmd_mv:
 
 	mov d, transient_data
 	mov al, 15	; mv command
-	syscall sys_fileio
+	syscall sys_filesystem
 	
 	syscall sys_terminate_proc
 

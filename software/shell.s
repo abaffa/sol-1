@@ -1,11 +1,5 @@
 .include "kernel.exp"
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; SHELL
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; SYSTEM CONSTANTS / EQUATIONS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 STACK_BEGIN:  .equ $F7FF  ; beginning of stack
 
 .org PROC_TEXT_ORG      ; origin at 1024
@@ -44,7 +38,7 @@ shell_L0:
   mov d, s_sol1
   call puts
   mov al, 18
-  syscall sys_fileio        ; print current path
+  syscall sys_filesystem        ; print current path
   mov d, s_hash
   call puts
   mov d, shell_input_buff
@@ -106,7 +100,7 @@ read_config:
   push si
   mov di, shell_transient_area
   mov al, 20
-  syscall sys_fileio        ; read entire config file
+  syscall sys_filesystem        ; read entire config file
   mov a, shell_transient_area
   mov [prog], a
   pop si
@@ -146,7 +140,7 @@ cmd_ssh:
   mov d, tokstr
   mov di, shell_transient_area
   mov al, 20
-  syscall sys_fileio        ; read textfile 
+  syscall sys_filesystem        ; read textfile 
   
   mov d, shell_transient_area
   mov a, d
@@ -199,7 +193,7 @@ cmd_setdate:
 ; this is the file system table formating
 cmd_mkfs:
   mov al, 0
-  syscall sys_fileio
+  syscall sys_filesystem
   ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -224,12 +218,12 @@ cmd_cd:
 cmd_cd_syscall:
   mov d, tokstr
   mov al, 19
-  syscall sys_fileio  ; get dirID in A
+  syscall sys_filesystem  ; get dirID in A
   cmp a, $FFFF
   je cmd_cd_fail
   mov b, a
   mov al, 3
-  syscall sys_fileio  ; set dir to B
+  syscall sys_filesystem  ; set dir to B
   ret
 cmd_cd_gotohome:
   call putback
@@ -273,7 +267,7 @@ cmd_exec_L0:
   call strcat      ; now glue the given filename to the total path
   mov d, temp_data
   mov al, 21
-  syscall sys_fileio  ; now we check whether such a file exists. success code is given in A. if 0, file does not exist
+  syscall sys_filesystem  ; now we check whether such a file exists. success code is given in A. if 0, file does not exist
   cmp a, 0
   jne cmd_exec_path_exists
   call get_token
@@ -323,14 +317,14 @@ cmd_fg:
   syscall sys_resumeproc
   ret
 
-commands: .db "mkfs", 0
-          .db "cd", 0
-          .db "sdate", 0
-          .db "reboot", 0
-          .db "drtoggle", 0
-          .db "fg", 0
-          .db "ssh", 0
-          .db 0
+commands:     .db "mkfs", 0
+              .db "cd", 0
+              .db "sdate", 0
+              .db "reboot", 0
+              .db "drtoggle", 0
+              .db "fg", 0
+              .db "ssh", 0
+              .db 0
 
 keyword_ptrs: .dw cmd_mkfs
               .dw cmd_cd
@@ -340,22 +334,22 @@ keyword_ptrs: .dw cmd_mkfs
               .dw cmd_fg
               .dw cmd_ssh
 
-homedir:    .fill 128, 0
-path:      .fill 128, 0    ; $path environment variable 
+homedir:      .fill 128, 0
+path:         .fill 128, 0    ; $path environment variable 
 
 s_etc_profile:  .db "/etc/profile", 0
-s_etc_config:  .db "/etc/sh.conf", 0
-s_home:      .db "home", 0
-s_path:      .db "path", 0
+s_etc_config:   .db "/etc/sh.conf", 0
+s_home:         .db "home", 0
+s_path:         .db "path", 0
 
-s_prompt_path:    .db "path=", 0
-s_prompt_config:  .db "\nreading \'/etc/sh.conf\' configuration file\n", 0
+s_prompt_path:  .db "path=", 0
+s_prompt_config:.db "\nreading \'/etc/sh.conf\' configuration file\n", 0
 
-s_rebooting:   .db 27, "[2J", 27, "[H", "rebooting", 0
-s_hash:      .db " # ", 0
-s_fslash:    .db "/", 0
-s_sol1:      .db "Solarium:", 0, 0
-; shell variables
+s_rebooting:    .db 27, "[2J", 27, "[H", "rebooting", 0
+s_hash:         .db " # ", 0
+s_fslash:       .db "/", 0
+s_sol1:         .db "Solarium:", 0, 0
+
 shell_input_buff:  .fill 512, 0
 parser_index:     .dw 0
 
