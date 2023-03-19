@@ -18,15 +18,15 @@ shell_main:
   call puts
 
 ; open config file
-; example: PATH=/usr/bin;
-; read PATH config entry
-  mov d, s_prompt_PATH
+; example: path=/usr/bin;
+; read path config entry
+  mov d, s_prompt_path
   call puts
   mov d, s_etc_config        ; '/etc/sh.conf'
-  mov si, s_PATH          ; config entry name is "PATH"
-  mov di, PATH          ; config value destination is the var that holds the PATH variable
+  mov si, s_path          ; config entry name is "path"
+  mov di, path          ; config value destination is the var that holds the path variable
   call read_config  
-  mov d, PATH
+  mov d, path
   call puts
 
 ; open config file
@@ -239,25 +239,6 @@ cmd_cd_gotohome:
   jmp cmd_cd_syscall
 cmd_cd_fail:
   ret
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; pad string to 32 chars
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; count in C
-padding:
-  push a
-  mov a, 32
-  mov b, c
-  sub a, b
-  mov c, a
-padding_L1:
-  mov ah, $20
-  call putchar
-  loopc padding_L1
-  pop a
-  ret
-; file structure:
-; 512 bytes header
-; header used to tell whether the block is free
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EXEC/OPEN PROGRAM/FILE
@@ -277,16 +258,16 @@ cmd_exec:
   je cmd_exec_abs
   cmp byte[tokstr], '.'  ; check first character of path
   je cmd_exec_abs
-  mov a, PATH
-  mov [prog], a    ; set token pointer to $PATH beginning
+  mov a, path
+  mov [prog], a    ; set token pointer to $path beginning
 cmd_exec_L0:
   call get_path    ; get a path option
   mov si, tokstr
   mov di, temp_data
-  call strcpy      ; firstly, form address from one of the '$PATH' addresses
+  call strcpy      ; firstly, form address from one of the '$path' addresses
   mov si, s_fslash
   mov di, temp_data
-  call strcat      ; add '/' in between $PATH component and filename
+  call strcat      ; add '/' in between $path component and filename
   mov si, temp_data1
   mov di, temp_data
   call strcat      ; now glue the given filename to the total path
@@ -294,15 +275,15 @@ cmd_exec_L0:
   mov al, 21
   syscall sys_fileio  ; now we check whether such a file exists. success code is given in A. if 0, file does not exist
   cmp a, 0
-  jne cmd_exec_PATH_exists
+  jne cmd_exec_path_exists
   call get_token
   cmp byte[tok], TOK_SEMI
   jne cmd_exec_L0    ; if not ';' at the end, then token must be a separator. so try another path
   jmp cmd_exec_unknown
-cmd_exec_PATH_exists:
+cmd_exec_path_exists:
   pop a        ; retrieve token pointer which points to the arguments given
   mov [prog], a
-  call get_arg    ; if however, $PATH/filename was found, then we execute it
+  call get_arg    ; if however, $path/filename was found, then we execute it
   mov b, tokstr
   mov d, temp_data
   syscall sys_fork
@@ -318,12 +299,6 @@ cmd_exec_ret:
   ret
 cmd_exec_unknown:
   pop a
-  ret
-
-cmd_shutdown:
-  mov al, 1
-  syscall sys_IDE
-  halt
   ret
 
 cmd_reboot:
@@ -352,7 +327,6 @@ commands: .db "mkfs", 0
           .db "cd", 0
           .db "sdate", 0
           .db "reboot", 0
-          .db "shutdown", 0
           .db "drtoggle", 0
           .db "fg", 0
           .db "ssh", 0
@@ -362,32 +336,27 @@ keyword_ptrs: .dw cmd_mkfs
               .dw cmd_cd
               .dw cmd_setdate
               .dw cmd_reboot
-              .dw cmd_shutdown
               .dw cmd_drtoggle
               .dw cmd_fg
               .dw cmd_ssh
 
 homedir:    .fill 128, 0
-PATH:      .fill 128, 0    ; $PATH environment variable (for now just one path)
+path:      .fill 128, 0    ; $path environment variable 
 
 s_etc_profile:  .db "/etc/profile", 0
 s_etc_config:  .db "/etc/sh.conf", 0
 s_home:      .db "home", 0
-s_PATH:      .db "PATH", 0
+s_path:      .db "path", 0
 
-s_prompt_homedir:  .db "\nhome directory=", 0
-s_prompt_PATH:    .db "PATH=", 0
+s_prompt_path:    .db "path=", 0
 s_prompt_config:  .db "\nreading \'/etc/sh.conf\' configuration file\n", 0
 
 s_rebooting:   .db 27, "[2J", 27, "[H", "rebooting", 0
-s_dataentry:  .db "% ", 0
-s_syntax_err:  .db "\nsyntax error\n", 0
 s_hash:      .db " # ", 0
 s_fslash:    .db "/", 0
 s_sol1:      .db "Solarium:", 0, 0
 ; shell variables
 shell_input_buff:  .fill 512, 0
-shell_buff_ptr:    .dw 0
 parser_index:     .dw 0
 
 .include "stdio.asm"
