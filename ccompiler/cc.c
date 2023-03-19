@@ -239,9 +239,38 @@ void parse_functions(void){
 
 
 void include_asm_lib(char *lib_name){
-  strcat(includes_list_asm, "\n.include ");
+  strcat(includes_list_asm, "\n.include \"");
   strcat(includes_list_asm, lib_name); // concatenate library name into a small text session that
+  strcat(includes_list_asm, "\"");
   // in the end we add this to the final ASM text  
+}
+
+
+void include_c_lib(char *lib_name){
+  FILE *fp;
+  int i;
+  char *p;
+
+  if((fp = fopen(lib_name, "rb")) == NULL){
+    printf("%s: Source file not found.\n", lib_name);
+    exit(0);
+  }
+  
+  p = c_in;
+  while(*p) p++; // goto end
+  *p++ = '\n';
+  i = 0;
+  
+  do{
+    *p = getc(fp);
+    p++;
+    i++;
+  } while(!feof(fp));
+  
+  *(p - 1) = '\0'; // overwrite the EOF char with NULL
+
+  fclose(fp);
+
 }
 
 
@@ -270,7 +299,13 @@ void pre_processor(void){
       if(tok == INC_ASM){
         get();
         if(tok_type != STRING_CONST) error(DIRECTIVE_SYNTAX);
-        include_asm_lib(token);
+        include_asm_lib(string_const);
+        continue;
+      }
+      else if(tok == INCLUDE){
+        get();
+        if(tok_type != STRING_CONST) error(DIRECTIVE_SYNTAX);
+        include_c_lib(string_const);
         continue;
       }
       /*else if(tok == DEFINE){
@@ -335,7 +370,7 @@ void pre_scan(void){
 
     if(tok == DIRECTIVE){
       get();
-      if(tok == INC_ASM){
+      if(tok == INC_ASM || tok == INCLUDE){
         get();
         continue;
       }

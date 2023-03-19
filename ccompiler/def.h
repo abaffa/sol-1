@@ -446,6 +446,7 @@ void declare_define();
 void pre_processor(void);
 int find_define(char *name);
 void include_asm_lib(char *lib_name);
+void include_c_lib(char *lib_name);
 
 void optimize(void);
 int find_string(char *str);
