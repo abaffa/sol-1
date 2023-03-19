@@ -7,29 +7,10 @@
 main:
   push bp
   mov bp, sp
-  mov b, 1
-  push a
-  mov a, b
-  mov b, 1
-  add a, b
-  mov b, a
-  pop a
-  mov b, 10
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  sub sp, 2 ; i
-  mov b, 55
-  push a
-  mov a, b
-  mov [bp + -1], a ; i
-  pop a
-  mov b, [bp + -1] ; i
-  swp b
-  push b
-  call print_num
-  add sp, 2
+  push word -55
+  push byte $41
+  push byte $ff
+  push word $42
   leave
   syscall sys_terminate_proc
 
@@ -174,8 +155,7 @@ _while3_block:
   mov b, 10
   div a, b
   pop a
-  add a, b
-  mov b, a
+  add b, a
   pop a
   pop d
   mov [d], bl

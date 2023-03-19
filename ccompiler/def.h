@@ -41,6 +41,13 @@ typedef enum {
 } t_token; // internal token representation
 t_token tok;
 
+typedef enum {
+  DELIMITER = 1,
+  CHAR_CONST, STRING_CONST, INTEGER_CONST, FLOAT_CONST, DOUBLE_CONST,
+  IDENTIFIER, RESERVED, END
+} t_token_type;
+t_token_type tok_type;
+
 typedef enum{
   LOCAL = 0, GLOBAL
 } t_var_scope;
@@ -48,13 +55,6 @@ typedef enum{
 typedef enum{
   FOR_LOOP, WHILE_LOOP, DO_LOOP, SWITCH_CONSTRUCT
 } t_loop_type;
-
-typedef enum {
-  DELIMITER = 1,
-  CHAR_CONST, STRING_CONST, INTEGER_CONST, FLOAT_CONST, DOUBLE_CONST,
-  IDENTIFIER, RESERVED, END
-} t_token_type;
-t_token_type tok_type;
 
 typedef union {
   char c;
@@ -215,9 +215,10 @@ typedef enum {
   UNDECLARED_ENUM_ELEMENT,
   UNDECLARED_IDENTIFIER,
   MAX_STRINGS,
-  LOCAL_ASSIGNMENT,
+  LOCAL_MATRIX_ASSIGNMENT,
   UNKNOWN_DATA_TYPE,
-  INVALID_INDEXING
+  INVALID_INDEXING,
+  LOCALVAR_INITIALIZATION_TO_NONCONSTANT
 } t_errorCode;
 
 // variable declaration
@@ -277,9 +278,10 @@ char *error_table[] = {
   "undeclared enum element",
   "undeclared identifier",
   "maximum number of strings reached",
-  "assignment of local variables is not possible yet",
+  "initialization of local matrices is not supported",
   "unknown data type in array initialization",
-  "invalid indexing attempt"
+  "invalid indexing attempt",
+  "local variable initialization value must be constant"
 };
 
 char string_table[STRING_TABLE_SIZE][STRING_CONST_SIZE];

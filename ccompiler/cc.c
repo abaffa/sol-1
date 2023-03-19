@@ -1732,9 +1732,11 @@ t_data parse_terms(void){
     emitln("  push a");
     emitln("  mov a, b");
     data2 = parse_factors();
-    if(temp_tok == PLUS) emitln("  add a, b");
-    else if(temp_tok == MINUS) emitln("  sub a, b");
-    emitln("  mov b, a");
+    if(temp_tok == PLUS) emitln("  add b, a");
+    else if(temp_tok == MINUS){
+      emitln("  sub a, b");
+      emitln("  mov b, a");
+    }
     emitln("  pop a");
   }
   expr_out = cast(data1, data2);
@@ -2811,6 +2813,7 @@ t_data_type get_data_type_from_tok(t_token t){
 void declare_local(void){                        
   t_var new_var;
   char *temp_prog;
+  char temp[64];
   
   temp_prog = prog;
   get(); // gets past the data type
@@ -2866,7 +2869,29 @@ void declare_local(void){
     new_var.bp_offset = current_function_var_bp_offset + 1;
 
     if(tok == ASSIGNMENT){
-      error(LOCAL_ASSIGNMENT);
+      char isneg = 0;
+      if(new_var.dims[0] > 0) error(LOCAL_MATRIX_ASSIGNMENT);
+      get();
+      if(tok == MINUS){
+        isneg = 1;
+        get();
+      }
+      if(tok_type != CHAR_CONST && tok_type != INTEGER_CONST) error(LOCALVAR_INITIALIZATION_TO_NONCONSTANT);
+      if(new_var.data.type == DT_CHAR){
+        if(tok_type == DT_CHAR)
+          sprintf(temp, "  push byte $%x", string_const[0]);
+        else
+          sprintf(temp, "  push byte $%x", (unsigned char)(isneg ? -atoi(token) : atoi(token)));
+        emitln(temp);
+      }
+      else if(new_var.data.type == DT_INT || new_var.data.ind_level > 0){
+        if(tok_type == DT_CHAR)
+          sprintf(temp, "  push word $%x", string_const[0]);
+        else
+          sprintf(temp, "  push word %d", (isneg ? -atoi(token) : atoi(token)));
+        emitln(temp);
+      }
+      get(); // get ';'
     }
     else{
       sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
