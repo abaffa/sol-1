@@ -2868,6 +2868,8 @@ void declare_local(void){
     current_function_var_bp_offset -= get_total_var_size(&new_var);
     new_var.bp_offset = current_function_var_bp_offset + 1;
 
+    sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
+    emitln(asm_line);
     if(tok == ASSIGNMENT){
       char isneg = 0;
       if(new_var.dims[0] > 0) error(LOCAL_MATRIX_ASSIGNMENT);
@@ -2876,33 +2878,34 @@ void declare_local(void){
         isneg = 1;
         get();
       }
-      // TODO: temporary solutuon due to error in push word, @ instruction
+      // TODO: push byte/word does not work
       if(tok_type != CHAR_CONST && tok_type != INTEGER_CONST) error(LOCALVAR_INITIALIZATION_TO_NONCONSTANT);
+      emitln("  lea d, [sp + 1]");
       if(new_var.data.type == DT_CHAR){
-        if(tok_type == DT_CHAR)
-          sprintf(temp, "  push byte $%x", string_const[0]);
-        else
-          sprintf(temp, "  push byte $%x", (unsigned char)(isneg ? -atoi(token) : atoi(token)));
-        emitln(temp);
+        if(tok_type == DT_CHAR){
+          sprintf(temp, "  mov al, $%x", string_const[0]);
+          emitln(temp);
+          emitln("  mov [d], al");
+        }
+        else{
+          sprintf(temp, "  mov al, $%x", (unsigned char)(isneg ? -atoi(token) : atoi(token)));
+          emitln(temp);
+          emitln("  mov [d], al");
+        }
       }
       else if(new_var.data.type == DT_INT || new_var.data.ind_level > 0){
         if(tok_type == DT_CHAR){
-          sprintf(temp, "  push byte $%x", string_const[0]);
+          sprintf(temp, "  mov a, $%x", string_const[0]);
           emitln(temp);
-          emitln("  push byte 0");
+          emitln("  mov [d], a");
         }
         else{
-          sprintf(temp, "  push byte $%x", 0xFF & (isneg ? -atoi(token) : atoi(token)));
+          sprintf(temp, "  mov a, $%x", (isneg ? -atoi(token) : atoi(token)));
           emitln(temp);
-          sprintf(temp, "  push byte $%x", (0xFF00 & (isneg ? -atoi(token) : atoi(token))) >> 8);
-          emitln(temp);
+          emitln("  mov [d], a");
         }
       }
       get(); // get ';'
-    }
-    else{
-      sprintf(asm_line, "  sub sp, %d ; %s", get_total_var_size(&new_var), new_var.var_name);
-      emitln(asm_line);
     }
     // assigns the new variable to the local stack
     function_table[current_func_id].local_vars[function_table[current_func_id].local_var_tos] = new_var;    
