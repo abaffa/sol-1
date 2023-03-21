@@ -3,7 +3,7 @@
 ;Uses fpdiv and fpadd as subroutines
 ;e accumulates in fp_e
 
-			.include "kernel.exp"
+			.include "lib/kernel.exp"
 			.org	0400h
 
 ;=================Debug===========================
@@ -733,7 +733,7 @@ divide_rounds		.db	0
 ;Input buffer		
 buffer:		.fill	40,0
 
-			.include "stdio.asm"
+			.include "lib/stdio.asm"
 
 			.end
 

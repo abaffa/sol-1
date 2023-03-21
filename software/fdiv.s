@@ -3,7 +3,7 @@
 ;Uses long_a, long_b, long_c and long_d to perform calculation
 ;Quotient returned in fp_c
 ;Does not check for zero divisor
-			.include "kernel.exp"
+			.include "lib/kernel.exp"
 			.org	1024
 
 ;First gets fp_a and fp_b from input
@@ -437,7 +437,7 @@ divide_rounds		.db	0
 ;Input buffer		
 buffer:		.fill	40,0
 
-			.include "stdio.asm"
+			.include "lib/stdio.asm"
 
 		
 			.end

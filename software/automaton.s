@@ -1,4 +1,4 @@
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 .org PROC_TEXT_ORG			; origin at 1024
 
@@ -116,7 +116,7 @@ chg_rule_L1:
 	loopc chg_rule_L1
 	ret
 	
-.include "stdio.asm"
+.include "lib/stdio.asm"
 
 
 	

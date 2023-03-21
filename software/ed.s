@@ -10,7 +10,7 @@
 ; 2a
 ; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 .org PROC_TEXT_ORG			; origin at 1024
 
@@ -420,9 +420,9 @@ keyword_pointers:
 s_bad_command:		.db "?", 0
 
 ; file includes. these are functions used by the shell
-.include "stdio.asm"
-.include "ctype.asm"
-.include "token.asm"
+.include "lib/stdio.asm"
+.include "lib/ctype.asm"
+.include "lib/token.asm"
 
 parser_index: .dw 0
 start:	.dw 0

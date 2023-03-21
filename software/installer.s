@@ -1,4 +1,4 @@
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -47,7 +47,7 @@ kernel_filename:    .fill 64, 0
 kernel_fullpath:  	.db "/boot/"
                     .fill 64, 0
 
-.include "stdio.asm"
+.include "lib/stdio.asm"
 
 
 .end

@@ -1,4 +1,4 @@
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 STACK_BEGIN:  .equ $F7FF  ; beginning of stack
 
@@ -353,9 +353,9 @@ s_sol1:         .db "Solarium:", 0, 0
 shell_input_buff:  .fill 512, 0
 parser_index:     .dw 0
 
-.include "stdio.asm"
-.include "ctype.asm"
-.include "token.asm"
+.include "lib/stdio.asm"
+.include "lib/ctype.asm"
+.include "lib/token.asm"
 
 temp_data1:        .fill 256, 0
 temp_data:        .fill 512, 0

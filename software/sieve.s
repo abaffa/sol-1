@@ -1,4 +1,4 @@
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 .org PROC_TEXT_ORG			; origin at 1024
 
@@ -103,7 +103,7 @@ count:	.dw
 iter:	.dw
 
 
-.include "stdio.asm"
+.include "lib/stdio.asm"
 
 flags:	.db
 

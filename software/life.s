@@ -1,4 +1,4 @@
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 .org PROC_TEXT_ORG			; origin at 1024
 
@@ -267,7 +267,7 @@ parity: .db 0
 
 s_clear:		.db 27, "[2J", 27, "[H", 0
 
-.include "stdio.asm"
+.include "lib/stdio.asm"
 
 board:			.fill (width)*(height)
 board2:		

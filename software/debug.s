@@ -1,4 +1,4 @@
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 
 main:
@@ -12,7 +12,7 @@ main_L0:
 end:
 	ret
 
-.include "stdio.asm"
+.include "lib/stdio.asm"
 
 
 

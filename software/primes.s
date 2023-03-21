@@ -1,4 +1,4 @@
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 .org PROC_TEXT_ORG
 
@@ -69,9 +69,9 @@ bad_args:
 	call puts
 	jmp primes_ret
 
-.include "stdio.asm"
-.include "token.asm"
-.include "ctype.asm"
+.include "lib/stdio.asm"
+.include "lib/token.asm"
+.include "lib/ctype.asm"
 
 s_usage:	.db "Usage: primes [min] [max]\n", 0
 total:		.dw 0

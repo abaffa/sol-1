@@ -164,9 +164,9 @@ ROOT_dirID:        			.equ FST_LBA_START
 ;; FILE INCLUDES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .include "bios.exp"  ; to obtain the BIOS_RESET_VECTOR location (for reboots)
-.include "stdio.asm"
-.include "ctype.asm"
-.include "token.asm"
+.include "lib/stdio.asm"
+.include "lib/ctype.asm"
+.include "lib/token.asm"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 sys_bkpt      			.equ 0

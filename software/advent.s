@@ -2,7 +2,7 @@
 ; ADVENTURE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 .org PROC_TEXT_ORG			; origin at 1024
 
@@ -276,8 +276,8 @@ s_items_here:
 p_itemlist:
 
 
-.include "stdio.asm"
-.include "ctype.asm"
-.include "token.asm"
+.include "lib/stdio.asm"
+.include "lib/ctype.asm"
+.include "lib/token.asm"
 
 .end

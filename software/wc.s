@@ -1,4 +1,4 @@
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; wc filename
@@ -37,9 +37,9 @@ cmd_wc_end:
 	syscall sys_terminate_proc
 
 
-.include "token.asm"
-.include "stdio.asm"
-.include "ctype.asm"
+.include "lib/token.asm"
+.include "lib/stdio.asm"
+.include "lib/ctype.asm"
 
 
 transient_data:

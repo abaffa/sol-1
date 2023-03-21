@@ -1,4 +1,4 @@
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 .org PROC_TEXT_ORG			; origin at 1024
 
@@ -32,9 +32,9 @@ manpath:  .db "/usr/share/man/", 0
 temp_data: .fill 512, 0
 s_fslash:  .db "/", 0
 
-.include "token.asm"
-.include "stdio.asm"
-.include "ctype.asm"
+.include "lib/token.asm"
+.include "lib/stdio.asm"
+.include "lib/ctype.asm"
 
 transient_area:
 

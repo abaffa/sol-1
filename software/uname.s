@@ -1,4 +1,4 @@
-.include "kernel.exp"
+.include "lib/kernel.exp"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; uname
@@ -12,8 +12,8 @@ cmd_ls:
 	syscall sys_terminate_proc
 
 
-.include "stdio.asm"
-.include "ctype.asm"
+.include "lib/stdio.asm"
+.include "lib/ctype.asm"
 
 .end
 

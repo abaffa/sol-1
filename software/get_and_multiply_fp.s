@@ -2,7 +2,7 @@
 ;Floats are IEEE 754 single-precision
 ;Multiplies fp_a and fp_b
 ;Result in fp_c
-.include "kernel.exp"
+.include "lib/kernel.exp"
 .org	1024
 
 ;First gets fp_a and fp_b from input
@@ -307,6 +307,6 @@ long_c			.db	0,0,0		;24-bit integer
 double_long_a	.db	0,0,0,0,0,0	;48-bit integer
 double_long_b	.db	0,0,0,0,0,0	;48-bit interger
 
-.include "stdio.asm"
+.include "lib/stdio.asm"
 
 .end
