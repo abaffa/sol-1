@@ -1619,9 +1619,8 @@ t_data parse_relational(void){
             emitln("  lodflgs");
             emitln("  mov bl, al");
             emitln("  shr al"); // align 'OF' to 'SF' position
-            emitln("  xor al, bl"); // OF ^ SF (less than)
-            emitln("  shr al, 2"); // move result to bit0 position
             emitln("  xor al, bl ; < (signed)"); // OF ^ SF (less than)
+            emitln("  shr al, 2"); // move result to bit0 position
           }
           break;
         case LESS_THAN_OR_EQUAL:
