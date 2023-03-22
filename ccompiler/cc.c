@@ -892,18 +892,6 @@ void goto_next_case(void){
 }
 
 
-int switch_has_default(void){
-  do{
-    get();
-    if(tok == OPENING_BRACE){
-      back();
-      skip_block();
-    }
-    else if(tok == DEFAULT) return 1;
-    else if(tok == CLOSING_BRACE) return 0;
-  } while(1);
-}
-
 void parse_switch(void){
   char s_label[64];
   char *temp_p;
@@ -1503,15 +1491,12 @@ t_data parse_logical_and(void){
     while(tok == LOGICAL_AND){
       temp_tok = tok;
       emitln("  push al");
-      //emitln("  mov a, b");
       emitln("  cmp b, 0");
       emitln("  lodflgs ; transform condition into a single bit");
-      //emitln("  xor al, %00000001"); 
       data2 = parse_bitwise_or();
       emitln("  push al");
       emitln("  cmp b, 0");
       emitln("  lodflgs");
-      //emitln("  xor al, %00000001");
 
       emitln("  pop bl ; matches previous 'push al'"); // popping into bl rather than al so we don't need an extra 'mov bl, al'
       emitln("  or al, bl"); 
@@ -1633,9 +1618,9 @@ t_data parse_relational(void){
             emitln("  cmp a, b");
             emitln("  lodflgs");
             emitln("  mov bl, al");
-            emitln("  shr al, 3"); // move OF to bit0 position
-            emitln("  shr bl, 2"); // move SF to bit0 position
-            emitln("  and bl, %00000001"); // mask out OF
+            emitln("  shr al"); // align 'OF' to 'SF' position
+            emitln("  xor al, bl"); // OF ^ SF (less than)
+            emitln("  shr al, 2"); // move result to bit0 position
             emitln("  xor al, bl ; < (signed)"); // OF ^ SF (less than)
           }
           break;
@@ -1651,16 +1636,15 @@ t_data parse_relational(void){
           else{
             emitln("  cmp a, b");
             emitln("  lodflgs");
-            emitln("  mov bl, al");
             emitln("  mov g, a"); // save flags temporarily
-            emitln("  shr al, 3"); // move OF to bit0 position
-            emitln("  shr bl, 2"); // move SF to bit0 position
-            emitln("  and bl, %00000001"); // mask out OF
+            emitln("  mov bl, al");
+            emitln("  shr al"); // align 'OF' to 'SF' position
             emitln("  xor al, bl"); // OF ^ SF (less than)
+            emitln("  shr al, 2"); // move result to bit0 position
             emitln("  mov b, g");
             emitln("  and bl, %00000001"); // isolate ZF
             emitln("  or al, bl ; <= (signed)"); // OR result with ZF
-          }
+          }// 
           break;
         case GREATER_THAN_OR_EQUAL:
           if(expr_out.ind_level > 0 || expr_out.signedness == SNESS_UNSIGNED){
@@ -1677,10 +1661,9 @@ t_data parse_relational(void){
             emitln("  cmp a, b");
             emitln("  lodflgs");
             emitln("  mov bl, al");
-            emitln("  shr al, 3"); // move OF to bit0 position
-            emitln("  shr bl, 2"); // move SF to bit0 position
-            emitln("  and bl, %00000001"); // mask out OF
+            emitln("  shr al"); // align 'OF' to 'SF' position
             emitln("  xor al, bl"); // OF ^ SF (less than)
+            emitln("  shr al, 2"); // move result to bit0 position
             emitln("  xor al, %00000001 ; >= (signed)"); // invert, hence ~LT = GTE
           }
           break;
@@ -1696,12 +1679,11 @@ t_data parse_relational(void){
             // same as LTE, but invert at the end so that ~LTE = GT
             emitln("  cmp a, b");
             emitln("  lodflgs");
-            emitln("  mov bl, al");
             emitln("  mov g, a"); // save flags temporarily
-            emitln("  shr al, 3"); // move OF to bit0 position
-            emitln("  shr bl, 2"); // move SF to bit0 position
-            emitln("  and bl, %00000001"); // mask out OF
+            emitln("  mov bl, al");
+            emitln("  shr al"); // align 'OF' to 'SF' position
             emitln("  xor al, bl"); // OF ^ SF (less than)
+            emitln("  shr al, 2"); // move result to bit0 position
             emitln("  mov b, g");
             emitln("  and bl, %00000001"); // isolate ZF
             emitln("  or al, bl"); // OR result with ZF
@@ -2927,7 +2909,6 @@ void declare_local(void){
         isneg = 1;
         get();
       }
-      // TODO: push byte/word does not work
       if(tok_type != CHAR_CONST && tok_type != INTEGER_CONST) error(LOCALVAR_INITIALIZATION_TO_NONCONSTANT);
       emitln("  lea d, [sp + 1]");
       if(new_var.data.type == DT_CHAR){

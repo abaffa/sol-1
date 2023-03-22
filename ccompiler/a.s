@@ -7,21 +7,69 @@
 main:
   push bp
   mov bp, sp
-
-; --- BEGIN INLINE ASM BLOCK
-  mov a, sp
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 2
+  cmp a, b
+  lodflgs
+  mov g, a
+  mov bl, al
+  shr al
+  xor bl, al
+  shr al, 2
+  mov b, g
+  and bl, %00000001
+  or al, bl
+  xor al, %00000001 ; > (signed)
+  mov ah, 0
   mov b, a
-  call print_u16x
-  push word $FFFF
-  mov a, sp
+  pop a
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 2
+  cmp a, b
+  lodflgs
+  mov bl, al
+  shr al
+  xor al, bl
+  shr al, 2
+  xor al, %00000001 ; >= (signed)
+  mov ah, 0
   mov b, a
-  call print_u16x
-  push byte $FF
-  mov a, sp
+  pop a
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 2
+  cmp a, b
+  lodflgs
+  mov bl, al
+  shr al
+  xor al, bl
+  shr al, 2
+  xor al, bl ; < (signed)
+  mov ah, 0
   mov b, a
-  call print_u16x
-; --- END INLINE ASM BLOCK
-
+  pop a
+  mov b, 1
+  push a
+  mov a, b
+  mov b, 2
+  cmp a, b
+  lodflgs
+  mov g, a
+  mov bl, al
+  shr al
+  xor al, bl
+  shr al, 2
+  mov b, g
+  and bl, %00000001
+  or al, bl ; <= (signed)
+  mov ah, 0
+  mov b, a
+  pop a
   leave
   syscall sys_terminate_proc
 ; --- END TEXT BLOCK

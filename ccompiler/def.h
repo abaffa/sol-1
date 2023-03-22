@@ -406,8 +406,6 @@ void parse_do(void);
 void parse_continue(void);
 void parse_break(void);
 
-int switch_has_default(void);
-
 void parse_asm(void);
 
 
