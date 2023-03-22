@@ -1457,16 +1457,14 @@ t_data parse_logical(void){
 
 
 t_data parse_logical_or(void){
-  char temp_tok;
-  t_data data1, data2, expr_out;
+  t_data data1, expr_out;
 
   data1 = parse_logical_and();
   if(tok == LOGICAL_OR){
     while(tok == LOGICAL_OR){
-      temp_tok = tok;
       emitln("  push a");
       emitln("  mov a, b");
-      data2 = parse_logical_and();
+      parse_logical_and();
       emitln("  or a, b");
       emitln("  mov b, a");
       emitln("  pop a");
@@ -1483,17 +1481,15 @@ t_data parse_logical_or(void){
 
 
 t_data parse_logical_and(void){
-  char temp_tok;
-  t_data data1, data2, expr_out;
+  t_data data1, expr_out;
 
   data1 = parse_bitwise_or();
   if(tok == LOGICAL_AND){
     while(tok == LOGICAL_AND){
-      temp_tok = tok;
       emitln("  push al");
       emitln("  cmp b, 0");
       emitln("  lodflgs ; transform condition into a single bit");
-      data2 = parse_bitwise_or();
+      parse_bitwise_or();
       emitln("  push al");
       emitln("  cmp b, 0");
       emitln("  lodflgs");
@@ -1518,14 +1514,12 @@ t_data parse_logical_and(void){
 
 
 t_data parse_bitwise_or(void){
-  char temp_tok;
   t_data data1, data2, expr_out;
 
   data1 = parse_bitwise_xor();
   data2.type = DT_CHAR;
   data2.ind_level = 0; // initialize so that cast works even if 'while' below does not trigger
   while(tok == BITWISE_OR){
-    temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
     data2 = parse_bitwise_xor();
@@ -1539,14 +1533,12 @@ t_data parse_bitwise_or(void){
 
 
 t_data parse_bitwise_xor(void){
-  char temp_tok;
   t_data data1, data2, expr_out;
 
   data1 = parse_bitwise_and();
   data2.type = DT_CHAR;
   data2.ind_level = 0; // initialize so that cast works even if 'while' below does not trigger
   while(tok == BITWISE_XOR){
-    temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
     data2 = parse_bitwise_and();
@@ -1560,14 +1552,12 @@ t_data parse_bitwise_xor(void){
 
 
 t_data parse_bitwise_and(void){
-  char temp_tok;
   t_data data1, data2, expr_out;
 
   data1 = parse_relational();
   data2.type = DT_CHAR;
   data2.ind_level = 0; // initialize so that cast works even if 'while' below does not trigger
   while(tok == BITWISE_AND){
-    temp_tok = tok;
     emitln("  push a");
     emitln("  mov a, b");
     data2 = parse_relational();
