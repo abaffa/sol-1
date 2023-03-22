@@ -6,13 +6,13 @@
 
 /* 
   DONE:
+    * add automatic return to function ends when final } met
     * fix logical value comparisons: remove ah half
     * add data types to expressions as return values 
     * implement signed numbers. conditions such as i >= 0 
       when i decreases will always evaluate to true since after 0  we get 65535 which is > 0!
   
   TODO:
-    * add automatic return to function ends when final } met
     * implement 'goto'
 
   COMMENTS:
