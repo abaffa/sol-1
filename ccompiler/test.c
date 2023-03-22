@@ -1,4 +1,3 @@
-#inc_asm "lib/stdio.asm"
 #include "stdio.c"
 
 int main() {

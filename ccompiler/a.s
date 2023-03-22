@@ -1,4 +1,4 @@
-; --- FILENAME: test.c
+; --- FILENAME: clear.c
 .include "lib/kernel.exp"
 .org PROC_TEXT_ORG
 
@@ -7,28 +7,7 @@
 main:
   push bp
   mov bp, sp
-  sub sp, 2 ; i
-  lea d, [sp + 1]
-  mov a, $ffff
-  mov [d], a
-  sub sp, 2 ; i2
-  lea d, [sp + 1]
-  mov a, $41
-  mov [d], a
-  sub sp, 1 ; c
-  lea d, [sp + 1]
-  mov al, $48
-  mov [d], al
-  sub sp, 1 ; c2
-  lea d, [sp + 1]
-  mov al, $42
-  mov [d], al
-  mov b, [bp + -1] ; i
-  swp b
-  push b
-  call print_num
-  add sp, 2
-  mov b, __string_0 ; "\n"
+  mov b, [__clear] ; clear
   swp b
   push b
   call print
@@ -302,7 +281,10 @@ print:
 ; --- END TEXT BLOCK
 
 ; --- BEGIN DATA BLOCK
-__string_0: .db "\n", 0
+__clear_data: 
+.db 27,$5b,$32,$4a,27,$5b,$48,0,
+.fill 0, 0
+__clear: .dw __clear_data
 ; --- END DATA BLOCK
 
 ; --- BEGIN INCLUDE BLOCK
