@@ -1,13 +1,19 @@
-#include "stdio.c"
+#inc_asm "lib/stdio.asm"
 
 int main() {
-  int i = 65535;
-  int i2 = 'A';
-  char c = 72;
-  char c2 = 'B';
-
-  print_num((char*)i);
-  print("\n");
+  asm{
+    mov a, sp
+    mov b, a
+    call print_u16x
+    push word $FFFF
+    mov a, sp
+    mov b, a
+    call print_u16x
+    push byte $FF
+    mov a, sp
+    mov b, a
+    call print_u16x
+  }
 }
 
 
